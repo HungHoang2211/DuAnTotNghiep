@@ -1,2 +1,2 @@
-Dự án tốt nghiệp: 
-Nhóm: 
+Dự án tốt nghiệp: Simple Survival
+Nhóm: Lục dậu
