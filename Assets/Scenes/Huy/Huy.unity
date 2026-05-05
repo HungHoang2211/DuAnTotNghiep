@@ -256,6 +256,7 @@ GameObject:
   - component: {fileID: 89972090}
   - component: {fileID: 89972089}
   - component: {fileID: 89972088}
+  - component: {fileID: 89972096}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -276,8 +277,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _input: {fileID: 89972090}
-  _moveSpeed: 5
+  _walkSpeed: 3
+  _runSpeed: 6
   _acceleration: 60
+  _animator: {fileID: 0}
+  _speedDampTime: 0.1
+  _audioSource: {fileID: 0}
+  _footstepClips: []
+  _walkStepInterval: 0.45
+  _runStepInterval: 0.28
+  _footstepVolume: 0.7
 --- !u!114 &89972089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,6 +433,24 @@ Transform:
   - {fileID: 1278164206}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &89972096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 89972087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c09fcb3919b39c49ab333241af1f2e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _input: {fileID: 89972090}
+  _attackCooldown: 0.4
+  _animator: {fileID: 0}
+  _audioSource: {fileID: 0}
+  _attackClip: {fileID: 0}
+  _attackVolume: 1
 --- !u!1 &849220703
 GameObject:
   m_ObjectHideFlags: 0

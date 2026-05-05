@@ -3,18 +3,48 @@
 namespace Xyla.Player
 {
     /// <summary>
-    /// Di chuyển nhân vật theo trục thế giới dựa trên WASD.
-    /// Dùng Rigidbody để va chạm với object/tường tự nhiên.
-    /// Hướng di chuyển ĐỘC LẬP với hướng quay của nhân vật (kiểu strafe).
+    /// Di chuyển nhân vật bằng Rigidbody + drive locomotion animation + phát footstep.
+    /// Giữ Shift → chạy (run speed), không giữ → đi bộ (walk speed).
+    /// Hướng di chuyển ĐỘC LẬP với hướng quay (kiểu strafe).
+    ///
+    /// Animator và AudioSource là TÙY CHỌN: chưa import animation/sound thì để trống,
+    /// movement vẫn chạy bình thường. Khi có rồi thì kéo vào field, code tự kích hoạt.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class TopDownMover : MonoBehaviour
     {
+        private static readonly int SpeedParam = Animator.StringToHash("Speed");
+
+        private const float IdleAnimValue = 0f;
+        private const float WalkAnimValue = 0.5f;
+        private const float RunAnimValue = 1f;
+
+        [Header("Input")]
         [SerializeField] private PlayerInputReader _input;
-        [SerializeField] private float _moveSpeed = 5f;
+
+        [Header("Movement")]
+        [SerializeField] private float _walkSpeed = 3f;
+        [SerializeField] private float _runSpeed = 6f;
         [SerializeField] private float _acceleration = 60f;
 
+        [Header("Animation (optional)")]
+        [Tooltip("Animator của Player. Để trống nếu chưa có animation — script sẽ skip.")]
+        [SerializeField] private Animator _animator;
+        [Tooltip("Thời gian smooth chuyển blend tree idle/walk/run, tránh giật.")]
+        [SerializeField] private float _speedDampTime = 0.1f;
+
+        [Header("Audio (optional)")]
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioClip[] _footstepClips;
+        [SerializeField] private float _walkStepInterval = 0.45f;
+        [SerializeField] private float _runStepInterval = 0.28f;
+        [SerializeField][Range(0f, 1f)] private float _footstepVolume = 0.7f;
+
         private Rigidbody _rigidbody;
+        private float _nextFootstepTime;
+
+        public bool IsMoving { get; private set; }
+        public bool IsRunning { get; private set; }
 
         private void Awake()
         {
@@ -34,16 +64,32 @@ namespace Xyla.Player
 
         private void FixedUpdate()
         {
-            Vector3 desiredVelocity = CalculateDesiredVelocity();
-            ApplyHorizontalVelocity(desiredVelocity);
+            Vector3 worldDirection = ReadMovementDirection();
+            UpdateMovementFlags(worldDirection);
+
+            float targetSpeed = IsRunning ? _runSpeed : _walkSpeed;
+            ApplyHorizontalVelocity(worldDirection * targetSpeed);
         }
 
-        private Vector3 CalculateDesiredVelocity()
+        private void Update()
+        {
+            DriveLocomotionAnimator();
+            TickFootstep();
+        }
+
+        private Vector3 ReadMovementDirection()
         {
             Vector2 axis = _input.MovementAxis;
-            Vector3 worldDirection = new Vector3(axis.x, 0f, axis.y);
-            if (worldDirection.sqrMagnitude > 1f) worldDirection.Normalize();
-            return worldDirection * _moveSpeed;
+            Vector3 direction = new Vector3(axis.x, 0f, axis.y);
+            if (direction.sqrMagnitude > 1f) direction.Normalize();
+            return direction;
+        }
+
+        private void UpdateMovementFlags(Vector3 worldDirection)
+        {
+            const float minMovementSqr = 0.01f;
+            IsMoving = worldDirection.sqrMagnitude > minMovementSqr;
+            IsRunning = IsMoving && _input.SprintHeld;
         }
 
         private void ApplyHorizontalVelocity(Vector3 desiredVelocity)
@@ -57,6 +103,50 @@ namespace Xyla.Player
                 _acceleration * Time.fixedDeltaTime);
 
             _rigidbody.linearVelocity = new Vector3(nextHorizontal.x, current.y, nextHorizontal.z);
+        }
+
+        private void DriveLocomotionAnimator()
+        {
+            if (_animator == null) return;
+            float target = ResolveAnimatorSpeedValue();
+            _animator.SetFloat(SpeedParam, target, _speedDampTime, Time.deltaTime);
+        }
+
+        private float ResolveAnimatorSpeedValue()
+        {
+            if (!IsMoving) return IdleAnimValue;
+            return IsRunning ? RunAnimValue : WalkAnimValue;
+        }
+
+        private void TickFootstep()
+        {
+            if (!CanPlayFootstep()) return;
+
+            if (!IsMoving)
+            {
+                _nextFootstepTime = Time.time;
+                return;
+            }
+
+            if (Time.time < _nextFootstepTime) return;
+
+            PlayRandomFootstep();
+            float interval = IsRunning ? _runStepInterval : _walkStepInterval;
+            _nextFootstepTime = Time.time + interval;
+        }
+
+        private bool CanPlayFootstep()
+        {
+            return _audioSource != null
+                && _footstepClips != null
+                && _footstepClips.Length > 0;
+        }
+
+        private void PlayRandomFootstep()
+        {
+            AudioClip clip = _footstepClips[Random.Range(0, _footstepClips.Length)];
+            if (clip == null) return;
+            _audioSource.PlayOneShot(clip, _footstepVolume);
         }
     }
 }

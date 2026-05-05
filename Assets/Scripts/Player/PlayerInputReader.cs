@@ -15,6 +15,11 @@ namespace Xyla.Player
 
         public Vector3 MouseScreenPosition => Input.mousePosition;
 
+        public bool SprintHeld => Input.GetKey(KeyCode.LeftShift)
+                               || Input.GetKey(KeyCode.RightShift);
+
+        public bool AttackPressed => Input.GetMouseButtonDown(0);
+
         public bool AttackHeld => Input.GetMouseButton(0);
 
         public bool AimHeld => Input.GetMouseButton(1);
