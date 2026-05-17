@@ -2,14 +2,6 @@
 
 namespace Xyla.Player
 {
-    /// <summary>
-    /// Di chuyển nhân vật bằng Rigidbody + drive locomotion animation + phát footstep.
-    /// Giữ Shift → chạy (run speed), không giữ → đi bộ (walk speed).
-    /// Hướng di chuyển ĐỘC LẬP với hướng quay (kiểu strafe).
-    ///
-    /// Animator và AudioSource là TÙY CHỌN: chưa import animation/sound thì để trống,
-    /// movement vẫn chạy bình thường. Khi có rồi thì kéo vào field, code tự kích hoạt.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class TopDownMover : MonoBehaviour
     {
@@ -27,10 +19,12 @@ namespace Xyla.Player
         [SerializeField] private float _runSpeed = 6f;
         [SerializeField] private float _acceleration = 60f;
 
+        [Header("Camera")]
+        [Tooltip("Camera dùng để tính hướng di chuyển relative. Để trống = Camera.main.")]
+        [SerializeField] private Camera _camera;
+
         [Header("Animation (optional)")]
-        [Tooltip("Animator của Player. Để trống nếu chưa có animation — script sẽ skip.")]
         [SerializeField] private Animator _animator;
-        [Tooltip("Thời gian smooth chuyển blend tree idle/walk/run, tránh giật.")]
         [SerializeField] private float _speedDampTime = 0.1f;
 
         [Header("Audio (optional)")]
@@ -50,6 +44,9 @@ namespace Xyla.Player
         {
             _rigidbody = GetComponent<Rigidbody>();
             ConfigureRigidbodyForTopDown();
+
+            if (_camera == null)
+                _camera = Camera.main;
         }
 
         private void ConfigureRigidbodyForTopDown()
@@ -77,11 +74,28 @@ namespace Xyla.Player
             TickFootstep();
         }
 
+        /// <summary>
+        /// Đọc input 2D rồi chuyển thành hướng 3D RELATIVE theo camera.
+        /// Camera top-down thường nghiêng góc X (vd 60°), nên forward của camera
+        /// khi chiếu xuống mặt phẳng ngang mới là "hướng lên" thực sự.
+        /// </summary>
         private Vector3 ReadMovementDirection()
         {
             Vector2 axis = _input.MovementAxis;
-            Vector3 direction = new Vector3(axis.x, 0f, axis.y);
+            if (axis.sqrMagnitude < 0.001f) return Vector3.zero;
+
+            // Dùng góc Y (yaw) của camera — bỏ qua pitch (X=60°)
+            // để "lên joystick" = đi về phía camera đang nhìn trên mặt phẳng ngang
+            float camYaw = _camera.transform.eulerAngles.y;
+            Quaternion flatR = Quaternion.Euler(0f, camYaw, 0f);
+            Vector3 camForward = flatR * Vector3.forward;
+            Vector3 camRight = flatR * Vector3.right;
+
+            Vector3 direction = camForward * axis.y + camRight * axis.x;
+
+            // Clamp magnitude về 1 (tránh diagonal nhanh hơn)
             if (direction.sqrMagnitude > 1f) direction.Normalize();
+
             return direction;
         }
 

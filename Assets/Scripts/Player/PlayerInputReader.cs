@@ -2,30 +2,56 @@
 
 namespace Xyla.Player
 {
-    /// <summary>
-    /// Bọc UnityEngine.Input (legacy) sau các property tường minh.
-    /// Các component gameplay phụ thuộc vào lớp này thay vì Input trực tiếp,
-    /// nhờ vậy có thể swap nguồn input (AI, replay, network) mà không sửa code gameplay.
-    /// </summary>
     public class PlayerInputReader : MonoBehaviour
     {
-        public Vector2 MovementAxis => new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical"));
+        [Header("Mobile Input (để trống nếu chỉ build PC)")]
+        [Tooltip("Kéo component MobileJoystick vào đây để bật mobile input.")]
+        [SerializeField] private MobileJoystick _mobileJoystick;
+
+        private bool _attackPressedThisFrame;
+        private bool _attackHeld;
+        public Vector2 MovementAxis
+        {
+            get
+            {
+                if (_mobileJoystick != null && _mobileJoystick.IsPressed)
+                    return _mobileJoystick.Axis;
+
+                return new Vector2(
+                    Input.GetAxisRaw("Horizontal"),
+                    Input.GetAxisRaw("Vertical"));
+            }
+        }
 
         public Vector3 MouseScreenPosition => Input.mousePosition;
 
         public bool SprintHeld => Input.GetKey(KeyCode.LeftShift)
                                || Input.GetKey(KeyCode.RightShift);
 
-        public bool AttackPressed => Input.GetMouseButtonDown(0);
+        public bool AttackPressed => Input.GetMouseButtonDown(0) || _attackPressedThisFrame;
 
-        public bool AttackHeld => Input.GetMouseButton(0);
+        public bool AttackHeld => Input.GetMouseButton(0) || _attackHeld;
 
         public bool AimHeld => Input.GetMouseButton(1);
 
         public bool InteractPressed => Input.GetKeyDown(KeyCode.E);
 
         public bool BuildModeToggled => Input.GetKeyDown(KeyCode.B);
+
+        public void OnAttackButtonDown()
+        {
+            _attackPressedThisFrame = true;
+            _attackHeld = true;
+        }
+
+        public void OnAttackButtonUp()
+        {
+            _attackHeld = false;
+        }
+
+        private void LateUpdate()
+        {
+            _attackPressedThisFrame = false;
+        }
     }
 }
