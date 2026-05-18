@@ -2,7 +2,7 @@
 
 namespace Xyla.Player
 {
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(CharacterController))]
     public class TopDownMover : MonoBehaviour
     {
         private static readonly int SpeedParam = Animator.StringToHash("Speed");
@@ -19,9 +19,8 @@ namespace Xyla.Player
         [SerializeField] private float _runSpeed = 6f;
         [SerializeField] private float _acceleration = 60f;
 
-        [Header("Camera")]
-        [Tooltip("Camera dùng để tính hướng di chuyển relative. Để trống = Camera.main.")]
-        [SerializeField] private Camera _camera;
+        [Header("Gravity")]
+        [SerializeField] private float _gravity = -20f;
 
         [Header("Animation (optional)")]
         [SerializeField] private Animator _animator;
@@ -34,7 +33,9 @@ namespace Xyla.Player
         [SerializeField] private float _runStepInterval = 0.28f;
         [SerializeField][Range(0f, 1f)] private float _footstepVolume = 0.7f;
 
-        private Rigidbody _rigidbody;
+        private CharacterController _cc;
+        private Vector3 _horizontalVelocity;
+        private float _verticalVelocity;
         private float _nextFootstepTime;
 
         public bool IsMoving { get; private set; }
@@ -42,60 +43,41 @@ namespace Xyla.Player
 
         private void Awake()
         {
-            _rigidbody = GetComponent<Rigidbody>();
-            ConfigureRigidbodyForTopDown();
-
-            if (_camera == null)
-                _camera = Camera.main;
-        }
-
-        private void ConfigureRigidbodyForTopDown()
-        {
-            _rigidbody.isKinematic = false;
-            _rigidbody.useGravity = true;
-            _rigidbody.constraints = RigidbodyConstraints.FreezeRotationX
-                                   | RigidbodyConstraints.FreezeRotationZ;
-            _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-            _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        }
-
-        private void FixedUpdate()
-        {
-            Vector3 worldDirection = ReadMovementDirection();
-            UpdateMovementFlags(worldDirection);
-
-            float targetSpeed = IsRunning ? _runSpeed : _walkSpeed;
-            ApplyHorizontalVelocity(worldDirection * targetSpeed);
+            _cc = GetComponent<CharacterController>();
         }
 
         private void Update()
         {
+            Vector3 moveDir = ReadMovementDirection();
+            UpdateMovementFlags(moveDir);
+
+            float targetSpeed = IsRunning ? _runSpeed : _walkSpeed;
+            Vector3 desiredHorizontal = moveDir * targetSpeed;
+
+            // Smooth acceleration
+            _horizontalVelocity = Vector3.MoveTowards(
+                _horizontalVelocity,
+                desiredHorizontal,
+                _acceleration * Time.deltaTime);
+
+            // Gravity
+            if (_cc.isGrounded && _verticalVelocity < 0f)
+                _verticalVelocity = -2f; // giữ dính đất
+            else
+                _verticalVelocity += _gravity * Time.deltaTime;
+
+            Vector3 finalVelocity = _horizontalVelocity + Vector3.up * _verticalVelocity;
+            _cc.Move(finalVelocity * Time.deltaTime);
+
             DriveLocomotionAnimator();
             TickFootstep();
         }
 
-        /// <summary>
-        /// Đọc input 2D rồi chuyển thành hướng 3D RELATIVE theo camera.
-        /// Camera top-down thường nghiêng góc X (vd 60°), nên forward của camera
-        /// khi chiếu xuống mặt phẳng ngang mới là "hướng lên" thực sự.
-        /// </summary>
         private Vector3 ReadMovementDirection()
         {
             Vector2 axis = _input.MovementAxis;
-            if (axis.sqrMagnitude < 0.001f) return Vector3.zero;
-
-            // Dùng góc Y (yaw) của camera — bỏ qua pitch (X=60°)
-            // để "lên joystick" = đi về phía camera đang nhìn trên mặt phẳng ngang
-            float camYaw = _camera.transform.eulerAngles.y;
-            Quaternion flatR = Quaternion.Euler(0f, camYaw, 0f);
-            Vector3 camForward = flatR * Vector3.forward;
-            Vector3 camRight = flatR * Vector3.right;
-
-            Vector3 direction = camForward * axis.y + camRight * axis.x;
-
-            // Clamp magnitude về 1 (tránh diagonal nhanh hơn)
+            Vector3 direction = new Vector3(axis.x, 0f, axis.y);
             if (direction.sqrMagnitude > 1f) direction.Normalize();
-
             return direction;
         }
 
@@ -104,19 +86,6 @@ namespace Xyla.Player
             const float minMovementSqr = 0.01f;
             IsMoving = worldDirection.sqrMagnitude > minMovementSqr;
             IsRunning = IsMoving && _input.SprintHeld;
-        }
-
-        private void ApplyHorizontalVelocity(Vector3 desiredVelocity)
-        {
-            Vector3 current = _rigidbody.linearVelocity;
-            Vector3 horizontalCurrent = new Vector3(current.x, 0f, current.z);
-
-            Vector3 nextHorizontal = Vector3.MoveTowards(
-                horizontalCurrent,
-                desiredVelocity,
-                _acceleration * Time.fixedDeltaTime);
-
-            _rigidbody.linearVelocity = new Vector3(nextHorizontal.x, current.y, nextHorizontal.z);
         }
 
         private void DriveLocomotionAnimator()

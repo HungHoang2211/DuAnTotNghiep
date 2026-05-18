@@ -2,18 +2,6 @@
 
 namespace Xyla.Player
 {
-    /// <summary>
-    /// Phát hiện input attack → kích trigger animation + phát attack sound.
-    /// Có cooldown để không spam.
-    ///
-    /// Class này KHÔNG khoá movement → vừa di chuyển vừa attack được.
-    /// Để attack animation không che mất chân chạy, setup Animator Controller
-    /// với Layer 1 = upper-body Avatar Mask, attack state nằm ở layer này.
-    /// (Locomotion blend tree ở Layer 0, weight = 1, vẫn drive chân.)
-    ///
-    /// Animator và AudioSource là TÙY CHỌN: chưa import animation/sound thì để trống,
-    /// attack vẫn fire (chỉ là không thấy/không nghe).
-    /// </summary>
     public class PlayerCombat : MonoBehaviour
     {
         private static readonly int AttackParam = Animator.StringToHash("Attack");

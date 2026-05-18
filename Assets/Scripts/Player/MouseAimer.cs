@@ -8,48 +8,21 @@ namespace Xyla.Player
         [SerializeField] private float _rotationSpeedDegPerSec = 720f;
         [SerializeField] private float _aimPlaneYOffset = 0f;
 
-        [Tooltip("Tắt MouseAimer trên mobile (touch device). " +
-                 "Trên mobile hướng nhìn do joystick/movement quyết định.")]
-        [SerializeField] private bool _disableOnMobile = true;
-
-        [Tooltip("Kéo MobileJoystick vào đây. Nếu joystick IsPressed thì MouseAimer nhường quyền xoay.")]
-        [SerializeField] private MobileJoystick _mobileJoystick;
-
         private Camera _camera;
-        private bool _isActive;
-        private Rigidbody _rigidbody;
 
         private void Awake()
         {
             _camera = Camera.main;
-            _isActive = !(_disableOnMobile && IsMobilePlatform());
-            _rigidbody = GetComponent<Rigidbody>();
         }
 
         private void Update()
         {
-            if (!_isActive) return;
-            // Nhường quyền xoay cho MovementAimer khi đang dùng joystick
-            if (_mobileJoystick != null && _mobileJoystick.IsPressed) return;
-            if (!HasValidMousePosition()) return;
             if (!TryGetAimPointOnGround(out Vector3 aimPoint)) return;
 
             Vector3 lookDirection = FlattenToHorizontal(aimPoint - transform.position);
             if (IsTooSmallToAim(lookDirection)) return;
 
             RotateToward(lookDirection);
-        }
-
-        private bool HasValidMousePosition()
-        {
-            Vector3 pos = _input.MouseScreenPosition;
-            if (float.IsInfinity(pos.x) || float.IsInfinity(pos.y)) return false;
-            if (float.IsNaN(pos.x) || float.IsNaN(pos.y)) return false;
-
-            if (_camera == null) return false;
-            var rect = _camera.pixelRect;
-            return pos.x >= rect.xMin && pos.x <= rect.xMax
-                && pos.y >= rect.yMin && pos.y <= rect.yMax;
         }
 
         private bool TryGetAimPointOnGround(out Vector3 aimPoint)
@@ -82,23 +55,11 @@ namespace Xyla.Player
 
         private void RotateToward(Vector3 lookDirection)
         {
-            // Chỉ xoay trục Y, tránh conflict với Rigidbody constraints
-            float targetY = Quaternion.LookRotation(lookDirection).eulerAngles.y;
-            float currentY = transform.eulerAngles.y;
-            float newY = Mathf.MoveTowardsAngle(currentY, targetY, _rotationSpeedDegPerSec * Time.deltaTime);
-            if (_rigidbody != null)
-                _rigidbody.MoveRotation(Quaternion.Euler(0f, newY, 0f));
-            else
-                transform.rotation = Quaternion.Euler(0f, newY, 0f);
-        }
-
-        private static bool IsMobilePlatform()
-        {
-#if UNITY_IOS || UNITY_ANDROID
-            return true;
-#else
-            return Input.touchSupported && !Input.mousePresent;
-#endif
+            Quaternion target = Quaternion.LookRotation(lookDirection);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                target,
+                _rotationSpeedDegPerSec * Time.deltaTime);
         }
     }
 }

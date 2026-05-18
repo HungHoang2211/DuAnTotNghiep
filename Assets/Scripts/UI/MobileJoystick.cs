@@ -6,9 +6,9 @@ namespace Xyla.Player
     // SETUP:
     //   1. Gắn script này lên JoystickArea (UI GameObject, KHÔNG phải Player 3D).
     //   2. Kéo "Joystick" (background tròn) vào _joystickRoot.
-    //  3. Kéo "Handle" vào _handle.
-    //   4. Kéo MobileJoystick component này vào PlayerInputReader._mobileJoystick
-   
+    //   3. Kéo "Handle" vào _handle.
+    //   4. Kéo MobileJoystick component này vào PlayerInputReader._mobileJoystick.
+    //
     // Muốn ẩn joystick lúc idle → gắn thêm JoystickVisibility lên JoystickArea,
     // thêm CanvasGroup lên "Joystick", kéo vào _joystickGroup của JoystickVisibility.
 
@@ -26,13 +26,15 @@ namespace Xyla.Player
         [Tooltip("Bán kính tối đa handle có thể kéo (đơn vị UI pixel).")]
         [SerializeField] private float _radius = 60f;
 
+        [Tooltip("Ngưỡng axis (0-1) để tự động sprint khi kéo joystick ra xa. Mặc định 0.8.")]
+        [SerializeField][Range(0.5f, 1f)] private float _sprintThreshold = 0.8f;
+
         [Tooltip("True = joystick dịch chuyển tới điểm chạm (dynamic).\n" +
                  "False = joystick cố định tại vị trí đặt trong Editor.")]
         [SerializeField] private bool _followTouch = true;
-
-        // Output
         public Vector2 Axis { get; private set; }
         public bool IsPressed { get; private set; }
+        public bool SprintHeld => IsPressed && Axis.magnitude >= _sprintThreshold;
 
         private Canvas _canvas;
         private Camera _uiCamera;
@@ -76,7 +78,6 @@ namespace Xyla.Player
             if (_followTouch && _joystickRoot != null)
                 _joystickRoot.anchoredPosition = _joystickStartAnchoredPos;
         }
-
         private void MoveJoystickToTouch(Vector2 screenPos)
         {
             if (_joystickRoot == null) return;

@@ -130,13 +130,12 @@ GameObject:
   - component: {fileID: 89972095}
   - component: {fileID: 89972094}
   - component: {fileID: 89972093}
-  - component: {fileID: 89972092}
-  - component: {fileID: 89972091}
   - component: {fileID: 89972090}
   - component: {fileID: 89972089}
   - component: {fileID: 89972097}
   - component: {fileID: 89972088}
   - component: {fileID: 89972096}
+  - component: {fileID: 89972098}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -160,7 +159,7 @@ MonoBehaviour:
   _walkSpeed: 3
   _runSpeed: 6
   _acceleration: 60
-  _camera: {fileID: 0}
+  _gravity: -20
   _animator: {fileID: 0}
   _speedDampTime: 0.1
   _audioSource: {fileID: 0}
@@ -183,8 +182,6 @@ MonoBehaviour:
   _input: {fileID: 89972090}
   _rotationSpeedDegPerSec: 720
   _aimPlaneYOffset: 0
-  _disableOnMobile: 1
-  _mobileJoystick: {fileID: 1233953024}
 --- !u!114 &89972090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,56 +195,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mobileJoystick: {fileID: 1233953024}
---- !u!54 &89972091
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 89972087}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!136 &89972092
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 89972087}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &89972093
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -350,6 +297,31 @@ MonoBehaviour:
   _input: {fileID: 89972090}
   _rotationSpeedDegPerSec: 720
   _camera: {fileID: 0}
+--- !u!143 &89972098
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 89972087}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &479177249
 GameObject:
   m_ObjectHideFlags: 0
@@ -656,6 +628,7 @@ MonoBehaviour:
   _joystickRoot: {fileID: 479177250}
   _handle: {fileID: 2126094296}
   _radius: 60
+  _sprintThreshold: 0.8
   _followTouch: 1
 --- !u!1 &1278164205
 GameObject:
@@ -1282,7 +1255,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 89972095}
-  _targetRigidbody: {fileID: 89972091}
   _maxDistance: 15
   _minDistance: 8
   _zoomSmoothTime: 0.4

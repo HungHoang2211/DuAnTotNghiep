@@ -7,29 +7,16 @@ namespace Xyla.Player
         [Header("Target")]
         [SerializeField] private Transform _target;
 
-        [Tooltip("Rigidbody của Player. Để trống → script tự tìm trên _target. " +
-                 "Cần thiết để fix camera rung do physics timestep.")]
-        [SerializeField] private Rigidbody _targetRigidbody;
-
         [Header("Distance")]
-        [Tooltip("Khoảng cách camera-player khi ở vùng trống (zoom out).")]
         [SerializeField] private float _maxDistance = 15f;
-
-        [Tooltip("Khoảng cách camera-player khi sát vật cản (zoom in).")]
         [SerializeField] private float _minDistance = 8f;
-
-        [Tooltip("Thời gian (giây) để zoom về đích. Càng lớn càng mượt.")]
         [SerializeField] private float _zoomSmoothTime = 0.4f;
 
         [Header("Proximity Detection")]
-        [Tooltip("Bán kính quét quanh player để tìm obstacle gần nhất.")]
         [SerializeField] private float _proximityRadius = 8f;
-
-        [Tooltip("Layer của obstacle (tường, prop). Không include Player và Ground.")]
         [SerializeField] private LayerMask _obstacleLayers;
 
         [Header("Follow")]
-        [Tooltip("Thời gian (giây) để camera đuổi kịp player. 0.08–0.15 là khoảng dễ chịu.")]
         [SerializeField] private float _followSmoothTime = 0.1f;
 
         private const int ObstacleBufferSize = 16;
@@ -39,20 +26,11 @@ namespace Xyla.Player
         private float _zoomVelocity;
         private Vector3 _positionVelocity;
 
-        public void SetTarget(Transform target)
-        {
-            _target = target;
-            _targetRigidbody = target != null ? target.GetComponent<Rigidbody>() : null;
-        }
-
+        public void SetTarget(Transform target) => _target = target;
 
         private void Start()
         {
             if (_target == null) return;
-
-            if (_targetRigidbody == null)
-                _targetRigidbody = _target.GetComponent<Rigidbody>();
-
             _currentDistance = _maxDistance;
             transform.position = ComputeDesiredPosition();
         }
@@ -60,11 +38,9 @@ namespace Xyla.Player
         private void LateUpdate()
         {
             if (_target == null) return;
-
             UpdateDistanceBasedOnProximity();
             FollowTargetSmoothly();
         }
-
 
         private void UpdateDistanceBasedOnProximity()
         {
@@ -81,20 +57,16 @@ namespace Xyla.Player
 
         private float FindClosestObstacleDistance()
         {
-            Vector3 origin = GetPhysicsPosition();
+            Vector3 origin = _target.position;
             int hitCount = Physics.OverlapSphereNonAlloc(
-                origin,
-                _proximityRadius,
-                _obstacleBuffer,
-                _obstacleLayers,
-                QueryTriggerInteraction.Ignore);
+                origin, _proximityRadius, _obstacleBuffer,
+                _obstacleLayers, QueryTriggerInteraction.Ignore);
 
             float closest = _proximityRadius;
             for (int i = 0; i < hitCount; i++)
             {
                 if (BelongsToTarget(_obstacleBuffer[i])) continue;
-                Vector3 nearestPoint = _obstacleBuffer[i].ClosestPoint(origin);
-                float distance = Vector3.Distance(origin, nearestPoint);
+                float distance = Vector3.Distance(origin, _obstacleBuffer[i].ClosestPoint(origin));
                 if (distance < closest) closest = distance;
             }
             return closest;
@@ -106,27 +78,17 @@ namespace Xyla.Player
             return t == _target || t.IsChildOf(_target);
         }
 
-
         private void FollowTargetSmoothly()
         {
             Vector3 desired = ComputeDesiredPosition();
             transform.position = Vector3.SmoothDamp(
-                transform.position,
-                desired,
-                ref _positionVelocity,
-                _followSmoothTime);
-        }
-
-        private Vector3 GetPhysicsPosition()
-        {
-            return _targetRigidbody != null
-                ? _targetRigidbody.position
-                : _target.position;
+                transform.position, desired,
+                ref _positionVelocity, _followSmoothTime);
         }
 
         private Vector3 ComputeDesiredPosition()
         {
-            return GetPhysicsPosition() - transform.forward * _currentDistance;
+            return _target.position - transform.forward * _currentDistance;
         }
 
         private void OnDrawGizmosSelected()

@@ -10,6 +10,7 @@ namespace Xyla.Player
 
         private bool _attackPressedThisFrame;
         private bool _attackHeld;
+
         public Vector2 MovementAxis
         {
             get
@@ -17,6 +18,7 @@ namespace Xyla.Player
                 if (_mobileJoystick != null && _mobileJoystick.IsPressed)
                     return _mobileJoystick.Axis;
 
+                // Fallback: keyboard
                 return new Vector2(
                     Input.GetAxisRaw("Horizontal"),
                     Input.GetAxisRaw("Vertical"));
@@ -25,19 +27,25 @@ namespace Xyla.Player
 
         public Vector3 MouseScreenPosition => Input.mousePosition;
 
-        public bool SprintHeld => Input.GetKey(KeyCode.LeftShift)
-                               || Input.GetKey(KeyCode.RightShift);
+        public bool SprintHeld
+        {
+            get
+            {
+                // Mobile: joystick kéo mạnh = sprint
+                if (_mobileJoystick != null && _mobileJoystick.IsPressed)
+                    return _mobileJoystick.SprintHeld;
+
+                // PC: Shift
+                return Input.GetKey(KeyCode.LeftShift)
+                    || Input.GetKey(KeyCode.RightShift);
+            }
+        }
 
         public bool AttackPressed => Input.GetMouseButtonDown(0) || _attackPressedThisFrame;
-
         public bool AttackHeld => Input.GetMouseButton(0) || _attackHeld;
-
         public bool AimHeld => Input.GetMouseButton(1);
-
         public bool InteractPressed => Input.GetKeyDown(KeyCode.E);
-
         public bool BuildModeToggled => Input.GetKeyDown(KeyCode.B);
-
         public void OnAttackButtonDown()
         {
             _attackPressedThisFrame = true;
@@ -48,6 +56,7 @@ namespace Xyla.Player
         {
             _attackHeld = false;
         }
+
 
         private void LateUpdate()
         {
