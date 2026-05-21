@@ -1,0 +1,155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1709254077376921
+GameObject:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_Component:
+  - component: {fileID: 4730242686860875}
+  - component: {fileID: 114724804207875695}
+  - component: {fileID: 114618682377417806}
+  m_Layer: 0
+  m_Name: CharacterGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4730242686860875
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1709254077376921}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
+--- !u!114 &114724804207875695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc4d9773edaa2ab38a2e21b9d98b29f7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  GenerationContainer: {fileID: 114618682377417806}
+--- !u!114 &114618682377417806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c882d78e445da48b185c329ac952dda, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  BodypartsGroups:
+  - GroupId: 0 Head
+    AtlasRect:
+      X: 0
+      Y: 0
+      Width: 128
+      Height: 128
+    Bodyparts:
+    - BodypartMesh: {fileID: 4300000, guid: 29b2e4fc11e3e0d4983ced775e356890, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 7bfdfbba753a56449b5211cee087dc78, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: aa3e7134a9c94324d84368c8907807ac, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 3a44a10d2dc2cb74bac688bd68c0c8ea, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 732ea96530ca4e44f994b1463f97fa43, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 35d737865c78c294597560f76121eef0, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 14559f28ee3f22448a269566d49bac9a, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 2c17930d7152b3643bee218aeaa849c4, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 5967f8b8e785cd44c967c5ceafeabd70, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 8849d60943dd6db44a3e8280ac6851fa, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 61f9972e472eea54abd68a70d1005d35, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: aa85619430f4cff46bfebfc7013f45dd, type: 2}
+  - GroupId: 1 Torso
+    AtlasRect:
+      X: 0
+      Y: 128
+      Width: 256
+      Height: 384
+    Bodyparts:
+    - BodypartMesh: {fileID: 4300000, guid: 864aefb05290fda45ac0ba259c4d9dc0, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: f0862ed9e40d2534d9a8f4e74fd0ba23, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: f48768c7632161845894543b2774dd57, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 8f24ebdc66ca72b418d93f95ae53397c, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 7e7ff018b6b2ce149941264225ed2f36, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 91ca2ea3f65f4a5459549b18fa57b2a3, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: bfb7c4ae212ef0a4ca35bfa139f8b9f3, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: beaab301cf7313646b959afae2af38b9, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: ff328f7acb5f14d44a042cff67e87982, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: af110dcef0c79cb4fa0bc1f8bb61b667, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 169e30ab42aa84a41a7cc9acc87eebc1, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 1b682ca49bee26b489c9ca8265cc4765, type: 2}
+  - GroupId: 2 Legs
+    AtlasRect:
+      X: 256
+      Y: 0
+      Width: 256
+      Height: 256
+    Bodyparts:
+    - BodypartMesh: {fileID: 4300000, guid: 3095e2818980eec4bb53aa79c707f42e, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 71f224849f35a384fab37f224f492540, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: be0af4fa17f9a2143a04064f09f5c7d7, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: b0dee077332a2b647938d54d3536dd43, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 717d24c877a1aa74ba3d41a35b7d6ad0, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 63484c410cbf1ec41a30d85caab053ba, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: f10af3907cfb652458129f502d36bbec, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: a6f90dd84bd59044fba7bccbc1cb161d, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: de533f77e03f2aa42a7bf795f0d5c6b9, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: bbb85eec1b360ac46add6ecd609e12c2, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: b02ea90924a09a94a8afd2865e6b1449, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 402a5513f5f93a241a74d3d3cab758a8, type: 2}
+  - GroupId: 3 Feet
+    AtlasRect:
+      X: 128
+      Y: 0
+      Width: 128
+      Height: 128
+    Bodyparts:
+    - BodypartMesh: {fileID: 4300000, guid: de2da9e192835604abcd7117b20ac1cd, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: fc712f11eb386ef4d89d08172e16ebce, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: a3e8b6dc69d6f514c8cc2784bc94e8f5, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: acddd68d2768db345a52c20be4ff4808, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 9ddbc3226309ab54aaacb58f8dc4f654, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 3913bb0d0ab618c4fa3ad3c86be12ebb, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 7fbe6ff72cf0eed48981d98697b777ed, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: af42c94b5f99ba04fb1391ced00bf2f3, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 53421c83b79b61149a1e6fa74db37c1e, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 0662a20b1d845a1459a4fe8f44fda474, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: dc9610f383172a0458aa80e07a1d3fea, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: 1b71f939dacca9d4bb8c86af7dd2b393, type: 2}
+  - GroupId: 4 Backpack
+    AtlasRect:
+      X: 256
+      Y: 256
+      Width: 256
+      Height: 256
+    Bodyparts:
+    - BodypartMesh: {fileID: 4300000, guid: 6e7bd9190eb7c2941946233e6b51daea, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: d355b1a4769938b44950e788fbeadbab, type: 2}
+    - BodypartMesh: {fileID: 4300000, guid: 645b730aaeff65d4181b9fc2873d8b4c, type: 2}
+      BodypartTexture: {fileID: 21300000, guid: c7f8c4d923c857e498cb3b4052f1db3e, type: 2}
+  DissolveTexture: {fileID: 2800000, guid: 300da1a9667c56e44bfaace401e6d392, type: 3}
+--- !u!1001 &100100000
+Prefab:
+  serializedVersion: 2
+  m_ObjectHideFlags: 1
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1709254077376921}
+  m_IsPrefabParent: 1
