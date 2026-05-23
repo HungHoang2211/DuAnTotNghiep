@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Xyla.Combat;
+using Xyla.Core;
 
 namespace Xyla.Enemy
 {
@@ -35,6 +36,15 @@ namespace Xyla.Enemy
             CurrentHealth = _maxHealth;
         }
 
+        // Gọi bởi ObjectPool khi enemy được lấy ra dùng lại
+        private void OnSpawnFromPool()
+        {
+            CurrentHealth = _maxHealth;
+            IsDead = false;
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = true;
+        }
+
         public bool TakeDamage(float amount, GameObject source)
         {
             if (IsDead) return false;
@@ -65,8 +75,8 @@ namespace Xyla.Enemy
             var col = GetComponent<Collider>();
             if (col != null) col.enabled = false;
 
-            // Người làm enemy có thể override OnDeath() hoặc bắt event này
-            Destroy(gameObject, 2f);
+            // Trả về pool thay vì Destroy — tái sử dụng, không tốn GC
+            ObjectPool.Instance.ReturnDelayed(gameObject, 2f);
         }
 
         private void PlaySound(AudioClip clip)
