@@ -660,6 +660,8 @@ GameObject:
   - component: {fileID: 230926071}
   - component: {fileID: 230926070}
   - component: {fileID: 230926078}
+  - component: {fileID: 230926079}
+  - component: {fileID: 230926080}
   m_Layer: 0
   m_Name: playertest
   m_TagString: Untagged
@@ -854,6 +856,45 @@ MonoBehaviour:
     m_Bits: 128
   _defaultClips: []
   _defaultVolume: 0.7
+--- !u!114 &230926079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230926069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5c6a827c44b5a141a019c9550bde9bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHP: 100
+  _startHP: 100
+  _hpRegenPerSec: 2
+  _regenThreshold: 0.2
+  _hungerCostPerHPRegen: 0.5
+  _thirstCostPerHPRegen: 0.8
+  _maxHunger: 100
+  _startHunger: 100
+  _hungerDecayPerSec: 0.5
+  _starveDamagePerSec: 1
+  _maxThirst: 100
+  _startThirst: 100
+  _thirstDecayPerSec: 0.8
+  _dehydrateDamagePerSec: 1.5
+--- !u!114 &230926080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230926069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f1b0f708a6b4074d9a1839078a8662f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stats: {fileID: 230926079}
 --- !u!1 &479177249
 GameObject:
   m_ObjectHideFlags: 0
