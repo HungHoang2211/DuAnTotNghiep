@@ -26,17 +26,9 @@ namespace Xyla.Player
         [SerializeField] private Animator _animator;
         [SerializeField] private float _speedDampTime = 0.1f;
 
-        [Header("Audio (optional)")]
-        [SerializeField] private AudioSource _audioSource;
-        [SerializeField] private AudioClip[] _footstepClips;
-        [SerializeField] private float _walkStepInterval = 0.45f;
-        [SerializeField] private float _runStepInterval = 0.28f;
-        [SerializeField][Range(0f, 1f)] private float _footstepVolume = 0.7f;
-
         private CharacterController _cc;
         private Vector3 _horizontalVelocity;
         private float _verticalVelocity;
-        private float _nextFootstepTime;
 
         public bool IsMoving { get; private set; }
         public bool IsRunning { get; private set; }
@@ -70,7 +62,6 @@ namespace Xyla.Player
             _cc.Move(finalVelocity * Time.deltaTime);
 
             DriveLocomotionAnimator();
-            TickFootstep();
         }
 
         private Vector3 ReadMovementDirection()
@@ -101,35 +92,6 @@ namespace Xyla.Player
             return IsRunning ? RunAnimValue : WalkAnimValue;
         }
 
-        private void TickFootstep()
-        {
-            if (!CanPlayFootstep()) return;
 
-            if (!IsMoving)
-            {
-                _nextFootstepTime = Time.time;
-                return;
-            }
-
-            if (Time.time < _nextFootstepTime) return;
-
-            PlayRandomFootstep();
-            float interval = IsRunning ? _runStepInterval : _walkStepInterval;
-            _nextFootstepTime = Time.time + interval;
-        }
-
-        private bool CanPlayFootstep()
-        {
-            return _audioSource != null
-                && _footstepClips != null
-                && _footstepClips.Length > 0;
-        }
-
-        private void PlayRandomFootstep()
-        {
-            AudioClip clip = _footstepClips[Random.Range(0, _footstepClips.Length)];
-            if (clip == null) return;
-            _audioSource.PlayOneShot(clip, _footstepVolume);
-        }
     }
 }
