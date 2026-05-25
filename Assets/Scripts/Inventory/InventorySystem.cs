@@ -35,6 +35,16 @@ namespace SimpleSurvival.Items
         }
 
         /// <summary>
+        /// Raises OnInventoryChanged manually. Use this when a stack already in
+        /// the inventory changed in place — for example its durability dropped —
+        /// so the UI redraws even though no slot was added or removed.
+        /// </summary>
+        public void NotifyChanged()
+        {
+            OnInventoryChanged?.Invoke();
+        }
+
+        /// <summary>
         /// Adds items to the inventory. First fills existing matching stacks,
         /// then uses empty slots for the remainder. Returns the amount that did
         /// not fit (0 when everything was stored).

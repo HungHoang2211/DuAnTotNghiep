@@ -7,8 +7,10 @@ namespace SimpleSurvival.Items
     /// each to its grid UI on startup. This is the bridge between the data
     /// layer (InventorySystem) and the display layer (InventoryGridUI).
     ///
-    /// Pockets are a fixed size. The backpack size changes with the equipped
-    /// backpack; until the Equipment system exists it uses a default size.
+    /// Pockets are a fixed size. The backpack exists only while a backpack is
+    /// equipped; with no backpack it is null and every backpack cell shows as
+    /// locked. The backpack can never have more slots than the UI has cells —
+    /// otherwise items would enter data slots that have no cell to display them.
     /// </summary>
     public sealed class PlayerInventory : MonoBehaviour
     {
@@ -17,32 +19,44 @@ namespace SimpleSurvival.Items
         [SerializeField] private InventoryGridUI pocketGridUI;
 
         [Header("Backpack Inventory")]
-        [Tooltip("Backpack slots available before any backpack is equipped.")]
+        [Tooltip("Backpack slots before any backpack is equipped. 0 = no backpack.")]
         [SerializeField] private int defaultBackpackSlotCount = 0;
+
+        [Tooltip("Maximum backpack slots. MUST equal the number of cells in the "
+            + "backpack grid UI, or items can fall into cells that do not exist.")]
+        [SerializeField] private int maxBackpackSlotCount = 20;
+
         [SerializeField] private InventoryGridUI backpackGridUI;
 
         private InventorySystem pockets;
         private InventorySystem backpack;
 
         public InventorySystem Pockets => pockets;
+
+        /// <summary>The backpack inventory, or null when no backpack is equipped.</summary>
         public InventorySystem Backpack => backpack;
+
+        public int MaxBackpackSlotCount => maxBackpackSlotCount;
 
         private void Awake()
         {
             pockets = new InventorySystem(pocketSlotCount);
             pocketGridUI.Bind(pockets);
 
-            CreateBackpack(defaultBackpackSlotCount);
+            SetBackpack(defaultBackpackSlotCount);
         }
 
         /// <summary>
-        /// Rebuilds the backpack inventory with a new slot count — called by the
-        /// Equipment system when a backpack is equipped or removed. Items that
-        /// no longer fit are pushed into the pockets; whatever still does not
-        /// fit is returned so the caller can drop it in the world.
+        /// Rebuilds the backpack with a new slot count — called by the Equipment
+        /// system when a backpack is equipped or removed. The count is clamped
+        /// to [0, maxBackpackSlotCount]. A count of 0 means no backpack. Items
+        /// that no longer fit are pushed into the pockets; whatever still does
+        /// not fit is returned so the caller can drop it in the world.
         /// </summary>
         public int ResizeBackpack(int newSlotCount)
         {
+            newSlotCount = Mathf.Clamp(newSlotCount, 0, maxBackpackSlotCount);
+
             int overflow = 0;
 
             if (backpack != null)
@@ -50,21 +64,17 @@ namespace SimpleSurvival.Items
                 overflow = MoveAllItemsToPockets();
             }
 
-            CreateBackpack(newSlotCount);
+            SetBackpack(newSlotCount);
             return overflow;
         }
 
-        private void CreateBackpack(int slotCount)
+        /// <summary>
+        /// Creates the backpack inventory, or sets it to null when the count is
+        /// 0, then binds the result to the UI. Binding null locks every cell.
+        /// </summary>
+        private void SetBackpack(int slotCount)
         {
-            if (slotCount > 0)
-            {
-                backpack = new InventorySystem(slotCount);
-            }
-            else
-            {
-                backpack = new InventorySystem(1);
-            }
-
+            backpack = slotCount > 0 ? new InventorySystem(slotCount) : null;
             backpackGridUI.Bind(backpack);
         }
 
@@ -84,8 +94,7 @@ namespace SimpleSurvival.Items
                     continue;
                 }
 
-                int notFitted = pockets.AddItem(stack.ItemData, stack.Quantity);
-                overflow += notFitted;
+                overflow += pockets.AddItem(stack.ItemData, stack.Quantity);
             }
 
             return overflow;
