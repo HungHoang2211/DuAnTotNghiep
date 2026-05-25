@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Xyla.Combat;
+using Xyla.Enemy;
 
 namespace Xyla.Player
 {
