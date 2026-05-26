@@ -23,6 +23,12 @@ public class DeerController : MonoBehaviour
     [SerializeField] private float _normalSpeed = 2f;
     [SerializeField] private float _detectionRadius = 6f;
 
+    [Header("Movement Feel")]
+    [SerializeField] private float _rotationSpeed = 3f;   // giảm từ 6 xuống 3
+    [SerializeField] private float _acceleration = 10f;
+    [SerializeField] private float _deceleration = 15f;
+    [SerializeField] private float _angularSpeed = 0f;   // đặt 0 vì updateRotation=false
+
     [Header("Death")]
     [SerializeField] private float _despawnDelay = 120f;
 
@@ -50,8 +56,15 @@ public class DeerController : MonoBehaviour
         _state = State.Wandering;
         _grazeBlockedUntil = 0f;
 
+        // Cấu hình NavMeshAgent để không trượt
         _agent.isStopped = false;
         _agent.speed = _normalSpeed;
+        _agent.acceleration = _acceleration;
+        _agent.angularSpeed = _angularSpeed;
+        _agent.autoBraking = true;   // tự phanh khi gần đích
+        _agent.stoppingDistance = 0.2f;
+        // Tắt rotation của agent — tự xử lý bằng code để smooth hơn
+        _agent.updateRotation = false;
 
         if (_anim != null) { _anim.SetDead(false); _anim.SetGrazing(false); _anim.SetSpeed(0f); }
 
@@ -70,9 +83,34 @@ public class DeerController : MonoBehaviour
     private void Update()
     {
         if (_isDead) return;
-        if (_anim != null) _anim.SetSpeed(_agent.velocity.magnitude);
+
+        // Smooth rotation — quay theo hướng di chuyển từ từ
+        SmoothRotation();
+
+        // Cập nhật speed cho Animator — dùng velocity thực của agent
+        if (_anim != null)
+            _anim.SetSpeed(_agent.velocity.magnitude);
+
         if (_state == State.Wandering || _state == State.Grazing)
             CheckForPlayer();
+    }
+
+    private void SmoothRotation()
+    {
+        // Chỉ quay khi đang di chuyển đủ nhanh
+        if (_agent.velocity.sqrMagnitude < 0.1f) return;
+
+        Vector3 moveDir = _agent.velocity.normalized;
+        moveDir.y = 0;
+
+        if (moveDir == Vector3.zero) return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(moveDir);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            _rotationSpeed * Time.deltaTime
+        );
     }
 
     // ── Behavior Loop ─────────────────────────────────────
