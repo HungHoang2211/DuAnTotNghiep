@@ -162,11 +162,6 @@ MonoBehaviour:
   _gravity: -20
   _animator: {fileID: 0}
   _speedDampTime: 0.1
-  _audioSource: {fileID: 0}
-  _footstepClips: []
-  _walkStepInterval: 0.45
-  _runStepInterval: 0.28
-  _footstepVolume: 0.7
 --- !u!114 &89972089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,7 +272,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _input: {fileID: 89972090}
+  _damage: 25
+  _attackRange: 1.5
+  _attackAngle: 180
   _attackCooldown: 0.4
+  _enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
   _animator: {fileID: 0}
   _audioSource: {fileID: 0}
   _attackClip: {fileID: 0}

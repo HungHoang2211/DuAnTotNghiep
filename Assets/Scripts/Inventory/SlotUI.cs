@@ -12,7 +12,8 @@ namespace SimpleSurvival.Items
     ///   - Locked vs unlocked  -> set by SetLocked (depends on the backpack).
     ///   - What stack it holds -> set by SetStack (depends on the item data).
     ///
-    /// All UI references are assigned by hand in the Inspector.
+    /// All UI references are assigned by hand in the Inspector. The script
+    /// turns components on and off itself, so they may start disabled.
     /// </summary>
     public sealed class SlotUI : MonoBehaviour
     {
@@ -23,11 +24,18 @@ namespace SimpleSurvival.Items
 
         [Header("Content")]
         [SerializeField] private Image iconImage;
-        [SerializeField] private Image durabilityFill;
         [SerializeField] private TMP_Text quantityText;
 
+        [Header("Durability")]
+        [Tooltip("Root object of the durability bar (the background). "
+            + "Toggled on/off as a whole — its fill child goes with it.")]
+        [SerializeField] private GameObject durabilityRoot;
+
+        [Tooltip("The Filled image inside the durability bar. Image Type must be Filled.")]
+        [SerializeField] private Image durabilityFill;
+
         [Header("Durability Colors")]
-        [SerializeField] private Color durabilityNormalColor = new Color(0.25f, 0.8f, 0.8f);
+        [SerializeField] private Color durabilityNormalColor = new Color(0.149f, 0.380f, 0.376f);
         [SerializeField] private Color durabilityLowColor = new Color(0.85f, 0.2f, 0.2f);
 
         [Tooltip("Below this ratio (0-1) the durability bar turns to the low color.")]
@@ -76,8 +84,8 @@ namespace SimpleSurvival.Items
         private void ShowEmpty()
         {
             iconImage.enabled = false;
-            durabilityFill.enabled = false;
             quantityText.enabled = false;
+            durabilityRoot.SetActive(false);
         }
 
         private void ShowIcon(ItemStack stack)
@@ -101,11 +109,11 @@ namespace SimpleSurvival.Items
         {
             if (!stack.ItemData.IsDurable)
             {
-                durabilityFill.enabled = false;
+                durabilityRoot.SetActive(false);
                 return;
             }
 
-            durabilityFill.enabled = true;
+            durabilityRoot.SetActive(true);
 
             float ratio = stack.DurabilityRatio;
             durabilityFill.fillAmount = ratio;
