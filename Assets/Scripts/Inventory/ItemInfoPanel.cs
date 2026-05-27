@@ -17,7 +17,8 @@ namespace SimpleSurvival.Items
     public sealed class ItemInfoPanel : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private GameObject root;
+        [Tooltip("CanvasGroup of the tooltip — its alpha shows/hides the panel.")]
+        [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private RectTransform panelRect;
 
         [Tooltip("Caption text — shows the item name.")]
@@ -32,6 +33,10 @@ namespace SimpleSurvival.Items
 
         [Tooltip("Canvas this panel lives on — needed to convert positions.")]
         [SerializeField] private RectTransform canvasRect;
+
+        [Tooltip("Camera rendering the Canvas. Required for Screen Space - Camera; "
+            + "leave empty for Screen Space - Overlay.")]
+        [SerializeField] private Camera uiCamera;
 
         private void Awake()
         {
@@ -52,13 +57,24 @@ namespace SimpleSurvival.Items
             captionText.text = stack.ItemData.ItemName;
             bodyText.text = BuildBody(stack.ItemData);
 
-            root.SetActive(true);
             PositionBeside(cellRect);
+            SetVisible(true);
         }
 
         public void Hide()
         {
-            root.SetActive(false);
+            SetVisible(false);
+        }
+
+        /// <summary>
+        /// Shows or hides the tooltip through its CanvasGroup. Alpha controls
+        /// visibility; blocksRaycasts is cleared when hidden so the invisible
+        /// panel does not silently swallow clicks.
+        /// </summary>
+        private void SetVisible(bool visible)
+        {
+            canvasGroup.alpha = visible ? 1f : 0f;
+            canvasGroup.blocksRaycasts = visible;
         }
 
         /// <summary>
@@ -144,23 +160,42 @@ namespace SimpleSurvival.Items
         }
 
         /// <summary>
-        /// Places the panel beside the cell. It sits to the right of the cell,
-        /// but flips to the left when there is not enough room on the right.
+        /// Places the panel beside the cell, in the Canvas's local space so it
+        /// works with Screen Space - Camera. The panel sits to the right of the
+        /// cell but flips left when the cell is past the Canvas mid-line, and
+        /// is clamped so it always stays fully inside the Canvas.
         /// </summary>
         private void PositionBeside(RectTransform cellRect)
         {
-            Vector3 cellWorld = cellRect.position;
+            // Convert the cell's centre to a point in the Canvas's local space.
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(
+                uiCamera, cellRect.position);
 
-            bool placeLeft = cellWorld.x > canvasRect.position.x;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvasRect, screenPoint, uiCamera, out Vector2 cellLocal);
 
-            float cellHalfWidth = cellRect.rect.width * 0.5f * cellRect.lossyScale.x;
-            float panelHalfWidth = panelRect.rect.width * 0.5f * panelRect.lossyScale.x;
+            // Sizes are in Canvas local units (no lossyScale needed here).
+            float cellHalfWidth = cellRect.rect.width * 0.5f;
+            float panelHalfWidth = panelRect.rect.width * 0.5f;
+            float panelHalfHeight = panelRect.rect.height * 0.5f;
 
+            // Flip to the left side when the cell is past the Canvas centre.
+            bool placeLeft = cellLocal.x > 0f;
             float direction = placeLeft ? -1f : 1f;
             float offsetX = direction * (cellHalfWidth + panelHalfWidth + horizontalOffset);
 
-            panelRect.position = new Vector3(
-                cellWorld.x + offsetX, cellWorld.y, cellWorld.z);
+            Vector2 target = new Vector2(cellLocal.x + offsetX, cellLocal.y);
+
+            // Keep the whole panel inside the Canvas bounds.
+            float canvasHalfWidth = canvasRect.rect.width * 0.5f;
+            float canvasHalfHeight = canvasRect.rect.height * 0.5f;
+
+            target.x = Mathf.Clamp(target.x,
+                -canvasHalfWidth + panelHalfWidth, canvasHalfWidth - panelHalfWidth);
+            target.y = Mathf.Clamp(target.y,
+                -canvasHalfHeight + panelHalfHeight, canvasHalfHeight - panelHalfHeight);
+
+            panelRect.anchoredPosition = target;
         }
     }
 }
