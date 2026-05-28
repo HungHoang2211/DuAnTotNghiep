@@ -3,52 +3,70 @@
 namespace Xyla.Player
 {
     /// <summary>
-    /// Camera follow top-down — distance cố định, không zoom.
-    /// _verticalOffset dịch điểm nhìn lên/xuống để player nằm đúng vị trí màn hình.
+    /// Camera follow top-down theo kiến trúc 2 transform:
+    ///   CameraRig (script này) → bám player, giữ rotation cố định
+    ///   Camera (child)        → offset theo trục Z local
+    ///
+    /// SETUP HIERARCHY:
+    ///   CameraRig (GameObject rỗng) ← script này
+    ///     └── Main Camera           ← kéo vào _cameraTransform
+    ///
+    /// Rotation của CameraRig set trong Inspector (vd X=45, Y=45, Z=0).
+    /// Script chỉ điều khiển position của CameraRig và Z offset của Camera.
     /// </summary>
     public class TopDownCameraFollow : MonoBehaviour
     {
         [Header("Target")]
         [SerializeField] private Transform _target;
 
-        [Header("Distance")]
-        [SerializeField] private float _distance = 15f;
-
-        [Tooltip("Dịch điểm camera nhìn theo trục Y. Tăng = player xuống thấp hơn trên màn hình.")]
-        [SerializeField] private float _verticalOffset = 2f;
+        [Header("Camera Child")]
+        [Tooltip("Transform của Camera con. Kéo Main Camera vào đây.")]
+        [SerializeField] private Transform _cameraTransform;
 
         [Header("Follow")]
-        [SerializeField] private float _followSmoothTime = 0.1f;
+        [Tooltip("Độ cao CameraRig so với mặt đất.")]
+        [SerializeField] private float _cameraHeight = 0.75f;
 
-        private Vector3 _positionVelocity;
+        [Tooltip("Tốc độ bám player (lerp speed).")]
+        [SerializeField] private float _followSpeed = 10f;
+
+        [Header("Distance")]
+        [Tooltip("Khoảng cách camera-pivot (Z offset của camera child).")]
+        [SerializeField] private float _cameraDistance = 12f;
+
+        [Tooltip("Tốc độ lerp distance.")]
+        [SerializeField] private float _distanceSpeed = 5f;
 
         public void SetTarget(Transform target) => _target = target;
 
         private void Start()
         {
-            if (_target == null) return;
-            transform.position = ComputeDesiredPosition();
+            if (_target == null || _cameraTransform == null) return;
+            // Snap ngay lập tức lúc đầu
+            Vector3 rigPos = new Vector3(_target.position.x, _cameraHeight, _target.position.z);
+            transform.position = rigPos;
+            _cameraTransform.localPosition = new Vector3(0f, 0f, -_cameraDistance);
         }
 
         private void LateUpdate()
         {
-            if (_target == null) return;
-            FollowTargetSmoothly();
-        }
+            if (_target == null || _cameraTransform == null) return;
 
-        private void FollowTargetSmoothly()
-        {
-            Vector3 desired = ComputeDesiredPosition();
-            transform.position = Vector3.SmoothDamp(
-                transform.position, desired,
-                ref _positionVelocity, _followSmoothTime);
-        }
+            // CameraRig bám theo player (chỉ XZ, Y cố định = _cameraHeight)
+            Vector3 desiredPos = new Vector3(
+                _target.position.x,
+                _cameraHeight,
+                _target.position.z);
 
-        private Vector3 ComputeDesiredPosition()
-        {
-            // Nhìn vào điểm cao hơn player một chút → player xuống thấp hơn trên màn hình
-            Vector3 lookTarget = _target.position + Vector3.up * _verticalOffset;
-            return lookTarget - transform.forward * _distance;
+            transform.position = Vector3.Lerp(
+                transform.position, desiredPos,
+                Time.deltaTime * _followSpeed);
+
+            // Camera child lerp về đúng distance theo trục Z local
+            float desiredZ = -_cameraDistance;
+            float currentZ = _cameraTransform.localPosition.z;
+            float newZ = Mathf.Lerp(currentZ, desiredZ, Time.deltaTime * _distanceSpeed);
+            _cameraTransform.localPosition = new Vector3(0f, 0f, newZ);
         }
     }
 }
