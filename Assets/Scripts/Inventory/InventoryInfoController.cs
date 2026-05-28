@@ -32,6 +32,7 @@ namespace SimpleSurvival.Items
             {
                 cell.OnHeld += HandleCellHeld;
                 cell.OnReleased += HandleCellReleased;
+                cell.OnDragStart += HandleDragStart;
             }
         }
 
@@ -41,6 +42,7 @@ namespace SimpleSurvival.Items
             {
                 cell.OnHeld -= HandleCellHeld;
                 cell.OnReleased -= HandleCellReleased;
+                cell.OnDragStart -= HandleDragStart;
             }
         }
 
@@ -57,6 +59,16 @@ namespace SimpleSurvival.Items
 
         private void HandleCellReleased(SlotUI cell)
         {
+            infoPanel.Hide();
+        }
+
+        /// <summary>
+        /// A hold that began as tooltip turned into a drag — hide the tooltip
+        /// so the drag ghost owns the screen alone.
+        /// </summary>
+        private void HandleDragStart(SlotUI cell)
+        {
+
             infoPanel.Hide();
         }
     }
