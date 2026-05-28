@@ -7,31 +7,19 @@ namespace Xyla.Player
         [SerializeField] private PlayerInputReader _input;
         [SerializeField] private float _rotationSpeedDegPerSec = 720f;
 
-        [Tooltip("Camera dùng để tính hướng relative. Để trống = Camera.main.")]
-        [SerializeField] private Camera _camera;
-
-        private void Awake()
-        {
-            if (_camera == null) _camera = Camera.main;
-        }
-
         private void Update()
         {
             Vector2 axis = _input.MovementAxis;
             if (axis.sqrMagnitude < 0.01f) return;
 
-            float camYaw = _camera.transform.eulerAngles.y;
-            Quaternion flatRot = Quaternion.Euler(0f, camYaw, 0f);
-            Vector3 forward = flatRot * Vector3.forward;
-            Vector3 right = flatRot * Vector3.right;
-
-            Vector3 moveDir = (forward * axis.y + right * axis.x).normalized;
+            // Joystick lên = +Z, phải = +X (world space)
+            // Camera Y=45° chỉ ảnh hưởng visual, không ảnh hưởng world movement
+            Vector3 moveDir = new Vector3(axis.x, 0f, axis.y).normalized;
             if (moveDir.sqrMagnitude < 0.001f) return;
 
             Quaternion target = Quaternion.LookRotation(moveDir);
             transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                target,
+                transform.rotation, target,
                 _rotationSpeedDegPerSec * Time.deltaTime);
         }
     }
