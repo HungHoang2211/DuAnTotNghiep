@@ -45,6 +45,72 @@ namespace SimpleSurvival.Items
         }
 
         /// <summary>
+        /// Replaces the contents of a slot with the given stack (or null). For
+        /// use by drag-drop and similar operations that move stacks between
+        /// known slots. Raises OnInventoryChanged.
+        /// </summary>
+        public void SetSlot(int index, ItemStack stack)
+        {
+            slots[index] = stack;
+            OnInventoryChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Moves a stack from one slot to another, possibly across inventories.
+        /// If the destination is empty, the stack moves over. If it holds the
+        /// same stackable item, the stacks merge (overflow stays at the source).
+        /// Otherwise, the two stacks swap positions.
+        /// </summary>
+        public static void TransferOrSwap(
+            InventorySystem fromInventory, int fromIndex,
+            InventorySystem toInventory, int toIndex)
+        {
+            if (fromInventory == toInventory && fromIndex == toIndex)
+            {
+                return;
+            }
+
+            ItemStack source = fromInventory.slots[fromIndex];
+            if (source == null)
+            {
+                return;
+            }
+
+            ItemStack destination = toInventory.slots[toIndex];
+
+            if (destination == null)
+            {
+                toInventory.slots[toIndex] = source;
+                fromInventory.slots[fromIndex] = null;
+            }
+            else if (destination.CanStackWith(source))
+            {
+                int overflow = destination.AddQuantity(source.Quantity);
+                if (overflow == 0)
+                {
+                    fromInventory.slots[fromIndex] = null;
+                }
+                else
+                {
+                    // The source keeps only the leftover that did not fit.
+                    source.RemoveQuantity(source.Quantity - overflow);
+                }
+            }
+            else
+            {
+                // Different items: swap their positions.
+                toInventory.slots[toIndex] = source;
+                fromInventory.slots[fromIndex] = destination;
+            }
+
+            fromInventory.OnInventoryChanged?.Invoke();
+            if (toInventory != fromInventory)
+            {
+                toInventory.OnInventoryChanged?.Invoke();
+            }
+        }
+
+        /// <summary>
         /// Adds items to the inventory. First fills existing matching stacks,
         /// then uses empty slots for the remainder. Returns the amount that did
         /// not fit (0 when everything was stored).
