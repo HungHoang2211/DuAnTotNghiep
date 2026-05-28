@@ -2,6 +2,13 @@
 
 namespace Xyla.Player
 {
+    /// <summary>
+    /// Di chuyển nhân vật bằng CharacterController thay vì Rigidbody.
+    /// CharacterController xử lý slope, step, và collision tốt hơn —
+    /// không bị trượt trên dốc hay bị physics đẩy lăn.
+    ///
+    /// Animator và AudioSource là TÙY CHỌN.
+    /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class TopDownMover : MonoBehaviour
     {
