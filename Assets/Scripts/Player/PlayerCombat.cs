@@ -6,25 +6,16 @@ namespace Xyla.Player
 {
     public class PlayerCombat : MonoBehaviour
     {
-        private static readonly int AttackParam = Animator.StringToHash("Attack");
+        private static readonly int AnimAttack = Animator.StringToHash("Attack");
 
         [Header("Input")]
         [SerializeField] private PlayerInputReader _input;
 
         [Header("Combat")]
-        [Tooltip("Damage mỗi lần đánh.")]
         [SerializeField] private float _damage = 25f;
-
-        [Tooltip("Tầm đánh (bán kính OverlapSphere). Tăng theo độ dài vũ khí.")]
         [SerializeField] private float _attackRange = 1.5f;
-
-        [Tooltip("Góc hình quạt phía trước nhân vật để tránh đánh ra sau lưng (độ).")]
         [SerializeField][Range(60f, 360f)] private float _attackAngle = 180f;
-
-        [Tooltip("Cooldown giữa 2 lần đánh (giây). Set xấp xỉ độ dài animation.")]
-        [SerializeField] private float _attackCooldown = 0.4f;
-
-        [Tooltip("Layer của Enemy. Dùng để OverlapSphere chỉ detect enemy.")]
+        [SerializeField] private float _attackCooldown = 0.6f;
         [SerializeField] private LayerMask _enemyLayer;
 
         [Header("Animation (optional)")]
@@ -35,82 +26,49 @@ namespace Xyla.Player
         [SerializeField] private AudioClip _attackClip;
         [SerializeField][Range(0f, 1f)] private float _attackVolume = 1f;
 
-        private float _nextAllowedAttackTime;
+        private float _nextAttackTime;
         private readonly Collider[] _hitBuffer = new Collider[16];
 
         private void Update()
         {
             if (!_input.AttackPressed) return;
-            if (Time.time < _nextAllowedAttackTime) return;
+            if (Time.time < _nextAttackTime) return;
 
-            _nextAllowedAttackTime = Time.time + _attackCooldown;
+            _nextAttackTime = Time.time + _attackCooldown;
             PerformAttack();
         }
 
         private void PerformAttack()
         {
-            TriggerAttackAnimation();
-            PlayAttackSound();
-            DetectAndDamageEnemies();
-        }
+            if (_animator != null) _animator.SetTrigger(AnimAttack);
+            if (_audioSource != null && _attackClip != null)
+                _audioSource.PlayOneShot(_attackClip, _attackVolume);
 
-        private void DetectAndDamageEnemies()
-        {
             Vector3 origin = transform.position + transform.forward * (_attackRange * 0.3f);
-
-            int hitCount = Physics.OverlapSphereNonAlloc(
-                origin, _attackRange, _hitBuffer, _enemyLayer);
+            int hitCount = Physics.OverlapSphereNonAlloc(origin, _attackRange, _hitBuffer, _enemyLayer);
 
             for (int i = 0; i < hitCount; i++)
             {
-                if (!IsInAttackAngle(_hitBuffer[i].transform.position)) continue;
+                Vector3 toTarget = (_hitBuffer[i].transform.position - transform.position);
+                toTarget.y = 0f;
+                if (Vector3.Angle(transform.forward, toTarget.normalized) > _attackAngle * 0.5f) continue;
 
-                // Tìm IDamageable trên enemy hoặc parent của nó
-                var damageable = _hitBuffer[i].GetComponentInParent<IDamageable>();
-                if (damageable == null || damageable.IsDead) continue;
+                var dmg = _hitBuffer[i].GetComponentInParent<IDamageable>();
+                if (dmg == null || dmg.IsDead) continue;
 
-                damageable.TakeDamage(_damage, gameObject);
-                Debug.Log($"Hit {_hitBuffer[i].name} for {_damage} damage. " +
-                          $"Remaining HP: {damageable.CurrentHealth}");
+                dmg.TakeDamage(_damage, gameObject);
             }
         }
 
-        private bool IsInAttackAngle(Vector3 targetPosition)
-        {
-            Vector3 toTarget = (targetPosition - transform.position).normalized;
-            toTarget.y = 0f;
-            float angle = Vector3.Angle(transform.forward, toTarget);
-            return angle <= _attackAngle * 0.5f;
-        }
-
-        private void TriggerAttackAnimation()
-        {
-            if (_animator == null) return;
-            _animator.SetTrigger(AttackParam);
-        }
-
-        private void PlayAttackSound()
-        {
-            if (_audioSource == null || _attackClip == null) return;
-            _audioSource.PlayOneShot(_attackClip, _attackVolume);
-        }
-
-        // Vẽ tầm đánh trong Scene view để dễ chỉnh
         private void OnDrawGizmosSelected()
         {
             Vector3 origin = transform.position + transform.forward * (_attackRange * 0.3f);
-
-            // Vòng tròn tầm đánh
             Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.3f);
             Gizmos.DrawWireSphere(origin, _attackRange);
-
-            // Góc hình quạt
+            float h = _attackAngle * 0.5f;
             Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
-            float halfAngle = _attackAngle * 0.5f;
-            Vector3 leftDir = Quaternion.Euler(0, -halfAngle, 0) * transform.forward;
-            Vector3 rightDir = Quaternion.Euler(0, halfAngle, 0) * transform.forward;
-            Gizmos.DrawRay(transform.position, leftDir * _attackRange);
-            Gizmos.DrawRay(transform.position, rightDir * _attackRange);
+            Gizmos.DrawRay(transform.position, Quaternion.Euler(0, -h, 0) * transform.forward * _attackRange);
+            Gizmos.DrawRay(transform.position, Quaternion.Euler(0, h, 0) * transform.forward * _attackRange);
         }
     }
 }
