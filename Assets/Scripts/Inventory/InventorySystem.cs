@@ -218,6 +218,106 @@ namespace SimpleSurvival.Items
             return IndexOfFirstEmptySlot() >= 0;
         }
 
+        /// <summary>
+        /// Merges stackable items of the same type up to their max stack size,
+        /// then sorts everything by item name. Fires one OnInventoryChanged.
+        /// Non-stackable stacks (weapons, armor) keep their original instances
+        /// so durability values are preserved.
+        /// </summary>
+        public void Sort()
+        {
+            List<ItemStack> sorted = BuildSortedList(this);
+            WriteBack(sorted, this);
+            OnInventoryChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Sorts two inventories as one combined bag — items from both are
+        /// merged, sorted by name, then filled back into <paramref name="first"/>
+        /// first and <paramref name="second"/> with the remainder.
+        /// Fires OnInventoryChanged on both.
+        /// </summary>
+        public static void SortTogether(InventorySystem first, InventorySystem second)
+        {
+            // ── Collect from both ────────────────────────────────────────────
+            List<InventorySystem> sources = new List<InventorySystem> { first, second };
+            List<ItemStack> sorted = BuildSortedList(sources.ToArray());
+
+            // ── Fill first, then second ───────────────────────────────────────
+            int written = WriteBack(sorted, first, startAt: 0);
+            List<ItemStack> remainder = sorted.GetRange(written, sorted.Count - written);
+            WriteBack(remainder, second, startAt: 0);
+
+            first.OnInventoryChanged?.Invoke();
+            second.OnInventoryChanged?.Invoke();
+        }
+
+        // ── Sort helpers ─────────────────────────────────────────────────────
+
+        private static List<ItemStack> BuildSortedList(params InventorySystem[] inventories)
+        {
+            Dictionary<ItemData, int> stackableTotals = new Dictionary<ItemData, int>();
+            List<ItemStack> nonStackables = new List<ItemStack>();
+
+            foreach (InventorySystem inventory in inventories)
+            {
+                for (int i = 0; i < inventory.slots.Length; i++)
+                {
+                    ItemStack stack = inventory.slots[i];
+                    if (stack == null)
+                        continue;
+
+                    if (stack.ItemData.IsStackable)
+                    {
+                        if (!stackableTotals.ContainsKey(stack.ItemData))
+                            stackableTotals[stack.ItemData] = 0;
+                        stackableTotals[stack.ItemData] += stack.Quantity;
+                    }
+                    else
+                    {
+                        nonStackables.Add(stack);
+                    }
+                }
+            }
+
+            List<ItemStack> merged = new List<ItemStack>();
+            foreach (KeyValuePair<ItemData, int> entry in stackableTotals)
+            {
+                int remaining = entry.Value;
+                while (remaining > 0)
+                {
+                    int amount = UnityEngine.Mathf.Min(remaining, entry.Key.MaxStack);
+                    merged.Add(new ItemStack(entry.Key, amount));
+                    remaining -= amount;
+                }
+            }
+
+            merged.AddRange(nonStackables);
+            merged.Sort((a, b) =>
+                string.Compare(a.ItemData.ItemName, b.ItemData.ItemName,
+                    System.StringComparison.Ordinal));
+
+            return merged;
+        }
+
+        /// <summary>
+        /// Writes stacks into the inventory starting at slot 0.
+        /// Returns the number of stacks actually written.
+        /// </summary>
+        private static int WriteBack(List<ItemStack> stacks, InventorySystem inventory,
+            int startAt = 0)
+        {
+            int written = 0;
+            for (int i = 0; i < inventory.slots.Length && written < stacks.Count; i++)
+                inventory.slots[i] = stacks[written++];
+
+            // Clear leftover slots.
+            for (int i = written; i < inventory.slots.Length; i++)
+                inventory.slots[i] = null;
+
+            return written;
+        }
+
         // ── Private helpers ──────────────────────────────────────────────────
 
         private int FillExistingStacks(ItemData itemData, int remaining)
@@ -253,7 +353,7 @@ namespace SimpleSurvival.Items
             return remaining;
         }
 
-        private int IndexOfFirstEmptySlot()
+        public int IndexOfFirstEmptySlot()
         {
             for (int i = 0; i < slots.Length; i++)
             {
