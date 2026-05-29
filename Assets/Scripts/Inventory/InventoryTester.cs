@@ -1,10 +1,11 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
     /// <summary>
     /// Temporary test harness for the inventory. Draws on-screen buttons to add
-    /// items, resize the backpack, and wear down item durability � so the
+    /// items, resize the backpack, and wear down item durability — so the
     /// inventory can be exercised before the real interaction and combat
     /// systems exist.
     ///
@@ -16,17 +17,26 @@ namespace SimpleSurvival.Items
         [SerializeField] private PlayerInventory playerInventory;
 
         [Header("Test Items")]
-        [Tooltip("A stackable item, e.g. wood.")]
-        [SerializeField] private ItemData stackableItem;
+        [Tooltip("Stackable items to test with, e.g. wood, stone.")]
+        [SerializeField] private List<ItemData> stackableItems = new List<ItemData>();
 
-        [Tooltip("A durable item, e.g. an axe.")]
-        [SerializeField] private ItemData durableItem;
+        [Tooltip("Durable items to test with, e.g. axe, helmet.")]
+        [SerializeField] private List<ItemData> durableItems = new List<ItemData>();
 
         [Header("Settings")]
         [SerializeField] private int addAmount = 5;
         [SerializeField] private int backpackStep = 5;
 
+        [Header("Random Durability")]
+        [Tooltip("Minimum durability ratio when spawning loot items (0 = broken, 1 = full).")]
+        [SerializeField, Range(0f, 1f)] private float minDurabilityRatio = 0.3f;
+
+        [Tooltip("Maximum durability ratio when spawning loot items.")]
+        [SerializeField, Range(0f, 1f)] private float maxDurabilityRatio = 0.9f;
+
         private int currentBackpackSlots;
+        private int selectedStackableIndex;
+        private int selectedDurableIndex;
 
         private void Awake()
         {
@@ -35,10 +45,12 @@ namespace SimpleSurvival.Items
 
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10, 10, 260, 400), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(10, 10, 280, 500), GUI.skin.box);
             GUILayout.Label("INVENTORY TESTER");
 
-            DrawAddItemButtons();
+            DrawStackableItemButtons();
+            GUILayout.Space(8);
+            DrawDurableItemButtons();
             GUILayout.Space(8);
             DrawBackpackButtons();
             GUILayout.Space(8);
@@ -47,132 +59,159 @@ namespace SimpleSurvival.Items
             GUILayout.EndArea();
         }
 
-        private void DrawAddItemButtons()
+        // ── Stackable ────────────────────────────────────────────────────────
+
+        private void DrawStackableItemButtons()
         {
-            GUILayout.Label("Add Items");
+            GUILayout.Label("Stackable Items");
 
-            if (GUILayout.Button($"Add {addAmount} stackable -> Pockets"))
+            if (stackableItems.Count == 0)
             {
-                AddToPockets(stackableItem);
+                GUILayout.Label("  (no stackable items assigned)");
+                return;
             }
 
-            if (GUILayout.Button("Add 1 durable -> Pockets"))
-            {
-                AddToPockets(durableItem, 1);
-            }
+            DrawItemSelector(ref selectedStackableIndex, stackableItems);
 
-            if (GUILayout.Button($"Add {addAmount} stackable -> Backpack"))
-            {
-                AddToBackpack(stackableItem);
-            }
+            ItemData selected = stackableItems[selectedStackableIndex];
+
+            if (GUILayout.Button($"Add {addAmount} '{selected.ItemName}' → Pockets"))
+                AddToPockets(selected, addAmount);
+
+            if (GUILayout.Button($"Add {addAmount} '{selected.ItemName}' → Backpack"))
+                AddToBackpack(selected, addAmount);
         }
+
+        // ── Durable ──────────────────────────────────────────────────────────
+
+        private void DrawDurableItemButtons()
+        {
+            GUILayout.Label("Durable Items");
+
+            if (durableItems.Count == 0)
+            {
+                GUILayout.Label("  (no durable items assigned)");
+                return;
+            }
+
+            DrawItemSelector(ref selectedDurableIndex, durableItems);
+
+            ItemData selected = durableItems[selectedDurableIndex];
+
+            if (GUILayout.Button($"Add 1 '{selected.ItemName}' (full dur.) → Pockets"))
+                AddToPockets(selected, 1);
+
+            if (GUILayout.Button($"Add 1 '{selected.ItemName}' (random dur.) → Pockets"))
+                AddToPocketsWithRandomDurability(selected);
+        }
+
+        // ── Backpack ─────────────────────────────────────────────────────────
 
         private void DrawBackpackButtons()
         {
             int max = playerInventory.MaxBackpackSlotCount;
             GUILayout.Label($"Backpack slots: {currentBackpackSlots} / {max}");
 
-            // The + button stops at the maximum so items can never enter
-            // backpack data slots that have no UI cell to display them.
             using (new GUIEnabledScope(currentBackpackSlots < max))
             {
                 if (GUILayout.Button($"+{backpackStep} backpack slots"))
-                {
                     ResizeBackpack(currentBackpackSlots + backpackStep);
-                }
             }
 
             using (new GUIEnabledScope(currentBackpackSlots > 0))
             {
                 if (GUILayout.Button($"-{backpackStep} backpack slots"))
-                {
                     ResizeBackpack(currentBackpackSlots - backpackStep);
-                }
             }
         }
+
+        // ── Durability ───────────────────────────────────────────────────────
 
         private void DrawDurabilityButton()
         {
             GUILayout.Label("Durability");
 
             if (GUILayout.Button("Reduce durability of first durable item"))
-            {
                 ReduceFirstDurableItem();
-            }
         }
 
-        private void AddToPockets(ItemData item, int amount = -1)
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        /// <summary>Draws prev/next arrows to cycle through an item list.</summary>
+        private void DrawItemSelector(ref int index, List<ItemData> items)
         {
-            if (item == null)
+            GUILayout.BeginHorizontal();
+
+            using (new GUIEnabledScope(index > 0))
             {
-                Debug.LogWarning("Tester: test item not assigned.");
-                return;
+                if (GUILayout.Button("◀", GUILayout.Width(30)))
+                    index--;
             }
 
-            int used = amount > 0 ? amount : addAmount;
-            int overflow = playerInventory.Pockets.AddItem(item, used);
+            GUILayout.Label(items[index].ItemName, GUI.skin.box,
+                GUILayout.ExpandWidth(true));
 
-            if (overflow > 0)
+            using (new GUIEnabledScope(index < items.Count - 1))
             {
-                Debug.Log($"Pockets full � {overflow} item(s) did not fit.");
+                if (GUILayout.Button("▶", GUILayout.Width(30)))
+                    index++;
             }
+
+            GUILayout.EndHorizontal();
         }
 
-        private void AddToBackpack(ItemData item)
+        private void AddToPockets(ItemData item, int amount)
         {
-            if (item == null)
-            {
-                Debug.LogWarning("Tester: test item not assigned.");
-                return;
-            }
+            int overflow = playerInventory.Pockets.AddItem(item, amount);
+            LogOverflow("Pockets", overflow);
+        }
 
+        private void AddToBackpack(ItemData item, int amount)
+        {
             if (playerInventory.Backpack == null)
             {
-                Debug.Log("No backpack equipped � add backpack slots first.");
+                Debug.Log("No backpack equipped — add backpack slots first.");
                 return;
             }
 
-            int overflow = playerInventory.Backpack.AddItem(item, addAmount);
+            int overflow = playerInventory.Backpack.AddItem(item, amount);
+            LogOverflow("Backpack", overflow);
+        }
 
-            if (overflow > 0)
-            {
-                Debug.Log($"Backpack full � {overflow} item(s) did not fit.");
-            }
+        private void AddToPocketsWithRandomDurability(ItemData item)
+        {
+            int randomDurability = Mathf.RoundToInt(
+                Random.Range(minDurabilityRatio, maxDurabilityRatio) * item.MaxDurability
+            );
+
+            ItemStack stack = new ItemStack(item, 1, randomDurability);
+            int overflow = playerInventory.Pockets.AddStack(stack);
+
+            Debug.Log($"Added '{item.ItemName}' with durability "
+                + $"{randomDurability}/{item.MaxDurability}.");
+            LogOverflow("Pockets", overflow);
         }
 
         private void ResizeBackpack(int newSlotCount)
         {
             int overflow = playerInventory.ResizeBackpack(newSlotCount);
-
-            // ResizeBackpack clamps to the allowed range; mirror the clamped
-            // value here so the label stays in sync.
             currentBackpackSlots = Mathf.Clamp(newSlotCount, 0,
                 playerInventory.MaxBackpackSlotCount);
 
             if (overflow > 0)
             {
-                Debug.Log($"Backpack shrunk � {overflow} item(s) did not fit "
-                    + "into the pockets and were lost.");
+                Debug.Log($"Backpack shrunk — {overflow} item(s) lost.");
             }
         }
 
-        /// <summary>
-        /// Finds the first durable item across pockets and backpack and wears
-        /// down its durability by one use, so the low-durability color and the
-        /// broken-item removal can be tested.
-        /// </summary>
         private void ReduceFirstDurableItem()
         {
             if (ReduceInInventory(playerInventory.Pockets))
-            {
                 return;
-            }
 
             if (playerInventory.Backpack != null
                 && ReduceInInventory(playerInventory.Backpack))
-            {
                 return;
-            }
 
             Debug.Log("No durable item found in the inventory.");
         }
@@ -183,28 +222,28 @@ namespace SimpleSurvival.Items
             {
                 ItemStack stack = inventory.GetSlot(i);
                 if (stack == null || !stack.ItemData.IsDurable)
-                {
                     continue;
-                }
 
                 bool broke = stack.ReduceDurability();
                 Debug.Log($"Durability now {stack.CurrentDurability}"
                     + $"/{stack.ItemData.MaxDurability}"
-                    + (broke ? " � item broke!" : string.Empty));
+                    + (broke ? " — item broke!" : string.Empty));
 
                 if (broke)
-                {
                     inventory.RemoveItem(stack.ItemData, stack.Quantity);
-                }
                 else
-                {
                     inventory.NotifyChanged();
-                }
 
                 return true;
             }
 
             return false;
+        }
+
+        private static void LogOverflow(string target, int overflow)
+        {
+            if (overflow > 0)
+                Debug.Log($"{target} full — {overflow} item(s) did not fit.");
         }
     }
 
