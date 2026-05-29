@@ -12,11 +12,8 @@ namespace SimpleSurvival.Items
         public const string Name = "Tool";
 
         [SerializeField] private ToolType toolType;
-        [SerializeField] private int bodypartVariantIndex;
 
         public override string AbilityName => Name;
-
         public ToolType ToolType => toolType;
-        public int BodypartVariantIndex => bodypartVariantIndex;
     }
 }

@@ -15,7 +15,7 @@ namespace SimpleSurvival.Items
         [Header("Identity")]
         [SerializeField] private string itemName;
         [SerializeField] private Sprite icon;
-        [TextArea] [SerializeField] private string description;
+        [TextArea][SerializeField] private string description;
 
         [Header("Stacking")]
         [SerializeField] private bool isStackable;
@@ -26,8 +26,8 @@ namespace SimpleSurvival.Items
         [SerializeField] private int maxDurability;
 
         [Header("Tags")]
-        [Tooltip("Equipment slots accept only items carrying the matching tag.")]
-        [SerializeField] private List<string> tags = new List<string>();
+        [Tooltip("Tick every role this item fills. Equipment slots accept only items carrying the matching tag.")]
+        [SerializeField] private ItemTag tags;
 
         [Header("Abilities")]
         [Tooltip("Drag ability assets here. An item with no abilities is a plain resource.")]
@@ -36,10 +36,8 @@ namespace SimpleSurvival.Items
         public string ItemName => itemName;
         public Sprite Icon => icon;
         public string Description => description;
-
         public bool IsStackable => isStackable;
         public int MaxStack => isStackable ? maxStack : 1;
-
         public int MaxDurability => maxDurability;
         public bool IsDurable => maxDurability > 0;
 
@@ -53,11 +51,8 @@ namespace SimpleSurvival.Items
             foreach (ItemAbility ability in abilities)
             {
                 if (ability is TAbility match)
-                {
                     return match;
-                }
             }
-
             return null;
         }
 
@@ -66,9 +61,13 @@ namespace SimpleSurvival.Items
             return GetAbility<TAbility>() != null;
         }
 
-        public bool HasTag(string tag)
+        /// <summary>
+        /// Returns true when this item carries ALL of the requested tags.
+        /// Pass multiple tags with the | operator: HasTag(ItemTag.Tool | ItemTag.Weapon).
+        /// </summary>
+        public bool HasTag(ItemTag tag)
         {
-            return tags.Contains(tag);
+            return (tags & tag) == tag;
         }
     }
 }

@@ -8,15 +8,17 @@ namespace SimpleSurvival.Items
 {
     /// <summary>
     /// Displays a single inventory cell and reports player input on it. It does
-    /// not act on input itself — coordinators (InventorySelection, the info
-    /// panel) listen to its events and decide what happens.
+    /// not act on input itself — coordinators (selection, info panel, drag)
+    /// listen to its events and decide what happens.
     ///
-    /// Input is reported as three events:
-    ///   - OnClicked    : a quick press and release (a tap).
-    ///   - OnHeld       : the press was held past the hold threshold.
-    ///   - OnReleased   : the pointer was released after a hold.
-    /// A tap selects; a hold shows the item info panel. Drag will later also
-    /// start from a hold-plus-move, so hold detection is kept separate here.
+    /// Input events:
+    ///   - OnClicked     : quick tap (press and release before the hold threshold).
+    ///   - OnHeld        : press held past the hold threshold, pointer still still.
+    ///   - OnDragStart   : after the hold, the pointer began to move — drag begins.
+    ///   - OnReleased    : pointer released after a hold that did not become a drag.
+    ///
+    /// A tap selects; a still hold shows the info tooltip; a hold + move starts a
+    /// drag. The two never collide because OnDragStart suppresses tooltip behavior.
     /// </summary>
     public sealed class SlotUI : MonoBehaviour,
         IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
@@ -44,42 +46,64 @@ namespace SimpleSurvival.Items
         [Range(0f, 1f)]
         [SerializeField] private float lowDurabilityThreshold = 0.25f;
 
-        [Header("Hold")]
+        [Header("Hold & Drag")]
         [Tooltip("Seconds the cell must be held before OnHeld fires.")]
         [SerializeField] private float holdThreshold = 0.5f;
+
+        [Tooltip("Pointer movement after hold (pixels) that turns a hold into a drag.")]
+        [SerializeField] private float dragMoveThreshold = 8f;
 
         private bool isLocked;
         private bool isPressed;
         private float pressTime;
         private bool holdFired;
+        private bool dragFired;
+        private Vector2 pressPosition;
 
-        /// <summary>Raised on a quick tap (press and release before the hold threshold).</summary>
         public event Action<SlotUI> OnClicked;
-
-        /// <summary>Raised once when a press is held past the hold threshold.</summary>
         public event Action<SlotUI> OnHeld;
-
-        /// <summary>Raised when the pointer is released after a hold fired.</summary>
         public event Action<SlotUI> OnReleased;
 
-        /// <summary>True when this cell currently holds an item.</summary>
-        public bool HasItem { get; private set; }
+        /// <summary>Raised when a hold turns into a drag (hold + pointer moved).</summary>
+        public event Action<SlotUI> OnDragStart;
 
-        /// <summary>The stack shown in this cell, or null when empty.</summary>
+        public bool HasItem { get; private set; }
         public ItemStack CurrentStack { get; private set; }
 
         private void Update()
         {
-            if (!isPressed || holdFired)
+            if (!isPressed)
             {
                 return;
             }
 
-            if (Time.unscaledTime - pressTime >= holdThreshold)
+            // Fire OnHeld once the press has lasted past the threshold.
+            if (!holdFired && Time.unscaledTime - pressTime >= holdThreshold)
             {
                 holdFired = true;
                 OnHeld?.Invoke(this);
             }
+
+            // After a hold, watch for pointer movement to begin a drag.
+            if (holdFired && !dragFired && HasItem)
+            {
+                Vector2 currentPosition = GetCurrentPointerPosition();
+                if (Vector2.Distance(currentPosition, pressPosition) >= dragMoveThreshold)
+                {
+                    dragFired = true;
+                    OnDragStart?.Invoke(this);
+                }
+            }
+        }
+
+        private static Vector2 GetCurrentPointerPosition()
+        {
+            if (Input.touchCount > 0)
+            {
+                return Input.GetTouch(0).position;
+            }
+
+            return Input.mousePosition;
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -91,14 +115,18 @@ namespace SimpleSurvival.Items
 
             isPressed = true;
             holdFired = false;
+            dragFired = false;
             pressTime = Time.unscaledTime;
+            pressPosition = eventData.position;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             isPressed = false;
 
-            if (holdFired)
+            // OnReleased fires only for a still hold that did not become a drag,
+            // so the info tooltip knows when to hide. A drag has its own end path.
+            if (holdFired && !dragFired)
             {
                 OnReleased?.Invoke(this);
             }
@@ -106,8 +134,7 @@ namespace SimpleSurvival.Items
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // A click that completed a hold is not a tap — ignore it so a hold
-            // does not also trigger selection.
+            // A click that completed a hold (still or dragged) is not a tap.
             if (isLocked || holdFired)
             {
                 return;
@@ -116,10 +143,6 @@ namespace SimpleSurvival.Items
             OnClicked?.Invoke(this);
         }
 
-        /// <summary>
-        /// Sets whether this cell is locked. A locked cell shows the locked
-        /// background, never displays an item, and cannot be selected.
-        /// </summary>
         public void SetLocked(bool locked)
         {
             isLocked = locked;
@@ -132,16 +155,11 @@ namespace SimpleSurvival.Items
             }
         }
 
-        /// <summary>Shows or hides the selection highlight on this cell.</summary>
         public void SetSelected(bool selected)
         {
             selectionHighlight.SetActive(selected);
         }
 
-        /// <summary>
-        /// Shows the given stack on this cell. Pass null for an empty cell.
-        /// Has no effect on a locked cell.
-        /// </summary>
         public void SetStack(ItemStack stack)
         {
             if (isLocked)

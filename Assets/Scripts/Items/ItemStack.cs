@@ -15,21 +15,29 @@ namespace SimpleSurvival.Items
         [SerializeField] private int quantity;
         [SerializeField] private int currentDurability;
 
+        /// <summary>
+        /// Creates a stack with full durability.
+        /// Use this for crafted items or items the player picks up fresh.
+        /// </summary>
         public ItemStack(ItemData itemData, int quantity)
         {
-            if (itemData == null)
-            {
-                throw new ArgumentNullException(nameof(itemData));
-            }
-
-            if (quantity < 1)
-            {
-                throw new ArgumentException("Quantity must be at least 1.", nameof(quantity));
-            }
-
+            Validate(itemData, quantity);
             this.itemData = itemData;
             this.quantity = Mathf.Min(quantity, itemData.MaxStack);
             this.currentDurability = itemData.MaxDurability;
+        }
+
+        /// <summary>
+        /// Creates a stack with a specific durability value.
+        /// Use this for loot items that spawn with partial wear.
+        /// Value is clamped to [0, MaxDurability].
+        /// </summary>
+        public ItemStack(ItemData itemData, int quantity, int currentDurability)
+        {
+            Validate(itemData, quantity);
+            this.itemData = itemData;
+            this.quantity = Mathf.Min(quantity, itemData.MaxStack);
+            this.currentDurability = Mathf.Clamp(currentDurability, 0, itemData.MaxDurability);
         }
 
         public ItemData ItemData => itemData;
@@ -37,6 +45,7 @@ namespace SimpleSurvival.Items
         public int CurrentDurability => currentDurability;
 
         public bool IsFull => quantity >= itemData.MaxStack;
+        public bool IsEmpty => quantity <= 0;
         public bool IsBroken => itemData.IsDurable && currentDurability <= 0;
 
         /// <summary>
@@ -57,9 +66,7 @@ namespace SimpleSurvival.Items
         public int AddQuantity(int amount)
         {
             if (amount < 1)
-            {
                 throw new ArgumentException("Amount must be at least 1.", nameof(amount));
-            }
 
             int freeSpace = itemData.MaxStack - quantity;
             int accepted = Mathf.Min(amount, freeSpace);
@@ -75,17 +82,13 @@ namespace SimpleSurvival.Items
         public int RemoveQuantity(int amount)
         {
             if (amount < 1)
-            {
                 throw new ArgumentException("Amount must be at least 1.", nameof(amount));
-            }
 
             int removed = Mathf.Min(amount, quantity);
             quantity -= removed;
 
             return removed;
         }
-
-        public bool IsEmpty => quantity <= 0;
 
         /// <summary>
         /// Reduces durability by one use. Does nothing for items that never
@@ -94,9 +97,7 @@ namespace SimpleSurvival.Items
         public bool ReduceDurability()
         {
             if (!itemData.IsDurable || currentDurability <= 0)
-            {
                 return false;
-            }
 
             currentDurability--;
             return currentDurability <= 0;
@@ -107,9 +108,7 @@ namespace SimpleSurvival.Items
             get
             {
                 if (!itemData.IsDurable)
-                {
                     return 1f;
-                }
 
                 return (float)currentDurability / itemData.MaxDurability;
             }
@@ -122,9 +121,17 @@ namespace SimpleSurvival.Items
         /// </summary>
         public ItemStack Clone()
         {
-            ItemStack copy = new ItemStack(itemData, quantity);
-            copy.currentDurability = currentDurability;
+            ItemStack copy = new ItemStack(itemData, quantity, currentDurability);
             return copy;
+        }
+
+        private static void Validate(ItemData itemData, int quantity)
+        {
+            if (itemData == null)
+                throw new ArgumentNullException(nameof(itemData));
+
+            if (quantity < 1)
+                throw new ArgumentException("Quantity must be at least 1.", nameof(quantity));
         }
     }
 }
