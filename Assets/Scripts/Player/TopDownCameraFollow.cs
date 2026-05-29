@@ -2,7 +2,6 @@
 
 namespace Xyla.Player
 {
-    /// <summary>
     /// Camera follow top-down theo kiến trúc 2 transform:
     ///   CameraRig (script này) → bám player, giữ rotation cố định
     ///   Camera (child)        → offset theo trục Z local
@@ -13,7 +12,6 @@ namespace Xyla.Player
     ///
     /// Rotation của CameraRig set trong Inspector (vd X=45, Y=45, Z=0).
     /// Script chỉ điều khiển position của CameraRig và Z offset của Camera.
-    /// </summary>
     public class TopDownCameraFollow : MonoBehaviour
     {
         [Header("Target")]
@@ -48,19 +46,22 @@ namespace Xyla.Player
             _cameraTransform.localPosition = new Vector3(0f, 0f, -_cameraDistance);
         }
 
+        private Vector3 _positionVelocity;
+
         private void LateUpdate()
         {
             if (_target == null || _cameraTransform == null) return;
 
-            // CameraRig bám theo player (chỉ XZ, Y cố định = _cameraHeight)
+            // CameraRig bám theo player — dùng SmoothDamp thay vì Lerp để không rung
             Vector3 desiredPos = new Vector3(
                 _target.position.x,
                 _cameraHeight,
                 _target.position.z);
 
-            transform.position = Vector3.Lerp(
+            transform.position = Vector3.SmoothDamp(
                 transform.position, desiredPos,
-                Time.deltaTime * _followSpeed);
+                ref _positionVelocity,
+                1f / _followSpeed);
 
             // Camera child lerp về đúng distance theo trục Z local
             float desiredZ = -_cameraDistance;
