@@ -43,6 +43,7 @@ namespace SimpleSurvival.Items
             // Subscribe to inventory events here — guaranteed all Awake() calls
             // across all objects have already run, so Pockets is initialized.
             playerInventory.Pockets.OnInventoryChanged += RefreshSortButton;
+            playerInventory.Pockets.OnInventoryChanged += RefreshSelectionButtonsFromInventory;
 
             RefreshSelectionButtons(selection.SelectedSlot);
             RefreshSortButton();
@@ -63,7 +64,10 @@ namespace SimpleSurvival.Items
 
             // Guard against OnDisable firing before Start (e.g. object disabled on load).
             if (playerInventory != null && playerInventory.Pockets != null)
+            {
                 playerInventory.Pockets.OnInventoryChanged -= RefreshSortButton;
+                playerInventory.Pockets.OnInventoryChanged -= RefreshSelectionButtonsFromInventory;
+            }
 
             buttonUse.onClick.RemoveListener(HandleUse);
             buttonSplit.onClick.RemoveListener(HandleSplit);
@@ -93,7 +97,15 @@ namespace SimpleSurvival.Items
             buttonUse.interactable = stack.ItemData.HasAbility<ConsumableAbility>()
                 || stack.ItemData.HasAbility<EquipmentAbility>();
 
-            buttonSplit.interactable = stack.ItemData.IsStackable && stack.Quantity > 1;
+            // Find the owning inventory to check free slots for split.
+            InventoryGridUI splitGrid = slot.GetComponentInParent<InventoryGridUI>();
+            bool hasFreeSlot = splitGrid != null
+                && HasFreeSlotForSplit(splitGrid.BoundInventory,
+                    splitGrid.IndexOf(slot));
+
+            buttonSplit.interactable = stack.ItemData.IsStackable
+                && stack.Quantity > 1
+                && hasFreeSlot;
 
             buttonDelete.interactable = true;
         }
@@ -102,6 +114,11 @@ namespace SimpleSurvival.Items
         /// Sort is enabled whenever pockets or backpack contains at least one item.
         /// Subscribed to OnInventoryChanged so it updates automatically.
         /// </summary>
+        private void RefreshSelectionButtonsFromInventory()
+        {
+            RefreshSelectionButtons(selection.SelectedSlot);
+        }
+
         private void RefreshSortButton()
         {
             bool hasAnyItem = InventoryHasItem(playerInventory.Pockets)
@@ -141,15 +158,34 @@ namespace SimpleSurvival.Items
             if (stack == null || !stack.ItemData.IsStackable || stack.Quantity < 2)
                 return;
 
+            // Try to find empty slot in current inventory first, then the other one.
             int emptyIndex = FindEmptySlotExcluding(inventory, index);
+            InventorySystem targetInventory = inventory;
+
+            if (emptyIndex < 0)
+            {
+                // Try the other inventory (pocket → backpack or vice versa).
+                InventorySystem other = GetOtherInventory(inventory);
+                if (other != null)
+                {
+                    emptyIndex = FindEmptySlotExcluding(other, -1);
+                    targetInventory = other;
+                }
+            }
+
             if (emptyIndex < 0)
                 return;
 
             int splitAmount = stack.Quantity / 2;
             stack.RemoveQuantity(splitAmount);
-            inventory.SetSlot(emptyIndex, new ItemStack(stack.ItemData, splitAmount));
+            targetInventory.SetSlot(emptyIndex, new ItemStack(stack.ItemData, splitAmount));
 
-            selection.Deselect();
+            // Keep selection on the original stack so player can keep splitting.
+            // Deselect only when stack can no longer be split.
+            if (stack.Quantity < 2)
+                selection.Deselect();
+            else
+                inventory.NotifyChanged();
         }
 
         private void HandleSort()
@@ -227,6 +263,34 @@ namespace SimpleSurvival.Items
             foundGrid = null;
             foundIndex = -1;
             return false;
+        }
+
+        /// <summary>
+        /// Returns the other inventory — if current is Pockets returns Backpack
+        /// and vice versa. Returns null if backpack is not equipped.
+        /// </summary>
+        /// <summary>
+        /// Returns true when there is at least one free slot available for the
+        /// split result — either in the current inventory or the other one.
+        /// </summary>
+        private bool HasFreeSlotForSplit(InventorySystem inventory, int excludeIndex)
+        {
+            if (FindEmptySlotExcluding(inventory, excludeIndex) >= 0)
+                return true;
+
+            InventorySystem other = GetOtherInventory(inventory);
+            return other != null && FindEmptySlotExcluding(other, -1) >= 0;
+        }
+
+        private InventorySystem GetOtherInventory(InventorySystem current)
+        {
+            if (current == playerInventory.Pockets)
+                return playerInventory.Backpack;
+
+            if (current == playerInventory.Backpack)
+                return playerInventory.Pockets;
+
+            return null;
         }
 
         private static bool InventoryHasItem(InventorySystem inventory)
