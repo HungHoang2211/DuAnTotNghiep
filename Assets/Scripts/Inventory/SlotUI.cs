@@ -7,21 +7,21 @@ using TMPro;
 namespace SimpleSurvival.Items
 {
     /// <summary>
-    /// Displays a single inventory cell and reports player input on it. It does
-    /// not act on input itself — coordinators (selection, info panel, drag)
-    /// listen to its events and decide what happens.
+    /// Displays a single inventory cell and reports player input on it.
+    /// Uses Unity's built-in drag interfaces so drag and tooltip never conflict.
     ///
     /// Input events:
-    ///   - OnClicked     : quick tap (press and release before the hold threshold).
-    ///   - OnHeld        : press held past the hold threshold, pointer still still.
-    ///   - OnDragStart   : after the hold, the pointer began to move — drag begins.
-    ///   - OnReleased    : pointer released after a hold that did not become a drag.
-    ///
-    /// A tap selects; a still hold shows the info tooltip; a hold + move starts a
-    /// drag. The two never collide because OnDragStart suppresses tooltip behavior.
+    ///   - OnClicked   : quick tap/click (no drag, no hold).
+    ///   - OnHeld      : pointer held past holdThreshold — tooltip trigger.
+    ///   - OnReleased  : pointer released after a still hold — tooltip hide.
+    ///   - OnBeginDrag : Unity fires this when pointer moves past pixelDragThreshold.
+    ///   - OnDrag      : pointer moving during drag — used to move the ghost.
+    ///   - OnEndDrag   : drag finished (dropped or cancelled).
+    ///   - OnDrop      : this cell received a drop from another cell.
     /// </summary>
     public sealed class SlotUI : MonoBehaviour,
-        IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
+        IPointerClickHandler, IPointerDownHandler, IPointerUpHandler,
+        IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
     {
         [Header("Background")]
         [SerializeField] private Image backgroundImage;
@@ -46,102 +46,115 @@ namespace SimpleSurvival.Items
         [Range(0f, 1f)]
         [SerializeField] private float lowDurabilityThreshold = 0.25f;
 
-        [Header("Hold & Drag")]
-        [Tooltip("Seconds the cell must be held before OnHeld fires.")]
+        [Header("Hold (Tooltip)")]
+        [Tooltip("Seconds held before OnHeld fires.")]
         [SerializeField] private float holdThreshold = 0.5f;
-
-        [Tooltip("Pointer movement after hold (pixels) that turns a hold into a drag.")]
-        [SerializeField] private float dragMoveThreshold = 8f;
 
         private bool isLocked;
         private bool isPressed;
         private float pressTime;
         private bool holdFired;
-        private bool dragFired;
-        private Vector2 pressPosition;
+        private bool isDragging;
+
+        // ── Events ───────────────────────────────────────────────────────────
 
         public event Action<SlotUI> OnClicked;
         public event Action<SlotUI> OnHeld;
         public event Action<SlotUI> OnReleased;
-
-        /// <summary>Raised when a hold turns into a drag (hold + pointer moved).</summary>
-        public event Action<SlotUI> OnDragStart;
+        public event Action<SlotUI, PointerEventData> OnBeginDragEvent;
+        public event Action<SlotUI, PointerEventData> OnDragEvent;
+        public event Action<SlotUI, PointerEventData> OnEndDragEvent;
+        public event Action<SlotUI> OnDropEvent;
 
         public bool HasItem { get; private set; }
         public ItemStack CurrentStack { get; private set; }
 
+        // ── Unity lifecycle ──────────────────────────────────────────────────
+
         private void Update()
         {
-            if (!isPressed)
-            {
+            if (!isPressed || holdFired || isDragging)
                 return;
-            }
 
-            // Fire OnHeld once the press has lasted past the threshold.
-            if (!holdFired && Time.unscaledTime - pressTime >= holdThreshold)
+            if (Time.unscaledTime - pressTime >= holdThreshold)
             {
                 holdFired = true;
                 OnHeld?.Invoke(this);
             }
-
-            // After a hold, watch for pointer movement to begin a drag.
-            if (holdFired && !dragFired && HasItem)
-            {
-                Vector2 currentPosition = GetCurrentPointerPosition();
-                if (Vector2.Distance(currentPosition, pressPosition) >= dragMoveThreshold)
-                {
-                    dragFired = true;
-                    OnDragStart?.Invoke(this);
-                }
-            }
         }
 
-        private static Vector2 GetCurrentPointerPosition()
-        {
-            if (Input.touchCount > 0)
-            {
-                return Input.GetTouch(0).position;
-            }
-
-            return Input.mousePosition;
-        }
+        // ── Pointer events ───────────────────────────────────────────────────
 
         public void OnPointerDown(PointerEventData eventData)
         {
             if (isLocked)
-            {
                 return;
-            }
 
             isPressed = true;
             holdFired = false;
-            dragFired = false;
+            isDragging = false;
             pressTime = Time.unscaledTime;
-            pressPosition = eventData.position;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             isPressed = false;
 
-            // OnReleased fires only for a still hold that did not become a drag,
-            // so the info tooltip knows when to hide. A drag has its own end path.
-            if (holdFired && !dragFired)
-            {
+            // Hide tooltip on release if a still hold was active.
+            if (holdFired && !isDragging)
                 OnReleased?.Invoke(this);
-            }
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // A click that completed a hold (still or dragged) is not a tap.
-            if (isLocked || holdFired)
-            {
+            if (isLocked || holdFired || isDragging)
                 return;
-            }
 
             OnClicked?.Invoke(this);
         }
+
+        // ── Drag events (Unity built-in) ─────────────────────────────────────
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (isLocked || !HasItem)
+                return;
+
+            isDragging = true;
+
+            // If tooltip was showing, hide it before drag takes over.
+            if (holdFired)
+                OnReleased?.Invoke(this);
+
+            OnBeginDragEvent?.Invoke(this, eventData);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (!isDragging)
+                return;
+
+            OnDragEvent?.Invoke(this, eventData);
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (!isDragging)
+                return;
+
+            isDragging = false;
+            OnEndDragEvent?.Invoke(this, eventData);
+        }
+
+        public void OnDrop(PointerEventData eventData)
+        {
+            if (isLocked)
+                return;
+
+            OnDropEvent?.Invoke(this);
+        }
+
+        // ── Slot state ───────────────────────────────────────────────────────
 
         public void SetLocked(bool locked)
         {
@@ -163,9 +176,7 @@ namespace SimpleSurvival.Items
         public void SetStack(ItemStack stack)
         {
             if (isLocked)
-            {
                 return;
-            }
 
             CurrentStack = stack;
 
@@ -180,6 +191,8 @@ namespace SimpleSurvival.Items
             ShowQuantity(stack);
             ShowDurability(stack);
         }
+
+        // ── Display helpers ──────────────────────────────────────────────────
 
         private void ShowEmpty()
         {
@@ -202,9 +215,7 @@ namespace SimpleSurvival.Items
             quantityText.enabled = showCount;
 
             if (showCount)
-            {
                 quantityText.text = stack.Quantity.ToString();
-            }
         }
 
         private void ShowDurability(ItemStack stack)
