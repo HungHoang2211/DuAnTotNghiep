@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7622016769354193967}
   - component: {fileID: 1827242979783996477}
   - component: {fileID: -4497339292798242100}
+  - component: {fileID: -9019002654988573813}
   m_Layer: 8
   m_Name: Wolf
   m_TagString: Enemy
@@ -52,7 +53,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: e4558883ac90a8a43bfc82ae70973823, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -95,26 +96,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcef56dafb485774387449cae75857bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wanderRadius: 8
+  _wanderRadius: 3
   _wanderIntervalMin: 2
   _wanderIntervalMax: 5
   _visionRange: 10
-  _visionAngle: 120
+  _visionAngle: 60
   _playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   _obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
-  _chaseSpeed: 6
+    m_Bits: 64
+  _hearingRadius: 10
+  _footstepMinSpeed: 2
+  _chaseRadius: 5
+  _chaseSpeed: 4
   _walkSpeed: 2
+  _loseTargetTime: 3
   _attackRange: 1.8
   _attackDamage: 20
   _attackCooldown: 1.5
-  _loseTargetTime: 3
   _howlChance: 0.4
   _howlDuration: 2.5
-  _despawnDelay: 120
+  _rotationSpeed: 80
+  _acceleration: 10
+  _angularSpeed: 0
+  _despawnDelay: 10
 --- !u!114 &7622016769354193967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +171,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-9019002654988573813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26420039585923096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lifetime: 0
 --- !u!1 &213402551378400243
 GameObject:
   m_ObjectHideFlags: 0
