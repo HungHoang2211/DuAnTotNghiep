@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace SimpleSurvival.Items
 {
     /// <summary>
     /// Connects cell hold events to the item info panel. When the player holds
     /// a cell that contains an item, the panel appears beside it; releasing the
-    /// hold hides it again. Empty cells show nothing.
+    /// hold or beginning a drag hides it again. Empty cells show nothing.
     /// </summary>
     public sealed class InventoryInfoController : MonoBehaviour
     {
@@ -32,7 +33,7 @@ namespace SimpleSurvival.Items
             {
                 cell.OnHeld += HandleCellHeld;
                 cell.OnReleased += HandleCellReleased;
-                cell.OnDragStart += HandleDragStart;
+                cell.OnBeginDragEvent += HandleBeginDrag;
             }
         }
 
@@ -42,19 +43,16 @@ namespace SimpleSurvival.Items
             {
                 cell.OnHeld -= HandleCellHeld;
                 cell.OnReleased -= HandleCellReleased;
-                cell.OnDragStart -= HandleDragStart;
+                cell.OnBeginDragEvent -= HandleBeginDrag;
             }
         }
 
         private void HandleCellHeld(SlotUI cell)
         {
             if (!cell.HasItem)
-            {
                 return;
-            }
 
-            RectTransform cellRect = cell.transform as RectTransform;
-            infoPanel.Show(cell.CurrentStack, cellRect);
+            infoPanel.Show(cell.CurrentStack, cell.transform as RectTransform);
         }
 
         private void HandleCellReleased(SlotUI cell)
@@ -62,13 +60,8 @@ namespace SimpleSurvival.Items
             infoPanel.Hide();
         }
 
-        /// <summary>
-        /// A hold that began as tooltip turned into a drag — hide the tooltip
-        /// so the drag ghost owns the screen alone.
-        /// </summary>
-        private void HandleDragStart(SlotUI cell)
+        private void HandleBeginDrag(SlotUI cell, PointerEventData eventData)
         {
-
             infoPanel.Hide();
         }
     }
