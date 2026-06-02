@@ -24,6 +24,9 @@ namespace SimpleSurvival.Items
         [SerializeField] private Button buttonSort;
         [SerializeField] private Button buttonDelete;
 
+        [Header("Dialogs")]
+        [SerializeField] private SimpleSurvival.UI.ConfirmDeleteDialog confirmDeleteDialog;
+
         /// <summary>
         /// Raised when the player presses Use on a consumable item.
         /// The survival system subscribes here to apply HP/Hunger/Thirst.
@@ -203,8 +206,25 @@ namespace SimpleSurvival.Items
             if (!TryFindSelectedLocation(out InventoryGridUI grid, out int index))
                 return;
 
-            grid.BoundInventory.SetSlot(index, null);
-            selection.Deselect();
+            ItemStack stack = grid.BoundInventory.GetSlot(index);
+            if (stack == null)
+                return;
+
+            string itemName = stack.ItemData.ItemName;
+            confirmDeleteDialog.Show(
+                $"Delete {itemName}?",
+                confirmed =>
+                {
+                    if (!confirmed)
+                        return;
+
+                    // Re-validate vì player có thể đã thay đổi selection trong lúc dialog hiện
+                    if (!TryFindSelectedLocation(out InventoryGridUI g, out int i))
+                        return;
+
+                    g.BoundInventory.SetSlot(i, null);
+                    selection.Deselect();
+                });
         }
 
         // ── Private helpers ──────────────────────────────────────────────────
