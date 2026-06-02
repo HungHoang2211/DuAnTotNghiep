@@ -21,7 +21,10 @@ namespace SimpleSurvival.Items
         [Header("Visuals")]
         [SerializeField] private Image icon;
         [SerializeField] private Sprite defaultIcon;
-        [SerializeField] private GameObject highlight;
+
+        [Header("Highlights")]
+        [SerializeField] private GameObject selectionHighlight;
+        [SerializeField] private GameObject dragHighlight;
         [SerializeField] private GameObject durabilityBar;
         [SerializeField] private Image durabilityLevel;
         [SerializeField] private TMP_Text countText;
@@ -34,6 +37,15 @@ namespace SimpleSurvival.Items
         private ItemStack _equippedStack;
         private float _lastClickTime;
         private const float DoubleClickThreshold = 0.25f;
+
+
+        // ── Unity lifecycle ───────────────────────────────────────────────────
+
+        private void Awake()
+        {
+            if (selectionHighlight != null) selectionHighlight.SetActive(false);
+            if (dragHighlight != null) dragHighlight.SetActive(false);
+        }
 
         // ── Events ───────────────────────────────────────────────────────────
 
@@ -60,11 +72,21 @@ namespace SimpleSurvival.Items
             else ShowItem(stack);
         }
 
+        /// <summary>Selection highlight — shown when player clicks this cell.</summary>
         public void SetSelected(bool selected)
         {
-            if (highlight != null)
-                highlight.SetActive(selected);
+            if (selectionHighlight != null)
+                selectionHighlight.SetActive(selected);
         }
+
+        /// <summary>Drag highlight — shown when a compatible item is being dragged.</summary>
+        public void SetDragTarget(bool active)
+        {
+            if (dragHighlight != null)
+                dragHighlight.SetActive(active);
+        }
+
+
 
         // ── Input handlers ───────────────────────────────────────────────────
 

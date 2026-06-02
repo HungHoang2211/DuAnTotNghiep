@@ -34,6 +34,11 @@ namespace SimpleSurvival.Items
 
         public bool IsDragging => sourceInventoryCell != null || sourceEquipCell != null;
 
+        /// <summary>Raised when drag starts. Arg: the stack being dragged.</summary>
+        public event System.Action<ItemStack> OnDragBegan;
+        /// <summary>Raised when drag ends (drop or cancel).</summary>
+        public event System.Action OnDragEnded;
+
         // ── Unity lifecycle ──────────────────────────────────────────────────
 
         private void Awake()
@@ -111,6 +116,7 @@ namespace SimpleSurvival.Items
             sourceIndex = index;
 
             ShowGhost(cell.CurrentStack.ItemData.Icon, eventData.position);
+            OnDragBegan?.Invoke(cell.CurrentStack);
         }
 
         private void HandleDrag(SlotUI cell, PointerEventData eventData)
@@ -159,6 +165,7 @@ namespace SimpleSurvival.Items
 
             sourceEquipCell = cell;
             ShowGhost(cell.EquippedStack.ItemData.Icon, eventData.position);
+            OnDragBegan?.Invoke(cell.EquippedStack);
         }
 
         private void HandleEquipDrag(EquipSlotUI cell, PointerEventData eventData)
