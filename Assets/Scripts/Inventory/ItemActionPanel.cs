@@ -98,7 +98,8 @@ namespace SimpleSurvival.Items
             ItemStack stack = slot.CurrentStack;
 
             buttonUse.interactable = stack.ItemData.HasAbility<ConsumableAbility>()
-                || stack.ItemData.HasAbility<EquipmentAbility>();
+                || stack.ItemData.HasAbility<EquipmentAbility>()
+                || stack.ItemData.HasAbility<WeaponAbility>();
 
             // Find the owning inventory to check free slots for split.
             InventoryGridUI splitGrid = slot.GetComponentInParent<InventoryGridUI>();
@@ -146,7 +147,8 @@ namespace SimpleSurvival.Items
                 return;
             }
 
-            if (stack.ItemData.HasAbility<EquipmentAbility>())
+            if (stack.ItemData.HasAbility<EquipmentAbility>()
+                || stack.ItemData.HasAbility<WeaponAbility>())
                 OnEquipRequested?.Invoke(stack);
         }
 

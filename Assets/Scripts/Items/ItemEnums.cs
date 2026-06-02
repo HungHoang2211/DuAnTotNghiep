@@ -35,7 +35,12 @@
         Helmet,
         Jacket,
         Pants,
-        Boots
+        Boots,
+        /// <summary>
+        /// Quick-use slot — accepts consumables and weapons.
+        /// Two cells share this type, distinguished by index.
+        /// </summary>
+        QuickSlot,
     }
 
     /// <summary>
@@ -56,5 +61,6 @@
         Pants = 1 << 6,
         Boots = 1 << 7,
         Backpack = 1 << 8,
+        QuickSlot = 1 << 9,
     }
 }

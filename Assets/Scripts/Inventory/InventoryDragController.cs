@@ -6,31 +6,33 @@ using UnityEngine.UI;
 namespace SimpleSurvival.Items
 {
     /// <summary>
-    /// Manages the drag ghost and resolves drop targets. Each SlotUI fires its
-    /// own drag events; this controller listens to all of them and handles:
-    ///   - showing/moving the ghost image while dragging
-    ///   - finding the destination cell on drop
-    ///   - calling TransferOrSwap between inventories
+    /// Quản lý drag ghost và xử lý tất cả kịch bản drag-drop:
+    ///   - Inventory  → Inventory  : TransferOrSwap
+    ///   - Inventory  → EquipSlot  : Equip item
+    ///   - EquipSlot  → Inventory  : Unequip về đúng slot
+    ///   - EquipSlot  → EquipSlot  : Swap equipment
     /// </summary>
     public sealed class InventoryDragController : MonoBehaviour
     {
         [Header("Grids")]
-        [Tooltip("All grids whose cells can participate in drag-drop.")]
         [SerializeField] private List<InventoryGridUI> grids = new List<InventoryGridUI>();
+
+        [Header("Equipment")]
+        [SerializeField] private List<EquipSlotUI> equipCells = new List<EquipSlotUI>();
+        [SerializeField] private EquipmentPanel equipmentPanel;
 
         [Header("Drag Ghost")]
         [SerializeField] private Image dragGhost;
-
         [SerializeField] private RectTransform canvasRect;
-
-        [Tooltip("Camera rendering the Canvas. Required for Screen Space - Camera.")]
         [SerializeField] private Camera uiCamera;
 
-        private SlotUI sourceCell;
+        // Drag source — chỉ một trong hai có giá trị tại một thời điểm.
+        private SlotUI sourceInventoryCell;
         private InventoryGridUI sourceGrid;
         private int sourceIndex;
+        private EquipSlotUI sourceEquipCell;
 
-        public bool IsDragging => sourceCell != null;
+        public bool IsDragging => sourceInventoryCell != null || sourceEquipCell != null;
 
         // ── Unity lifecycle ──────────────────────────────────────────────────
 
@@ -46,61 +48,74 @@ namespace SimpleSurvival.Items
         private void OnEnable()
         {
             foreach (InventoryGridUI grid in grids)
-            {
                 foreach (SlotUI cell in grid.GetComponentsInChildren<SlotUI>(true))
-                    SubscribeCell(cell);
-            }
+                    SubscribeInventoryCell(cell);
+
+            foreach (EquipSlotUI cell in equipCells)
+                SubscribeEquipCell(cell);
         }
 
         private void OnDisable()
         {
             foreach (InventoryGridUI grid in grids)
-            {
                 foreach (SlotUI cell in grid.GetComponentsInChildren<SlotUI>(true))
-                    UnsubscribeCell(cell);
-            }
+                    UnsubscribeInventoryCell(cell);
+
+            foreach (EquipSlotUI cell in equipCells)
+                UnsubscribeEquipCell(cell);
         }
 
-        // ── Subscription helpers ─────────────────────────────────────────────
+        // ── Subscription ─────────────────────────────────────────────────────
 
-        private void SubscribeCell(SlotUI cell)
+        private void SubscribeInventoryCell(SlotUI cell)
         {
-            cell.OnBeginDragEvent += HandleBeginDrag;
+            cell.OnBeginDragEvent += HandleInventoryBeginDrag;
             cell.OnDragEvent += HandleDrag;
             cell.OnEndDragEvent += HandleEndDrag;
-            cell.OnDropEvent += HandleDrop;
+            cell.OnDropEvent += HandleDropOnInventory;
         }
 
-        private void UnsubscribeCell(SlotUI cell)
+        private void UnsubscribeInventoryCell(SlotUI cell)
         {
-            cell.OnBeginDragEvent -= HandleBeginDrag;
+            cell.OnBeginDragEvent -= HandleInventoryBeginDrag;
             cell.OnDragEvent -= HandleDrag;
             cell.OnEndDragEvent -= HandleEndDrag;
-            cell.OnDropEvent -= HandleDrop;
+            cell.OnDropEvent -= HandleDropOnInventory;
         }
 
-        // ── Drag handlers ────────────────────────────────────────────────────
+        private void SubscribeEquipCell(EquipSlotUI cell)
+        {
+            cell.OnBeginDragEvent += HandleEquipBeginDrag;
+            cell.OnDragEvent += HandleEquipDrag;
+            cell.OnEndDragEvent += HandleEquipEndDrag;
+            cell.OnDropEvent += HandleDropOnEquip;
+        }
 
-        private void HandleBeginDrag(SlotUI cell, PointerEventData eventData)
+        private void UnsubscribeEquipCell(EquipSlotUI cell)
+        {
+            cell.OnBeginDragEvent -= HandleEquipBeginDrag;
+            cell.OnDragEvent -= HandleEquipDrag;
+            cell.OnEndDragEvent -= HandleEquipEndDrag;
+            cell.OnDropEvent -= HandleDropOnEquip;
+        }
+
+        // ── Inventory drag handlers ──────────────────────────────────────────
+
+        private void HandleInventoryBeginDrag(SlotUI cell, PointerEventData eventData)
         {
             if (!TryFindCellLocation(cell, out InventoryGridUI grid, out int index))
                 return;
 
-            sourceCell = cell;
+            sourceInventoryCell = cell;
             sourceGrid = grid;
             sourceIndex = index;
 
-            dragGhost.sprite = cell.CurrentStack.ItemData.Icon;
-            dragGhost.gameObject.SetActive(true);
-            MoveGhost(eventData.position);
+            ShowGhost(cell.CurrentStack.ItemData.Icon, eventData.position);
         }
 
         private void HandleDrag(SlotUI cell, PointerEventData eventData)
         {
-            if (!IsDragging)
-                return;
-
-            MoveGhost(eventData.position);
+            if (IsDragging) MoveGhost(eventData.position);
         }
 
         private void HandleEndDrag(SlotUI cell, PointerEventData eventData)
@@ -108,39 +123,96 @@ namespace SimpleSurvival.Items
             EndDrag();
         }
 
-        /// <summary>
-        /// Called on the DESTINATION cell when a drag is dropped onto it.
-        /// </summary>
-        private void HandleDrop(SlotUI targetCell)
+        /// <summary>Inventory → Inventory drop.</summary>
+        private void HandleDropOnInventory(SlotUI targetCell)
         {
-            if (!IsDragging)
-                return;
+            if (!IsDragging) return;
 
-            if (TryFindCellLocation(targetCell, out InventoryGridUI targetGrid, out int targetIndex))
+            if (sourceInventoryCell != null)
             {
-                InventorySystem.TransferOrSwap(
-                    sourceGrid.BoundInventory, sourceIndex,
-                    targetGrid.BoundInventory, targetIndex);
+                // Inventory → Inventory
+                if (TryFindCellLocation(targetCell, out InventoryGridUI targetGrid, out int targetIndex))
+                {
+                    InventorySystem.TransferOrSwap(
+                        sourceGrid.BoundInventory, sourceIndex,
+                        targetGrid.BoundInventory, targetIndex);
+                }
+            }
+            else if (sourceEquipCell != null)
+            {
+                // EquipSlot → Inventory: unequip vào đúng slot này
+                if (TryFindCellLocation(targetCell, out InventoryGridUI targetGrid, out int targetIndex))
+                {
+                    equipmentPanel.HandleEquipDropToInventory(
+                        sourceEquipCell, targetGrid.BoundInventory, targetIndex);
+                }
             }
 
             EndDrag();
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── Equipment drag handlers ──────────────────────────────────────────
+
+        private void HandleEquipBeginDrag(EquipSlotUI cell, PointerEventData eventData)
+        {
+            if (!cell.HasItem) return;
+
+            sourceEquipCell = cell;
+            ShowGhost(cell.EquippedStack.ItemData.Icon, eventData.position);
+        }
+
+        private void HandleEquipDrag(EquipSlotUI cell, PointerEventData eventData)
+        {
+            if (IsDragging) MoveGhost(eventData.position);
+        }
+
+        private void HandleEquipEndDrag(EquipSlotUI cell, PointerEventData eventData)
+        {
+            EndDrag();
+        }
+
+        /// <summary>Inventory hoặc EquipSlot → EquipSlot drop.</summary>
+        private void HandleDropOnEquip(EquipSlotUI targetCell)
+        {
+            if (!IsDragging) return;
+
+            if (sourceInventoryCell != null)
+            {
+                // Inventory → EquipSlot: equip item
+                equipmentPanel.HandleInventoryDropToEquip(
+                    sourceInventoryCell, sourceGrid, sourceIndex, targetCell);
+            }
+            else if (sourceEquipCell != null && sourceEquipCell != targetCell)
+            {
+                // EquipSlot → EquipSlot: swap
+                equipmentPanel.HandleEquipSwap(sourceEquipCell, targetCell);
+            }
+
+            EndDrag();
+        }
+
+        // ── Ghost helpers ────────────────────────────────────────────────────
+
+        private void ShowGhost(Sprite sprite, Vector2 screenPos)
+        {
+            dragGhost.sprite = sprite;
+            dragGhost.gameObject.SetActive(true);
+            MoveGhost(screenPos);
+        }
 
         private void MoveGhost(Vector2 screenPoint)
         {
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvasRect, screenPoint, uiCamera, out Vector2 localPoint);
-
             ((RectTransform)dragGhost.transform).anchoredPosition = localPoint;
         }
 
         private void EndDrag()
         {
-            sourceCell = null;
+            sourceInventoryCell = null;
             sourceGrid = null;
             sourceIndex = -1;
+            sourceEquipCell = null;
             dragGhost.gameObject.SetActive(false);
         }
 

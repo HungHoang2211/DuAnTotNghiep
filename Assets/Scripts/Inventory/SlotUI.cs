@@ -55,9 +55,12 @@ namespace SimpleSurvival.Items
         private float pressTime;
         private bool holdFired;
         private bool isDragging;
+        private float _lastClickTime;
+        private const float DoubleClickThreshold = 0.25f;
 
         // ── Events ───────────────────────────────────────────────────────────
 
+        public event Action<SlotUI> OnDoubleClicked;
         public event Action<SlotUI> OnClicked;
         public event Action<SlotUI> OnHeld;
         public event Action<SlotUI> OnReleased;
@@ -110,7 +113,14 @@ namespace SimpleSurvival.Items
             if (isLocked || holdFired || isDragging)
                 return;
 
-            OnClicked?.Invoke(this);
+            float now = Time.unscaledTime;
+            bool isDouble = now - _lastClickTime < DoubleClickThreshold;
+            _lastClickTime = now;
+
+            if (isDouble)
+                OnDoubleClicked?.Invoke(this);
+            else
+                OnClicked?.Invoke(this);
         }
 
         // ── Drag events (Unity built-in) ─────────────────────────────────────
@@ -235,4 +245,4 @@ namespace SimpleSurvival.Items
                 : durabilityNormalColor;
         }
     }
-}
+} 
