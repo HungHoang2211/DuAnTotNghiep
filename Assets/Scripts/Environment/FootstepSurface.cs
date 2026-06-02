@@ -17,6 +17,16 @@ namespace Xyla.Audio
         [Tooltip("Âm lượng riêng của mặt đất này (cỏ nhẹ hơn gỗ).")]
         [SerializeField][Range(0f, 1f)] private float _volumeScale = 1f;
 
+        [Header("Sneak Footstep (optional)")]
+        [Tooltip("Clip tiếng bước chân khi sneak trên mặt này. Để trống → dùng clip thường.")]
+        [SerializeField] private AudioClip[] _sneakClips;
+
+        /// <summary>Trả về clip ngẫu nhiên cho bước sneak. Null nếu chưa setup.</summary>
+        public AudioClip GetRandomSneakClip()
+        {
+            if (_sneakClips == null || _sneakClips.Length == 0) return null;
+            return _sneakClips[Random.Range(0, _sneakClips.Length)];
+        }
         public string SurfaceName => _surfaceName;
         public float VolumeScale => _volumeScale;
 
