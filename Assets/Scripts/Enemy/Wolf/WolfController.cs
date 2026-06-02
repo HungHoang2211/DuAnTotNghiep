@@ -80,8 +80,8 @@ public class WolfController : MonoBehaviour
         _agent.speed = _walkSpeed;
         _agent.acceleration = _acceleration;
         _agent.angularSpeed = _angularSpeed;
-        _agent.autoBraking = true;
-        _agent.stoppingDistance = 0.3f;
+        _agent.autoBraking = false;   // tắt — tránh khựng giữa đường
+        _agent.stoppingDistance = 0f; // code tự kiểm tra khoảng cách
         _agent.updateRotation = false;
 
         if (_anim != null) { _anim.SetDead(false); _anim.SetSpeed(0f); _anim.SetHowling(false); }
@@ -154,7 +154,20 @@ public class WolfController : MonoBehaviour
                 _homePosition = transform.position;
                 Vector3 target = GetRandomNavMeshPoint(transform.position, _wanderRadius);
                 _agent.SetDestination(target);
+
+                // Chờ Wolf đến đích thật sự (hoặc timeout 10s) rồi mới tiếp tục
+                float timeout = 10f;
+                float elapsed = 0f;
+                while (_state == State.Wandering && elapsed < timeout)
+                {
+                    elapsed += Time.deltaTime;
+                    if (!_agent.pathPending && _agent.remainingDistance < 0.3f)
+                        break;
+                    yield return null;
+                }
             }
+
+            // Dừng nghỉ tự nhiên giữa các bước wander
             yield return new WaitForSeconds(Random.Range(_wanderIntervalMin, _wanderIntervalMax));
         }
     }
