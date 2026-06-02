@@ -42,7 +42,6 @@ public class DeerController : MonoBehaviour
     private Coroutine _behaviorCoroutine;
     private bool _isDead = false;
     private float _grazeBlockedUntil = 0f; // thời điểm được phép ăn cỏ trở lại
-    private float _deadPositionY;
 
     private void Awake()
     {
@@ -52,7 +51,6 @@ public class DeerController : MonoBehaviour
 
     public void Initialize(DeerSpawnPoint spawnPoint)
     {
-        _agent.enabled = true;
         _spawnPoint = spawnPoint;
         _isDead = false;
         _state = State.Wandering;
@@ -95,16 +93,6 @@ public class DeerController : MonoBehaviour
 
         if (_state == State.Wandering || _state == State.Grazing)
             CheckForPlayer();
-    }
-
-    private void LateUpdate()
-    {
-        if (!_isDead) return;
-
-        // Ghim Y sau khi Animator chạy xong — ngăn animation kéo model xuống sàn
-        Vector3 pos = transform.position;
-        pos.y = _deadPositionY;
-        transform.position = pos;
     }
 
     private void SmoothRotation()
@@ -246,12 +234,9 @@ public class DeerController : MonoBehaviour
         _isDead = true;
         _state = State.Dead;
 
-        _deadPositionY = transform.position.y; // ← lưu Y khi đứng trên sàn
-
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
-        _agent.enabled = false; // ← tắt agent
 
         if (_anim != null) { _anim.SetGrazing(false); _anim.SetSpeed(0f); _anim.SetDead(true); }
 

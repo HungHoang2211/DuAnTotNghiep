@@ -1194,7 +1194,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 38999f2b236c92b4796ee115992802dc, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -1219,7 +1219,7 @@ NavMeshAgent:
   m_AngularSpeed: 120
   m_StoppingDistance: 0.2
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
@@ -1237,7 +1237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 356de88bfb8a29c408b4b1497beab0f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wanderRadius: 5
+  _wanderRadius: 3
   _wanderIntervalMin: 2
   _wanderIntervalMax: 5
   _grazeChance: 0.4
@@ -1252,7 +1252,7 @@ MonoBehaviour:
   _acceleration: 10
   _deceleration: 10
   _angularSpeed: 0
-  _despawnDelay: 120
+  _despawnDelay: 10
 --- !u!114 &8515481889967424379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1265,6 +1265,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9223f349a35a3f45a5ad2ff62e96ac6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _walkAnimSpeed: 1
+  _runAnimSpeed: 1
+  _runThreshold: 3.5
 --- !u!114 &6942175452303524175
 MonoBehaviour:
   m_ObjectHideFlags: 0

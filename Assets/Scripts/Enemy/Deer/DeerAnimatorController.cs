@@ -8,6 +8,9 @@ public class DeerAnimatorController : MonoBehaviour
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
     private static readonly int IsGrazingHash = Animator.StringToHash("IsGrazing");
+    // Float 0..1 — Blend Tree Death sẽ dùng giá trị này để chọn animation
+    // 0 → DeerDie_1 | 1 → DeerDie_2
+    private static readonly int DeathIndexHash = Animator.StringToHash("DeathIndex");
 
     [Header("Animation Speed Matching")]
     [Tooltip("Chỉnh đến khi bước chân khớp với tốc độ đi bộ")]
@@ -30,18 +33,30 @@ public class DeerAnimatorController : MonoBehaviour
         else if (speed > 0.1f)
             _animator.speed = _walkAnimSpeed;
         else
-            _animator.speed = 1f; // đứng yên → tốc độ mặc định
+            _animator.speed = 1f;
     }
 
+    /// <summary>
+    /// Kích hoạt death với animation ngẫu nhiên qua Blend Tree.
+    /// Trước khi set IsDead, chọn ngẫu nhiên DeathIndex để Blend Tree
+    /// biết phát DeerDie_1 (0) hay DeerDie_2 (1).
+    /// </summary>
     public void SetDead(bool isDead)
     {
+        if (isDead)
+        {
+            // Random 0 hoặc 1 — đặt TRƯỚC khi trigger transition
+            float randomIndex = Random.value < 0.5f ? 0f : 1f;
+            _animator.SetFloat(DeathIndexHash, randomIndex);
+            _animator.speed = 1f; // reset speed về bình thường
+        }
+
         _animator.SetBool(IsDeadHash, isDead);
-        if (isDead) _animator.speed = 1f; // reset về bình thường khi chết
     }
 
     public void SetGrazing(bool grazing)
     {
         _animator.SetBool(IsGrazingHash, grazing);
-        if (grazing) _animator.speed = 1f; // animation ăn cỏ không cần scale
+        if (grazing) _animator.speed = 1f;
     }
 }

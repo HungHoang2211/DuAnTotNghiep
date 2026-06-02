@@ -71,19 +71,19 @@ NavMeshAgent:
   m_GameObject: {fileID: 26420039585923096}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.3
   m_Speed: 2
-  m_Acceleration: 10
+  m_Acceleration: 15
   avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 0.3
+  m_AngularSpeed: 0
+  m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 1
 --- !u!114 &4710821042027462422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
   _wanderIntervalMin: 2
   _wanderIntervalMax: 5
   _visionRange: 10
-  _visionAngle: 60
+  _visionAngle: 90
   _playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -109,11 +109,11 @@ MonoBehaviour:
     m_Bits: 64
   _hearingRadius: 10
   _footstepMinSpeed: 2
-  _chaseRadius: 5
+  _chaseRadius: 10
   _chaseSpeed: 4
   _walkSpeed: 2
   _loseTargetTime: 3
-  _attackRange: 1.8
+  _attackRange: 2
   _attackDamage: 20
   _attackCooldown: 1.5
   _howlChance: 0.4
@@ -150,6 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aac5523e17061d44abcb1d9e4114edd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _deathClipCount: 2
 --- !u!65 &-4497339292798242100
 BoxCollider:
   m_ObjectHideFlags: 0
