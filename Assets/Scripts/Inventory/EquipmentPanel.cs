@@ -114,6 +114,7 @@ namespace SimpleSurvival.Items
         private void HandleCellDoubleClicked(CellUI cell)
         {
             if (!cell.HasItem) return;
+            if (IsBackpackOccupied(cell)) return;
 
             int slotIndex = GetSlotIndex(cell);
             bool unequipped = _equipmentSystem.TryUnequip(
@@ -169,6 +170,7 @@ namespace SimpleSurvival.Items
         private void HandleInventoryDoubleClicked(CellUI cell)
         {
             if (!cell.HasItem) return;
+            if (WouldReplaceOccupiedBackpack(cell.CurrentStack)) return;
 
             InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
             if (grid == null) return;
@@ -187,6 +189,8 @@ namespace SimpleSurvival.Items
 
         private void HandleEquipRequested(ItemStack stack)
         {
+            if (WouldReplaceOccupiedBackpack(stack)) return;
+
             CellUI selectedCell = selection.SelectedCell;
             if (selectedCell == null) return;
 
@@ -203,6 +207,7 @@ namespace SimpleSurvival.Items
         public void UnequipSelected()
         {
             if (_selectedEquipCell == null || !_selectedEquipCell.HasItem) return;
+            if (IsBackpackOccupied(_selectedEquipCell)) return;
 
             int slotIndex = GetSlotIndex(_selectedEquipCell);
             bool unequipped = _equipmentSystem.TryUnequip(
@@ -220,6 +225,8 @@ namespace SimpleSurvival.Items
         public void HandleEquipDropToInventory(CellUI sourceCell,
             InventorySystem targetInventory, int targetIndex)
         {
+            if (IsBackpackOccupied(sourceCell)) return;
+
             int slotIndex = GetSlotIndex(sourceCell);
             ItemStack equipped = _equipmentSystem.GetSlot(sourceCell.EquipSlot, slotIndex);
             if (equipped == null) return;
@@ -241,6 +248,7 @@ namespace SimpleSurvival.Items
             InventoryGridUI sourceGrid, int sourceIndex, CellUI targetCell)
         {
             if (!sourceCell.HasItem) return;
+            if (IsBackpackOccupied(targetCell)) return;
 
             int slotIndex = GetSlotIndex(targetCell);
             _equipmentSystem.TryEquip(
@@ -275,6 +283,48 @@ namespace SimpleSurvival.Items
             CellUI cell = GetCell(slot, slotIndex);
             if (cell != null)
                 cell.SetStack(stack);
+
+            if (slot == EquipSlot.Backpack)
+                ApplyBackpackResize(stack);
+        }
+
+        // ── Backpack helpers ─────────────────────────────────────────────────
+
+        private void ApplyBackpackResize(ItemStack backpackStack)
+        {
+            if (backpackStack == null)
+            {
+                playerInventory.ResizeBackpack(0);
+                return;
+            }
+
+            ContainerAbility container = backpackStack.ItemData.GetAbility<ContainerAbility>();
+            if (container != null)
+                playerInventory.ResizeBackpack(container.ExtraSlots);
+        }
+
+        private bool IsBackpackOccupied(CellUI cell)
+        {
+            return cell.EquipSlot == EquipSlot.Backpack && HasItemsInBackpack();
+        }
+
+        private bool WouldReplaceOccupiedBackpack(ItemStack stack)
+        {
+            return _equipmentSystem.GetAutoEquipSlot(stack) == EquipSlot.Backpack
+                && HasItemsInBackpack();
+        }
+
+        private bool HasItemsInBackpack()
+        {
+            if (playerInventory.Backpack == null) return false;
+
+            for (int i = 0; i < playerInventory.Backpack.SlotCount; i++)
+            {
+                if (playerInventory.Backpack.GetSlot(i) != null)
+                    return true;
+            }
+
+            return false;
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────

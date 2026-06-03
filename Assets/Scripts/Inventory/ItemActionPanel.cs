@@ -31,21 +31,24 @@ namespace SimpleSurvival.Items
 
         // ── Unity lifecycle ──────────────────────────────────────────────────
 
+        private void Start()
+        {
+            playerInventory.Pockets.OnInventoryChanged += RefreshAllButtons;
+            playerInventory.Pockets.OnInventoryChanged += RefreshSortButton;
+
+            RefreshAllButtons();
+            RefreshSortButton();
+        }
+
         private void OnEnable()
         {
             selection.OnSelectionChanged += HandleInventorySelectionChanged;
             equipmentPanel.OnEquipSelectionChanged += HandleEquipSelectionChanged;
 
-            playerInventory.Pockets.OnInventoryChanged += RefreshAllButtons;
-            playerInventory.Pockets.OnInventoryChanged += RefreshSortButton;
-
             buttonUse.onClick.AddListener(HandleUse);
             buttonSplit.onClick.AddListener(HandleSplit);
             buttonSort.onClick.AddListener(HandleSort);
             buttonDelete.onClick.AddListener(HandleDelete);
-
-            RefreshAllButtons();
-            RefreshSortButton();
         }
 
         private void OnDisable()
