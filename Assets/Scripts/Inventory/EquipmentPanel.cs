@@ -5,8 +5,8 @@ using UnityEngine;
 namespace SimpleSurvival.Items
 {
     /// <summary>
-    /// Connects EquipSlotUI cells with EquipmentSystem. Handles:
-    ///   - Displaying equipped items in each cell
+    /// Connects equipment CellUI cells with EquipmentSystem. Handles:
+    ///   - Displaying equipped items
     ///   - Selection of equipment slots
     ///   - Drag highlight for compatible slots
     ///   - Equip via button or double-click from inventory
@@ -21,27 +21,22 @@ namespace SimpleSurvival.Items
         [SerializeField] private InventoryDragController dragController;
 
         [Header("Equipment Cells")]
-        [SerializeField] private EquipSlotUI weaponCell;
-        [SerializeField] private EquipSlotUI backpackCell;
-        [SerializeField] private EquipSlotUI headCell;
-        [SerializeField] private EquipSlotUI bodyCell;
-        [SerializeField] private EquipSlotUI legCell;
-        [SerializeField] private EquipSlotUI bootsCell;
-        [SerializeField] private EquipSlotUI quickSlotCell1;
-        [SerializeField] private EquipSlotUI quickSlotCell2;
+        [SerializeField] private CellUI weaponCell;
+        [SerializeField] private CellUI backpackCell;
+        [SerializeField] private CellUI headCell;
+        [SerializeField] private CellUI bodyCell;
+        [SerializeField] private CellUI legCell;
+        [SerializeField] private CellUI bootsCell;
+        [SerializeField] private CellUI quickSlotCell1;
+        [SerializeField] private CellUI quickSlotCell2;
 
         private EquipmentSystem _equipmentSystem;
-        private List<EquipSlotUI> _allCells;
-        private EquipSlotUI _selectedEquipCell;
+        private List<CellUI> _allCells;
+        private CellUI _selectedEquipCell;
 
-        // ── Events ───────────────────────────────────────────────────────────
+        public event Action<CellUI> OnEquipSelectionChanged;
 
-        /// <summary>Raised when equipment slot selection changes. Null = deselected.</summary>
-        public event Action<EquipSlotUI> OnEquipSelectionChanged;
-
-        // ── Properties ───────────────────────────────────────────────────────
-
-        public EquipSlotUI SelectedEquipCell => _selectedEquipCell;
+        public CellUI SelectedEquipCell => _selectedEquipCell;
 
         // ── Unity lifecycle ──────────────────────────────────────────────────
 
@@ -49,7 +44,7 @@ namespace SimpleSurvival.Items
         {
             _equipmentSystem = new EquipmentSystem();
 
-            _allCells = new List<EquipSlotUI>
+            _allCells = new List<CellUI>
             {
                 weaponCell, backpackCell, headCell, bodyCell,
                 legCell, bootsCell, quickSlotCell1, quickSlotCell2
@@ -58,7 +53,7 @@ namespace SimpleSurvival.Items
 
         private void OnEnable()
         {
-            foreach (EquipSlotUI cell in _allCells)
+            foreach (CellUI cell in _allCells)
             {
                 if (cell == null) continue;
                 cell.OnClicked += HandleCellClicked;
@@ -79,7 +74,7 @@ namespace SimpleSurvival.Items
 
         private void OnDisable()
         {
-            foreach (EquipSlotUI cell in _allCells)
+            foreach (CellUI cell in _allCells)
             {
                 if (cell == null) continue;
                 cell.OnClicked -= HandleCellClicked;
@@ -100,7 +95,7 @@ namespace SimpleSurvival.Items
 
         // ── Equipment slot selection ─────────────────────────────────────────
 
-        private void HandleCellClicked(EquipSlotUI cell)
+        private void HandleCellClicked(CellUI cell)
         {
             if (_selectedEquipCell == cell)
             {
@@ -108,7 +103,6 @@ namespace SimpleSurvival.Items
                 return;
             }
 
-            // Clear inventory selection when selecting equipment slot.
             selection.Deselect();
 
             _selectedEquipCell?.SetSelected(false);
@@ -117,7 +111,7 @@ namespace SimpleSurvival.Items
             OnEquipSelectionChanged?.Invoke(_selectedEquipCell);
         }
 
-        private void HandleCellDoubleClicked(EquipSlotUI cell)
+        private void HandleCellDoubleClicked(CellUI cell)
         {
             if (!cell.HasItem) return;
 
@@ -126,8 +120,8 @@ namespace SimpleSurvival.Items
                 cell.EquipSlot, slotIndex, playerInventory.Pockets);
 
             if (!unequipped && playerInventory.Backpack != null)
-                _equipmentSystem.TryUnequip(cell.EquipSlot, slotIndex,
-                    playerInventory.Backpack);
+                _equipmentSystem.TryUnequip(
+                    cell.EquipSlot, slotIndex, playerInventory.Backpack);
 
             ClearEquipSelection();
         }
@@ -141,10 +135,9 @@ namespace SimpleSurvival.Items
 
         // ── Inventory selection changes ──────────────────────────────────────
 
-        private void HandleInventorySelectionChanged(SlotUI slot)
+        private void HandleInventorySelectionChanged(CellUI cell)
         {
-            // Clear equipment selection when inventory slot is selected.
-            if (slot != null && _selectedEquipCell != null)
+            if (cell != null && _selectedEquipCell != null)
                 ClearEquipSelection();
         }
 
@@ -152,45 +145,39 @@ namespace SimpleSurvival.Items
 
         private void HandleDragBegan(ItemStack stack)
         {
-            Debug.Log($"HandleDragBegan: {stack.ItemData.ItemName}");
-            foreach (EquipSlotUI cell in _allCells)
+            foreach (CellUI cell in _allCells)
             {
                 if (cell == null) continue;
                 cell.SetSelected(false);
-                bool compatible = _equipmentSystem.CanEquipInSlot(stack, cell.EquipSlot);
-                Debug.Log($"  {cell.name} ({cell.EquipSlot}): compatible={compatible}");
-                cell.SetDragTarget(compatible);
+                cell.SetDragTarget(_equipmentSystem.CanEquipInSlot(stack, cell.EquipSlot));
             }
         }
 
         private void HandleDragEnded()
         {
-            Debug.Log("HandleDragEnded");
-            foreach (EquipSlotUI cell in _allCells)
+            foreach (CellUI cell in _allCells)
             {
                 if (cell == null) continue;
                 cell.SetDragTarget(false);
             }
 
-            // Restore selection highlight if a cell is still selected.
-            if (_selectedEquipCell != null)
-                _selectedEquipCell.SetSelected(true);
+            _selectedEquipCell?.SetSelected(true);
         }
 
         // ── Double-click inventory slot → auto equip ─────────────────────────
 
-        private void HandleInventoryDoubleClicked(SlotUI slot)
+        private void HandleInventoryDoubleClicked(CellUI cell)
         {
-            if (!slot.HasItem) return;
+            if (!cell.HasItem) return;
 
-            InventoryGridUI grid = slot.GetComponentInParent<InventoryGridUI>();
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
             if (grid == null) return;
 
-            int inventoryIndex = grid.IndexOf(slot);
+            int inventoryIndex = grid.IndexOf(cell);
             if (inventoryIndex < 0) return;
 
             bool equipped = _equipmentSystem.TryAutoEquip(
-                slot.CurrentStack, grid.BoundInventory, inventoryIndex);
+                cell.CurrentStack, grid.BoundInventory, inventoryIndex);
 
             if (equipped)
                 selection.Deselect();
@@ -200,20 +187,19 @@ namespace SimpleSurvival.Items
 
         private void HandleEquipRequested(ItemStack stack)
         {
-            SlotUI selectedSlot = selection.SelectedSlot;
-            if (selectedSlot == null) return;
+            CellUI selectedCell = selection.SelectedCell;
+            if (selectedCell == null) return;
 
-            InventoryGridUI grid = selectedSlot.GetComponentInParent<InventoryGridUI>();
+            InventoryGridUI grid = selectedCell.GetComponentInParent<InventoryGridUI>();
             if (grid == null) return;
 
-            int inventoryIndex = grid.IndexOf(selectedSlot);
+            int inventoryIndex = grid.IndexOf(selectedCell);
             if (inventoryIndex < 0) return;
 
             _equipmentSystem.TryAutoEquip(stack, grid.BoundInventory, inventoryIndex);
             selection.Deselect();
         }
 
-        /// <summary>Called by ItemActionPanel when Unequip button is pressed.</summary>
         public void UnequipSelected()
         {
             if (_selectedEquipCell == null || !_selectedEquipCell.HasItem) return;
@@ -223,15 +209,15 @@ namespace SimpleSurvival.Items
                 _selectedEquipCell.EquipSlot, slotIndex, playerInventory.Pockets);
 
             if (!unequipped && playerInventory.Backpack != null)
-                _equipmentSystem.TryUnequip(_selectedEquipCell.EquipSlot, slotIndex,
-                    playerInventory.Backpack);
+                _equipmentSystem.TryUnequip(
+                    _selectedEquipCell.EquipSlot, slotIndex, playerInventory.Backpack);
 
             ClearEquipSelection();
         }
 
         // ── Called by InventoryDragController ────────────────────────────────
 
-        public void HandleEquipDropToInventory(EquipSlotUI sourceCell,
+        public void HandleEquipDropToInventory(CellUI sourceCell,
             InventorySystem targetInventory, int targetIndex)
         {
             int slotIndex = GetSlotIndex(sourceCell);
@@ -239,25 +225,33 @@ namespace SimpleSurvival.Items
             if (equipped == null) return;
 
             ItemStack existing = targetInventory.GetSlot(targetIndex);
+
+            if (existing != null && !_equipmentSystem.CanEquipInSlot(existing, sourceCell.EquipSlot))
+            {
+                targetInventory.SetSlot(targetIndex, equipped);
+                _equipmentSystem.SetSlotDirect(sourceCell.EquipSlot, slotIndex, null);
+                return;
+            }
+
             _equipmentSystem.SetSlotDirect(sourceCell.EquipSlot, slotIndex, existing);
             targetInventory.SetSlot(targetIndex, equipped);
         }
 
-        public void HandleInventoryDropToEquip(SlotUI sourceSlot,
-            InventoryGridUI sourceGrid, int sourceIndex, EquipSlotUI targetCell)
+        public void HandleInventoryDropToEquip(CellUI sourceCell,
+            InventoryGridUI sourceGrid, int sourceIndex, CellUI targetCell)
         {
-            if (!sourceSlot.HasItem) return;
+            if (!sourceCell.HasItem) return;
 
             int slotIndex = GetSlotIndex(targetCell);
             _equipmentSystem.TryEquip(
-                sourceSlot.CurrentStack,
+                sourceCell.CurrentStack,
                 sourceGrid.BoundInventory,
                 sourceIndex,
                 targetCell.EquipSlot,
                 slotIndex);
         }
 
-        public void HandleEquipSwap(EquipSlotUI fromCell, EquipSlotUI toCell)
+        public void HandleEquipSwap(CellUI fromCell, CellUI toCell)
         {
             int fromIndex = GetSlotIndex(fromCell);
             int toIndex = GetSlotIndex(toCell);
@@ -278,14 +272,14 @@ namespace SimpleSurvival.Items
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
         {
-            EquipSlotUI cell = GetCell(slot, slotIndex);
+            CellUI cell = GetCell(slot, slotIndex);
             if (cell != null)
                 cell.SetStack(stack);
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
 
-        private EquipSlotUI GetCell(EquipSlot slot, int slotIndex)
+        private CellUI GetCell(EquipSlot slot, int slotIndex)
         {
             return slot switch
             {
@@ -300,7 +294,7 @@ namespace SimpleSurvival.Items
             };
         }
 
-        private int GetSlotIndex(EquipSlotUI cell)
+        private int GetSlotIndex(CellUI cell)
         {
             return cell == quickSlotCell2 ? 1 : 0;
         }

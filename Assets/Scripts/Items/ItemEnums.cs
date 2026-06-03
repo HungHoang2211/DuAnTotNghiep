@@ -30,6 +30,7 @@
     /// <summary>Equipment slots a piece of gear can occupy.</summary>
     public enum EquipSlot
     {
+        None = -1,
         Weapon,
         Backpack,
         Helmet,
