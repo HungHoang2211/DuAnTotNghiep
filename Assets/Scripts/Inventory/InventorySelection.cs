@@ -6,31 +6,27 @@ namespace SimpleSurvival.Items
 {
     /// <summary>
     /// Coordinates cell selection across the whole inventory. Only one cell may
-    /// be selected at a time — even though pockets and backpack are separate
-    /// grids — so this single object listens to every cell and keeps exactly
-    /// one highlighted.
-    ///
-    /// Also bridges SlotUI hold events to the ItemInfoPanel tooltip.
+    /// be selected at a time — even across pockets and backpack grids.
+    /// Also bridges hold events to the ItemInfoPanel tooltip.
     /// </summary>
     public sealed class InventorySelection : MonoBehaviour
     {
         [Header("Cells")]
-        [Tooltip("Every SlotUI the player can select — pockets and backpack cells.")]
-        [SerializeField] private List<SlotUI> allCells = new List<SlotUI>();
+        [Tooltip("Every CellUI the player can select — pockets and backpack cells.")]
+        [SerializeField] private List<CellUI> allCells = new List<CellUI>();
 
-        [Tooltip("When the list above is empty, collect SlotUI from children.")]
+        [Tooltip("When the list above is empty, collect CellUI from children.")]
         [SerializeField] private bool autoCollectFromChildren = true;
 
         [Header("Tooltip")]
         [SerializeField] private ItemInfoPanel itemInfoPanel;
 
-        private SlotUI selectedSlot;
+        private CellUI _selectedCell;
 
-        /// <summary>The currently selected cell, or null if nothing is selected.</summary>
-        public SlotUI SelectedSlot => selectedSlot;
+        public CellUI SelectedCell => _selectedCell;
 
-        /// <summary>Raised whenever the selection changes. Argument may be null.</summary>
-        public event Action<SlotUI> OnSelectionChanged;
+        public event Action<CellUI> OnSelectionChanged;
+        public event Action<CellUI> OnCellDoubleClicked;
 
         // ── Unity lifecycle ──────────────────────────────────────────────────
 
@@ -39,13 +35,13 @@ namespace SimpleSurvival.Items
             if (allCells.Count == 0 && autoCollectFromChildren)
             {
                 allCells.Clear();
-                allCells.AddRange(GetComponentsInChildren<SlotUI>(includeInactive: true));
+                allCells.AddRange(GetComponentsInChildren<CellUI>(includeInactive: true));
             }
         }
 
         private void OnEnable()
         {
-            foreach (SlotUI cell in allCells)
+            foreach (CellUI cell in allCells)
             {
                 cell.OnClicked += HandleCellClicked;
                 cell.OnDoubleClicked += HandleCellDoubleClicked;
@@ -56,7 +52,7 @@ namespace SimpleSurvival.Items
 
         private void OnDisable()
         {
-            foreach (SlotUI cell in allCells)
+            foreach (CellUI cell in allCells)
             {
                 cell.OnClicked -= HandleCellClicked;
                 cell.OnDoubleClicked -= HandleCellDoubleClicked;
@@ -67,9 +63,9 @@ namespace SimpleSurvival.Items
 
         // ── Selection ────────────────────────────────────────────────────────
 
-        private void HandleCellClicked(SlotUI cell)
+        private void HandleCellClicked(CellUI cell)
         {
-            if (selectedSlot == cell)
+            if (_selectedCell == cell)
             {
                 Deselect();
                 return;
@@ -78,39 +74,35 @@ namespace SimpleSurvival.Items
             Select(cell);
         }
 
-        public void Select(SlotUI cell)
+        public void Select(CellUI cell)
         {
-            if (selectedSlot != null)
-                selectedSlot.SetSelected(false);
+            if (_selectedCell != null)
+                _selectedCell.SetSelected(false);
 
-            selectedSlot = cell;
-            selectedSlot.SetSelected(true);
-            OnSelectionChanged?.Invoke(selectedSlot);
+            _selectedCell = cell;
+            _selectedCell.SetSelected(true);
+            OnSelectionChanged?.Invoke(_selectedCell);
         }
 
-        /// <summary>Clears the selection — nothing is highlighted afterwards.</summary>
         public void Deselect()
         {
-            if (selectedSlot != null)
+            if (_selectedCell != null)
             {
-                selectedSlot.SetSelected(false);
-                selectedSlot = null;
+                _selectedCell.SetSelected(false);
+                _selectedCell = null;
             }
 
             OnSelectionChanged?.Invoke(null);
         }
 
-        /// <summary>Raised when a cell is double-clicked — for auto-equip.</summary>
-        public event System.Action<SlotUI> OnCellDoubleClicked;
-
-        private void HandleCellDoubleClicked(SlotUI cell)
+        private void HandleCellDoubleClicked(CellUI cell)
         {
             OnCellDoubleClicked?.Invoke(cell);
         }
 
         // ── Tooltip ──────────────────────────────────────────────────────────
 
-        private void HandleCellHeld(SlotUI cell)
+        private void HandleCellHeld(CellUI cell)
         {
             if (itemInfoPanel == null || !cell.HasItem)
                 return;
@@ -118,12 +110,10 @@ namespace SimpleSurvival.Items
             itemInfoPanel.Show(cell.CurrentStack, (RectTransform)cell.transform);
         }
 
-        private void HandleCellReleased(SlotUI cell)
+        private void HandleCellReleased(CellUI cell)
         {
-            if (itemInfoPanel == null)
-                return;
-
-            itemInfoPanel.Hide();
+            if (itemInfoPanel != null)
+                itemInfoPanel.Hide();
         }
     }
 }

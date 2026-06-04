@@ -23,6 +23,9 @@ namespace SimpleSurvival.Items
         [Tooltip("Durable items to test with, e.g. axe, helmet.")]
         [SerializeField] private List<ItemData> durableItems = new List<ItemData>();
 
+        [Tooltip("Single-slot items without stacking or durability, e.g. backpack, key.")]
+        [SerializeField] private List<ItemData> miscItems = new List<ItemData>();
+
         [Header("Settings")]
         [SerializeField] private int addAmount = 5;
         [SerializeField] private int backpackStep = 5;
@@ -37,6 +40,7 @@ namespace SimpleSurvival.Items
         private int currentBackpackSlots;
         private int selectedStackableIndex;
         private int selectedDurableIndex;
+        private int selectedMiscIndex;
 
         private void Awake()
         {
@@ -45,12 +49,14 @@ namespace SimpleSurvival.Items
 
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(10, 10, 280, 500), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(10, 10, 280, 600), GUI.skin.box);
             GUILayout.Label("INVENTORY TESTER");
 
             DrawStackableItemButtons();
             GUILayout.Space(8);
             DrawDurableItemButtons();
+            GUILayout.Space(8);
+            DrawMiscItemButtons();
             GUILayout.Space(8);
             DrawBackpackButtons();
             GUILayout.Space(8);
@@ -103,6 +109,26 @@ namespace SimpleSurvival.Items
 
             if (GUILayout.Button($"Add 1 '{selected.ItemName}' (random dur.) → Pockets"))
                 AddToPocketsWithRandomDurability(selected);
+        }
+
+        // ── Misc ─────────────────────────────────────────────────────────────
+
+        private void DrawMiscItemButtons()
+        {
+            GUILayout.Label("Misc Items");
+
+            if (miscItems.Count == 0)
+            {
+                GUILayout.Label("  (no misc items assigned)");
+                return;
+            }
+
+            DrawItemSelector(ref selectedMiscIndex, miscItems);
+
+            ItemData selected = miscItems[selectedMiscIndex];
+
+            if (GUILayout.Button($"Add 1 '{selected.ItemName}' → Pockets"))
+                AddToPockets(selected, 1);
         }
 
         // ── Backpack ─────────────────────────────────────────────────────────

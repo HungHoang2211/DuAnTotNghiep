@@ -813,6 +813,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 751292260}
+  - {fileID: 81228652}
   - {fileID: 583171349}
   - {fileID: 1547174180}
   - {fileID: 1932244747}
@@ -834,19 +835,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 41594390}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 1547174181}
+  equipSlot: 6
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 1547174181}
   defaultIcon: {fileID: 21300000, guid: 9f11632995c02ed40ad6dc95c5faf4c4, type: 3}
-  highlight: {fileID: 583171348}
-  durabilityBar: {fileID: 1932244746}
-  durabilityLevel: {fileID: 870825348}
-  countText: {fileID: 760900549}
+  quantityText: {fileID: 760900549}
+  durabilityRoot: {fileID: 1932244746}
+  durabilityFill: {fileID: 870825348}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 81228651}
+  dragHighlight: {fileID: 583171348}
+  holdThreshold: 0
 --- !u!1 &51106141
 GameObject:
   m_ObjectHideFlags: 0
@@ -1331,7 +1337,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 72880298}
-  - component: {fileID: 72880297}
+  - component: {fileID: 72880299}
   m_Layer: 5
   m_Name: Cell (4)
   m_TagString: Untagged
@@ -1339,30 +1345,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &72880297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 72880296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 947773222}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1229183302}
-  iconImage: {fileID: 1768195651}
-  quantityText: {fileID: 1536400896}
-  durabilityRoot: {fileID: 251187473}
-  durabilityFill: {fileID: 569246932}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &72880298
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1388,6 +1370,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &72880299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72880296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 947773222}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1768195651}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1536400896}
+  durabilityRoot: {fileID: 251187473}
+  durabilityFill: {fileID: 569246932}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1229183302}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &74075310
 GameObject:
   m_ObjectHideFlags: 0
@@ -1583,6 +1592,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 75748908}
+  m_CullTransparentMesh: 1
+--- !u!1 &81228651
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 81228652}
+  - component: {fileID: 81228654}
+  - component: {fileID: 81228653}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &81228652
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81228651}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 41594391}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 130}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &81228653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81228651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &81228654
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81228651}
   m_CullTransparentMesh: 1
 --- !u!1 &86432667
 GameObject:
@@ -3118,7 +3202,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 133797200}
-  - component: {fileID: 133797199}
+  - component: {fileID: 133797201}
   m_Layer: 5
   m_Name: BackpackCell (3)
   m_TagString: Untagged
@@ -3126,30 +3210,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &133797199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 133797198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1535739834}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 650084416}
-  iconImage: {fileID: 382292712}
-  quantityText: {fileID: 1438727588}
-  durabilityRoot: {fileID: 437057766}
-  durabilityFill: {fileID: 519423609}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &133797200
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3175,6 +3235,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &133797201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 133797198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1535739834}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 382292712}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1438727588}
+  durabilityRoot: {fileID: 437057766}
+  durabilityFill: {fileID: 519423609}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 650084416}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &141516352
 GameObject:
   m_ObjectHideFlags: 0
@@ -3184,7 +3271,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 141516354}
-  - component: {fileID: 141516353}
+  - component: {fileID: 141516355}
   m_Layer: 5
   m_Name: Cell (3)
   m_TagString: Untagged
@@ -3192,30 +3279,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &141516353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 141516352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 165771747}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 763625989}
-  iconImage: {fileID: 167085925}
-  quantityText: {fileID: 1298928442}
-  durabilityRoot: {fileID: 14437506}
-  durabilityFill: {fileID: 1384793032}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &141516354
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3241,6 +3304,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &141516355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 141516352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 165771747}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 167085925}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1298928442}
+  durabilityRoot: {fileID: 14437506}
+  durabilityFill: {fileID: 1384793032}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 763625989}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &142210045
 GameObject:
   m_ObjectHideFlags: 0
@@ -3325,7 +3415,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 154633417}
-  - component: {fileID: 154633416}
+  - component: {fileID: 154633418}
   m_Layer: 5
   m_Name: Cell (1)
   m_TagString: Untagged
@@ -3333,30 +3423,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &154633416
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 154633415}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 450313309}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 426860322}
-  iconImage: {fileID: 358659800}
-  quantityText: {fileID: 803281181}
-  durabilityRoot: {fileID: 1056946222}
-  durabilityFill: {fileID: 1794947204}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &154633417
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3382,6 +3448,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &154633418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154633415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 450313309}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 358659800}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 803281181}
+  durabilityRoot: {fileID: 1056946222}
+  durabilityFill: {fileID: 1794947204}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 426860322}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &165771744
 GameObject:
   m_ObjectHideFlags: 0
@@ -3541,7 +3634,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 171523668}
-  - component: {fileID: 171523667}
+  - component: {fileID: 171523669}
   m_Layer: 5
   m_Name: BackpackCell (4)
   m_TagString: Untagged
@@ -3549,30 +3642,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &171523667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 171523666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1839486161}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1853702144}
-  iconImage: {fileID: 114442573}
-  quantityText: {fileID: 2043925820}
-  durabilityRoot: {fileID: 104899420}
-  durabilityFill: {fileID: 1659983553}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &171523668
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3598,6 +3667,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &171523669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171523666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1839486161}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 114442573}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 2043925820}
+  durabilityRoot: {fileID: 104899420}
+  durabilityFill: {fileID: 1659983553}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1853702144}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &172165332
 GameObject:
   m_ObjectHideFlags: 0
@@ -3830,7 +3926,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 179884147}
-  - component: {fileID: 179884146}
+  - component: {fileID: 179884148}
   m_Layer: 5
   m_Name: BackpackCell (15)
   m_TagString: Untagged
@@ -3838,30 +3934,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &179884146
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 179884145}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 731728272}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1702128724}
-  iconImage: {fileID: 1314325152}
-  quantityText: {fileID: 67411974}
-  durabilityRoot: {fileID: 1217447659}
-  durabilityFill: {fileID: 930320255}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &179884147
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3887,6 +3959,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &179884148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179884145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 731728272}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1314325152}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 67411974}
+  durabilityRoot: {fileID: 1217447659}
+  durabilityFill: {fileID: 930320255}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1702128724}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &182406990
 GameObject:
   m_ObjectHideFlags: 0
@@ -4038,6 +4137,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 193511654}
   m_CullTransparentMesh: 1
+--- !u!1 &214828701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 214828702}
+  - component: {fileID: 214828704}
+  - component: {fileID: 214828703}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &214828702
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214828701}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 965681269}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 130}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &214828703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214828701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &214828704
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214828701}
+  m_CullTransparentMesh: 1
 --- !u!1 &228605607
 GameObject:
   m_ObjectHideFlags: 0
@@ -4113,6 +4287,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 228605607}
+  m_CullTransparentMesh: 1
+--- !u!1 &230681883
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 230681884}
+  - component: {fileID: 230681886}
+  - component: {fileID: 230681885}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &230681884
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230681883}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.00008, y: 1.00008, z: 1.00008}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1616739672}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 140, y: 140}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &230681885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230681883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &230681886
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230681883}
   m_CullTransparentMesh: 1
 --- !u!1 &232356758
 GameObject:
@@ -4432,6 +4681,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 51106142}
+  - {fileID: 1134937178}
   - {fileID: 1737771686}
   - {fileID: 732455211}
   - {fileID: 228605608}
@@ -4453,19 +4703,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 257065629}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 732455212}
+  equipSlot: 2
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 732455212}
   defaultIcon: {fileID: 21300000, guid: 9a93bdce2e8d31047bed6137178d5fe8, type: 3}
-  highlight: {fileID: 1737771685}
-  durabilityBar: {fileID: 228605607}
-  durabilityLevel: {fileID: 102518008}
-  countText: {fileID: 1661333174}
+  quantityText: {fileID: 1661333174}
+  durabilityRoot: {fileID: 228605607}
+  durabilityFill: {fileID: 102518008}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1134937177}
+  dragHighlight: {fileID: 1737771685}
+  holdThreshold: 0
 --- !u!1 &267793841
 GameObject:
   m_ObjectHideFlags: 0
@@ -6819,7 +7074,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 4cc171889a4ff974c88f1c4abf384cb8, type: 3}
   m_Type: 0
-  m_PreserveAspect: 1
+  m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -7197,6 +7452,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462526791}
   m_CullTransparentMesh: 1
+--- !u!1 &462951492
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 462951493}
+  - component: {fileID: 462951495}
+  - component: {fileID: 462951494}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &462951493
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462951492}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.00008, y: 1.00008, z: 1.00008}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 909236968}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 162}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &462951494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462951492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &462951495
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462951492}
+  m_CullTransparentMesh: 1
 --- !u!1 &467693465
 GameObject:
   m_ObjectHideFlags: 0
@@ -7425,6 +7755,7 @@ MonoBehaviour:
   playerInventory: {fileID: 1762195266}
   selection: {fileID: 784633514}
   actionPanel: {fileID: 985885645}
+  dragController: {fileID: 1077637363}
   weaponCell: {fileID: 909236969}
   backpackCell: {fileID: 991279758}
   headCell: {fileID: 257065631}
@@ -7433,7 +7764,6 @@ MonoBehaviour:
   bootsCell: {fileID: 977483979}
   quickSlotCell1: {fileID: 41594392}
   quickSlotCell2: {fileID: 965681270}
-  useButtonText: {fileID: 1517795031}
 --- !u!1 &489372990
 GameObject:
   m_ObjectHideFlags: 0
@@ -9822,7 +10152,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 605989863}
-  - component: {fileID: 605989862}
+  - component: {fileID: 605989864}
   m_Layer: 5
   m_Name: BackpackCell (9)
   m_TagString: Untagged
@@ -9830,30 +10160,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &605989862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 605989861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1153134031}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 431436903}
-  iconImage: {fileID: 1418944851}
-  quantityText: {fileID: 89957160}
-  durabilityRoot: {fileID: 344533780}
-  durabilityFill: {fileID: 10071554}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &605989863
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9879,6 +10185,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &605989864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605989861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1153134031}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1418944851}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 89957160}
+  durabilityRoot: {fileID: 344533780}
+  durabilityFill: {fileID: 10071554}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 431436903}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &618990026
 GameObject:
   m_ObjectHideFlags: 0
@@ -10607,7 +10940,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 662621188}
-  - component: {fileID: 662621187}
+  - component: {fileID: 662621189}
   m_Layer: 5
   m_Name: BackpackCell (10)
   m_TagString: Untagged
@@ -10615,30 +10948,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &662621187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 662621186}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 683097725}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1967929607}
-  iconImage: {fileID: 812840523}
-  quantityText: {fileID: 1745680730}
-  durabilityRoot: {fileID: 395925485}
-  durabilityFill: {fileID: 539798242}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &662621188
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10664,6 +10973,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &662621189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662621186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 683097725}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 812840523}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1745680730}
+  durabilityRoot: {fileID: 395925485}
+  durabilityFill: {fileID: 539798242}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1967929607}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &668158710
 GameObject:
   m_ObjectHideFlags: 0
@@ -12501,7 +12837,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 775065908}
-  - component: {fileID: 775065907}
+  - component: {fileID: 775065909}
   m_Layer: 5
   m_Name: Cell (2)
   m_TagString: Untagged
@@ -12509,30 +12845,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &775065907
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 775065906}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 100154948}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1161329092}
-  iconImage: {fileID: 401576387}
-  quantityText: {fileID: 1694523009}
-  durabilityRoot: {fileID: 581709889}
-  durabilityFill: {fileID: 172165333}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &775065908
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12558,6 +12870,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &775065909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 775065906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 100154948}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 401576387}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1694523009}
+  durabilityRoot: {fileID: 581709889}
+  durabilityFill: {fileID: 172165333}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1161329092}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &784633511
 GameObject:
   m_ObjectHideFlags: 0
@@ -14322,7 +14661,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 872281221}
-  - component: {fileID: 872281220}
+  - component: {fileID: 872281222}
   m_Layer: 5
   m_Name: Cell (9)
   m_TagString: Untagged
@@ -14330,30 +14669,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &872281220
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 872281219}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 92296449}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1369239514}
-  iconImage: {fileID: 1687212667}
-  quantityText: {fileID: 571410480}
-  durabilityRoot: {fileID: 193511654}
-  durabilityFill: {fileID: 300815360}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &872281221
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14379,6 +14694,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &872281222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872281219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 92296449}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1687212667}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 571410480}
+  durabilityRoot: {fileID: 193511654}
+  durabilityFill: {fileID: 300815360}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1369239514}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &876262928
 GameObject:
   m_ObjectHideFlags: 0
@@ -14922,6 +15264,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 807439195}
+  - {fileID: 462951493}
   - {fileID: 2126642077}
   - {fileID: 449912841}
   - {fileID: 114301162}
@@ -14943,19 +15286,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 909236967}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   equipSlot: 0
-  icon: {fileID: 449912842}
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 449912842}
   defaultIcon: {fileID: 21300000, guid: 4cc171889a4ff974c88f1c4abf384cb8, type: 3}
-  highlight: {fileID: 2126642076}
-  durabilityBar: {fileID: 114301161}
-  durabilityLevel: {fileID: 657268816}
-  countText: {fileID: 1503116388}
+  quantityText: {fileID: 1503116388}
+  durabilityRoot: {fileID: 114301161}
+  durabilityFill: {fileID: 657268816}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 462951492}
+  dragHighlight: {fileID: 2126642076}
+  holdThreshold: 0
 --- !u!1 &911773802
 GameObject:
   m_ObjectHideFlags: 0
@@ -15451,7 +15799,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 114.34109, y: -32.5}
+  m_AnchoredPosition: {x: 154.81012, y: -32.5}
   m_SizeDelta: {x: 0, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &937908327
@@ -16037,20 +16385,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 952241299}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlot: -1
   backgroundImage: {fileID: 1209507810}
   unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
   lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1776957884}
   iconImage: {fileID: 1560690460}
+  defaultIcon: {fileID: 0}
   quantityText: {fileID: 378919268}
   durabilityRoot: {fileID: 1870046517}
   durabilityFill: {fileID: 182406992}
   durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1776957884}
+  dragHighlight: {fileID: 0}
   holdThreshold: 0.5
 --- !u!1 &962270299
 GameObject:
@@ -16157,6 +16508,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 598188187}
+  - {fileID: 214828702}
   - {fileID: 1991525389}
   - {fileID: 1663331900}
   - {fileID: 75748909}
@@ -16179,19 +16531,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 965681268}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 1663331901}
+  equipSlot: 6
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 1663331901}
   defaultIcon: {fileID: 21300000, guid: 9f11632995c02ed40ad6dc95c5faf4c4, type: 3}
-  highlight: {fileID: 1991525388}
-  durabilityBar: {fileID: 1688089440}
-  durabilityLevel: {fileID: 2135097473}
-  countText: {fileID: 580889674}
+  quantityText: {fileID: 580889674}
+  durabilityRoot: {fileID: 1688089440}
+  durabilityFill: {fileID: 2135097473}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 214828701}
+  dragHighlight: {fileID: 1991525388}
+  holdThreshold: 0
 --- !u!1 &977483977
 GameObject:
   m_ObjectHideFlags: 0
@@ -16222,6 +16579,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 633678235}
+  - {fileID: 1738412869}
   - {fileID: 1949539754}
   - {fileID: 142210046}
   - {fileID: 1320821880}
@@ -16243,19 +16601,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 977483977}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 142210047}
+  equipSlot: 5
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 142210047}
   defaultIcon: {fileID: 21300000, guid: f7ebf496d6572164ca47d2791bd25a31, type: 3}
-  highlight: {fileID: 1949539753}
-  durabilityBar: {fileID: 1320821879}
-  durabilityLevel: {fileID: 130731450}
-  countText: {fileID: 721078660}
+  quantityText: {fileID: 721078660}
+  durabilityRoot: {fileID: 1320821879}
+  durabilityFill: {fileID: 130731450}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1738412868}
+  dragHighlight: {fileID: 1949539753}
+  holdThreshold: 0
 --- !u!1 &982069950
 GameObject:
   m_ObjectHideFlags: 0
@@ -16265,7 +16628,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 982069952}
-  - component: {fileID: 982069951}
+  - component: {fileID: 982069953}
   m_Layer: 5
   m_Name: BackpackCell (12)
   m_TagString: Untagged
@@ -16273,30 +16636,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &982069951
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 982069950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 813220592}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1884851872}
-  iconImage: {fileID: 1647816962}
-  quantityText: {fileID: 584390100}
-  durabilityRoot: {fileID: 1492324966}
-  durabilityFill: {fileID: 1380452010}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &982069952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16322,6 +16661,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &982069953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982069950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 813220592}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1647816962}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 584390100}
+  durabilityRoot: {fileID: 1492324966}
+  durabilityFill: {fileID: 1380452010}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1884851872}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &985885643
 GameObject:
   m_ObjectHideFlags: 0
@@ -16377,10 +16743,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selection: {fileID: 784633514}
   playerInventory: {fileID: 1762195266}
+  equipmentPanel: {fileID: 480375770}
   buttonUse: {fileID: 1174152177}
   buttonSplit: {fileID: 415857781}
   buttonSort: {fileID: 567862459}
   buttonDelete: {fileID: 1529350122}
+  useButtonText: {fileID: 1517795031}
   confirmDeleteDialog: {fileID: 1365290754}
 --- !u!1 &987610442
 GameObject:
@@ -16564,6 +16932,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 700758907}
+  - {fileID: 1987215840}
   - {fileID: 74075311}
   - {fileID: 1224337444}
   - {fileID: 1782517642}
@@ -16585,19 +16954,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 991279756}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 1224337445}
+  equipSlot: 1
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 1224337445}
   defaultIcon: {fileID: 21300000, guid: cae943864e0ad4544a2f5ca57fbd8911, type: 3}
-  highlight: {fileID: 74075310}
-  durabilityBar: {fileID: 1782517641}
-  durabilityLevel: {fileID: 1029839919}
-  countText: {fileID: 793535090}
+  quantityText: {fileID: 793535090}
+  durabilityRoot: {fileID: 1782517641}
+  durabilityFill: {fileID: 1029839919}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1987215839}
+  dragHighlight: {fileID: 74075310}
+  holdThreshold: 0
 --- !u!1 &992441339
 GameObject:
   m_ObjectHideFlags: 0
@@ -16682,7 +17056,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1007553839}
-  - component: {fileID: 1007553838}
+  - component: {fileID: 1007553840}
   m_Layer: 5
   m_Name: Cell (8)
   m_TagString: Untagged
@@ -16690,30 +17064,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1007553838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007553837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1287775736}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1553192314}
-  iconImage: {fileID: 323905150}
-  quantityText: {fileID: 1338759920}
-  durabilityRoot: {fileID: 1302225558}
-  durabilityFill: {fileID: 878539175}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1007553839
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16739,6 +17089,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1007553840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007553837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1287775736}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 323905150}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1338759920}
+  durabilityRoot: {fileID: 1302225558}
+  durabilityFill: {fileID: 878539175}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1553192314}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1029839917
 GameObject:
   m_ObjectHideFlags: 0
@@ -17216,7 +17593,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 0
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -17411,7 +17788,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1073943736}
-  - component: {fileID: 1073943735}
+  - component: {fileID: 1073943737}
   m_Layer: 5
   m_Name: BackpackCell (11)
   m_TagString: Untagged
@@ -17419,30 +17796,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1073943735
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1073943734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 765087234}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 2027547506}
-  iconImage: {fileID: 1409718591}
-  quantityText: {fileID: 669598656}
-  durabilityRoot: {fileID: 1366330564}
-  durabilityFill: {fileID: 1709777752}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1073943736
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17468,6 +17821,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1073943737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073943734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 765087234}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1409718591}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 669598656}
+  durabilityRoot: {fileID: 1366330564}
+  durabilityFill: {fileID: 1709777752}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 2027547506}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1077637361
 GameObject:
   m_ObjectHideFlags: 0
@@ -18115,6 +18495,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 6, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1134937177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1134937178}
+  - component: {fileID: 1134937180}
+  - component: {fileID: 1134937179}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1134937178
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134937177}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.00008, y: 1.00008, z: 1.00008}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 257065630}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 140, y: 130}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1134937179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134937177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1134937180
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134937177}
+  m_CullTransparentMesh: 1
 --- !u!1 &1136730996
 GameObject:
   m_ObjectHideFlags: 0
@@ -18401,6 +18856,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161329092}
+  m_CullTransparentMesh: 1
+--- !u!1 &1161405722
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1161405723}
+  - component: {fileID: 1161405725}
+  - component: {fileID: 1161405724}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1161405723
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161405722}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1983493420}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 140, y: 150}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1161405724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161405722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1161405725
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161405722}
   m_CullTransparentMesh: 1
 --- !u!1 &1174152175
 GameObject:
@@ -18761,7 +19291,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188504874}
-  - component: {fileID: 1188504873}
+  - component: {fileID: 1188504875}
   m_Layer: 5
   m_Name: BackpackCell (5)
   m_TagString: Untagged
@@ -18769,30 +19299,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1188504873
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1188504872}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 913908390}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1387715694}
-  iconImage: {fileID: 1695031628}
-  quantityText: {fileID: 1633826718}
-  durabilityRoot: {fileID: 1322602434}
-  durabilityFill: {fileID: 1129224445}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1188504874
 RectTransform:
   m_ObjectHideFlags: 0
@@ -18818,6 +19324,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1188504875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188504872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 913908390}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1695031628}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1633826718}
+  durabilityRoot: {fileID: 1322602434}
+  durabilityFill: {fileID: 1129224445}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1387715694}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1199380062
 GameObject:
   m_ObjectHideFlags: 0
@@ -18827,7 +19360,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1199380064}
-  - component: {fileID: 1199380063}
+  - component: {fileID: 1199380065}
   m_Layer: 5
   m_Name: Cell (7)
   m_TagString: Untagged
@@ -18835,30 +19368,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1199380063
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1199380062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 760193580}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1049407738}
-  iconImage: {fileID: 1338431951}
-  quantityText: {fileID: 65915900}
-  durabilityRoot: {fileID: 1406339962}
-  durabilityFill: {fileID: 2133043477}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1199380064
 RectTransform:
   m_ObjectHideFlags: 0
@@ -18884,6 +19393,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1199380065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1199380062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 760193580}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1338431951}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 65915900}
+  durabilityRoot: {fileID: 1406339962}
+  durabilityFill: {fileID: 2133043477}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1049407738}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1208806005
 GameObject:
   m_ObjectHideFlags: 0
@@ -19636,20 +20172,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1256062511}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  equipSlot: -1
   backgroundImage: {fileID: 809577539}
   unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
   lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 2062553812}
   iconImage: {fileID: 467693467}
+  defaultIcon: {fileID: 0}
   quantityText: {fileID: 1653291710}
   durabilityRoot: {fileID: 675611255}
   durabilityFill: {fileID: 329286759}
   durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 2062553812}
+  dragHighlight: {fileID: 0}
   holdThreshold: 0.5
 --- !u!1 &1258304289
 GameObject:
@@ -19660,7 +20199,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1258304291}
-  - component: {fileID: 1258304290}
+  - component: {fileID: 1258304292}
   m_Layer: 5
   m_Name: BackpackCell (16)
   m_TagString: Untagged
@@ -19668,30 +20207,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1258304290
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1258304289}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 2074542044}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 2004943800}
-  iconImage: {fileID: 605749910}
-  quantityText: {fileID: 1886920140}
-  durabilityRoot: {fileID: 618990026}
-  durabilityFill: {fileID: 623824115}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1258304291
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19717,6 +20232,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1258304292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1258304289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 2074542044}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 605749910}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1886920140}
+  durabilityRoot: {fileID: 618990026}
+  durabilityFill: {fileID: 623824115}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 2004943800}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1261168508
 GameObject:
   m_ObjectHideFlags: 0
@@ -21143,10 +21685,10 @@ RectTransform:
   - {fileID: 389812795}
   m_Father: {fileID: 1491944679}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 84.031006, y: -32.5}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1345108197
 MonoBehaviour:
@@ -21757,25 +22299,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cells:
   - {fileID: 1256062513}
-  - {fileID: 1856315284}
-  - {fileID: 1403405022}
-  - {fileID: 133797199}
-  - {fileID: 171523667}
-  - {fileID: 1188504873}
-  - {fileID: 1414136975}
-  - {fileID: 1863295680}
-  - {fileID: 1643360545}
-  - {fileID: 605989862}
-  - {fileID: 662621187}
-  - {fileID: 1073943735}
-  - {fileID: 982069951}
-  - {fileID: 1916162699}
-  - {fileID: 1712059902}
-  - {fileID: 179884146}
-  - {fileID: 1258304290}
-  - {fileID: 1950617192}
-  - {fileID: 1694497120}
-  - {fileID: 1535132228}
+  - {fileID: 1856315286}
+  - {fileID: 1403405024}
+  - {fileID: 133797201}
+  - {fileID: 171523669}
+  - {fileID: 1188504875}
+  - {fileID: 1414136977}
+  - {fileID: 1863295682}
+  - {fileID: 1643360547}
+  - {fileID: 605989864}
+  - {fileID: 662621189}
+  - {fileID: 1073943737}
+  - {fileID: 982069953}
+  - {fileID: 1916162701}
+  - {fileID: 1712059904}
+  - {fileID: 179884148}
+  - {fileID: 1258304292}
+  - {fileID: 1950617194}
+  - {fileID: 1694497122}
+  - {fileID: 1535132230}
   autoCollectFromChildren: 1
 --- !u!1 &1369239514
 GameObject:
@@ -22841,7 +23383,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1403405023}
-  - component: {fileID: 1403405022}
+  - component: {fileID: 1403405024}
   m_Layer: 5
   m_Name: BackpackCell (2)
   m_TagString: Untagged
@@ -22849,30 +23391,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1403405022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1403405021}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1041650694}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1532195043}
-  iconImage: {fileID: 1562892331}
-  quantityText: {fileID: 373255239}
-  durabilityRoot: {fileID: 18646931}
-  durabilityFill: {fileID: 1534832957}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1403405023
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22898,6 +23416,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1403405024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1403405021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1041650694}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1562892331}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 373255239}
+  durabilityRoot: {fileID: 18646931}
+  durabilityFill: {fileID: 1534832957}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1532195043}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1406339962
 GameObject:
   m_ObjectHideFlags: 0
@@ -23195,7 +23740,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1414136976}
-  - component: {fileID: 1414136975}
+  - component: {fileID: 1414136977}
   m_Layer: 5
   m_Name: BackpackCell (6)
   m_TagString: Untagged
@@ -23203,30 +23748,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1414136975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1414136974}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 332896765}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1557805470}
-  iconImage: {fileID: 1421374847}
-  quantityText: {fileID: 1185951054}
-  durabilityRoot: {fileID: 470444304}
-  durabilityFill: {fileID: 1875698892}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1414136976
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23252,6 +23773,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1414136977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414136974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 332896765}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1421374847}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1185951054}
+  durabilityRoot: {fileID: 470444304}
+  durabilityFill: {fileID: 1875698892}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1557805470}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1418944850
 GameObject:
   m_ObjectHideFlags: 0
@@ -24096,7 +24644,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1461481582}
-  - component: {fileID: 1461481581}
+  - component: {fileID: 1461481583}
   m_Layer: 5
   m_Name: Cell (6)
   m_TagString: Untagged
@@ -24104,30 +24652,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1461481581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1461481580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 573222208}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 2049074887}
-  iconImage: {fileID: 679518824}
-  quantityText: {fileID: 132156196}
-  durabilityRoot: {fileID: 2040025942}
-  durabilityFill: {fileID: 393456243}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1461481582
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24153,6 +24677,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1461481583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1461481580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 573222208}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 679518824}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 132156196}
+  durabilityRoot: {fileID: 2040025942}
+  durabilityFill: {fileID: 393456243}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 2049074887}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1473550166
 GameObject:
   m_ObjectHideFlags: 0
@@ -24524,7 +25075,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1491944679
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24541,10 +25092,10 @@ RectTransform:
   - {fileID: 787797936}
   m_Father: {fileID: 792141828}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 411.3178, y: -33.5}
+  m_SizeDelta: {x: 178.06201, y: 67}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1491944680
 MonoBehaviour:
@@ -25258,7 +25809,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1525482780}
-  - component: {fileID: 1525482779}
+  - component: {fileID: 1525482781}
   m_Layer: 5
   m_Name: Cell (5)
   m_TagString: Untagged
@@ -25266,30 +25817,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1525482779
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1525482778}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 636207721}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 643494757}
-  iconImage: {fileID: 1179079056}
-  quantityText: {fileID: 1928122543}
-  durabilityRoot: {fileID: 841428029}
-  durabilityFill: {fileID: 539520248}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1525482780
 RectTransform:
   m_ObjectHideFlags: 0
@@ -25315,6 +25842,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1525482781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1525482778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 636207721}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1179079056}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1928122543}
+  durabilityRoot: {fileID: 841428029}
+  durabilityFill: {fileID: 539520248}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 643494757}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1528941804
 GameObject:
   m_ObjectHideFlags: 0
@@ -25687,7 +26241,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1535132229}
-  - component: {fileID: 1535132228}
+  - component: {fileID: 1535132230}
   m_Layer: 5
   m_Name: BackpackCell (19)
   m_TagString: Untagged
@@ -25695,30 +26249,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1535132228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1535132227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 583386699}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1503403613}
-  iconImage: {fileID: 771588346}
-  quantityText: {fileID: 127911038}
-  durabilityRoot: {fileID: 493668805}
-  durabilityFill: {fileID: 1504028182}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1535132229
 RectTransform:
   m_ObjectHideFlags: 0
@@ -25744,6 +26274,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1535132230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535132227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 583386699}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 771588346}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 127911038}
+  durabilityRoot: {fileID: 493668805}
+  durabilityFill: {fileID: 1504028182}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1503403613}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1535739833
 GameObject:
   m_ObjectHideFlags: 0
@@ -26746,6 +27303,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1072386801}
+  - {fileID: 230681884}
   - {fileID: 1056696}
   - {fileID: 1791836027}
   - {fileID: 1403099420}
@@ -26767,19 +27325,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1616739671}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 1791836028}
+  equipSlot: 3
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 1791836028}
   defaultIcon: {fileID: 21300000, guid: 64869a2b34f0d1d46bb06a590aff93c2, type: 3}
-  highlight: {fileID: 1056695}
-  durabilityBar: {fileID: 1403099419}
-  durabilityLevel: {fileID: 1753934286}
-  countText: {fileID: 1441262096}
+  quantityText: {fileID: 1441262096}
+  durabilityRoot: {fileID: 1403099419}
+  durabilityFill: {fileID: 1753934286}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 230681883}
+  dragHighlight: {fileID: 1056695}
+  holdThreshold: 0
 --- !u!1 &1624331490
 GameObject:
   m_ObjectHideFlags: 0
@@ -27004,7 +27567,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1643360546}
-  - component: {fileID: 1643360545}
+  - component: {fileID: 1643360547}
   m_Layer: 5
   m_Name: BackpackCell (8)
   m_TagString: Untagged
@@ -27012,30 +27575,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1643360545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1643360544}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 87705528}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 687718933}
-  iconImage: {fileID: 86432668}
-  quantityText: {fileID: 1421214572}
-  durabilityRoot: {fileID: 1266471639}
-  durabilityFill: {fileID: 1808320454}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1643360546
 RectTransform:
   m_ObjectHideFlags: 0
@@ -27061,6 +27600,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1643360547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643360544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 87705528}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 86432668}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1421214572}
+  durabilityRoot: {fileID: 1266471639}
+  durabilityFill: {fileID: 1808320454}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 687718933}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1647816961
 GameObject:
   m_ObjectHideFlags: 0
@@ -27236,15 +27802,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cells:
   - {fileID: 952241301}
-  - {fileID: 154633416}
-  - {fileID: 775065907}
-  - {fileID: 141516353}
-  - {fileID: 72880297}
-  - {fileID: 1525482779}
-  - {fileID: 1461481581}
-  - {fileID: 1199380063}
-  - {fileID: 1007553838}
-  - {fileID: 872281220}
+  - {fileID: 154633418}
+  - {fileID: 775065909}
+  - {fileID: 141516355}
+  - {fileID: 72880299}
+  - {fileID: 1525482781}
+  - {fileID: 1461481583}
+  - {fileID: 1199380065}
+  - {fileID: 1007553840}
+  - {fileID: 872281222}
   autoCollectFromChildren: 1
 --- !u!1 &1653291708
 GameObject:
@@ -28055,7 +28621,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1694497121}
-  - component: {fileID: 1694497120}
+  - component: {fileID: 1694497122}
   m_Layer: 5
   m_Name: BackpackCell (18)
   m_TagString: Untagged
@@ -28063,30 +28629,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1694497120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1694497119}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1943118600}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 863914646}
-  iconImage: {fileID: 1985792053}
-  quantityText: {fileID: 798426592}
-  durabilityRoot: {fileID: 602697854}
-  durabilityFill: {fileID: 448527235}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1694497121
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28112,6 +28654,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1694497122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694497119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1943118600}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1985792053}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 798426592}
+  durabilityRoot: {fileID: 602697854}
+  durabilityFill: {fileID: 448527235}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 863914646}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1694523006
 GameObject:
   m_ObjectHideFlags: 0
@@ -28483,7 +29052,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1712059903}
-  - component: {fileID: 1712059902}
+  - component: {fileID: 1712059904}
   m_Layer: 5
   m_Name: BackpackCell (14)
   m_TagString: Untagged
@@ -28491,30 +29060,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1712059902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712059901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 2005062033}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 551685931}
-  iconImage: {fileID: 926562032}
-  quantityText: {fileID: 2068662960}
-  durabilityRoot: {fileID: 987610442}
-  durabilityFill: {fileID: 2089646148}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1712059903
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28540,6 +29085,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1712059904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1712059901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 2005062033}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 926562032}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 2068662960}
+  durabilityRoot: {fileID: 987610442}
+  durabilityFill: {fileID: 2089646148}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 551685931}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1713961856
 GameObject:
   m_ObjectHideFlags: 0
@@ -28902,6 +29474,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737771685}
+  m_CullTransparentMesh: 1
+--- !u!1 &1738412868
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1738412869}
+  - component: {fileID: 1738412871}
+  - component: {fileID: 1738412870}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1738412869
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738412868}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 977483978}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 140, y: 130}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1738412870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738412868}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1738412871
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738412868}
   m_CullTransparentMesh: 1
 --- !u!1 &1742662790
 GameObject:
@@ -29398,9 +30045,14 @@ MonoBehaviour:
   stackableItems:
   - {fileID: 11400000, guid: 70ac1dbbcbe2c1146a81bee435e31caf, type: 2}
   - {fileID: 11400000, guid: 676e56abf2fdaa541ba452d3deb112ca, type: 2}
+  - {fileID: 11400000, guid: 813252bcd6145084ab8bc3e2f2bff5a9, type: 2}
   durableItems:
   - {fileID: 11400000, guid: 379828d807b7f18499e9efb8c8fcaaef, type: 2}
   - {fileID: 11400000, guid: 6a43ae151e3843a4f845d2f1166c8be1, type: 2}
+  miscItems:
+  - {fileID: 11400000, guid: 2676edec09ee26f44abe3d252b409f8e, type: 2}
+  - {fileID: 11400000, guid: 813252bcd6145084ab8bc3e2f2bff5a9, type: 2}
+  - {fileID: 11400000, guid: 0a97d61ccd8275c4cb2ec8f62c5caa4c, type: 2}
   addAmount: 5
   backpackStep: 5
   minDurabilityRatio: 0.3
@@ -29420,35 +30072,43 @@ MonoBehaviour:
   infoPanel: {fileID: 1262318437}
   cells:
   - {fileID: 952241301}
-  - {fileID: 154633416}
-  - {fileID: 775065907}
-  - {fileID: 141516353}
-  - {fileID: 72880297}
-  - {fileID: 1525482779}
-  - {fileID: 1461481581}
-  - {fileID: 1199380063}
-  - {fileID: 1007553838}
-  - {fileID: 872281220}
+  - {fileID: 154633418}
+  - {fileID: 775065909}
+  - {fileID: 141516355}
+  - {fileID: 72880299}
+  - {fileID: 1525482781}
+  - {fileID: 1461481583}
+  - {fileID: 1199380065}
+  - {fileID: 1007553840}
+  - {fileID: 872281222}
   - {fileID: 1256062513}
-  - {fileID: 1856315284}
-  - {fileID: 1403405022}
-  - {fileID: 133797199}
-  - {fileID: 171523667}
-  - {fileID: 1188504873}
-  - {fileID: 1414136975}
-  - {fileID: 1863295680}
-  - {fileID: 1643360545}
-  - {fileID: 605989862}
-  - {fileID: 662621187}
-  - {fileID: 1073943735}
-  - {fileID: 982069951}
-  - {fileID: 1916162699}
-  - {fileID: 1712059902}
-  - {fileID: 179884146}
-  - {fileID: 1258304290}
-  - {fileID: 1950617192}
-  - {fileID: 1694497120}
-  - {fileID: 1535132228}
+  - {fileID: 1856315286}
+  - {fileID: 1403405024}
+  - {fileID: 133797201}
+  - {fileID: 171523669}
+  - {fileID: 1188504875}
+  - {fileID: 1414136977}
+  - {fileID: 1863295682}
+  - {fileID: 1643360547}
+  - {fileID: 605989864}
+  - {fileID: 662621189}
+  - {fileID: 1073943737}
+  - {fileID: 982069953}
+  - {fileID: 1916162701}
+  - {fileID: 1712059904}
+  - {fileID: 179884148}
+  - {fileID: 1258304292}
+  - {fileID: 1950617194}
+  - {fileID: 1694497122}
+  - {fileID: 1535132230}
+  - {fileID: 909236969}
+  - {fileID: 991279758}
+  - {fileID: 41594392}
+  - {fileID: 965681270}
+  - {fileID: 257065631}
+  - {fileID: 1616739673}
+  - {fileID: 1983493421}
+  - {fileID: 977483979}
   autoCollectFromChildren: 0
 --- !u!1 &1762420649
 GameObject:
@@ -30755,7 +31415,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1856315285}
-  - component: {fileID: 1856315284}
+  - component: {fileID: 1856315286}
   m_Layer: 5
   m_Name: BackpackCell (1)
   m_TagString: Untagged
@@ -30763,30 +31423,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1856315284
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1856315283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 2021247608}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 887497683}
-  iconImage: {fileID: 500976926}
-  quantityText: {fileID: 2081249516}
-  durabilityRoot: {fileID: 1891081348}
-  durabilityFill: {fileID: 807609868}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1856315285
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30812,6 +31448,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1856315286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1856315283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 2021247608}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 500976926}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 2081249516}
+  durabilityRoot: {fileID: 1891081348}
+  durabilityFill: {fileID: 807609868}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 887497683}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1863295679
 GameObject:
   m_ObjectHideFlags: 0
@@ -30821,7 +31484,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1863295681}
-  - component: {fileID: 1863295680}
+  - component: {fileID: 1863295682}
   m_Layer: 5
   m_Name: BackpackCell (7)
   m_TagString: Untagged
@@ -30829,30 +31492,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1863295680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1863295679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 631242748}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1071226247}
-  iconImage: {fileID: 1061675166}
-  quantityText: {fileID: 1136730997}
-  durabilityRoot: {fileID: 336710078}
-  durabilityFill: {fileID: 1379550343}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1863295681
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30878,6 +31517,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1863295682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863295679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 631242748}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1061675166}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1136730997}
+  durabilityRoot: {fileID: 336710078}
+  durabilityFill: {fileID: 1379550343}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1071226247}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1864801546
 GameObject:
   m_ObjectHideFlags: 0
@@ -31613,7 +32279,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1916162700}
-  - component: {fileID: 1916162699}
+  - component: {fileID: 1916162701}
   m_Layer: 5
   m_Name: BackpackCell (13)
   m_TagString: Untagged
@@ -31621,30 +32287,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1916162699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1916162698}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 102733932}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 1762420649}
-  iconImage: {fileID: 1748573426}
-  quantityText: {fileID: 1361362742}
-  durabilityRoot: {fileID: 810284797}
-  durabilityFill: {fileID: 14690974}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1916162700
 RectTransform:
   m_ObjectHideFlags: 0
@@ -31670,6 +32312,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1916162701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916162698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 102733932}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1748573426}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1361362742}
+  durabilityRoot: {fileID: 810284797}
+  durabilityFill: {fileID: 14690974}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1762420649}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1924344129
 GameObject:
   m_ObjectHideFlags: 0
@@ -32303,7 +32972,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1950617193}
-  - component: {fileID: 1950617192}
+  - component: {fileID: 1950617194}
   m_Layer: 5
   m_Name: BackpackCell (17)
   m_TagString: Untagged
@@ -32311,30 +32980,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1950617192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1950617191}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e25c36eecd82f9148b49e3a20f8d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backgroundImage: {fileID: 1334012245}
-  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
-  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
-  selectionHighlight: {fileID: 815147910}
-  iconImage: {fileID: 1350575979}
-  quantityText: {fileID: 1261312594}
-  durabilityRoot: {fileID: 899239550}
-  durabilityFill: {fileID: 1953661085}
-  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
-  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  lowDurabilityThreshold: 0.25
-  holdThreshold: 0.5
 --- !u!224 &1950617193
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32360,6 +33005,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1950617194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950617191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipSlot: -1
+  backgroundImage: {fileID: 1334012245}
+  unlockedBackground: {fileID: 21300000, guid: 1b43e8960546178409e1668abbbd9e7b, type: 3}
+  lockedBackground: {fileID: 21300000, guid: 88f79e50e63f37e4b81dd1d3477bf29d, type: 3}
+  iconImage: {fileID: 1350575979}
+  defaultIcon: {fileID: 0}
+  quantityText: {fileID: 1261312594}
+  durabilityRoot: {fileID: 899239550}
+  durabilityFill: {fileID: 1953661085}
+  durabilityNormalColor: {r: 0.14901961, g: 0.38039216, b: 0.3764706, a: 1}
+  durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 815147910}
+  dragHighlight: {fileID: 0}
+  holdThreshold: 0.5
 --- !u!1 &1953661084
 GameObject:
   m_ObjectHideFlags: 0
@@ -32615,6 +33287,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1985569064}
+  - {fileID: 1161405723}
   - {fileID: 1656708043}
   - {fileID: 1366122047}
   - {fileID: 989283054}
@@ -32636,19 +33309,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1983493419}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69e7f625a56c15945a1a458314a097ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 45e3ca46c83c96949b2972e9eb844351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipSlot: 0
-  icon: {fileID: 1366122048}
+  equipSlot: 4
+  backgroundImage: {fileID: 0}
+  unlockedBackground: {fileID: 0}
+  lockedBackground: {fileID: 0}
+  iconImage: {fileID: 1366122048}
   defaultIcon: {fileID: 21300000, guid: 6a0f9ca6543d02b4b99717ed98c6f51a, type: 3}
-  highlight: {fileID: 1656708042}
-  durabilityBar: {fileID: 989283053}
-  durabilityLevel: {fileID: 433169520}
-  countText: {fileID: 366270137}
+  quantityText: {fileID: 366270137}
+  durabilityRoot: {fileID: 989283053}
+  durabilityFill: {fileID: 433169520}
   durabilityNormalColor: {r: 0.149, g: 0.38, b: 0.376, a: 1}
   durabilityLowColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
   lowDurabilityThreshold: 0.25
+  selectionHighlight: {fileID: 1161405722}
+  dragHighlight: {fileID: 1656708042}
+  holdThreshold: 0
 --- !u!1 &1985349753
 GameObject:
   m_ObjectHideFlags: 0
@@ -32936,6 +33614,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 110, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1987215839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1987215840}
+  - component: {fileID: 1987215842}
+  - component: {fileID: 1987215841}
+  m_Layer: 5
+  m_Name: SelectHighLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1987215840
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987215839}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 991279757}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 135, y: 130}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1987215841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987215839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.8627451, g: 0.8627451, b: 0.8627451, a: 0.78431374}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: b97c660059d556d43a97516844958393, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1987215842
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987215839}
+  m_CullTransparentMesh: 1
 --- !u!1 &1991525388
 GameObject:
   m_ObjectHideFlags: 0

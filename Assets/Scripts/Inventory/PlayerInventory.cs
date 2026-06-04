@@ -94,7 +94,7 @@ namespace SimpleSurvival.Items
                     continue;
                 }
 
-                overflow += pockets.AddItem(stack.ItemData, stack.Quantity);
+                overflow += pockets.AddStack(stack);
             }
 
             return overflow;

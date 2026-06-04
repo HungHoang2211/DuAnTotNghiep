@@ -30,6 +30,7 @@
     /// <summary>Equipment slots a piece of gear can occupy.</summary>
     public enum EquipSlot
     {
+        None = -1,
         Weapon,
         Backpack,
         Helmet,
@@ -53,7 +54,7 @@
     {
         None = 0,
         Resource = 1 << 0,
-        Food = 1 << 1,
+        Consumable = 1 << 1,
         Weapon = 1 << 2,
         Tool = 1 << 3,
         Helmet = 1 << 4,
