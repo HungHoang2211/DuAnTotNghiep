@@ -4,78 +4,171 @@ using SimpleSurvival.Input;
 namespace SimpleSurvival.Player
 {
     /// <summary>
-    /// Di chuyển player dựa trên input từ PlayerInput.
-    /// Dùng Unity's CharacterController để có collision.
+    /// Di chuyển player với 3 mức tốc độ (walk/run/sneak), acceleration mượt,
+    /// và sneak collider resize (capsule co lại để chui qua khe hẹp).
     /// 
-    /// Trách nhiệm:
-    /// - Di chuyển theo WorldDirection từ PlayerInput.
-    /// - Xoay player root theo direction (lerp mượt).
-    /// - Apply gravity đơn giản.
-    /// 
-    /// Gắn lên Player GameObject (cùng GameObject có CharacterController và PlayerInput).
+    /// Trách nhiệm THUẦN movement — không động đến animation hay action.
+    /// Animation tách ra PlayerAnimator.cs.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    [RequireComponent(typeof(PlayerInput))]
+    [RequireComponent(typeof(PlayerInputReader))]
     public class PlayerMovement : MonoBehaviour
     {
-        [Header("Movement")]
-        [Tooltip("Tốc độ di chuyển tối đa (đơn vị/giây).")]
-        [SerializeField] private float moveSpeed = 5f;
+        [Header("Speeds")]
+        [SerializeField] private float walkSpeed = 3f;
+        [SerializeField] private float runSpeed = 6f;
+        [SerializeField] private float sneakSpeed = 1.5f;
 
-        [Tooltip("Độ mượt khi xoay nhân vật theo direction. Cao = quay nhanh.")]
+        [Tooltip("Magnitude joystick từ ngưỡng này trở lên = chạy. Dưới = đi bộ.")]
+        [SerializeField, Range(0.3f, 0.95f)] private float runThreshold = 0.6f;
+
+        [Header("Acceleration")]
+        [Tooltip("Đơn vị/giây² — cao = đổi tốc độ nhanh, thấp = trễ.")]
+        [SerializeField] private float acceleration = 60f;
+
+        [Header("Rotation")]
         [SerializeField, Range(1f, 30f)] private float rotationSmoothness = 12f;
+
+        [Header("Sneak Collider")]
+        [Tooltip("Capsule co bao nhiêu đơn vị khi sneak.")]
+        [SerializeField] private float sneakHeightReduction = 0.6f;
+
+        [Tooltip("Tốc độ lerp collider khi sneak/đứng.")]
+        [SerializeField] private float sneakLerpSpeed = 10f;
+
+        [Tooltip("Layer mà sphere cast SẼ va vào khi check đứng dậy (bỏ tick Player).")]
+        [SerializeField] private LayerMask standUpCheckMask = ~0;
 
         [Header("Gravity")]
         [SerializeField] private float gravity = -20f;
 
-        // Components
-        private CharacterController _controller;
-        private PlayerInput _input;
+        // ========== Public state (cho PlayerAnimator đọc) ==========
 
-        // State
-        private float _verticalVelocity = 0f;
+        public bool IsMoving { get; private set; }
+        public bool IsRunning { get; private set; }
+        public bool IsSneaking { get; private set; }
+
+        /// <summary>Tốc độ hiện tại / tốc độ tối đa hiện tại. 0..1 cho animation blend.</summary>
+        public float NormalizedSpeed { get; private set; }
+
+        // ========== Internals ==========
+
+        private CharacterController _controller;
+        private PlayerInputReader _input;
+
+        private Vector3 _horizontalVelocity;
+        private float _verticalVelocity;
+
+        // Lưu height gốc của collider (đọc từ Inspector, không hardcode)
+        private float _originalHeight;
+        private float _originalCenterY;
 
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
-            _input = GetComponent<PlayerInput>();
+            _input = GetComponent<PlayerInputReader>();
+            _originalHeight = _controller.height;
+            _originalCenterY = _controller.center.y;
         }
 
         private void Update()
         {
-            HandleMovement();
-            HandleRotation();
+            UpdateSneakState();
+            ApplySneakCollider();
+            UpdateMovement();
+            UpdateRotation();
         }
 
-        private void HandleMovement()
-        {
-            // Horizontal movement từ input (đã bù camera angle ở PlayerInput)
-            Vector3 horizontalVelocity = _input.WorldDirection * (moveSpeed * _input.Magnitude);
+        // ========== Sneak ==========
 
-            // Gravity: tích lũy vận tốc rơi, reset khi chạm đất
+        private void UpdateSneakState()
+        {
+            bool wantSneak = _input.SneakHeld;
+
+            // Muốn đứng dậy nhưng có vật cản → ép sneak tiếp + sync UI button
+            if (!wantSneak && IsSneaking && !CanStandUp())
+            {
+                _input.ForceSneak(true);
+                IsSneaking = true;
+                return;
+            }
+
+            IsSneaking = wantSneak;
+        }
+
+        private void ApplySneakCollider()
+        {
+            float targetHeight = IsSneaking
+                ? _originalHeight - sneakHeightReduction
+                : _originalHeight;
+
+            float prevHeight = _controller.height;
+            _controller.height = Mathf.Lerp(_controller.height, targetHeight, sneakLerpSpeed * Time.deltaTime);
+
+            // Khi height đổi, center phải đổi theo để chân giữ chạm đất (không bay lên)
+            float delta = _controller.height - prevHeight;
+            _controller.center = new Vector3(0f, _controller.center.y + delta * 0.5f, 0f);
+        }
+
+        private bool CanStandUp()
+        {
+            // Sphere cast lên trên kiểm tra có đụng trần/vật cản không
+            float radius = _controller.radius * 0.9f;
+            Vector3 origin = transform.position + Vector3.up * (_controller.height + 0.05f);
+            return !Physics.SphereCast(
+                origin, radius, Vector3.up, out _,
+                sneakHeightReduction, standUpCheckMask, QueryTriggerInteraction.Ignore
+            );
+        }
+
+        // ========== Movement ==========
+
+        private void UpdateMovement()
+        {
+            Vector3 moveDir = _input.WorldDirection;
+            float inputMagnitude = _input.Magnitude;
+
+            IsMoving = inputMagnitude > 0.1f;
+            // IsRunning giờ dựa vào MAGNITUDE, không phải SprintHeld
+            IsRunning = IsMoving && !IsSneaking && inputMagnitude >= runThreshold;
+
+            // Pick target speed
+            float targetSpeed = IsSneaking ? sneakSpeed
+                              : IsRunning ? runSpeed
+                              : walkSpeed;
+
+            // Velocity đích — KHÔNG nhân với magnitude nữa (vì magnitude đã quyết speed tier)
+            Vector3 desiredVelocity = IsMoving ? moveDir * targetSpeed : Vector3.zero;
+
+            // Acceleration mượt
+            _horizontalVelocity = Vector3.MoveTowards(
+                _horizontalVelocity, desiredVelocity, acceleration * Time.deltaTime
+            );
+
+            // Gravity
             if (_controller.isGrounded && _verticalVelocity < 0f)
-                _verticalVelocity = -2f;  // giá trị nhỏ âm giữ grounded ổn định
+                _verticalVelocity = -2f;
             else
                 _verticalVelocity += gravity * Time.deltaTime;
 
-            // Kết hợp horizontal + vertical
-            Vector3 velocity = horizontalVelocity + Vector3.up * _verticalVelocity;
-            _controller.Move(velocity * Time.deltaTime);
+            // Move
+            Vector3 totalVelocity = _horizontalVelocity + Vector3.up * _verticalVelocity;
+            _controller.Move(totalVelocity * Time.deltaTime);
+
+            // NormalizedSpeed cho animation
+            float maxSpeed = IsRunning ? runSpeed : (IsSneaking ? sneakSpeed : walkSpeed);
+            NormalizedSpeed = maxSpeed > 0.01f ? _horizontalVelocity.magnitude / maxSpeed : 0f;
         }
 
-        private void HandleRotation()
+        // ========== Rotation ==========
+
+        private void UpdateRotation()
         {
-            // Chỉ xoay khi có input (không xoay về facing 0 khi đứng yên)
-            if (!_input.HasInput) return;
+            if (!IsMoving) return;
 
-            // Target rotation: face theo direction di chuyển
             Quaternion targetRot = Quaternion.LookRotation(_input.WorldDirection, Vector3.up);
-
-            // Lerp mượt thay vì snap rotation
             transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRot,
-                rotationSmoothness * Time.deltaTime
+                transform.rotation, targetRot, rotationSmoothness * Time.deltaTime
             );
         }
     }

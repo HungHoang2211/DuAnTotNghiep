@@ -6,7 +6,7 @@ namespace Xyla.Player
 {
     public class PlayerCombat : MonoBehaviour
     {
-        private static readonly int AttackParam = Animator.StringToHash("Attack");
+        private static readonly int AttackParam = Animator.StringToHash("ActionAttackMeleeFists");
 
         [Header("Input")]
         [SerializeField] private PlayerInputReader _input;
@@ -49,6 +49,7 @@ namespace Xyla.Player
 
         private void PerformAttack()
         {
+            _animator.SetInteger("ActionIndex", Random.Range(0, 4));
             TriggerAttackAnimation();
             PlayAttackSound();
             DetectAndDamageEnemies();
@@ -65,7 +66,6 @@ namespace Xyla.Player
             {
                 if (!IsInAttackAngle(_hitBuffer[i].transform.position)) continue;
 
-                // Tìm IDamageable trên enemy hoặc parent của nó
                 var damageable = _hitBuffer[i].GetComponentInParent<IDamageable>();
                 if (damageable == null || damageable.IsDead) continue;
 
@@ -95,16 +95,13 @@ namespace Xyla.Player
             _audioSource.PlayOneShot(_attackClip, _attackVolume);
         }
 
-        // Vẽ tầm đánh trong Scene view để dễ chỉnh
         private void OnDrawGizmosSelected()
         {
             Vector3 origin = transform.position + transform.forward * (_attackRange * 0.3f);
 
-            // Vòng tròn tầm đánh
             Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.3f);
             Gizmos.DrawWireSphere(origin, _attackRange);
 
-            // Góc hình quạt
             Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
             float halfAngle = _attackAngle * 0.5f;
             Vector3 leftDir = Quaternion.Euler(0, -halfAngle, 0) * transform.forward;

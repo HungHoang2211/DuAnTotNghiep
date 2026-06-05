@@ -7,7 +7,7 @@ namespace Xyla.Player
     public class TopDownMover : MonoBehaviour
     {
         private static readonly int AnimMoveSpeed = Animator.StringToHash("MoveSpeed");
-        private static readonly int AnimIsSneaking = Animator.StringToHash("IsSneaking");
+        private static readonly int AnimMoveMode = Animator.StringToHash("MoveMode");
 
         [Header("Input")]
         [SerializeField] private PlayerInputReader _input;
@@ -42,7 +42,6 @@ namespace Xyla.Player
         private Vector3 _horizontalVelocity;
         private float _verticalVelocity;
 
-        // Lưu height gốc của CharacterController (lấy từ Inspector, không override)
         private float _originalHeight;
         private float _originalCenterY;
 
@@ -90,7 +89,6 @@ namespace Xyla.Player
         {
             bool wantSneak = _input.SneakHeld;
 
-            // Nếu muốn đứng dậy nhưng bị vật cản → ép giữ sneak và sync lại toggle
             if (!wantSneak && IsSneaking && !CanStandUp())
             {
                 _input.ForceSneak(true);
@@ -117,8 +115,7 @@ namespace Xyla.Player
         {
             float radius = _cc.radius * 0.9f;
             float checkDist = _sneakHeightReduction;
-            Vector3 origin = transform.position
-                             + Vector3.up * (_cc.height + 0.05f);
+            Vector3 origin = transform.position + Vector3.up * (_cc.height + 0.05f);
             return !Physics.SphereCast(origin, radius, Vector3.up, out _,
                                        checkDist, ~LayerMask.GetMask("Player"),
                                        QueryTriggerInteraction.Ignore);
@@ -158,7 +155,7 @@ namespace Xyla.Player
 
         private void UpdateMovementFlags(Vector3 dir)
         {
-            IsMoving = dir.sqrMagnitude > 0.01f;
+            IsMoving = dir.sqrMagnitude > 0.04f;
             IsRunning = IsMoving && !IsSneaking && _input.SprintHeld;
         }
 
@@ -169,12 +166,24 @@ namespace Xyla.Player
             transform.rotation = Quaternion.Slerp(
                 transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
         }
+
         private void UpdateAnimator()
         {
             if (_animator == null) return;
-            float target = !IsMoving ? 0f : IsRunning ? 1f : 0.5f;
-            _animator.SetFloat(AnimMoveSpeed, target, _speedDampTime, Time.deltaTime);
-            _animator.SetBool(AnimIsSneaking, IsSneaking);
+
+
+            float speedTarget;
+            if (!IsMoving)
+                speedTarget = 0f;
+            else if (IsSneaking)
+                speedTarget = 1f;        
+            else if (IsRunning)
+                speedTarget = 1f;        
+            else
+                speedTarget = 0.5f;      
+
+            _animator.SetFloat(AnimMoveSpeed, speedTarget, _speedDampTime, Time.deltaTime);
+            _animator.SetInteger(AnimMoveMode, IsSneaking ? 1 : 0);
         }
     }
 }
