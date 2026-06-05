@@ -7,14 +7,14 @@ namespace SimpleSurvival.Items
     /// <summary>
     /// Connects cell hold events to the item info panel. When the player holds
     /// a cell that contains an item, the panel appears beside it; releasing the
-    /// hold or beginning a drag hides it again. Empty cells show nothing.
+    /// hold or beginning a drag hides it again.
     /// </summary>
     public sealed class InventoryInfoController : MonoBehaviour
     {
         [SerializeField] private ItemInfoPanel infoPanel;
 
-        [Tooltip("Every SlotUI that can show item info. Leave empty to auto-collect.")]
-        [SerializeField] private List<SlotUI> cells = new List<SlotUI>();
+        [Tooltip("Every CellUI that can show item info. Leave empty to auto-collect.")]
+        [SerializeField] private List<CellUI> cells = new List<CellUI>();
 
         [SerializeField] private bool autoCollectFromChildren = true;
 
@@ -23,13 +23,13 @@ namespace SimpleSurvival.Items
             if (cells.Count == 0 && autoCollectFromChildren)
             {
                 cells.Clear();
-                cells.AddRange(GetComponentsInChildren<SlotUI>(includeInactive: true));
+                cells.AddRange(GetComponentsInChildren<CellUI>(includeInactive: true));
             }
         }
 
         private void OnEnable()
         {
-            foreach (SlotUI cell in cells)
+            foreach (CellUI cell in cells)
             {
                 cell.OnHeld += HandleCellHeld;
                 cell.OnReleased += HandleCellReleased;
@@ -39,7 +39,7 @@ namespace SimpleSurvival.Items
 
         private void OnDisable()
         {
-            foreach (SlotUI cell in cells)
+            foreach (CellUI cell in cells)
             {
                 cell.OnHeld -= HandleCellHeld;
                 cell.OnReleased -= HandleCellReleased;
@@ -47,20 +47,18 @@ namespace SimpleSurvival.Items
             }
         }
 
-        private void HandleCellHeld(SlotUI cell)
+        private void HandleCellHeld(CellUI cell)
         {
-            if (!cell.HasItem)
-                return;
-
+            if (!cell.HasItem) return;
             infoPanel.Show(cell.CurrentStack, cell.transform as RectTransform);
         }
 
-        private void HandleCellReleased(SlotUI cell)
+        private void HandleCellReleased(CellUI cell)
         {
             infoPanel.Hide();
         }
 
-        private void HandleBeginDrag(SlotUI cell, PointerEventData eventData)
+        private void HandleBeginDrag(CellUI cell, PointerEventData eventData)
         {
             infoPanel.Hide();
         }
