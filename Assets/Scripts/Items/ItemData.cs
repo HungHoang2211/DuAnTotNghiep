@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Defines a TYPE of item (its shared, unchanging data). Created as an asset
-    /// in the project. Every stone axe in the game points to the same ItemData.
-    /// Per-instance state that changes during play (quantity, current durability)
-    /// lives in ItemStack, never here.
-    /// </summary>
     [CreateAssetMenu(menuName = "Simple Survival/Item Data", fileName = "NewItem")]
     public sealed class ItemData : ScriptableObject
     {
@@ -40,12 +34,6 @@ namespace SimpleSurvival.Items
         public int MaxStack => isStackable ? maxStack : 1;
         public int MaxDurability => maxDurability;
         public bool IsDurable => maxDurability > 0;
-
-        /// <summary>
-        /// Returns the ability of the requested type, or null if this item
-        /// does not have it. Lets callers ask "can this item do X" without
-        /// ever doing a type check themselves.
-        /// </summary>
         public TAbility GetAbility<TAbility>() where TAbility : ItemAbility
         {
             foreach (ItemAbility ability in abilities)
@@ -61,10 +49,6 @@ namespace SimpleSurvival.Items
             return GetAbility<TAbility>() != null;
         }
 
-        /// <summary>
-        /// Returns true when this item carries ALL of the requested tags.
-        /// Pass multiple tags with the | operator: HasTag(ItemTag.Tool | ItemTag.Weapon).
-        /// </summary>
         public bool HasTag(ItemTag tag)
         {
             return (tags & tag) == tag;

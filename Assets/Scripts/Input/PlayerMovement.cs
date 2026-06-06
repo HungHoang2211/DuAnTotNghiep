@@ -3,13 +3,6 @@ using SimpleSurvival.Input;
 
 namespace SimpleSurvival.Player
 {
-    /// <summary>
-    /// Di chuyển player với 3 mức tốc độ (walk/run/sneak), acceleration mượt,
-    /// và sneak collider resize (capsule co lại để chui qua khe hẹp).
-    /// 
-    /// Trách nhiệm THUẦN movement — không động đến animation hay action.
-    /// Animation tách ra PlayerAnimator.cs.
-    /// </summary>
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(PlayerInputReader))]
     public class PlayerMovement : MonoBehaviour
@@ -42,16 +35,11 @@ namespace SimpleSurvival.Player
         [Header("Gravity")]
         [SerializeField] private float gravity = -20f;
 
-        // ========== Public state (cho PlayerAnimator đọc) ==========
-
         public bool IsMoving { get; private set; }
         public bool IsRunning { get; private set; }
         public bool IsSneaking { get; private set; }
 
-        /// <summary>Tốc độ hiện tại / tốc độ tối đa hiện tại. 0..1 cho animation blend.</summary>
         public float NormalizedSpeed { get; private set; }
-
-        // ========== Internals ==========
 
         private CharacterController _controller;
         private PlayerInputReader _input;
@@ -59,7 +47,6 @@ namespace SimpleSurvival.Player
         private Vector3 _horizontalVelocity;
         private float _verticalVelocity;
 
-        // Lưu height gốc của collider (đọc từ Inspector, không hardcode)
         private float _originalHeight;
         private float _originalCenterY;
 
@@ -79,13 +66,10 @@ namespace SimpleSurvival.Player
             UpdateRotation();
         }
 
-        // ========== Sneak ==========
-
         private void UpdateSneakState()
         {
             bool wantSneak = _input.SneakHeld;
 
-            // Muốn đứng dậy nhưng có vật cản → ép sneak tiếp + sync UI button
             if (!wantSneak && IsSneaking && !CanStandUp())
             {
                 _input.ForceSneak(true);
@@ -105,14 +89,12 @@ namespace SimpleSurvival.Player
             float prevHeight = _controller.height;
             _controller.height = Mathf.Lerp(_controller.height, targetHeight, sneakLerpSpeed * Time.deltaTime);
 
-            // Khi height đổi, center phải đổi theo để chân giữ chạm đất (không bay lên)
             float delta = _controller.height - prevHeight;
             _controller.center = new Vector3(0f, _controller.center.y + delta * 0.5f, 0f);
         }
 
         private bool CanStandUp()
         {
-            // Sphere cast lên trên kiểm tra có đụng trần/vật cản không
             float radius = _controller.radius * 0.9f;
             Vector3 origin = transform.position + Vector3.up * (_controller.height + 0.05f);
             return !Physics.SphereCast(
@@ -121,46 +103,36 @@ namespace SimpleSurvival.Player
             );
         }
 
-        // ========== Movement ==========
-
         private void UpdateMovement()
         {
             Vector3 moveDir = _input.WorldDirection;
             float inputMagnitude = _input.Magnitude;
 
             IsMoving = inputMagnitude > 0.1f;
-            // IsRunning giờ dựa vào MAGNITUDE, không phải SprintHeld
             IsRunning = IsMoving && !IsSneaking && inputMagnitude >= runThreshold;
 
-            // Pick target speed
             float targetSpeed = IsSneaking ? sneakSpeed
                               : IsRunning ? runSpeed
                               : walkSpeed;
 
-            // Velocity đích — KHÔNG nhân với magnitude nữa (vì magnitude đã quyết speed tier)
             Vector3 desiredVelocity = IsMoving ? moveDir * targetSpeed : Vector3.zero;
 
-            // Acceleration mượt
             _horizontalVelocity = Vector3.MoveTowards(
                 _horizontalVelocity, desiredVelocity, acceleration * Time.deltaTime
             );
 
-            // Gravity
             if (_controller.isGrounded && _verticalVelocity < 0f)
                 _verticalVelocity = -2f;
             else
                 _verticalVelocity += gravity * Time.deltaTime;
 
-            // Move
             Vector3 totalVelocity = _horizontalVelocity + Vector3.up * _verticalVelocity;
             _controller.Move(totalVelocity * Time.deltaTime);
 
-            // NormalizedSpeed cho animation
             float maxSpeed = IsRunning ? runSpeed : (IsSneaking ? sneakSpeed : walkSpeed);
             NormalizedSpeed = maxSpeed > 0.01f ? _horizontalVelocity.magnitude / maxSpeed : 0f;
         }
 
-        // ========== Rotation ==========
 
         private void UpdateRotation()
         {

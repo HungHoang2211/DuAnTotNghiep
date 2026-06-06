@@ -2,19 +2,9 @@
 
 namespace SimpleSurvival.Player
 {
-    /// <summary>
-    /// Bridge giữa PlayerMovement state và Animator parameters.
-    /// 
-    /// Trách nhiệm: ĐỌC state từ PlayerMovement, SET parameters cho Animator.
-    /// KHÔNG drive movement, KHÔNG xử lý input.
-    /// 
-    /// Tách riêng để: nếu sau này đổi animator (model khác, controller khác),
-    /// chỉ sửa file này, không động đến movement logic.
-    /// </summary>
     [RequireComponent(typeof(PlayerMovement))]
     public class PlayerAnimator : MonoBehaviour
     {
-        // Cached parameter hashes — nhanh hơn dùng string mỗi frame
         private static readonly int ParamMoveSpeed = Animator.StringToHash("MoveSpeed");
         private static readonly int ParamMoveMode = Animator.StringToHash("MoveMode");
 
@@ -38,8 +28,6 @@ namespace SimpleSurvival.Player
         private void Awake()
         {
             _movement = GetComponent<PlayerMovement>();
-
-            // Tự tìm Animator nếu chưa gán (trên con)
             if (animator == null)
                 animator = GetComponentInChildren<Animator>();
         }
@@ -54,8 +42,6 @@ namespace SimpleSurvival.Player
 
         private void UpdateMoveSpeed()
         {
-            // NormalizedSpeed 0..1 — Animator blend tree tự pick clip phù hợp
-            // 0 = idle, 0.5 = walk, 1 = run (tùy blend tree setup)
             animator.SetFloat(ParamMoveSpeed, _movement.NormalizedSpeed, speedDampTime, Time.deltaTime);
         }
 
