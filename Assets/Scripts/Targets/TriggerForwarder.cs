@@ -7,6 +7,12 @@ namespace SimpleSurvival.Targets
     {
         [SerializeField] private PlayerTargetChecker checker;
 
+        private void Awake()
+        {
+            if (checker == null)
+                checker = GetComponent<PlayerTargetChecker>();
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             if (checker != null) checker.OnTargetEnter(other);

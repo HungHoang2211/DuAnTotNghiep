@@ -41,7 +41,6 @@ namespace SimpleSurvival.UI.HealthBar
 
             if (playerNameLabel != null)
                 playerNameLabel.text = playerName;
-
         }
 
         private void OnDisable()

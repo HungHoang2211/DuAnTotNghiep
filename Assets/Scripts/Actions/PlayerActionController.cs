@@ -36,9 +36,9 @@ namespace SimpleSurvival.Player
             PlayerTransform = transform;
 
             if (animator == null) animator = GetComponentInChildren<Animator>();
-            if (playerStats == null) playerStats = GetComponent<PlayerStats>();
-            if (playerEquipment == null) playerEquipment = GetComponent<PlayerEquipment>();
-            if (inventoryQueries == null) inventoryQueries = GetComponent<PlayerInventoryQueries>();
+            if (playerStats == null) playerStats = GetComponentInChildren<PlayerStats>();
+            if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
+            if (inventoryQueries == null) inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
 
             _idleAction = new IdleAction(this);
             _moveAction = new MoveAction(this, moveConfig);
