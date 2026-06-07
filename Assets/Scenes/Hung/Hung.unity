@@ -3768,6 +3768,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 151805943}
+  - component: {fileID: 151805944}
   m_Layer: 5
   m_Name: BarObject
   m_TagString: Untagged
@@ -3797,6 +3798,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 45}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &151805944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151805942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a59e5860ee64ba64aaee5d915985bd21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bar: {fileID: 698030331}
+  barBack: {fileID: 1904144551}
+  damageColor: {r: 0.95686275, g: 0.42745098, b: 0.42745098, a: 1}
+  healColor: {r: 0.53333336, g: 0.8666667, b: 0.4, a: 1}
+  speed: 3
+  speedLimitMin: 0.1
+  speedLimitMax: 2
 --- !u!1 &154633415
 GameObject:
   m_ObjectHideFlags: 0
@@ -5195,6 +5215,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 267484587}
+  - component: {fileID: 267484588}
   m_Layer: 5
   m_Name: HealthPanel
   m_TagString: Untagged
@@ -5222,6 +5243,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 350, y: 45}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &267484588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267484586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e71267dc2e172ae4baaaca9754f5bee7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStats: {fileID: 8905305806091854575}
+  hpBar: {fileID: 151805944}
+  healOverTimeBar: {fileID: 940604919}
+  healPreviewSeconds: 5
+  hpAmountLabel: {fileID: 1178725582}
+  playerNameLabel: {fileID: 964442161}
+  playerName: Player
 --- !u!1 &267793841
 GameObject:
   m_ObjectHideFlags: 0
@@ -18580,6 +18620,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 935447855}
+  - component: {fileID: 935447856}
   m_Layer: 5
   m_Name: EnemyHealthPanel
   m_TagString: Untagged
@@ -18607,6 +18648,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -14}
   m_SizeDelta: {x: 350, y: 45}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &935447856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935447854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29b982ebdc964384dbd1e3803f4e1f53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetChecker: {fileID: 8905305806091854572}
+  panelRoot: {fileID: 935447854}
+  hpBar: {fileID: 1043142160}
+  hpAmountLabel: {fileID: 436418525}
+  enemyNameLabel: {fileID: 875279357}
 --- !u!1 &937908325
 GameObject:
   m_ObjectHideFlags: 0
@@ -20330,6 +20388,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1043142159}
+  - component: {fileID: 1043142160}
   m_Layer: 5
   m_Name: BarObject
   m_TagString: Untagged
@@ -20359,6 +20418,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 45}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1043142160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043142158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a59e5860ee64ba64aaee5d915985bd21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bar: {fileID: 1999620430}
+  barBack: {fileID: 510789691}
+  damageColor: {r: 0.95686275, g: 0.42745098, b: 0.42745098, a: 1}
+  healColor: {r: 0.95686275, g: 0.42745098, b: 0.42745098, a: 1}
+  speed: 3
+  speedLimitMin: 0.1
+  speedLimitMax: 2
 --- !u!1 &1049407738
 GameObject:
   m_ObjectHideFlags: 0
