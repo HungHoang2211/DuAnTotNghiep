@@ -51,8 +51,6 @@ namespace SimpleSurvival.Actions
         {
             FacingTarget();
 
-            //_animator.SetBool(ParamIsInCombat, true);
-
             int randomIndex = UnityEngine.Random.Range(0, 4);
             _animator.SetFloat(ParamActionIndex, (float)randomIndex);
             _animator.SetTrigger(ParamActionAttackMeleeFists);
