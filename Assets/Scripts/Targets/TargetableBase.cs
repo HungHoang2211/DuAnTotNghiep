@@ -6,9 +6,8 @@ namespace SimpleSurvival.Targets
     public abstract class TargetableBase : MonoBehaviour, ITargetable
     {
         [SerializeField] protected float radius = 0.5f;
-        [SerializeField] protected Transform groundAnchor;
 
-        public Transform Transform => groundAnchor != null ? groundAnchor : transform;
+        public Transform Transform => transform;
         public float Radius => radius;
         public abstract TargetType Type { get; }
 

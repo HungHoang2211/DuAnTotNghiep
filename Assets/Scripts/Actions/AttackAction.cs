@@ -10,6 +10,7 @@ namespace SimpleSurvival.Actions
     {
         private static readonly int ParamActionAttackMeleeFists = Animator.StringToHash("ActionAttackMeleeFists");
         private static readonly int ParamActionIndex = Animator.StringToHash("ActionIndex");
+        private static readonly int ParamIsInCombat = Animator.StringToHash("IsInCombat");
 
         public ActionType Type => ActionType.Attack;
         public bool IsCompleted { get; private set; }
@@ -50,6 +51,8 @@ namespace SimpleSurvival.Actions
         {
             FacingTarget();
 
+            //_animator.SetBool(ParamIsInCombat, true);
+
             int randomIndex = UnityEngine.Random.Range(0, 4);
             _animator.SetFloat(ParamActionIndex, (float)randomIndex);
             _animator.SetTrigger(ParamActionAttackMeleeFists);
@@ -72,10 +75,22 @@ namespace SimpleSurvival.Actions
             float distance = Vector3.Distance(_controller.PlayerTransform.position, _target.Transform.position);
             if (distance > _range + _target.Radius) return;
 
-            BaseStats targetStats = (_target as MonoBehaviour)?.GetComponent<BaseStats>();
-            if (targetStats == null) return;
+            MonoBehaviour targetMb = _target as MonoBehaviour;
+            if (targetMb == null) return;
 
-            targetStats.TakeDamage(_damage);
+            BaseStats stats = targetMb.GetComponent<BaseStats>();
+            if (stats != null)
+            {
+                stats.TakeDamage(_damage);
+                return;
+            }
+
+
+            Xyla.Combat.IDamageable damageable = targetMb.GetComponent<Xyla.Combat.IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(_damage, _controller.gameObject);
+            }
         }
 
         public void HandleEnd()

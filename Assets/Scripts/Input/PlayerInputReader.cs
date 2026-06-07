@@ -18,6 +18,8 @@ namespace SimpleSurvival.Input
         private PlayerActionController _actionController;
         private bool _sneakFromUI;
 
+        public bool IsSneakHeld => _sneakFromUI || (enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak));
+
         public void SetSneakFromUI(bool held) => _sneakFromUI = held;
         public void SetSprintFromUI(bool held) { }
 

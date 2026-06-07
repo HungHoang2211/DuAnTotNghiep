@@ -3,7 +3,8 @@ namespace SimpleSurvival.Targets
     public enum TargetType
     {
         Enemy,
-        Resource,
+        Pickup,
+        Harvest,
         Container,
         Workbench,
         Trader,

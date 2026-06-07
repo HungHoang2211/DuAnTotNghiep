@@ -45,6 +45,7 @@ namespace SimpleSurvival.Stats
             float reduction = ArmorReduction(_armor);
             float finalDamage = rawDamage * (1f - reduction);
             SetHP(HP - finalDamage);
+            Debug.Log($"[{name}] Take damage: {rawDamage}, HP before: {HP}");
         }
 
         public void Heal(float amount)

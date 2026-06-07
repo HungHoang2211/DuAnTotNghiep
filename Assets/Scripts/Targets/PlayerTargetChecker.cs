@@ -56,17 +56,18 @@ namespace SimpleSurvival.Targets
             ITargetable newEnemy = FindClosest(true);
             ITargetable newUsable = FindClosest(false);
 
+            UpdateMarker(enemyMarker, newEnemy, true);
+            UpdateMarker(usableMarker, newUsable, false);
+
             if (newEnemy != CurrentEnemy)
             {
                 CurrentEnemy = newEnemy;
-                UpdateMarker(enemyMarker, newEnemy, true);
                 OnEnemyChanged?.Invoke(newEnemy);
             }
 
             if (newUsable != CurrentUsable)
             {
                 CurrentUsable = newUsable;
-                UpdateMarker(usableMarker, newUsable, false);
                 OnUsableChanged?.Invoke(newUsable);
             }
         }

@@ -16,6 +16,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private Animator animator;
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private PlayerEquipment playerEquipment;
+        [SerializeField] private PlayerInventoryQueries inventoryQueries;
 
         [Header("Combat Settings")]
         [SerializeField] private float baseAttackRange = 1.5f;
@@ -37,6 +38,7 @@ namespace SimpleSurvival.Player
             if (animator == null) animator = GetComponentInChildren<Animator>();
             if (playerStats == null) playerStats = GetComponent<PlayerStats>();
             if (playerEquipment == null) playerEquipment = GetComponent<PlayerEquipment>();
+            if (inventoryQueries == null) inventoryQueries = GetComponent<PlayerInventoryQueries>();
 
             _idleAction = new IdleAction(this);
             _moveAction = new MoveAction(this, moveConfig);
@@ -75,7 +77,6 @@ namespace SimpleSurvival.Player
 
         public bool RequestAttack(ITargetable target)
         {
-            if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null || playerStats == null) return false;
 
             float damage = playerStats.BaseDamage;
@@ -119,5 +120,21 @@ namespace SimpleSurvival.Player
 
             OnActionChanged?.Invoke(oldAction, _idleAction);
         }
+
+        public bool RequestPickup(PickupTarget target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null || inventoryQueries == null) return false;
+
+            if (!inventoryQueries.CanAddItem(target.ItemData, target.Quantity))
+            {
+                Debug.Log("[ActionController] Inventory full, cannot pickup");
+                return false;
+            }
+
+            PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
+            return TryRequestAction(pickup);
+        }
     }
+
 }

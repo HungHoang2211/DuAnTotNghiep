@@ -53,6 +53,8 @@ namespace SimpleSurvival.Targets
             if (_followTarget == null) return;
 
             Vector3 pos = _followTarget.position;
+            Debug.Log($"[Marker] target={_followTarget.name}, target.position={pos}, applied to {gameObject.name}");
+
             pos.y = yOffset;
             transform.position = pos;
 

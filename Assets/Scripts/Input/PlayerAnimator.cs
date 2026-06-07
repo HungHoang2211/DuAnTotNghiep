@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using SimpleSurvival.Actions;
+using SimpleSurvival.Input;
 
 namespace SimpleSurvival.Player
 {
@@ -10,8 +11,9 @@ namespace SimpleSurvival.Player
         private static readonly int ParamMoveMode = Animator.StringToHash("MoveMode");
 
         [SerializeField] private Animator animator;
+        [SerializeField] private PlayerInputReader inputReader;
         [SerializeField] private int moveModeNormal = 0;
-        [SerializeField] private int moveModeSneak = 4;
+        [SerializeField] private int moveModeSneak = 1;
         [SerializeField] private float speedDampTime = 0.1f;
 
         private PlayerActionController _actionController;
@@ -19,8 +21,8 @@ namespace SimpleSurvival.Player
         private void Awake()
         {
             _actionController = GetComponent<PlayerActionController>();
-            if (animator == null)
-                animator = GetComponentInChildren<Animator>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
+            if (inputReader == null) inputReader = GetComponent<PlayerInputReader>();
         }
 
         private void Update()
@@ -28,13 +30,11 @@ namespace SimpleSurvival.Player
             if (animator == null) return;
 
             float moveSpeed = 0f;
-            bool isSneaking = false;
 
             if (_actionController.CurrentAction is MoveAction move)
-            {
                 moveSpeed = move.NormalizedSpeed;
-                isSneaking = move.IsSneaking;
-            }
+
+            bool isSneaking = inputReader != null && inputReader.IsSneakHeld;
 
             animator.SetFloat(ParamMoveSpeed, moveSpeed, speedDampTime, Time.deltaTime);
             animator.SetInteger(ParamMoveMode, isSneaking ? moveModeSneak : moveModeNormal);
