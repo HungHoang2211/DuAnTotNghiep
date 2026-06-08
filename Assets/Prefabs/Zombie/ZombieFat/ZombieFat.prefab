@@ -2819,8 +2819,8 @@ GameObject:
   - component: {fileID: 4959282023112273432}
   - component: {fileID: 5804780784029234990}
   - component: {fileID: 7230465798756799081}
-  - component: {fileID: 8278607386561033979}
   - component: {fileID: 349651418300874036}
+  - component: {fileID: -137147942667614784}
   m_Layer: 8
   m_Name: ZombieFat
   m_TagString: Enemy
@@ -2977,7 +2977,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _hearingRadius: 7
-  _hearingNoiseThreshold: 0.3
   _chaseSpeed: 4
   _chaseRadius: 10
   _loseTargetTime: 4
@@ -2991,23 +2990,7 @@ MonoBehaviour:
   _mouthTransform: {fileID: 0}
   _acidSpeed: 7
   _acidLifetime: 3
-  _despawnDelay: 5
---- !u!114 &8278607386561033979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8363300174663062271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1797a9f993a94bb4d9a68028b95e4085, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _maxHealth: 250
-  _audioSource: {fileID: 0}
-  _hitClip: {fileID: 0}
-  _deathClip: {fileID: 0}
+  _despawnDelay: 30
 --- !u!114 &349651418300874036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3021,6 +3004,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lifetime: 0
+--- !u!114 &-137147942667614784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa4c47e264b42ba4fa04c5ff49a48009, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHealth: 150
 --- !u!1 &8416963274110584342
 GameObject:
   m_ObjectHideFlags: 0

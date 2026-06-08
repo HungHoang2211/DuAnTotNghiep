@@ -1,26 +1,28 @@
 ﻿using UnityEngine;
 using Xyla.Combat;
 
-public class ZombieHealth : MonoBehaviour, IDamageable
+public class EnemyHealthH : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
     [SerializeField] private float _maxHealth = 100f;
 
-    [Header("Audio (optional)")]
-    [SerializeField] private AudioSource _audioSource;
-    [SerializeField] private AudioClip _hitClip;
-    [SerializeField] private AudioClip _deathClip;
-
     public float CurrentHealth { get; private set; }
     public bool IsDead { get; private set; }
 
-    private ZombieController _controller;
+    private ZombieController _zombie;
+    private ZombieFatController _zombieFat;
+    private WolfController _wolf;
+    private DeerController _deer;
+
     private int _lastDamageFrame = -1;
 
     private void Awake()
     {
         CurrentHealth = _maxHealth;
-        _controller = GetComponent<ZombieController>();
+        _zombie = GetComponent<ZombieController>();
+        _zombieFat = GetComponent<ZombieFatController>();
+        _wolf = GetComponent<WolfController>();
+        _deer = GetComponent<DeerController>();
     }
 
     private void OnSpawnFromPool()
@@ -40,32 +42,35 @@ public class ZombieHealth : MonoBehaviour, IDamageable
         _lastDamageFrame = Time.frameCount;
 
         CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
-        PlaySound(_hitClip);
 
         if (CurrentHealth <= 0f)
-            ZombieDie();
-        else if (_controller != null && source != null)
-            _controller.OnTakeDamage(source.transform);
+            Die();
+        else if (source != null)
+            NotifyTakeDamage(source.transform);
 
         return !IsDead;
     }
 
-    private void ZombieDie()
+    private void Die()
     {
         if (IsDead) return;
         IsDead = true;
-        PlaySound(_deathClip);
 
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        if (_controller != null) _controller.Die();
+        if (_zombie != null) _zombie.Die();
+        else if (_zombieFat != null) _zombieFat.Die();
+        else if (_wolf != null) _wolf.Die();
+        else if (_deer != null) _deer.Die();
     }
 
-    private void PlaySound(AudioClip clip)
+    private void NotifyTakeDamage(Transform attacker)
     {
-        if (_audioSource == null || clip == null) return;
-        _audioSource.PlayOneShot(clip);
+        if (_zombie != null) _zombie.OnTakeDamage(attacker);
+        else if (_zombieFat != null) _zombieFat.OnTakeDamage(attacker);
+        else if (_wolf != null) _wolf.OnTakeDamage(attacker);
+        // DeerController không có OnTakeDamage — nai chỉ bỏ chạy khi bị tấn công
     }
 
     private void OnDrawGizmosSelected()
