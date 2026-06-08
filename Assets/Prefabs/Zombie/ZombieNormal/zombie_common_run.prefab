@@ -2418,7 +2418,7 @@ GameObject:
   - component: {fileID: 6462454601432149408}
   - component: {fileID: 7213027466504647735}
   - component: {fileID: 1956828932666080739}
-  - component: {fileID: 4856535516875649413}
+  - component: {fileID: 2854403518257678318}
   - component: {fileID: 680019447985497470}
   - component: {fileID: -7656215154857311713}
   m_Layer: 8
@@ -2554,7 +2554,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _hearingRadius: 8
-  _hearingNoiseThreshold: 0.3
   _wanderSpeed: 1.5
   _chaseSpeed: 4
   _chaseRadius: 25
@@ -2564,8 +2563,8 @@ MonoBehaviour:
   _attackCooldown: 1.8
   _howlChance: 0.7
   _howlDuration: 2
-  _despawnDelay: 5
---- !u!114 &4856535516875649413
+  _despawnDelay: 30
+--- !u!114 &2854403518257678318
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2574,13 +2573,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7002519786067054812}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2eed703515604b4991af45624642b0e, type: 3}
+  m_Script: {fileID: 11500000, guid: fa4c47e264b42ba4fa04c5ff49a48009, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 200
-  _audioSource: {fileID: 0}
-  _hitClip: {fileID: 0}
-  _deathClip: {fileID: 0}
+  _maxHealth: 100
 --- !u!114 &680019447985497470
 MonoBehaviour:
   m_ObjectHideFlags: 0

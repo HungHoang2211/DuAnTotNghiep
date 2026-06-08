@@ -31,8 +31,6 @@ public class ZombieFatController : MonoBehaviour
 
     [Header("Detection — Hearing")]
     [SerializeField] private float _hearingRadius = 7f;
-    [Tooltip("Mức noise tối thiểu để phát hiện. NoiseSneakWalk=0.15 nên đặt > 0.15.")]
-    [SerializeField] private float _hearingNoiseThreshold = 0.3f;
 
     [Header("Chase — Run Only")]
     [SerializeField] private float _chaseSpeed = 4.5f;
@@ -73,7 +71,6 @@ public class ZombieFatController : MonoBehaviour
     private ZombieFatAnimatorController _anim;
     private ZombieFatSpawnPoint _spawnPoint;
     private Transform _player;
-    private NoiseEmitter _playerNoise;
 
     private bool _isDead = false;
     private bool _isAttacking = false;
@@ -97,7 +94,6 @@ public class ZombieFatController : MonoBehaviour
         _state = State.Wandering;
         _lostTargetTimer = 0f;
         _player = null;
-        _playerNoise = null;
         _lastAttackTime = -999f;
         _lastClawTime = -999f;
 
@@ -225,7 +221,6 @@ public class ZombieFatController : MonoBehaviour
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dirToTarget);
             if (_obstacleLayer != 0 && Physics.Raycast(ray, dist, _obstacleLayer)) continue;
             _player = target;
-            _playerNoise = target.GetComponent<NoiseEmitter>();
             return true;
         }
         return false;
@@ -240,12 +235,7 @@ public class ZombieFatController : MonoBehaviour
         foreach (var hit in hits)
         {
             if (!hit.CompareTag("Player")) continue;
-            var noise = hit.GetComponent<NoiseEmitter>();
-            // Sneak (noise 0.15) < threshold (0.3) → không phát hiện
-            if (noise == null || !noise.IsActive) continue;
-            if (noise.LastNoiseLevel < _hearingNoiseThreshold) continue;
             _player = hit.transform;
-            _playerNoise = noise;
             return true;
         }
         return false;
@@ -320,8 +310,7 @@ public class ZombieFatController : MonoBehaviour
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dir);
             if (_obstacleLayer == 0 || !Physics.Raycast(ray, dist, _obstacleLayer)) return true;
         }
-        if (_playerNoise != null && _playerNoise.IsActive
-            && _playerNoise.LastNoiseLevel >= _hearingNoiseThreshold) return true;
+        if (dist <= _hearingRadius) return true;
         return false;
     }
 
@@ -331,7 +320,6 @@ public class ZombieFatController : MonoBehaviour
         _agent.isStopped = false;
         _agent.speed = _wanderSpeed;
         _player = null;
-        _playerNoise = null;
         _lostTargetTimer = 0f;
         if (_anim != null) _anim.SetIdle();
     }
@@ -431,7 +419,6 @@ public class ZombieFatController : MonoBehaviour
     {
         if (_isDead) return;
         _player = attacker;
-        _playerNoise = attacker.GetComponent<NoiseEmitter>();
         if (_state != State.Chasing) BeginChase();
     }
 
