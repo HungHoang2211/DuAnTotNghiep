@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace SimpleSurvival.Input
 {
@@ -10,34 +9,32 @@ namespace SimpleSurvival.Input
         public enum Mode { Hold, Toggle }
 
         [Header("References")]
+        [Tooltip("PlayerInputReader nhận state từ button này.")]
         [SerializeField] private PlayerInputReader inputReader;
 
         [Header("Settings")]
+        [Tooltip("Loại action button này điều khiển.")]
         [SerializeField] private ActionType action = ActionType.Sneak;
+
+        [Tooltip("Hold = giữ để active. Toggle = tap để bật/tắt.")]
         [SerializeField] private Mode mode = Mode.Toggle;
 
-        [Header("Visual")]
-        [Tooltip("Icon Image của button. Sẽ swap sprite khi active.")]
-        [SerializeField] private Image iconImage;
-        [SerializeField] private Sprite inactiveSprite;
-        [SerializeField] private Sprite activeSprite;
-
-        [Tooltip("Optional: GameObject phụ hiển thị khi active (glow, ring, ...).")]
+        [Header("Visual (optional)")]
+        [Tooltip("GameObject hiển thị khi active (icon highlight, glow, ...). Có thể null.")]
         [SerializeField] private GameObject activeIndicator;
 
         private bool _isActive = false;
 
-        private void Awake()
-        {
-            ApplyVisual();
-        }
-
         public void OnPointerDown(PointerEventData eventData)
         {
             if (mode == Mode.Hold)
+            {
                 SetState(true);
-            else
+            }
+            else // Toggle
+            {
                 SetState(!_isActive);
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -50,35 +47,21 @@ namespace SimpleSurvival.Input
         {
             _isActive = active;
 
-            if (inputReader != null)
-            {
-                switch (action)
-                {
-                    case ActionType.Sneak:
-                        inputReader.SetSneakFromUI(active);
-                        break;
-                    case ActionType.Sprint:
-                        inputReader.SetSprintFromUI(active);
-                        break;
-                }
-            }
+            if (inputReader == null) return;
 
-            ApplyVisual();
-        }
-
-        private void ApplyVisual()
-        {
-            if (iconImage != null)
+            switch (action)
             {
-                Sprite target = _isActive ? activeSprite : inactiveSprite;
-                if (target != null)
-                    iconImage.sprite = target;
+                case ActionType.Sneak:
+                    inputReader.SetSneakFromUI(active);
+                    break;
+                case ActionType.Sprint:
+                    inputReader.SetSprintFromUI(active);
+                    break;
             }
 
             if (activeIndicator != null)
-                activeIndicator.SetActive(_isActive);
+                activeIndicator.SetActive(active);
         }
-
         public void ResetState()
         {
             SetState(false);

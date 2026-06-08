@@ -4,10 +4,17 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
+    /// <summary>
+    /// Connects equipment CellUI cells with EquipmentSystem. Handles:
+    ///   - Displaying equipped items
+    ///   - Selection of equipment slots
+    ///   - Drag highlight for compatible slots
+    ///   - Equip via button or double-click from inventory
+    ///   - Unequip via double-click on equipment cell
+    /// </summary>
     public sealed class EquipmentPanel : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private InventorySelection selection;
         [SerializeField] private ItemActionPanel actionPanel;
@@ -31,10 +38,11 @@ namespace SimpleSurvival.Items
 
         public CellUI SelectedEquipCell => _selectedEquipCell;
 
+        // ── Unity lifecycle ──────────────────────────────────────────────────
 
         private void Awake()
         {
-            _equipmentSystem = playerEquipment.System;
+            _equipmentSystem = new EquipmentSystem();
 
             _allCells = new List<CellUI>
             {
@@ -85,6 +93,8 @@ namespace SimpleSurvival.Items
             }
         }
 
+        // ── Equipment slot selection ─────────────────────────────────────────
+
         private void HandleCellClicked(CellUI cell)
         {
             if (_selectedEquipCell == cell)
@@ -124,12 +134,15 @@ namespace SimpleSurvival.Items
             OnEquipSelectionChanged?.Invoke(null);
         }
 
+        // ── Inventory selection changes ──────────────────────────────────────
+
         private void HandleInventorySelectionChanged(CellUI cell)
         {
             if (cell != null && _selectedEquipCell != null)
                 ClearEquipSelection();
         }
 
+        // ── Drag highlights ──────────────────────────────────────────────────
 
         private void HandleDragBegan(ItemStack stack)
         {
@@ -152,6 +165,7 @@ namespace SimpleSurvival.Items
             _selectedEquipCell?.SetSelected(true);
         }
 
+        // ── Double-click inventory slot → auto equip ─────────────────────────
 
         private void HandleInventoryDoubleClicked(CellUI cell)
         {
@@ -171,6 +185,7 @@ namespace SimpleSurvival.Items
                 selection.Deselect();
         }
 
+        // ── ItemActionPanel equip/unequip requests ───────────────────────────
 
         private void HandleEquipRequested(ItemStack stack)
         {
@@ -204,6 +219,8 @@ namespace SimpleSurvival.Items
 
             ClearEquipSelection();
         }
+
+        // ── Called by InventoryDragController ────────────────────────────────
 
         public void HandleEquipDropToInventory(CellUI sourceCell,
             InventorySystem targetInventory, int targetIndex)
@@ -259,6 +276,8 @@ namespace SimpleSurvival.Items
             _equipmentSystem.SetSlotDirect(toCell.EquipSlot, toIndex, fromStack);
         }
 
+        // ── EquipmentSystem → cell visuals ───────────────────────────────────
+
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
         {
             CellUI cell = GetCell(slot, slotIndex);
@@ -268,6 +287,8 @@ namespace SimpleSurvival.Items
             if (slot == EquipSlot.Backpack)
                 ApplyBackpackResize(stack);
         }
+
+        // ── Backpack helpers ─────────────────────────────────────────────────
 
         private void ApplyBackpackResize(ItemStack backpackStack)
         {
@@ -306,6 +327,7 @@ namespace SimpleSurvival.Items
             return false;
         }
 
+        // ── Helpers ──────────────────────────────────────────────────────────
 
         private CellUI GetCell(EquipSlot slot, int slotIndex)
         {

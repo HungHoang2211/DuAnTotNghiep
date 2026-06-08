@@ -1,60 +1,78 @@
 ﻿using SimpleSurvival.Cameras;
-using SimpleSurvival.Player;
 using UnityEngine;
 
 namespace SimpleSurvival.Input
 {
-    [RequireComponent(typeof(PlayerActionController))]
     public class PlayerInputReader : MonoBehaviour
     {
         [Header("Input Sources")]
+        [Tooltip("Joystick UI cho mobile. Có thể null nếu chỉ test PC.")]
         [SerializeField] private VirtualJoystick joystick;
+
+        [Tooltip("Camera rig để đọc yaw angle (bù camera bằng 45°).")]
         [SerializeField] private CameraRigController cameraRig;
 
         [Header("PC Keyboard Fallback")]
+        [Tooltip("Cho phép keyboard input. Bật trong editor, có thể tắt khi build mobile.")]
         [SerializeField] private bool enableKeyboard = true;
+
+        [Tooltip("Phím sprint (chạy). Mặc định Left Shift.")]
+        [SerializeField] private KeyCode keyboardSprint = KeyCode.LeftShift;
+
+        [Tooltip("Phím sneak. Mặc định Left Ctrl.")]
         [SerializeField] private KeyCode keyboardSneak = KeyCode.LeftControl;
 
-        private PlayerActionController _actionController;
-        private bool _sneakFromUI;
+        public Vector3 WorldDirection { get; private set; } = Vector3.zero;
+        public float Magnitude { get; private set; } = 0f;
 
-        public bool IsSneakHeld => _sneakFromUI || (enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak));
+        public bool HasInput => Magnitude > 0.01f;
 
+        public bool SneakHeld { get; private set; }
+
+        public bool SprintHeld { get; private set; }
+
+        private bool _sneakFromUI = false;
+        private bool _sprintFromUI = false;
         public void SetSneakFromUI(bool held) => _sneakFromUI = held;
-        public void SetSprintFromUI(bool held) { }
+        public void SetSprintFromUI(bool held) => _sprintFromUI = held;
 
         public void ForceSneak(bool value)
         {
             _sneakFromUI = value;
+            SneakHeld = value;
         }
 
         private void Awake()
         {
-            _actionController = GetComponent<PlayerActionController>();
             if (cameraRig == null)
-                cameraRig = FindAnyObjectByType<CameraRigController>();
+                cameraRig = FindFirstObjectByType<CameraRigController>();
         }
 
         private void Update()
         {
+            ReadMovement();
+            ReadModifiers();
+        }
+
+        private void ReadMovement()
+        {
             Vector2 rawInput = ReadRawMovementInput();
-            Vector3 worldDir = Vector3.zero;
-            float magnitude = 0f;
 
-            if (rawInput.sqrMagnitude > 0.001f)
+            if (rawInput.sqrMagnitude < 0.001f)
             {
-                float yaw = cameraRig != null ? cameraRig.YawAngle : 45f;
-                Vector3 inputAsWorld = new Vector3(rawInput.x, 0f, rawInput.y);
-                worldDir = Quaternion.Euler(0f, yaw, 0f) * inputAsWorld;
-                magnitude = Mathf.Clamp01(rawInput.magnitude);
-
-                if (worldDir.sqrMagnitude > 0.001f)
-                    worldDir = worldDir.normalized;
+                WorldDirection = Vector3.zero;
+                Magnitude = 0f;
+                return;
             }
 
-            bool sneakHeld = _sneakFromUI || (enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak));
+            float yaw = cameraRig != null ? cameraRig.YawAngle : 45f;
+            Vector3 inputAsWorld = new Vector3(rawInput.x, 0f, rawInput.y);
+            WorldDirection = Quaternion.Euler(0f, yaw, 0f) * inputAsWorld;
 
-            _actionController.RequestMove(worldDir, magnitude, sneakHeld);
+            Magnitude = Mathf.Clamp01(rawInput.magnitude);
+
+            if (WorldDirection.sqrMagnitude > 0.001f)
+                WorldDirection = WorldDirection.normalized;
         }
 
         private Vector2 ReadRawMovementInput()
@@ -72,6 +90,15 @@ namespace SimpleSurvival.Input
             }
 
             return Vector2.zero;
+        }
+
+        private void ReadModifiers()
+        {
+            bool sneakFromKeyboard = enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak);
+            SneakHeld = _sneakFromUI || sneakFromKeyboard;
+
+            bool sprintFromKeyboard = enableKeyboard && UnityEngine.Input.GetKey(keyboardSprint);
+            SprintHeld = _sprintFromUI || sprintFromKeyboard;
         }
     }
 }
