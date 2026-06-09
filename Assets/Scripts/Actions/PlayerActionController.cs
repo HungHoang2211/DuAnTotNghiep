@@ -30,6 +30,12 @@ namespace SimpleSurvival.Player
         public Transform PlayerTransform { get; private set; }
 
         public bool IsAttackHeld { get; private set; }
+        public bool AttackInputQueued { get; private set; }
+
+        public void ConsumeAttackQueue()
+        {
+            AttackInputQueued = false;
+        }
 
         private IdleAction _idleAction;
         private MoveAction _moveAction;
@@ -96,6 +102,7 @@ namespace SimpleSurvival.Player
         public void SetAttackHeld(bool held)
         {
             IsAttackHeld = held;
+            if (held) AttackInputQueued = true;
         }
 
         public void ForceIdle()

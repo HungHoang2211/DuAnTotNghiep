@@ -60,6 +60,7 @@ namespace SimpleSurvival.Actions
 
         public void Init()
         {
+            _controller.ConsumeAttackQueue();
             _comboIndex = 0;
             StartSwing();
         }
@@ -70,8 +71,9 @@ namespace SimpleSurvival.Actions
 
             _comboWindowRemaining -= deltaTime;
 
-            if (_controller.IsAttackHeld)
+            if (_controller.IsAttackHeld || _controller.AttackInputQueued)
             {
+                _controller.ConsumeAttackQueue();
                 AdvanceComboIndex();
                 StartSwing();
                 return;
@@ -102,7 +104,7 @@ namespace SimpleSurvival.Actions
             if (targetMb == null) return;
 
             IDamageable damageable = targetMb.GetComponent<IDamageable>();
-            if (damageable == null || !damageable.IsAlive) return;
+            if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(_damage, _controller.gameObject);
         }
