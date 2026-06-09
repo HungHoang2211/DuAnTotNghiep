@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Xyla.Combat;
+using SimpleSurvival.Combat;
 using Xyla.Core;
 
 /// <summary>

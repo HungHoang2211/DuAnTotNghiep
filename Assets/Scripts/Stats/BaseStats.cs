@@ -8,6 +8,7 @@ namespace SimpleSurvival.Stats
     {
         public event Action<float, float> OnHPChanged;
         public event Action OnDeath;
+        public event Action<GameObject> OnDamagedBy;
 
         [SerializeField] protected BaseStatsConfig baseConfig;
 
@@ -15,6 +16,7 @@ namespace SimpleSurvival.Stats
 
         private float _armor;
         private float _moveSpeed;
+        private int _lastDamageFrame = -1;
 
         public float HP { get; private set; }
         public float MaxHP => baseConfig != null ? baseConfig.MaxHP : 0f;
@@ -23,6 +25,7 @@ namespace SimpleSurvival.Stats
         public float Armor => _armor;
         public float MoveSpeed => _moveSpeed;
         public bool IsAlive { get; private set; }
+        public bool IsDead => !IsAlive;
 
         protected virtual void Awake()
         {
@@ -32,10 +35,20 @@ namespace SimpleSurvival.Stats
                 return;
             }
 
+            ResetStats();
+        }
+
+        public virtual void ResetStats()
+        {
+            if (baseConfig == null) return;
+
             HP = Mathf.Clamp(baseConfig.StartHP, 0f, baseConfig.MaxHP);
             _armor = baseConfig.Armor;
             _moveSpeed = baseConfig.MoveSpeed;
             IsAlive = HP > 0f;
+            _lastDamageFrame = -1;
+
+            OnHPChanged?.Invoke(HP, MaxHP);
         }
 
         public bool TakeDamage(float rawDamage)
@@ -48,10 +61,22 @@ namespace SimpleSurvival.Stats
             if (!IsAlive || rawDamage <= 0f)
                 return IsAlive;
 
+            if (source != null)
+            {
+                if (Time.frameCount == _lastDamageFrame)
+                    return IsAlive;
+                _lastDamageFrame = Time.frameCount;
+            }
+
             float reduction = ArmorReduction(_armor);
             float finalDamage = rawDamage * (1f - reduction);
             SetHP(HP - finalDamage);
+
             Debug.Log($"[{name}] Take damage: {rawDamage} from {(source != null ? source.name : "unknown")}, HP after: {HP}");
+
+            if (IsAlive && source != null)
+                OnDamagedBy?.Invoke(source);
+
             return IsAlive;
         }
 

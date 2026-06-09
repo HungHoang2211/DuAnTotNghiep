@@ -20,14 +20,23 @@ namespace SimpleSurvival.Stats
         {
             base.Awake();
 
-            if (Config == null)
+            if (baseConfig != null && Config == null)
             {
-                Debug.LogError($"[{name}] PlayerStats requires PlayerStatsConfig, got {baseConfig?.GetType().Name}", this);
-                return;
+                Debug.LogError($"[{name}] PlayerStats requires PlayerStatsConfig, got {baseConfig.GetType().Name}", this);
             }
+        }
+
+        public override void ResetStats()
+        {
+            base.ResetStats();
+
+            if (Config == null) return;
 
             Hunger = Mathf.Clamp(Config.StartHunger, 0f, Config.MaxHunger);
             Thirst = Mathf.Clamp(Config.StartThirst, 0f, Config.MaxThirst);
+
+            OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
+            OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
 
         private void Update()

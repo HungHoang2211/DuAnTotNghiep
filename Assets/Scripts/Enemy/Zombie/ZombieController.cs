@@ -2,57 +2,20 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Stats;
 using Xyla.Core;
 
-
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(EnemyStats))]
 public class ZombieController : MonoBehaviour
 {
-    // ── Move Type ──────────────────────────────────────────
+    [Header("Variant")]
+    [Tooltip("Bật để Zombie dùng run animation khi chase. Tắt = walk. Tương ứng với 2 prefab variant.")]
+    [SerializeField] private bool _isRunner = false;
 
-    public enum MoveType { WalkOnly, RunOnly }
-
-    [Header("Move Type")]
-    [Tooltip("WalkOnly = chỉ dùng walk khi đuổi.\nRunOnly = chỉ dùng run khi đuổi.")]
-    [SerializeField] private MoveType _moveType = MoveType.WalkOnly;
-
-    // ── Inspector ──────────────────────────────────────────
-
-    [Header("Wander")]
-    [SerializeField] private float _wanderRadius = 4f;
-    [SerializeField] private float _wanderIntervalMin = 2f;
-    [SerializeField] private float _wanderIntervalMax = 5f;
-
-    [Header("Detection — Vision")]
-    [SerializeField] private float _visionRange = 12f;
-    [SerializeField] private float _visionAngle = 100f;
+    [Header("Detection Layers")]
     [SerializeField] private LayerMask _playerLayer;
     [SerializeField] private LayerMask _obstacleLayer;
-
-    [Header("Detection — Hearing")]
-    [SerializeField] private float _hearingRadius = 8f;
-
-    [Header("Chase Speed")]
-    [Tooltip("Tốc độ khi wander (luôn dùng walk animation).")]
-    [SerializeField] private float _wanderSpeed = 1.5f;
-    [Tooltip("Tốc độ khi đuổi player (khớp với animation đã chọn).")]
-    [SerializeField] private float _chaseSpeed = 4f;
-    [SerializeField] private float _chaseRadius = 25f;
-    [SerializeField] private float _loseTargetTime = 4f;
-
-    [Header("Attack")]
-    [SerializeField] private float _attackRange = 1.6f;
-    [SerializeField] private float _attackDamage = 15f;
-    [SerializeField] private float _attackCooldown = 1.8f;
-
-    [Header("Howl")]
-    [SerializeField][Range(0f, 1f)] private float _howlChance = 0.7f;
-    [SerializeField] private float _howlDuration = 2f;
-
-    [Header("Death")]
-    [SerializeField] private float _despawnDelay = 120f;
-
-    // ── State ──────────────────────────────────────────────
 
     private enum State { Wandering, Alerting, Chasing, Dead }
     private State _state = State.Wandering;
@@ -60,6 +23,7 @@ public class ZombieController : MonoBehaviour
     private NavMeshAgent _agent;
     private ZombieAnimatorController _anim;
     private ZombieSpawnPoint _spawnPoint;
+    private EnemyStats _stats;
     private Transform _player;
 
     private bool _isDead = false;
@@ -68,16 +32,41 @@ public class ZombieController : MonoBehaviour
     private float _lostTargetTimer = 0f;
     private Vector3 _homePosition;
 
-    // ── Lifecycle ──────────────────────────────────────────
+    private EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<ZombieAnimatorController>();
+        _stats = GetComponent<EnemyStats>();
+
+        if (_stats == null)
+        {
+            Debug.LogError($"[{name}] Missing EnemyStats component", this);
+            return;
+        }
+
+        _stats.OnDeath += HandleDeath;
+        _stats.OnDamagedBy += HandleDamagedBy;
+    }
+
+    private void OnDestroy()
+    {
+        if (_stats != null)
+        {
+            _stats.OnDeath -= HandleDeath;
+            _stats.OnDamagedBy -= HandleDamagedBy;
+        }
     }
 
     public void Initialize(ZombieSpawnPoint spawnPoint)
     {
+        if (Config == null)
+        {
+            Debug.LogError($"[{name}] EnemyStatsConfig missing on EnemyStats", this);
+            return;
+        }
+
         _spawnPoint = spawnPoint;
         _isDead = false;
         _isAttacking = false;
@@ -88,7 +77,7 @@ public class ZombieController : MonoBehaviour
         _lastAttackTime = -999f;
 
         _agent.isStopped = false;
-        _agent.speed = _wanderSpeed;
+        _agent.speed = Config.WanderSpeed;
         _agent.autoBraking = true;
         _agent.stoppingDistance = 0.1f;
         _agent.angularSpeed = 0f;
@@ -104,14 +93,19 @@ public class ZombieController : MonoBehaviour
         StartCoroutine(DetectionRoutine());
     }
 
-    private void OnSpawnFromPool() { }
+    private void HandleDeath() => Die();
+
+    private void HandleDamagedBy(GameObject source)
+    {
+        if (source != null)
+            OnTakeDamage(source.transform);
+    }
 
     private void Update()
     {
         if (_isDead) return;
         SmoothRotation();
 
-        // Force dừng hoàn toàn khi đang tấn công
         if (_isAttacking)
         {
             _agent.isStopped = true;
@@ -141,32 +135,26 @@ public class ZombieController : MonoBehaviour
             transform.rotation, Quaternion.LookRotation(moveDir), 120f * Time.deltaTime);
     }
 
-    // ── Animation Helper ───────────────────────────────────
-
-    /// <summary>
-    /// Bật animation di chuyển theo MoveType đã chọn.
-    /// WalkOnly → SetWalking(true) | RunOnly → SetRunning(true)
-    /// </summary>
     private void PlayChaseAnimation()
     {
         if (_anim == null) return;
-        if (_moveType == MoveType.WalkOnly)
-            _anim.SetWalking(true);
-        else
+        if (_isRunner)
             _anim.SetRunning(true);
+        else
+            _anim.SetWalking(true);
     }
-
-    // ── Wander ────────────────────────────────────────────
 
     private IEnumerator WanderRoutine()
     {
         while (!_isDead)
         {
+            if (Config == null) yield break;
+
             if (_state == State.Wandering)
             {
-                Vector3 target = GetRandomNavMeshPoint(transform.position, _wanderRadius);
+                Vector3 target = GetRandomNavMeshPoint(transform.position, Config.WanderRadius);
                 _agent.SetDestination(target);
-                if (_anim != null) _anim.SetWalking(true); // wander luôn dùng walk
+                if (_anim != null) _anim.SetWalking(true);
 
                 float timeout = 8f, elapsed = 0f;
                 while (_state == State.Wandering && elapsed < timeout)
@@ -178,7 +166,7 @@ public class ZombieController : MonoBehaviour
 
                 if (_anim != null) _anim.SetIdle();
             }
-            yield return new WaitForSeconds(Random.Range(_wanderIntervalMin, _wanderIntervalMax));
+            yield return new WaitForSeconds(Random.Range(Config.WanderIntervalMin, Config.WanderIntervalMax));
         }
     }
 
@@ -193,8 +181,6 @@ public class ZombieController : MonoBehaviour
         }
         return origin;
     }
-
-    // ── Detection ─────────────────────────────────────────
 
     private IEnumerator DetectionRoutine()
     {
@@ -211,9 +197,11 @@ public class ZombieController : MonoBehaviour
 
     private bool DetectByVision()
     {
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _visionRange)
-            : Physics.OverlapSphere(transform.position, _visionRange, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.VisionRange)
+            : Physics.OverlapSphere(transform.position, Config.VisionRange, _playerLayer);
 
         foreach (var hit in hits)
         {
@@ -221,7 +209,7 @@ public class ZombieController : MonoBehaviour
             Transform target = hit.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, dirToTarget);
-            if (angle > _visionAngle * 0.5f) continue;
+            if (angle > Config.VisionAngle * 0.5f) continue;
             float dist = Vector3.Distance(transform.position, target.position);
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dirToTarget);
             if (_obstacleLayer != 0 && Physics.Raycast(ray, dist, _obstacleLayer)) continue;
@@ -233,9 +221,11 @@ public class ZombieController : MonoBehaviour
 
     private bool DetectByHearing()
     {
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _hearingRadius)
-            : Physics.OverlapSphere(transform.position, _hearingRadius, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.HearingRadius)
+            : Physics.OverlapSphere(transform.position, Config.HearingRadius, _playerLayer);
 
         foreach (var hit in hits)
         {
@@ -246,11 +236,11 @@ public class ZombieController : MonoBehaviour
         return false;
     }
 
-    // ── Alert (Hú trước khi đuổi) ─────────────────────────
-
     private IEnumerator AlertRoutine()
     {
         if (_state != State.Wandering) yield break;
+        if (Config == null) yield break;
+
         _state = State.Alerting;
 
         _agent.isStopped = true;
@@ -263,35 +253,35 @@ public class ZombieController : MonoBehaviour
             if (dir != Vector3.zero) transform.rotation = Quaternion.LookRotation(dir);
         }
 
-        if (Random.value <= _howlChance)
+        if (Random.value <= Config.HowlChance)
         {
             if (_anim != null) _anim.SetHowling(true);
-            yield return new WaitForSeconds(_howlDuration);
+            yield return new WaitForSeconds(Config.HowlDuration);
             if (_anim != null) _anim.SetHowling(false);
         }
 
         if (!_isDead) BeginChase();
     }
 
-    // ── Chase ─────────────────────────────────────────────
-
     private void BeginChase()
     {
+        if (Config == null) return;
+
         _state = State.Chasing;
         _agent.isStopped = false;
-        _agent.speed = _chaseSpeed;
+        _agent.speed = Config.MoveSpeed;
         _lostTargetTimer = 0f;
     }
 
     private void UpdateChase()
     {
+        if (Config == null) return;
         if (_player == null) { BeginWander(); return; }
 
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist > _chaseRadius) { BeginWander(); return; }
+        if (dist > Config.ChaseRadius) { BeginWander(); return; }
 
-        // Trong tầm attack → đứng yên tấn công
-        if (dist <= _attackRange)
+        if (dist <= Config.AttackRange)
         {
             _agent.isStopped = true;
             _agent.ResetPath();
@@ -301,7 +291,6 @@ public class ZombieController : MonoBehaviour
             return;
         }
 
-        // Ngoài tầm → đuổi theo bằng animation đã chọn
         _agent.isStopped = false;
         _agent.SetDestination(_player.position);
         PlayChaseAnimation();
@@ -310,41 +299,42 @@ public class ZombieController : MonoBehaviour
         if (!canDetect)
         {
             _lostTargetTimer += Time.deltaTime;
-            if (_lostTargetTimer >= _loseTargetTime) BeginWander();
+            if (_lostTargetTimer >= Config.LoseTargetTime) BeginWander();
         }
         else _lostTargetTimer = 0f;
     }
 
     private bool CanStillDetect()
     {
-        if (_player == null) return false;
+        if (Config == null || _player == null) return false;
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist <= _visionRange)
+        if (dist <= Config.VisionRange)
         {
             Vector3 dir = (_player.position - transform.position).normalized;
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dir);
             if (_obstacleLayer == 0 || !Physics.Raycast(ray, dist, _obstacleLayer)) return true;
         }
-        if (dist <= _hearingRadius) return true;
+        if (dist <= Config.HearingRadius) return true;
         return false;
     }
 
     private void BeginWander()
     {
+        if (Config == null) return;
+
         _state = State.Wandering;
         _agent.isStopped = false;
-        _agent.speed = _wanderSpeed;
+        _agent.speed = Config.WanderSpeed;
         _player = null;
         _lostTargetTimer = 0f;
         if (_anim != null) { _anim.SetHowling(false); _anim.SetIdle(); }
     }
 
-    // ── Attack ────────────────────────────────────────────
-
     private void TryAttack()
     {
+        if (Config == null) return;
         if (_isAttacking) return;
-        if (Time.time < _lastAttackTime + _attackCooldown) return;
+        if (Time.time < _lastAttackTime + Config.AttackCooldown) return;
         if (_isDead) return;
 
         _isAttacking = true;
@@ -358,22 +348,20 @@ public class ZombieController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.4f);
 
-        if (!_isDead && _player != null)
+        if (Config != null && !_isDead && _player != null)
         {
             float dist = Vector3.Distance(transform.position, _player.position);
-            if (dist <= _attackRange + 0.5f)
+            if (dist <= Config.AttackRange + 0.5f)
             {
                 var damageable = _player.GetComponentInParent<IDamageable>();
                 if (damageable != null && !damageable.IsDead)
-                    damageable.TakeDamage(_attackDamage, gameObject);
+                    damageable.TakeDamage(Config.BaseDamage, gameObject);
             }
         }
 
         yield return new WaitForSeconds(0.8f);
         _isAttacking = false;
     }
-
-    // ── Được tấn công bởi Player ──────────────────────────
 
     public void OnTakeDamage(Transform attacker)
     {
@@ -382,8 +370,6 @@ public class ZombieController : MonoBehaviour
         if (_state == State.Wandering) StartCoroutine(AlertRoutine());
         else if (_state == State.Chasing) BeginChase();
     }
-
-    // ── Death ─────────────────────────────────────────────
 
     public void Die()
     {
@@ -401,25 +387,26 @@ public class ZombieController : MonoBehaviour
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        ObjectPool.Instance.ReturnDelayed(gameObject, _despawnDelay);
-        if (_spawnPoint != null) _spawnPoint.Invoke("OnZombieDespawned", _despawnDelay);
+        float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
+        ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
+        if (_spawnPoint != null) _spawnPoint.Invoke("OnZombieDespawned", despawnDelay);
     }
-
-    // ── Gizmos ────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
+        if (Config == null) return;
+
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _hearingRadius);
+        Gizmos.DrawWireSphere(transform.position, Config.HearingRadius);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _visionRange);
+        Gizmos.DrawWireSphere(transform.position, Config.VisionRange);
         Gizmos.color = new Color(1f, 0.5f, 0f);
-        Gizmos.DrawWireSphere(transform.position, _chaseRadius);
+        Gizmos.DrawWireSphere(transform.position, Config.ChaseRadius);
         Gizmos.color = Color.cyan;
-        float half = _visionAngle * 0.5f;
+        float half = Config.VisionAngle * 0.5f;
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, -half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, -half, 0) * transform.forward * Config.VisionRange);
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, half, 0) * transform.forward * Config.VisionRange);
     }
 }

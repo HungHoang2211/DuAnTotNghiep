@@ -2,56 +2,29 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Stats;
 using Xyla.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(EnemyStats))]
 public class WolfController : MonoBehaviour
 {
-    [Header("Wander")]
-    [SerializeField] private float _wanderRadius = 8f;
-    [SerializeField] private float _wanderIntervalMin = 2f;
-    [SerializeField] private float _wanderIntervalMax = 5f;
-
-    [Header("Vision")]
-    [SerializeField] private float _visionRange = 15f;  // tăng từ 10 lên 15
-    [SerializeField] private float _visionAngle = 120f;
+    [Header("Detection Layers")]
     [SerializeField] private LayerMask _playerLayer;
     [SerializeField] private LayerMask _obstacleLayer;
 
-    [Header("Hearing")]
-    [SerializeField] private float _hearingRadius = 10f; // bán kính nghe
-    [SerializeField] private float _footstepMinSpeed = 2f;  // tốc độ tối thiểu tạo tiếng
-
-    [Header("Chase")]
-    [SerializeField] private float _chaseRadius = 20f; // bán kính tối đa đuổi theo
-    [SerializeField] private float _chaseSpeed = 6f;
-    [SerializeField] private float _walkSpeed = 2f;
-    [SerializeField] private float _loseTargetTime = 3f;
-
-    [Header("Attack")]
-    [SerializeField] private float _attackRange = 1.8f;
-    [SerializeField] private float _attackDamage = 20f;
-    [SerializeField] private float _attackCooldown = 1.5f;
-
-    [Header("Howl")]
-    [SerializeField] private float _howlChance = 0.4f;
-    [SerializeField] private float _howlDuration = 2.5f;
-
     [Header("Movement Feel")]
-    [SerializeField] private float _rotationSpeed = 80f;  // độ/giây
+    [SerializeField] private float _rotationSpeed = 80f;
     [SerializeField] private float _acceleration = 10f;
     [SerializeField] private float _angularSpeed = 0f;
 
-    [Header("Death")]
-    [SerializeField] private float _despawnDelay = 120f;
-
-    // ── State ─────────────────────────────────────────────
     private enum State { Wandering, Howling, Chasing, Attacking, Returning, Dead }
     private State _state = State.Wandering;
 
     private NavMeshAgent _agent;
     private WolfAnimatorController _anim;
     private WolfSpawnPoint _spawnPoint;
+    private EnemyStats _stats;
     private Transform _player;
 
     private bool _isDead = false;
@@ -59,16 +32,41 @@ public class WolfController : MonoBehaviour
     private float _lostTargetTimer = 0f;
     private Vector3 _homePosition;
 
-    // ── Lifecycle ─────────────────────────────────────────
+    private WolfStatsConfig Config => _stats != null ? _stats.EnemyConfig as WolfStatsConfig : null;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<WolfAnimatorController>();
+        _stats = GetComponent<EnemyStats>();
+
+        if (_stats == null)
+        {
+            Debug.LogError($"[{name}] Missing EnemyStats component", this);
+            return;
+        }
+
+        _stats.OnDeath += HandleDeath;
+        _stats.OnDamagedBy += HandleDamagedBy;
+    }
+
+    private void OnDestroy()
+    {
+        if (_stats != null)
+        {
+            _stats.OnDeath -= HandleDeath;
+            _stats.OnDamagedBy -= HandleDamagedBy;
+        }
     }
 
     public void Initialize(WolfSpawnPoint spawnPoint)
     {
+        if (Config == null)
+        {
+            Debug.LogError($"[{name}] WolfStatsConfig missing on EnemyStats", this);
+            return;
+        }
+
         _spawnPoint = spawnPoint;
         _isDead = false;
         _state = State.Wandering;
@@ -77,11 +75,11 @@ public class WolfController : MonoBehaviour
         _homePosition = transform.position;
 
         _agent.isStopped = false;
-        _agent.speed = _walkSpeed;
+        _agent.speed = Config.WalkSpeed;
         _agent.acceleration = _acceleration;
         _agent.angularSpeed = _angularSpeed;
-        _agent.autoBraking = false;   // tắt — tránh khựng giữa đường
-        _agent.stoppingDistance = 0f; // code tự kiểm tra khoảng cách
+        _agent.autoBraking = false;
+        _agent.stoppingDistance = 0f;
         _agent.updateRotation = false;
 
         if (_anim != null) { _anim.SetDead(false); _anim.SetSpeed(0f); _anim.SetHowling(false); }
@@ -97,7 +95,13 @@ public class WolfController : MonoBehaviour
         StartCoroutine(DetectionRoutine());
     }
 
-    private void OnSpawnFromPool() { }
+    private void HandleDeath() => Die();
+
+    private void HandleDamagedBy(GameObject source)
+    {
+        if (source != null)
+            OnTakeDamage(source.transform);
+    }
 
     private void Update()
     {
@@ -113,7 +117,6 @@ public class WolfController : MonoBehaviour
 
     private void SmoothRotation()
     {
-        // Khi attack — quay nhanh hơn về phía player
         if (_state == State.Attacking)
         {
             if (_player != null)
@@ -143,19 +146,18 @@ public class WolfController : MonoBehaviour
         );
     }
 
-    // ── Wander ────────────────────────────────────────────
-
     private IEnumerator WanderRoutine()
     {
         while (!_isDead)
         {
+            if (Config == null) yield break;
+
             if (_state == State.Wandering)
             {
                 _homePosition = transform.position;
-                Vector3 target = GetRandomNavMeshPoint(transform.position, _wanderRadius);
+                Vector3 target = GetRandomNavMeshPoint(transform.position, Config.WanderRadius);
                 _agent.SetDestination(target);
 
-                // Chờ Wolf đến đích thật sự (hoặc timeout 10s) rồi mới tiếp tục
                 float timeout = 10f;
                 float elapsed = 0f;
                 while (_state == State.Wandering && elapsed < timeout)
@@ -167,8 +169,7 @@ public class WolfController : MonoBehaviour
                 }
             }
 
-            // Dừng nghỉ tự nhiên giữa các bước wander
-            yield return new WaitForSeconds(Random.Range(_wanderIntervalMin, _wanderIntervalMax));
+            yield return new WaitForSeconds(Random.Range(Config.WanderIntervalMin, Config.WanderIntervalMax));
         }
     }
 
@@ -184,8 +185,6 @@ public class WolfController : MonoBehaviour
         return origin;
     }
 
-    // ── Detection ─────────────────────────────────────────
-
     private IEnumerator DetectionRoutine()
     {
         while (!_isDead)
@@ -194,10 +193,7 @@ public class WolfController : MonoBehaviour
             if (_state == State.Dead) yield break;
             if (_state != State.Wandering && _state != State.Howling) continue;
 
-            // Hearing không cần nhìn thấy — đi sau lưng vẫn bị nghe
             bool heard = DetectByHearing();
-
-            // Vision chỉ phát hiện phía trước
             bool seen = !heard && DetectByVision();
 
             if (heard || seen)
@@ -207,25 +203,22 @@ public class WolfController : MonoBehaviour
 
     private bool DetectByVision()
     {
-        // Dùng Physics.OverlapSphere không có LayerMask để debug
-        // nếu _playerLayer chưa set đúng
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _visionRange)
-            : Physics.OverlapSphere(transform.position, _visionRange, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.VisionRange)
+            : Physics.OverlapSphere(transform.position, Config.VisionRange, _playerLayer);
 
         foreach (var hit in hits)
         {
-            // Tìm object có tag Player
             if (!hit.CompareTag("Player")) continue;
 
             Transform target = hit.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
 
-            // Kiểm tra góc nhìn
             float angle = Vector3.Angle(transform.forward, dirToTarget);
-            if (angle > _visionAngle * 0.5f) continue;
+            if (angle > Config.VisionAngle * 0.5f) continue;
 
-            // Raycast kiểm tra vật cản
             float dist = Vector3.Distance(transform.position, target.position);
             Ray ray = new Ray(transform.position + Vector3.up * 0.5f, dirToTarget);
             if (Physics.Raycast(ray, dist, _obstacleLayer)) continue;
@@ -238,9 +231,11 @@ public class WolfController : MonoBehaviour
 
     private bool DetectByHearing()
     {
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _hearingRadius)
-            : Physics.OverlapSphere(transform.position, _hearingRadius, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.HearingRadius)
+            : Physics.OverlapSphere(transform.position, Config.HearingRadius, _playerLayer);
 
         foreach (var hit in hits)
         {
@@ -258,7 +253,7 @@ public class WolfController : MonoBehaviour
                 if (cc != null) playerSpeed = cc.velocity.magnitude;
             }
 
-            if (playerSpeed < _footstepMinSpeed) continue;
+            if (playerSpeed < Config.FootstepMinSpeed) continue;
 
             _player = target;
             return true;
@@ -266,49 +261,48 @@ public class WolfController : MonoBehaviour
         return false;
     }
 
-    // ── Alert ─────────────────────────────────────────────
-
     private IEnumerator AlertRoutine()
     {
         if (_state != State.Wandering) yield break;
+        if (Config == null) yield break;
+
         _agent.ResetPath();
 
-        if (Random.value < _howlChance)
+        if (Random.value < Config.HowlChance)
         {
             _state = State.Howling;
             if (_anim != null) _anim.SetHowling(true);
-            yield return new WaitForSeconds(_howlDuration);
+            yield return new WaitForSeconds(Config.HowlDuration);
             if (_anim != null) _anim.SetHowling(false);
         }
 
         if (!_isDead) BeginChase();
     }
 
-    // ── Chase ─────────────────────────────────────────────
-
     private void BeginChase()
     {
+        if (Config == null) return;
+
         _homePosition = transform.position;
         _state = State.Chasing;
-        _agent.speed = _chaseSpeed;
+        _agent.speed = Config.MoveSpeed;
         _lostTargetTimer = 0f;
     }
 
     private void UpdateChase()
     {
+        if (Config == null) return;
         if (_player == null) { BeginReturn(); return; }
 
         float dist = Vector3.Distance(transform.position, _player.position);
 
-        // Vượt quá bán kính đuổi tối đa → bỏ cuộc
-        if (dist > _chaseRadius)
+        if (dist > Config.ChaseRadius)
         {
             BeginReturn();
             return;
         }
 
-        // Đủ gần → tấn công
-        if (dist <= _attackRange)
+        if (dist <= Config.AttackRange)
         {
             TryAttack();
             return;
@@ -316,12 +310,11 @@ public class WolfController : MonoBehaviour
 
         _agent.SetDestination(_player.position);
 
-        // Mất tầm nhìn → đếm timer
         bool canDetect = DetectByVision() || DetectByHearing();
         if (!canDetect)
         {
             _lostTargetTimer += Time.deltaTime;
-            if (_lostTargetTimer >= _loseTargetTime)
+            if (_lostTargetTimer >= Config.LoseTargetTime)
                 BeginReturn();
         }
         else
@@ -330,12 +323,12 @@ public class WolfController : MonoBehaviour
         }
     }
 
-    // ── Return ────────────────────────────────────────────
-
     private void BeginReturn()
     {
+        if (Config == null) return;
+
         _state = State.Returning;
-        _agent.speed = _walkSpeed;
+        _agent.speed = Config.WalkSpeed;
         _player = null;
         _lostTargetTimer = 0f;
         _agent.SetDestination(_homePosition);
@@ -353,11 +346,10 @@ public class WolfController : MonoBehaviour
             BeginChase();
     }
 
-    // ── Attack ────────────────────────────────────────────
-
     private void TryAttack()
     {
-        if (Time.time < _lastAttackTime + _attackCooldown) return;
+        if (Config == null) return;
+        if (Time.time < _lastAttackTime + Config.AttackCooldown) return;
         if (_state == State.Dead) return;
 
         _lastAttackTime = Time.time;
@@ -373,13 +365,14 @@ public class WolfController : MonoBehaviour
         yield return new WaitForSeconds(0.4f);
 
         if (_isDead || _player == null) yield break;
+        if (Config == null) yield break;
 
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist <= _attackRange + 0.5f)
+        if (dist <= Config.AttackRange + 0.5f)
         {
             var damageable = _player.GetComponentInParent<IDamageable>();
             if (damageable != null && !damageable.IsDead)
-                damageable.TakeDamage(_attackDamage, gameObject);
+                damageable.TakeDamage(Config.BaseDamage, gameObject);
         }
 
         yield return new WaitForSeconds(0.5f);
@@ -393,8 +386,6 @@ public class WolfController : MonoBehaviour
         if (_state != State.Chasing && _state != State.Attacking)
             BeginChase();
     }
-
-    // ── Death ─────────────────────────────────────────────
 
     public void Die()
     {
@@ -411,35 +402,33 @@ public class WolfController : MonoBehaviour
         var loot = GetComponent<WolfLoot>();
         if (loot != null) loot.SetLootable(true);
 
-        ObjectPool.Instance.ReturnDelayed(gameObject, _despawnDelay);
+        float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
+        ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
 
         if (_spawnPoint != null)
-            _spawnPoint.Invoke("OnWolfDespawned", _despawnDelay);
+            _spawnPoint.Invoke("OnWolfDespawned", despawnDelay);
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Vùng nghe
+        if (Config == null) return;
+
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _hearingRadius);
+        Gizmos.DrawWireSphere(transform.position, Config.HearingRadius);
 
-        // Vùng nhìn
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _visionRange);
+        Gizmos.DrawWireSphere(transform.position, Config.VisionRange);
 
-        // Bán kính đuổi tối đa
         Gizmos.color = new Color(1f, 0.5f, 0f);
-        Gizmos.DrawWireSphere(transform.position, _chaseRadius);
+        Gizmos.DrawWireSphere(transform.position, Config.ChaseRadius);
 
-        // Góc nhìn
         Gizmos.color = Color.cyan;
-        float half = _visionAngle * 0.5f;
+        float half = Config.VisionAngle * 0.5f;
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, -half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, -half, 0) * transform.forward * Config.VisionRange);
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, half, 0) * transform.forward * Config.VisionRange);
 
-        // Home
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(_homePosition, 0.5f);
     }

@@ -2,67 +2,22 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Stats;
 using Xyla.Core;
 
-
-/// <summary>
-/// AI ZombieFat:
-/// - Wander ngẫu nhiên khi không phát hiện player
-/// - Chỉ dùng Run khi đuổi theo player (không có Walk chase)
-/// - Combo claw: Attack_Claw_1 → Attack_Claw_2 (tay trái rồi tay phải)
-/// - Sau 10 giây tấn công: dùng Attack_Special (phun axit từ miệng)
-/// - Sneak player: không bị phát hiện qua nghe tiếng nếu noise thấp
-/// - Chết: ragdoll + rơi bộ phận ngẫu nhiên + despawn sau 2 phút qua ObjectPool
-/// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(EnemyStats))]
 public class ZombieFatController : MonoBehaviour
 {
-    [Header("Wander")]
-    [SerializeField] private float _wanderRadius = 4f;
-    [SerializeField] private float _wanderIntervalMin = 2f;
-    [SerializeField] private float _wanderIntervalMax = 5f;
-    [SerializeField] private float _wanderSpeed = 1.5f;
-
-    [Header("Detection — Vision")]
-    [SerializeField] private float _visionRange = 10f;
-    [SerializeField] private float _visionAngle = 100f;
+    [Header("Detection Layers")]
     [SerializeField] private LayerMask _playerLayer;
     [SerializeField] private LayerMask _obstacleLayer;
 
-    [Header("Detection — Hearing")]
-    [SerializeField] private float _hearingRadius = 7f;
-
-    [Header("Chase — Run Only")]
-    [SerializeField] private float _chaseSpeed = 4.5f;
-    [SerializeField] private float _chaseRadius = 25f;
-    [SerializeField] private float _loseTargetTime = 4f;
-
-    [Header("Attack — Claw Combo")]
-    [Tooltip("Tầm tấn công claw.")]
-    [SerializeField] private float _attackRange = 2f;
-    [SerializeField] private float _attackDamage = 20f;
-    [Tooltip("Cooldown giữa các combo claw (giây).")]
-    [SerializeField] private float _attackCooldown = 2f;
-
-    [Header("Attack — Special (Acid)")]
-    [Tooltip("Sau bao nhiêu giây kể từ lần tấn công đầu thì dùng skill axit.")]
-    [SerializeField] private float _specialCooldown = 10f;
-    [Tooltip("Tầm bắn axit — thường xa hơn tầm claw.")]
-    [SerializeField] private float _specialRange = 8f;
-    [SerializeField] private float _specialDamage = 30f;
-
-    [Header("Special Effect")]
+    [Header("Special Effect References")]
     [Tooltip("Prefab effect axit bắn từ miệng. Cần có Rigidbody + Collider(IsTrigger).")]
     [SerializeField] private GameObject _acidEffectPrefab;
     [Tooltip("Vị trí miệng zombie — kéo bone đầu hoặc empty object tại miệng.")]
     [SerializeField] private Transform _mouthTransform;
-    [SerializeField] private float _acidSpeed = 7f;
-    [SerializeField] private float _acidLifetime = 3f;
-
-    [Header("Death")]
-    [SerializeField] private float _despawnDelay = 120f;
-
-    // ── State ──────────────────────────────────────────────
 
     private enum State { Wandering, Chasing, Dead }
     private State _state = State.Wandering;
@@ -70,27 +25,50 @@ public class ZombieFatController : MonoBehaviour
     private NavMeshAgent _agent;
     private ZombieFatAnimatorController _anim;
     private ZombieFatSpawnPoint _spawnPoint;
+    private EnemyStats _stats;
     private Transform _player;
 
     private bool _isDead = false;
     private bool _isAttacking = false;
     private float _lastAttackTime = -999f;
-    private float _lastClawTime = -999f; // tính 10s special từ lần claw xong
+    private float _lastClawTime = -999f;
     private float _lostTargetTimer = 0f;
 
-    // ── Lifecycle ──────────────────────────────────────────
-
-    public bool IsDead { get; private set; }
-    public bool IsAlive => !IsDead; //thêm tạm để fix
+    private ZombieFatStatsConfig Config => _stats != null ? _stats.EnemyConfig as ZombieFatStatsConfig : null;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<ZombieFatAnimatorController>();
+        _stats = GetComponent<EnemyStats>();
+
+        if (_stats == null)
+        {
+            Debug.LogError($"[{name}] Missing EnemyStats component", this);
+            return;
+        }
+
+        _stats.OnDeath += HandleDeath;
+        _stats.OnDamagedBy += HandleDamagedBy;
+    }
+
+    private void OnDestroy()
+    {
+        if (_stats != null)
+        {
+            _stats.OnDeath -= HandleDeath;
+            _stats.OnDamagedBy -= HandleDamagedBy;
+        }
     }
 
     public void Initialize(ZombieFatSpawnPoint spawnPoint)
     {
+        if (Config == null)
+        {
+            Debug.LogError($"[{name}] ZombieFatStatsConfig missing on EnemyStats", this);
+            return;
+        }
+
         _spawnPoint = spawnPoint;
         _isDead = false;
         _isAttacking = false;
@@ -101,7 +79,7 @@ public class ZombieFatController : MonoBehaviour
         _lastClawTime = -999f;
 
         _agent.isStopped = false;
-        _agent.speed = _wanderSpeed;
+        _agent.speed = Config.WanderSpeed;
         _agent.autoBraking = true;
         _agent.stoppingDistance = 0.1f;
         _agent.updateRotation = false;
@@ -116,13 +94,18 @@ public class ZombieFatController : MonoBehaviour
         StartCoroutine(DetectionRoutine());
     }
 
-    private void OnSpawnFromPool() { }
+    private void HandleDeath() => Die();
+
+    private void HandleDamagedBy(GameObject source)
+    {
+        if (source != null)
+            OnTakeDamage(source.transform);
+    }
 
     private void Update()
     {
         if (_isDead) return;
 
-        // Force dừng khi đang tấn công — không trượt
         if (_isAttacking)
         {
             _agent.isStopped = true;
@@ -154,17 +137,17 @@ public class ZombieFatController : MonoBehaviour
             transform.rotation, Quaternion.LookRotation(moveDir), 120f * Time.deltaTime);
     }
 
-    // ── Wander ────────────────────────────────────────────
-
     private IEnumerator WanderRoutine()
     {
         while (!_isDead)
         {
+            if (Config == null) yield break;
+
             if (_state == State.Wandering)
             {
-                Vector3 target = GetRandomNavMeshPoint(transform.position, _wanderRadius);
+                Vector3 target = GetRandomNavMeshPoint(transform.position, Config.WanderRadius);
                 _agent.SetDestination(target);
-                if (_anim != null) _anim.SetWalking(true); // wander dùng walk
+                if (_anim != null) _anim.SetWalking(true);
 
                 float timeout = 8f, elapsed = 0f;
                 while (_state == State.Wandering && elapsed < timeout)
@@ -174,9 +157,9 @@ public class ZombieFatController : MonoBehaviour
                     yield return null;
                 }
 
-                if (_anim != null) _anim.SetIdle(); // đến nơi → về idle
+                if (_anim != null) _anim.SetIdle();
             }
-            yield return new WaitForSeconds(Random.Range(_wanderIntervalMin, _wanderIntervalMax));
+            yield return new WaitForSeconds(Random.Range(Config.WanderIntervalMin, Config.WanderIntervalMax));
         }
     }
 
@@ -191,8 +174,6 @@ public class ZombieFatController : MonoBehaviour
         }
         return origin;
     }
-
-    // ── Detection ─────────────────────────────────────────
 
     private IEnumerator DetectionRoutine()
     {
@@ -209,9 +190,11 @@ public class ZombieFatController : MonoBehaviour
 
     private bool DetectByVision()
     {
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _visionRange)
-            : Physics.OverlapSphere(transform.position, _visionRange, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.VisionRange)
+            : Physics.OverlapSphere(transform.position, Config.VisionRange, _playerLayer);
 
         foreach (var hit in hits)
         {
@@ -219,7 +202,7 @@ public class ZombieFatController : MonoBehaviour
             Transform target = hit.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, dirToTarget);
-            if (angle > _visionAngle * 0.5f) continue;
+            if (angle > Config.VisionAngle * 0.5f) continue;
             float dist = Vector3.Distance(transform.position, target.position);
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dirToTarget);
             if (_obstacleLayer != 0 && Physics.Raycast(ray, dist, _obstacleLayer)) continue;
@@ -231,9 +214,11 @@ public class ZombieFatController : MonoBehaviour
 
     private bool DetectByHearing()
     {
+        if (Config == null) return false;
+
         Collider[] hits = _playerLayer == 0
-            ? Physics.OverlapSphere(transform.position, _hearingRadius)
-            : Physics.OverlapSphere(transform.position, _hearingRadius, _playerLayer);
+            ? Physics.OverlapSphere(transform.position, Config.HearingRadius)
+            : Physics.OverlapSphere(transform.position, Config.HearingRadius, _playerLayer);
 
         foreach (var hit in hits)
         {
@@ -244,29 +229,28 @@ public class ZombieFatController : MonoBehaviour
         return false;
     }
 
-    // ── Chase ─────────────────────────────────────────────
-
     private void BeginChase()
     {
+        if (Config == null) return;
+
         _state = State.Chasing;
         _agent.isStopped = false;
-        _agent.speed = _chaseSpeed;
+        _agent.speed = Config.MoveSpeed;
         _lostTargetTimer = 0f;
     }
 
     private void UpdateChase()
     {
+        if (Config == null) return;
         if (_player == null) { BeginWander(); return; }
 
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist > _chaseRadius) { BeginWander(); return; }
+        if (dist > Config.ChaseRadius) { BeginWander(); return; }
 
-        // Kiểm tra special trước — ưu tiên hơn claw sau 10s kể từ lần claw cuối
-        // dist <= _specialRange đủ để dùng (bao gồm cả khi player trong tầm claw)
         bool specialReady = !_isAttacking
                          && _lastClawTime > -999f
-                         && Time.time >= _lastClawTime + _specialCooldown
-                         && dist <= _specialRange;
+                         && Time.time >= _lastClawTime + Config.SpecialCooldown
+                         && dist <= Config.SpecialRange;
 
         if (specialReady)
         {
@@ -278,8 +262,7 @@ public class ZombieFatController : MonoBehaviour
             return;
         }
 
-        // Trong tầm claw và special chưa sẵn sàng → claw combo
-        if (dist <= _attackRange)
+        if (dist <= Config.AttackRange)
         {
             _agent.isStopped = true;
             _agent.ResetPath();
@@ -289,7 +272,6 @@ public class ZombieFatController : MonoBehaviour
             return;
         }
 
-        // Ngoài tầm → chạy đuổi theo (Run animation)
         _agent.isStopped = false;
         _agent.SetDestination(_player.position);
         if (_anim != null) _anim.SetRunning(true);
@@ -298,41 +280,42 @@ public class ZombieFatController : MonoBehaviour
         if (!canDetect)
         {
             _lostTargetTimer += Time.deltaTime;
-            if (_lostTargetTimer >= _loseTargetTime) BeginWander();
+            if (_lostTargetTimer >= Config.LoseTargetTime) BeginWander();
         }
         else _lostTargetTimer = 0f;
     }
 
     private bool CanStillDetect()
     {
-        if (_player == null) return false;
+        if (Config == null || _player == null) return false;
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist <= _visionRange)
+        if (dist <= Config.VisionRange)
         {
             Vector3 dir = (_player.position - transform.position).normalized;
             Ray ray = new Ray(transform.position + Vector3.up * 0.8f, dir);
             if (_obstacleLayer == 0 || !Physics.Raycast(ray, dist, _obstacleLayer)) return true;
         }
-        if (dist <= _hearingRadius) return true;
+        if (dist <= Config.HearingRadius) return true;
         return false;
     }
 
     private void BeginWander()
     {
+        if (Config == null) return;
+
         _state = State.Wandering;
         _agent.isStopped = false;
-        _agent.speed = _wanderSpeed;
+        _agent.speed = Config.WanderSpeed;
         _player = null;
         _lostTargetTimer = 0f;
         if (_anim != null) _anim.SetIdle();
     }
 
-    // ── Claw Attack (Combo) ────────────────────────────────
-
     private void TryClawAttack()
     {
+        if (Config == null) return;
         if (_isAttacking) return;
-        if (Time.time < _lastAttackTime + _attackCooldown) return;
+        if (Time.time < _lastAttackTime + Config.AttackCooldown) return;
         if (_isDead) return;
 
         _isAttacking = true;
@@ -344,37 +327,30 @@ public class ZombieFatController : MonoBehaviour
 
     private IEnumerator ClawComboRoutine()
     {
-        // Claw 1 — tay trái hit
         yield return new WaitForSeconds(0.4f);
         ApplyClawDamage();
 
-        // Chờ animation chuyển sang Claw 2
         yield return new WaitForSeconds(0.5f);
 
-        // Claw 2 — tay phải hit
         yield return new WaitForSeconds(0.35f);
         ApplyClawDamage();
 
-        // Chờ animation kết thúc
         yield return new WaitForSeconds(0.5f);
         _isAttacking = false;
 
-        // Ghi lại thời điểm claw xong — special sẽ tính 10s từ đây
         _lastClawTime = Time.time;
     }
 
     private void ApplyClawDamage()
     {
-        if (_isDead || _player == null) return;
+        if (Config == null || _isDead || _player == null) return;
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist > _attackRange + 0.5f) return;
+        if (dist > Config.AttackRange + 0.5f) return;
 
         var damageable = _player.GetComponentInParent<IDamageable>();
         if (damageable != null && !damageable.IsDead)
-            damageable.TakeDamage(_attackDamage, gameObject);
+            damageable.TakeDamage(Config.BaseDamage, gameObject);
     }
-
-    // ── Special Attack (Acid) ──────────────────────────────
 
     private IEnumerator PerformSpecialAttack()
     {
@@ -382,22 +358,20 @@ public class ZombieFatController : MonoBehaviour
 
         if (_anim != null) _anim.TriggerSpecialAttack();
 
-        // Chờ đến frame bắn axit trong animation
         yield return new WaitForSeconds(0.6f);
 
         if (!_isDead && _player != null)
             FireAcid();
 
-        // Chờ animation kết thúc
         yield return new WaitForSeconds(1f);
         _isAttacking = false;
 
-        // Reset lại timer claw để 10s tiếp theo mới special lại
         _lastClawTime = Time.time;
     }
 
     private void FireAcid()
     {
+        if (Config == null) return;
         if (_acidEffectPrefab == null)
         {
             Debug.LogWarning("[ZombieFat] Chưa gán _acidEffectPrefab!", this);
@@ -413,10 +387,8 @@ public class ZombieFatController : MonoBehaviour
 
         var projectile = proj.GetComponent<ZombieFatAcid>();
         if (projectile != null)
-            projectile.Initialize(_player, _specialDamage, _acidSpeed, _acidLifetime, gameObject);
+            projectile.Initialize(_player, Config.SpecialDamage, Config.AcidSpeed, Config.AcidLifetime, gameObject);
     }
-
-    // ── Bị tấn công bởi Player ────────────────────────────
 
     public void OnTakeDamage(Transform attacker)
     {
@@ -424,8 +396,6 @@ public class ZombieFatController : MonoBehaviour
         _player = attacker;
         if (_state != State.Chasing) BeginChase();
     }
-
-    // ── Death ─────────────────────────────────────────────
 
     public void Die()
     {
@@ -443,28 +413,29 @@ public class ZombieFatController : MonoBehaviour
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        ObjectPool.Instance.ReturnDelayed(gameObject, _despawnDelay);
+        float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
+        ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
         if (_spawnPoint != null)
-            _spawnPoint.Invoke("OnZombieFatDespawned", _despawnDelay);
+            _spawnPoint.Invoke("OnZombieFatDespawned", despawnDelay);
     }
-
-    // ── Gizmos ────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
+        if (Config == null) return;
+
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, _hearingRadius);
+        Gizmos.DrawWireSphere(transform.position, Config.HearingRadius);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _visionRange);
+        Gizmos.DrawWireSphere(transform.position, Config.VisionRange);
         Gizmos.color = new Color(0.5f, 0f, 1f);
-        Gizmos.DrawWireSphere(transform.position, _specialRange);
+        Gizmos.DrawWireSphere(transform.position, Config.SpecialRange);
         Gizmos.color = new Color(1f, 0.5f, 0f);
-        Gizmos.DrawWireSphere(transform.position, _chaseRadius);
-        float half = _visionAngle * 0.5f;
+        Gizmos.DrawWireSphere(transform.position, Config.ChaseRadius);
+        float half = Config.VisionAngle * 0.5f;
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, -half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, -half, 0) * transform.forward * Config.VisionRange);
         Gizmos.DrawRay(transform.position,
-            Quaternion.Euler(0, half, 0) * transform.forward * _visionRange);
+            Quaternion.Euler(0, half, 0) * transform.forward * Config.VisionRange);
     }
 }

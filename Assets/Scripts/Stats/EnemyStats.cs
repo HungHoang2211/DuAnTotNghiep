@@ -4,7 +4,21 @@ namespace SimpleSurvival.Stats
 {
     public class EnemyStats : BaseStats
     {
-        // BaseStats đã có đủ cho combat cơ bản.
-        // Mở rộng tại đây khi cần.
+        public EnemyStatsConfig EnemyConfig => baseConfig as EnemyStatsConfig;
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            if (baseConfig != null && EnemyConfig == null)
+            {
+                Debug.LogError($"[{name}] EnemyStats requires EnemyStatsConfig, got {baseConfig.GetType().Name}", this);
+            }
+        }
+
+        private void OnSpawnFromPool()
+        {
+            ResetStats();
+        }
     }
 }
