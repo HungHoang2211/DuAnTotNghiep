@@ -1,18 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using Xyla.Combat;
+using SimpleSurvival.Combat;
 using Xyla.Core;
-using Xyla.Player;
 
-/// <summary>
-/// AI Zombie dùng chung cho cả zombie Walk và zombie Run.
-/// Chọn loại di chuyển bằng field _moveType trong Inspector:
-///   - WalkOnly : chỉ dùng animation walk khi đuổi theo player
-///   - RunOnly  : chỉ dùng animation run khi đuổi theo player
-/// Khi player trong tầm tấn công: đứng yên tấn công, không trượt.
-/// Khi player ra ngoài tầm: đuổi theo bằng animation đã chọn.
-/// </summary>
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class ZombieController : MonoBehaviour
 {

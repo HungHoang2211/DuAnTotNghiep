@@ -4,12 +4,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Visual data for one mod attachment point on a weapon.
-    /// defaultMesh is what the slot shows when nothing is installed —
-    /// for example a plain iron magazine or an empty scope rail.
-    /// Leave defaultMesh null if this weapon physically has no such slot.
-    /// </summary>
     [Serializable]
     public sealed class WeaponModSlotVisual
     {
@@ -23,11 +17,6 @@ namespace SimpleSurvival.Items
         public Material DefaultMaterial => defaultMaterial;
     }
 
-    /// <summary>
-    /// Makes an item usable as a weapon. Combat reads the stats;
-    /// the visual system reads the mesh data to swap the character's
-    /// Mesh_Weapon SkinnedMeshRenderers on equip.
-    /// </summary>
     [CreateAssetMenu(menuName = "Simple Survival/Abilities/Weapon", fileName = "WeaponAbility")]
     public sealed class WeaponAbility : ItemAbility
     {
@@ -45,8 +34,13 @@ namespace SimpleSurvival.Items
         [Tooltip("How much accuracy degrades on sustained fire. 0 = no degradation (melee).")]
         [SerializeField] private float stability;
 
+        [Header("Animation")]
+        [SerializeField] private AnimatorOverrideController overrideController;
+        [Tooltip("0 = 1 swing only (pistol/rifle). 1 = 2-swing combo (2H). 2 = 3-swing combo (1H melee). 3 = 4-swing combo (fists).")]
+        [SerializeField] private int maxComboIndex;
+        [SerializeField] private WeaponCategory category;
+
         [Header("Visuals - Body")]
-        [Tooltip("Main weapon mesh shown on the character.")]
         [SerializeField] private Mesh weaponMesh;
         [SerializeField] private Material weaponMaterial;
 
@@ -62,13 +56,12 @@ namespace SimpleSurvival.Items
         public float Weight => weight;
         public float Noise => noise;
         public float Stability => stability;
+        public AnimatorOverrideController OverrideController => overrideController;
+        public int MaxComboIndex => maxComboIndex;
+        public WeaponCategory Category => category;
         public Mesh WeaponMesh => weaponMesh;
         public Material WeaponMaterial => weaponMaterial;
 
-        /// <summary>
-        /// Returns the default visual for the requested mod slot,
-        /// or null if this weapon does not have that slot at all.
-        /// </summary>
         public WeaponModSlotVisual GetModSlotVisual(WeaponModSlot slot)
         {
             foreach (WeaponModSlotVisual visual in modSlots)
@@ -79,7 +72,6 @@ namespace SimpleSurvival.Items
             return null;
         }
 
-        /// <summary>True when this weapon has the requested mod slot.</summary>
         public bool HasModSlot(WeaponModSlot slot)
         {
             return GetModSlotVisual(slot) != null;

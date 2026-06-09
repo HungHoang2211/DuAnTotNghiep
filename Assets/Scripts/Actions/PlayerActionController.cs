@@ -18,14 +18,18 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
 
-        [Header("Combat Settings")]
-        [SerializeField] private float baseAttackRange = 1.5f;
+        [Header("Combat Defaults (Unarmed)")]
+        [SerializeField] private float unarmedAttackRange = 1.5f;
+        [SerializeField] private int unarmedMaxComboIndex = 3;
+        [SerializeField] private float comboWindowSeconds = 0.25f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
 
         public CharacterController Controller { get; private set; }
         public Transform PlayerTransform { get; private set; }
+
+        public bool IsAttackHeld { get; private set; }
 
         private IdleAction _idleAction;
         private MoveAction _moveAction;
@@ -77,18 +81,70 @@ namespace SimpleSurvival.Player
 
         public bool RequestAttack(ITargetable target)
         {
-            if (animator == null || playerStats == null) return false;
+            if (animator == null) return false;
 
-            float damage = playerStats.BaseDamage;
-            float range = baseAttackRange;
+            float damage = ResolveAttackDamage();
+            float range = ResolveAttackRange();
+            int maxComboIndex = ResolveMaxComboIndex();
 
-            AttackAction attack = new AttackAction(this, animator, playerStats, target, damage, range);
+            AttackAction attack = new AttackAction(
+                this, animator, target,
+                damage, range, maxComboIndex, comboWindowSeconds);
             return TryRequestAction(attack);
+        }
+
+        public void SetAttackHeld(bool held)
+        {
+            IsAttackHeld = held;
         }
 
         public void ForceIdle()
         {
             SwitchToIdle();
+        }
+
+        public bool RequestPickup(PickupTarget target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null || inventoryQueries == null) return false;
+
+            if (!inventoryQueries.CanAddItem(target.ItemData, target.Quantity))
+            {
+                Debug.Log("[ActionController] Inventory full, cannot pickup");
+                return false;
+            }
+
+            PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
+            return TryRequestAction(pickup);
+        }
+
+        private float ResolveAttackDamage()
+        {
+            WeaponAbility weapon = GetEquippedWeapon();
+            if (weapon != null) return weapon.Damage;
+            return playerStats != null ? playerStats.BaseDamage : 0f;
+        }
+
+        private float ResolveAttackRange()
+        {
+            WeaponAbility weapon = GetEquippedWeapon();
+            if (weapon != null) return weapon.Range;
+            return unarmedAttackRange;
+        }
+
+        private int ResolveMaxComboIndex()
+        {
+            WeaponAbility weapon = GetEquippedWeapon();
+            if (weapon != null) return weapon.MaxComboIndex;
+            return unarmedMaxComboIndex;
+        }
+
+        private WeaponAbility GetEquippedWeapon()
+        {
+            if (playerEquipment == null) return null;
+            ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
+            if (stack == null) return null;
+            return stack.ItemData.GetAbility<WeaponAbility>();
         }
 
         private void SwitchAction(IAction newAction)
@@ -120,21 +176,5 @@ namespace SimpleSurvival.Player
 
             OnActionChanged?.Invoke(oldAction, _idleAction);
         }
-
-        public bool RequestPickup(PickupTarget target)
-        {
-            if (target == null || !target.CanBeTargeted()) return false;
-            if (animator == null || inventoryQueries == null) return false;
-
-            if (!inventoryQueries.CanAddItem(target.ItemData, target.Quantity))
-            {
-                Debug.Log("[ActionController] Inventory full, cannot pickup");
-                return false;
-            }
-
-            PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
-            return TryRequestAction(pickup);
-        }
     }
-
 }

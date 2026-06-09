@@ -9,9 +9,11 @@ namespace SimpleSurvival.Items
 
         [SerializeField] private ToolType toolType;
         [SerializeField] private float damage = 25f;
+        [SerializeField] private AnimatorOverrideController overrideController;
 
         public override string AbilityName => Name;
         public ToolType ToolType => toolType;
         public float Damage => damage;
+        public AnimatorOverrideController OverrideController => overrideController;
     }
 }

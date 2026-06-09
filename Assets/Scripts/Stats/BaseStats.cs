@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System;
+using SimpleSurvival.Combat;
 
 namespace SimpleSurvival.Stats
 {
-    public abstract class BaseStats : MonoBehaviour
+    public abstract class BaseStats : MonoBehaviour, IDamageable
     {
         public event Action<float, float> OnHPChanged;
         public event Action OnDeath;
@@ -37,15 +38,21 @@ namespace SimpleSurvival.Stats
             IsAlive = HP > 0f;
         }
 
-        public void TakeDamage(float rawDamage)
+        public bool TakeDamage(float rawDamage)
+        {
+            return TakeDamage(rawDamage, null);
+        }
+
+        public bool TakeDamage(float rawDamage, GameObject source)
         {
             if (!IsAlive || rawDamage <= 0f)
-                return;
+                return IsAlive;
 
             float reduction = ArmorReduction(_armor);
             float finalDamage = rawDamage * (1f - reduction);
             SetHP(HP - finalDamage);
-            Debug.Log($"[{name}] Take damage: {rawDamage}, HP before: {HP}");
+            Debug.Log($"[{name}] Take damage: {rawDamage} from {(source != null ? source.name : "unknown")}, HP after: {HP}");
+            return IsAlive;
         }
 
         public void Heal(float amount)

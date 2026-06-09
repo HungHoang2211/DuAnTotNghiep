@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using Xyla.Combat;
+using SimpleSurvival.Combat;
 using Xyla.Core;
-using Xyla.Player;
+
 
 /// <summary>
 /// AI ZombieFat:
@@ -79,6 +79,9 @@ public class ZombieFatController : MonoBehaviour
     private float _lostTargetTimer = 0f;
 
     // ── Lifecycle ──────────────────────────────────────────
+
+    public bool IsDead { get; private set; }
+    public bool IsAlive => !IsDead; //thêm tạm để fix
 
     private void Awake()
     {

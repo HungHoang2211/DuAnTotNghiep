@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using Xyla.Combat;
+using SimpleSurvival.Combat;
 using Xyla.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
