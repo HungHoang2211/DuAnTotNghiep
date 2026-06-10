@@ -8,7 +8,7 @@ namespace SimpleSurvival.Actions
 {
     public class PickupAction : IAction
     {
-        private static readonly int ParamActionGatherHands = Animator.StringToHash("ActionGatherHands");
+        private static readonly int ParamPickup = Animator.StringToHash("Pickup");
 
         public ActionType Type => ActionType.Use;
         public bool IsCompleted { get; private set; }
@@ -41,8 +41,9 @@ namespace SimpleSurvival.Actions
 
         public void Init()
         {
+            _controller.CancelSneak();
             FacingTarget();
-            _animator.SetTrigger(ParamActionGatherHands);
+            _animator.SetTrigger(ParamPickup);
         }
 
         public void Update(float deltaTime) { }

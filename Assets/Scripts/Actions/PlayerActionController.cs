@@ -105,9 +105,40 @@ namespace SimpleSurvival.Player
             if (held) AttackInputQueued = true;
         }
 
+        public bool IsGatherHeld { get; private set; }
+
+        public void SetGatherHeld(bool held)
+        {
+            IsGatherHeld = held;
+        }
+
         public void ForceIdle()
         {
             SwitchToIdle();
+        }
+
+        public void CancelSneak()
+        {
+            var input = GetComponent<SimpleSurvival.Input.PlayerInputReader>();
+            if (input != null) input.ForceSneak(false);
+        }
+
+        public bool RequestGather(HarvestTarget target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null || inventoryQueries == null) return false;
+
+            ToolType required = target.RequiredTool;
+            float damage = ResolveToolDamage(required);
+
+            if (damage <= 0f)
+            {
+                Debug.Log($"[ActionController] Missing tool: {required}");
+                return false;
+            }
+
+            GatherAction gather = new GatherAction(this, animator, inventoryQueries, target, damage);
+            return TryRequestAction(gather);
         }
 
         public bool RequestPickup(PickupTarget target)
@@ -152,6 +183,25 @@ namespace SimpleSurvival.Player
             ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
             if (stack == null) return null;
             return stack.ItemData.GetAbility<WeaponAbility>();
+        }
+
+        private float ResolveToolDamage(ToolType required)
+        {
+            if (playerEquipment != null)
+            {
+                ItemStack equipped = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
+                if (equipped != null)
+                {
+                    ToolAbility equippedTool = equipped.ItemData.GetAbility<ToolAbility>();
+                    if (equippedTool != null && equippedTool.ToolType == required)
+                        return equippedTool.Damage;
+                }
+            }
+
+            if (inventoryQueries != null && inventoryQueries.HasTool(required))
+                return inventoryQueries.GetToolDamage(required);
+
+            return 0f;
         }
 
         private void SwitchAction(IAction newAction)

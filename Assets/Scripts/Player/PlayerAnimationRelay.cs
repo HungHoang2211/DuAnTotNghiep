@@ -36,5 +36,17 @@ namespace SimpleSurvival.Player
             if (_actionController.CurrentAction is PickupAction pickup)
                 pickup.HandleEnd();
         }
+
+        public void OnGatherHit()
+        {
+            if (_actionController.CurrentAction is GatherAction gather)
+                gather.HandleHit();
+        }
+
+        public void OnGatherEnd()
+        {
+            if (_actionController.CurrentAction is GatherAction gather)
+                gather.HandleEnd();
+        }
     }
 }

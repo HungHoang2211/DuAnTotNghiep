@@ -61,6 +61,7 @@ namespace SimpleSurvival.Actions
         public void Init()
         {
             _controller.ConsumeAttackQueue();
+            _controller.CancelSneak();
             _comboIndex = 0;
             StartSwing();
         }

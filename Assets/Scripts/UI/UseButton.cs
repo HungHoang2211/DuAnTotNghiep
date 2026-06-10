@@ -64,14 +64,24 @@ namespace SimpleSurvival.UI
         {
             if (_currentTarget == null) return;
             if (pressRoot != null) pressRoot.localScale = Vector3.one * 0.9f;
+
+            if (_currentTarget is HarvestTarget harvest)
+            {
+                actionController.SetGatherHeld(true);
+                DispatchHarvest(harvest);
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             if (pressRoot != null) pressRoot.localScale = Vector3.one;
 
+            actionController.SetGatherHeld(false);
+
             if (_currentTarget == null) return;
-            DispatchAction(_currentTarget);
+
+            if (_currentTarget is PickupTarget pickup)
+                actionController.RequestPickup(pickup);
         }
 
         private void HandleTargetChanged(ITargetable target)
@@ -104,27 +114,35 @@ namespace SimpleSurvival.UI
             }
         }
 
-        private void DispatchAction(ITargetable target)
+        private void DispatchHarvest(HarvestTarget harvest)
         {
-            switch (target)
+            if (inventoryQueries == null) return;
+
+            if (!inventoryQueries.HasTool(harvest.RequiredTool))
             {
-                case PickupTarget pickup:
-                    actionController.RequestPickup(pickup);
-                    break;
-
-                case HarvestTarget harvest:
-                    if (inventoryQueries != null && !inventoryQueries.HasTool(harvest.RequiredTool))
-                    {
-                        Debug.Log($"[UseButton] Missing tool: {harvest.RequiredTool}");
-                        return;
-                    }
-
-                    float damage = inventoryQueries != null
-                        ? inventoryQueries.GetToolDamage(harvest.RequiredTool)
-                        : 0f;
-                    Debug.Log($"[UseButton] Harvest requested: {harvest.ItemData?.ItemName}, tool damage: {damage}");
-                    break;
+                bool equippedHasTool = HasEquippedTool(harvest.RequiredTool);
+                if (!equippedHasTool)
+                {
+                    Debug.Log($"[UseButton] Missing tool: {harvest.RequiredTool}");
+                    return;
+                }
             }
+
+            actionController.RequestGather(harvest);
+        }
+
+        private bool HasEquippedTool(ToolType required)
+        {
+            if (actionController == null) return false;
+
+            var equipment = actionController.GetComponentInChildren<SimpleSurvival.Items.PlayerEquipment>();
+            if (equipment == null || equipment.System == null) return false;
+
+            var stack = equipment.System.GetSlot(SimpleSurvival.Items.EquipSlot.Weapon, 0);
+            if (stack == null) return false;
+
+            var tool = stack.ItemData.GetAbility<SimpleSurvival.Items.ToolAbility>();
+            return tool != null && tool.ToolType == required;
         }
 
         private void UpdateAlphaFade()
