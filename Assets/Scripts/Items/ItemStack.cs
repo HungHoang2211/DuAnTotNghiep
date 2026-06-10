@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// One stack of items as it exists in the world at runtime: which item type,
-    /// how many, and how much durability is left. This is the mutable counterpart
-    /// to ItemData. Inventory cells hold ItemStacks.
-    /// </summary>
     [Serializable]
     public sealed class ItemStack
     {
@@ -15,10 +10,6 @@ namespace SimpleSurvival.Items
         [SerializeField] private int quantity;
         [SerializeField] private int currentDurability;
 
-        /// <summary>
-        /// Creates a stack with full durability.
-        /// Use this for crafted items or items the player picks up fresh.
-        /// </summary>
         public ItemStack(ItemData itemData, int quantity)
         {
             Validate(itemData, quantity);
@@ -27,11 +18,6 @@ namespace SimpleSurvival.Items
             this.currentDurability = itemData.MaxDurability;
         }
 
-        /// <summary>
-        /// Creates a stack with a specific durability value.
-        /// Use this for loot items that spawn with partial wear.
-        /// Value is clamped to [0, MaxDurability].
-        /// </summary>
         public ItemStack(ItemData itemData, int quantity, int currentDurability)
         {
             Validate(itemData, quantity);
@@ -48,10 +34,6 @@ namespace SimpleSurvival.Items
         public bool IsEmpty => quantity <= 0;
         public bool IsBroken => itemData.IsDurable && currentDurability <= 0;
 
-        /// <summary>
-        /// True when another stack holds the same stackable item type and so
-        /// could receive items from this one.
-        /// </summary>
         public bool CanStackWith(ItemStack other)
         {
             return other != null
@@ -59,10 +41,6 @@ namespace SimpleSurvival.Items
                 && other.itemData == itemData;
         }
 
-        /// <summary>
-        /// Adds up to <paramref name="amount"/> items, respecting the max stack
-        /// size. Returns the amount that did not fit (0 when all fit).
-        /// </summary>
         public int AddQuantity(int amount)
         {
             if (amount < 1)
@@ -75,10 +53,6 @@ namespace SimpleSurvival.Items
             return amount - accepted;
         }
 
-        /// <summary>
-        /// Removes up to <paramref name="amount"/> items. Returns how many were
-        /// actually removed (capped at the current quantity).
-        /// </summary>
         public int RemoveQuantity(int amount)
         {
             if (amount < 1)
@@ -90,10 +64,6 @@ namespace SimpleSurvival.Items
             return removed;
         }
 
-        /// <summary>
-        /// Reduces durability by one use. Does nothing for items that never
-        /// wear out. Returns true on the use that breaks the item.
-        /// </summary>
         public bool ReduceDurability()
         {
             if (!itemData.IsDurable || currentDurability <= 0)
@@ -114,11 +84,6 @@ namespace SimpleSurvival.Items
             }
         }
 
-        /// <summary>
-        /// Creates an independent copy. Inventory code clones a stack before
-        /// storing it so two cells can never share — and silently corrupt —
-        /// the same instance.
-        /// </summary>
         public ItemStack Clone()
         {
             ItemStack copy = new ItemStack(itemData, quantity, currentDurability);

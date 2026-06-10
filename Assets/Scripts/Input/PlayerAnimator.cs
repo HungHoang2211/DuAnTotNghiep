@@ -14,6 +14,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private Animator animator;
         [SerializeField] private PlayerInputReader inputReader;
         [SerializeField] private PlayerEquipment playerEquipment;
+        [SerializeField] private PlayerToolSwapper toolSwapper;
         [SerializeField] private int moveModeNormal = 0;
         [SerializeField] private int moveModeSneak = 1;
         [SerializeField] private float speedDampTime = 0.1f;
@@ -24,12 +25,21 @@ namespace SimpleSurvival.Player
 
         private PlayerActionController _actionController;
 
+        public AnimatorOverrideController ResolveCurrentWeaponController()
+        {
+            ItemStack stack = null;
+            if (playerEquipment != null)
+                stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
+            return ResolveOverrideController(stack);
+        }
+
         private void Awake()
         {
             _actionController = GetComponent<PlayerActionController>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
             if (inputReader == null) inputReader = GetComponent<PlayerInputReader>();
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
+            if (toolSwapper == null) toolSwapper = GetComponent<PlayerToolSwapper>();
         }
 
         private void Start()
@@ -49,7 +59,6 @@ namespace SimpleSurvival.Player
             if (animator == null) return;
 
             float moveSpeed = 0f;
-
             if (_actionController.CurrentAction is MoveAction move)
                 moveSpeed = move.NormalizedSpeed;
 
@@ -62,6 +71,7 @@ namespace SimpleSurvival.Player
         private void HandleSlotChanged(EquipSlot slot, int index, ItemStack stack)
         {
             if (slot != EquipSlot.Weapon) return;
+            if (toolSwapper != null && toolSwapper.IsSwapped) return;
 
             AnimatorOverrideController overrideController = ResolveOverrideController(stack);
             SwapOverrideController(overrideController);
@@ -74,6 +84,10 @@ namespace SimpleSurvival.Player
             WeaponAbility weapon = stack.ItemData.GetAbility<WeaponAbility>();
             if (weapon != null && weapon.OverrideController != null)
                 return weapon.OverrideController;
+
+            ToolAbility tool = stack.ItemData.GetAbility<ToolAbility>();
+            if (tool != null && tool.OverrideController != null)
+                return tool.OverrideController;
 
             return defaultOverrideController;
         }

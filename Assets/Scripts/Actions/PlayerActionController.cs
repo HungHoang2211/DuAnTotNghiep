@@ -17,6 +17,8 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
+        [SerializeField] private PlayerToolSwapper toolSwapper;
+        [SerializeField] private PlayerAnimator playerAnimator;
 
         [Header("Combat Defaults (Unarmed)")]
         [SerializeField] private float unarmedAttackRange = 1.5f;
@@ -49,6 +51,8 @@ namespace SimpleSurvival.Player
             if (playerStats == null) playerStats = GetComponentInChildren<PlayerStats>();
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (inventoryQueries == null) inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
+            if (toolSwapper == null) toolSwapper = GetComponentInChildren<PlayerToolSwapper>();
+            if (playerAnimator == null) playerAnimator = GetComponentInChildren<PlayerAnimator>();
 
             _idleAction = new IdleAction(this);
             _moveAction = new MoveAction(this, moveConfig);
@@ -129,15 +133,24 @@ namespace SimpleSurvival.Player
             if (animator == null || inventoryQueries == null) return false;
 
             ToolType required = target.RequiredTool;
-            float damage = ResolveToolDamage(required);
+            GatherToolResolution resolution = ResolveGatherTool(required);
 
-            if (damage <= 0f)
+            if (!resolution.HasTool)
             {
-                Debug.Log($"[ActionController] Missing tool: {required}");
+                Debug.Log($"[NoTool] Missing tool: {required}");
                 return false;
             }
 
-            GatherAction gather = new GatherAction(this, animator, inventoryQueries, target, damage);
+            GatherAction gather = new GatherAction(
+                this,
+                animator,
+                inventoryQueries,
+                toolSwapper,
+                playerAnimator,
+                target,
+                resolution.ToolStack,
+                resolution.Damage,
+                resolution.IsEphemeral);
             return TryRequestAction(gather);
         }
 
@@ -185,23 +198,52 @@ namespace SimpleSurvival.Player
             return stack.ItemData.GetAbility<WeaponAbility>();
         }
 
-        private float ResolveToolDamage(ToolType required)
+        private struct GatherToolResolution
         {
+            public bool HasTool;
+            public ItemStack ToolStack;
+            public float Damage;
+            public bool IsEphemeral;
+        }
+
+        private GatherToolResolution ResolveGatherTool(ToolType required)
+        {
+            GatherToolResolution result = new GatherToolResolution();
+
             if (playerEquipment != null)
             {
                 ItemStack equipped = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
                 if (equipped != null)
                 {
                     ToolAbility equippedTool = equipped.ItemData.GetAbility<ToolAbility>();
-                    if (equippedTool != null && equippedTool.ToolType == required)
-                        return equippedTool.Damage;
+                    if (equippedTool != null && equippedTool.ToolType == required && !equipped.IsBroken)
+                    {
+                        result.HasTool = true;
+                        result.ToolStack = equipped;
+                        result.Damage = equippedTool.Damage;
+                        result.IsEphemeral = false;
+                        return result;
+                    }
                 }
             }
 
-            if (inventoryQueries != null && inventoryQueries.HasTool(required))
-                return inventoryQueries.GetToolDamage(required);
+            if (inventoryQueries != null)
+            {
+                ItemStack stack = inventoryQueries.FindToolItemLowestDurability(required);
+                if (stack != null)
+                {
+                    ToolAbility tool = stack.ItemData.GetAbility<ToolAbility>();
+                    if (tool != null)
+                    {
+                        result.HasTool = true;
+                        result.ToolStack = stack;
+                        result.Damage = tool.Damage;
+                        result.IsEphemeral = true;
+                    }
+                }
+            }
 
-            return 0f;
+            return result;
         }
 
         private void SwitchAction(IAction newAction)

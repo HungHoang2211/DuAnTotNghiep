@@ -32,6 +32,18 @@ namespace SimpleSurvival.Input
             ApplyVisual();
         }
 
+        private void OnEnable()
+        {
+            if (inputReader != null && action == ActionType.Sneak)
+                inputReader.OnSneakChanged += HandleSneakChanged;
+        }
+
+        private void OnDisable()
+        {
+            if (inputReader != null && action == ActionType.Sneak)
+                inputReader.OnSneakChanged -= HandleSneakChanged;
+        }
+
         public void OnPointerDown(PointerEventData eventData)
         {
             if (mode == Mode.Hold)
@@ -44,6 +56,13 @@ namespace SimpleSurvival.Input
         {
             if (mode == Mode.Hold)
                 SetState(false);
+        }
+
+        private void HandleSneakChanged(bool active)
+        {
+            if (_isActive == active) return;
+            _isActive = active;
+            ApplyVisual();
         }
 
         private void SetState(bool active)

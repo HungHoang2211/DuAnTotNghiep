@@ -1,4 +1,5 @@
-﻿using SimpleSurvival.Cameras;
+﻿using System;
+using SimpleSurvival.Cameras;
 using SimpleSurvival.Player;
 using UnityEngine;
 
@@ -15,17 +16,30 @@ namespace SimpleSurvival.Input
         [SerializeField] private bool enableKeyboard = true;
         [SerializeField] private KeyCode keyboardSneak = KeyCode.LeftControl;
 
+        public event Action<bool> OnSneakChanged;
+
         private PlayerActionController _actionController;
         private bool _sneakFromUI;
 
         public bool IsSneakHeld => _sneakFromUI || (enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak));
 
-        public void SetSneakFromUI(bool held) => _sneakFromUI = held;
+        public void SetSneakFromUI(bool held)
+        {
+            SetSneakInternal(held);
+        }
+
         public void SetSprintFromUI(bool held) { }
 
         public void ForceSneak(bool value)
         {
+            SetSneakInternal(value);
+        }
+
+        private void SetSneakInternal(bool value)
+        {
+            if (_sneakFromUI == value) return;
             _sneakFromUI = value;
+            OnSneakChanged?.Invoke(value);
         }
 
         private void Awake()
@@ -47,13 +61,11 @@ namespace SimpleSurvival.Input
                 Vector3 inputAsWorld = new Vector3(rawInput.x, 0f, rawInput.y);
                 worldDir = Quaternion.Euler(0f, yaw, 0f) * inputAsWorld;
                 magnitude = Mathf.Clamp01(rawInput.magnitude);
-
                 if (worldDir.sqrMagnitude > 0.001f)
                     worldDir = worldDir.normalized;
             }
 
             bool sneakHeld = _sneakFromUI || (enableKeyboard && UnityEngine.Input.GetKey(keyboardSneak));
-
             _actionController.RequestMove(worldDir, magnitude, sneakHeld);
         }
 

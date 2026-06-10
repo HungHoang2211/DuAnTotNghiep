@@ -3,17 +3,10 @@ using System.Collections.Generic;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// The data layer of an inventory: a fixed list of slots, each holding one
-    /// ItemStack or null (empty). Knows nothing about UI — it only stores items
-    /// and raises an event when its contents change. The UI listens to that
-    /// event and redraws itself.
-    /// </summary>
     public sealed class InventorySystem
     {
         private readonly ItemStack[] slots;
 
-        /// <summary>Raised whenever the contents change, so the UI can redraw.</summary>
         public event Action OnInventoryChanged;
 
         public InventorySystem(int slotCount)
@@ -26,39 +19,22 @@ namespace SimpleSurvival.Items
 
         public int SlotCount => slots.Length;
 
-        /// <summary>Returns the stack in a slot, or null if the slot is empty.</summary>
         public ItemStack GetSlot(int index)
         {
             return slots[index];
         }
 
-        /// <summary>
-        /// Raises OnInventoryChanged manually. Use this when a stack already in
-        /// the inventory changed in place — for example its durability dropped —
-        /// so the UI redraws even though no slot was added or removed.
-        /// </summary>
         public void NotifyChanged()
         {
             OnInventoryChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Replaces the contents of a slot with the given stack (or null). For
-        /// use by drag-drop and similar operations that move stacks between
-        /// known slots. Raises OnInventoryChanged.
-        /// </summary>
         public void SetSlot(int index, ItemStack stack)
         {
             slots[index] = stack;
             OnInventoryChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Moves a stack from one slot to another, possibly across inventories.
-        /// If the destination is empty, the stack moves over. If it holds the
-        /// same stackable item, the stacks merge (overflow stays at the source).
-        /// Otherwise, the two stacks swap positions.
-        /// </summary>
         public static void TransferOrSwap(
             InventorySystem fromInventory, int fromIndex,
             InventorySystem toInventory, int toIndex)
@@ -82,17 +58,14 @@ namespace SimpleSurvival.Items
                 int overflow = destination.AddQuantity(source.Quantity);
                 if (overflow == 0)
                 {
-                    // Everything fit — clear the source slot.
                     fromInventory.slots[fromIndex] = null;
                 }
                 else if (overflow < source.Quantity)
                 {
-                    // Some items moved — remove only the amount that fit.
                     source.RemoveQuantity(source.Quantity - overflow);
                 }
                 else
                 {
-                    // Destination was full — nothing merged, swap instead.
                     toInventory.slots[toIndex] = source;
                     fromInventory.slots[fromIndex] = destination;
                 }
@@ -108,11 +81,6 @@ namespace SimpleSurvival.Items
                 toInventory.OnInventoryChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Adds items to the inventory, creating new stacks with full durability.
-        /// First fills existing matching stacks, then uses empty slots.
-        /// Returns the amount that did not fit (0 when everything was stored).
-        /// </summary>
         public int AddItem(ItemData itemData, int amount)
         {
             if (itemData == null)
@@ -132,12 +100,6 @@ namespace SimpleSurvival.Items
             return remaining;
         }
 
-        /// <summary>
-        /// Places a pre-built stack into the inventory as-is, preserving its
-        /// durability. Use this for loot items that spawn with partial wear.
-        /// For stackable items, merges into existing stacks first.
-        /// Returns 0 if the stack fit, or the leftover quantity if it did not.
-        /// </summary>
         public int AddStack(ItemStack stack)
         {
             if (stack == null)
@@ -145,12 +107,9 @@ namespace SimpleSurvival.Items
 
             int remaining = stack.Quantity;
 
-            // Stackable items can merge into existing stacks.
             if (stack.ItemData.IsStackable)
                 remaining = FillExistingStacks(stack.ItemData, remaining);
 
-            // Place whatever is left into an empty slot, keeping the original
-            // stack instance so its durability value is preserved.
             if (remaining > 0)
             {
                 int emptyIndex = IndexOfFirstEmptySlot();
@@ -167,10 +126,6 @@ namespace SimpleSurvival.Items
             return remaining;
         }
 
-        /// <summary>
-        /// Removes up to <paramref name="amount"/> of an item type from anywhere
-        /// in the inventory. Returns how many were actually removed.
-        /// </summary>
         public int RemoveItem(ItemData itemData, int amount)
         {
             if (itemData == null)
@@ -200,7 +155,6 @@ namespace SimpleSurvival.Items
             return removed;
         }
 
-        /// <summary>Total count of an item type across all slots.</summary>
         public int CountItem(ItemData itemData)
         {
             int total = 0;
@@ -218,12 +172,6 @@ namespace SimpleSurvival.Items
             return IndexOfFirstEmptySlot() >= 0;
         }
 
-        /// <summary>
-        /// Merges stackable items of the same type up to their max stack size,
-        /// then sorts everything by item name. Fires one OnInventoryChanged.
-        /// Non-stackable stacks (weapons, armor) keep their original instances
-        /// so durability values are preserved.
-        /// </summary>
         public void Sort()
         {
             List<ItemStack> sorted = BuildSortedList(this);
@@ -231,19 +179,11 @@ namespace SimpleSurvival.Items
             OnInventoryChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Sorts two inventories as one combined bag — items from both are
-        /// merged, sorted by name, then filled back into <paramref name="first"/>
-        /// first and <paramref name="second"/> with the remainder.
-        /// Fires OnInventoryChanged on both.
-        /// </summary>
         public static void SortTogether(InventorySystem first, InventorySystem second)
         {
-            // ── Collect from both ────────────────────────────────────────────
             List<InventorySystem> sources = new List<InventorySystem> { first, second };
             List<ItemStack> sorted = BuildSortedList(sources.ToArray());
 
-            // ── Fill first, then second ───────────────────────────────────────
             int written = WriteBack(sorted, first, startAt: 0);
             List<ItemStack> remainder = sorted.GetRange(written, sorted.Count - written);
             WriteBack(remainder, second, startAt: 0);
@@ -251,8 +191,6 @@ namespace SimpleSurvival.Items
             first.OnInventoryChanged?.Invoke();
             second.OnInventoryChanged?.Invoke();
         }
-
-        // ── Sort helpers ─────────────────────────────────────────────────────
 
         private static List<ItemStack> BuildSortedList(params InventorySystem[] inventories)
         {
@@ -300,10 +238,6 @@ namespace SimpleSurvival.Items
             return merged;
         }
 
-        /// <summary>
-        /// Writes stacks into the inventory starting at slot 0.
-        /// Returns the number of stacks actually written.
-        /// </summary>
         private static int WriteBack(List<ItemStack> stacks, InventorySystem inventory,
             int startAt = 0)
         {
@@ -311,14 +245,12 @@ namespace SimpleSurvival.Items
             for (int i = 0; i < inventory.slots.Length && written < stacks.Count; i++)
                 inventory.slots[i] = stacks[written++];
 
-            // Clear leftover slots.
             for (int i = written; i < inventory.slots.Length; i++)
                 inventory.slots[i] = null;
 
             return written;
         }
 
-        // ── Private helpers ──────────────────────────────────────────────────
 
         private int FillExistingStacks(ItemData itemData, int remaining)
         {
