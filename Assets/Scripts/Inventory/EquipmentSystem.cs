@@ -29,6 +29,18 @@ namespace SimpleSurvival.Items
             return _slots[slot][index];
         }
 
+        public IEnumerable<EquipSlot> Slots => _slots.Keys;
+
+        public int SlotCount(EquipSlot slot)
+        {
+            return _slots[slot].Length;
+        }
+
+        public bool HasSlot(EquipSlot slot)
+        {
+            return _slots.ContainsKey(slot);
+        }
+
         public bool TryEquip(ItemStack stack, InventorySystem inventory,
             int inventoryIndex, EquipSlot targetSlot, int slotIndex = 0)
         {

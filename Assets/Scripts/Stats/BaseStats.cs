@@ -51,6 +51,17 @@ namespace SimpleSurvival.Stats
             OnHPChanged?.Invoke(HP, MaxHP);
         }
 
+        public virtual void RestoreHP(float hp)
+        {
+            if (baseConfig == null) return;
+
+            HP = Mathf.Clamp(hp, 0f, MaxHP);
+            IsAlive = HP > 0f;
+            _lastDamageFrame = -1;
+
+            OnHPChanged?.Invoke(HP, MaxHP);
+        }
+
         public bool TakeDamage(float rawDamage)
         {
             return TakeDamage(rawDamage, null);

@@ -7,6 +7,7 @@ namespace SimpleSurvival.Items
     public sealed class ItemData : ScriptableObject
     {
         [Header("Identity")]
+        [SerializeField] private string itemId;
         [SerializeField] private string itemName;
         [SerializeField] private Sprite icon;
         [TextArea][SerializeField] private string description;
@@ -27,6 +28,7 @@ namespace SimpleSurvival.Items
         [Tooltip("Drag ability assets here. An item with no abilities is a plain resource.")]
         [SerializeField] private List<ItemAbility> abilities = new List<ItemAbility>();
 
+        public string ItemId => itemId;
         public string ItemName => itemName;
         public Sprite Icon => icon;
         public string Description => description;

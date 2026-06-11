@@ -39,6 +39,14 @@ namespace SimpleSurvival.Stats
             OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
 
+        public void RestoreSurvival(float hunger, float thirst)
+        {
+            if (Config == null) return;
+
+            SetHunger(hunger);
+            SetThirst(thirst);
+        }
+
         private void Update()
         {
             if (!IsAlive || Config == null)

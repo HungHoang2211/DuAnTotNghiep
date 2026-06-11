@@ -35,6 +35,17 @@ namespace SimpleSurvival.Items
             OnInventoryChanged?.Invoke();
         }
 
+        public void ReplaceAll(ItemStack[] orderedSlots)
+        {
+            if (orderedSlots == null)
+                throw new ArgumentNullException(nameof(orderedSlots));
+
+            for (int i = 0; i < slots.Length; i++)
+                slots[i] = i < orderedSlots.Length ? orderedSlots[i] : null;
+
+            OnInventoryChanged?.Invoke();
+        }
+
         public static void TransferOrSwap(
             InventorySystem fromInventory, int fromIndex,
             InventorySystem toInventory, int toIndex)
