@@ -175,6 +175,7 @@ namespace SimpleSurvival.Player
         private float ResolveAttackDamage()
         {
             WeaponAbility weapon = GetEquippedWeapon();
+            Debug.Log($"[Attack] Weapon={weapon?.AbilityName ?? "null"}, Damage={weapon?.Damage ?? -1f}, BaseDamage={playerStats?.BaseDamage}");
             if (weapon != null) return weapon.Damage;
             return playerStats != null ? playerStats.BaseDamage : 0f;
         }
