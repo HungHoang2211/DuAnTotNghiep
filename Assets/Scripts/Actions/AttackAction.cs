@@ -28,11 +28,13 @@ namespace SimpleSurvival.Actions
         private readonly float _range;
         private readonly int _maxComboIndex;
         private readonly float _comboWindowSeconds;
+        private readonly float _safetyTimeout;
 
         private Phase _phase;
         private int _comboIndex;
         private bool _hitAppliedThisSwing;
         private float _comboWindowRemaining;
+        private float _swingTimer;
 
         public AttackAction(
             PlayerActionController controller,
@@ -41,7 +43,8 @@ namespace SimpleSurvival.Actions
             float damage,
             float range,
             int maxComboIndex,
-            float comboWindowSeconds)
+            float comboWindowSeconds,
+            float safetyTimeout)
         {
             _controller = controller;
             _animator = animator;
@@ -50,6 +53,7 @@ namespace SimpleSurvival.Actions
             _range = range;
             _maxComboIndex = Mathf.Max(0, maxComboIndex);
             _comboWindowSeconds = Mathf.Max(0f, comboWindowSeconds);
+            _safetyTimeout = Mathf.Max(0.1f, safetyTimeout);
         }
 
         public bool CanBeInterruptedBy(IAction newAction)
@@ -68,7 +72,16 @@ namespace SimpleSurvival.Actions
 
         public void Update(float deltaTime)
         {
-            if (_phase != Phase.ComboWindow) return;
+            if (_phase == Phase.Attacking)
+            {
+                _swingTimer += deltaTime;
+                if (_swingTimer >= _safetyTimeout)
+                {
+                    Debug.LogWarning($"[SafetyTimeout] AttackAction swing exceeded {_safetyTimeout}s. Force HandleEnd. (Missing OnAttackEnd event?)");
+                    HandleEnd();
+                }
+                return;
+            }
 
             _comboWindowRemaining -= deltaTime;
 
@@ -112,6 +125,7 @@ namespace SimpleSurvival.Actions
 
         public void HandleEnd()
         {
+            if (_phase == Phase.ComboWindow) return;
             _phase = Phase.ComboWindow;
             _comboWindowRemaining = _comboWindowSeconds;
         }
@@ -126,6 +140,7 @@ namespace SimpleSurvival.Actions
         {
             FacingTarget();
             _hitAppliedThisSwing = false;
+            _swingTimer = 0f;
             _phase = Phase.Attacking;
             _animator.SetInteger(ParamActionIndex, _comboIndex);
             _animator.SetTrigger(ParamAttack);

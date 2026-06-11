@@ -28,6 +28,9 @@ namespace SimpleSurvival.Actions
         private bool _hitAppliedThisChop;
         private bool _targetDepleted;
 
+        private float _chopTimer;
+        private float _currentSafetyTimeout;
+
         public GatherAction(
             PlayerActionController controller,
             Animator animator,
@@ -57,7 +60,6 @@ namespace SimpleSurvival.Actions
             return true;
         }
 
-
         public void Init()
         {
             _controller.CancelSneak();
@@ -72,17 +74,24 @@ namespace SimpleSurvival.Actions
             StartChop();
         }
 
-        public void Update(float deltaTime) { }
+        public void Update(float deltaTime)
+        {
+            _chopTimer += deltaTime;
+            if (_chopTimer >= _currentSafetyTimeout)
+            {
+                Debug.LogWarning($"[SafetyTimeout] GatherAction chop exceeded {_currentSafetyTimeout}s. Force HandleEnd. (Missing OnGatherEnd event?)");
+                _chopTimer = 0f;
+                HandleEnd();
+            }
+        }
 
         public void Cancel()
         {
-            Debug.Log($"[GatherCancel] at {Time.time:F2}, toolDur={_toolStack?.CurrentDurability}");
             CompleteAction();
         }
 
         public void HandleHit()
         {
-            Debug.Log($"[GatherHit] Fire at {Time.time:F2}, hitAlreadyApplied={_hitAppliedThisChop}, toolDur={_toolStack?.CurrentDurability}, targetHP={_target?.Stats?.HP}");
             if (_hitAppliedThisChop) return;
             _hitAppliedThisChop = true;
 
@@ -92,9 +101,7 @@ namespace SimpleSurvival.Actions
             FacingTarget();
             _target.Stats.TakeDamage(_damage);
 
-            Debug.Log($"[GatherHit] After TakeDamage, targetHP={_target.Stats.HP}");
             ConsumeToolDurability();
-            Debug.Log($"[GatherHit] After ConsumeDur, toolDur={_toolStack?.CurrentDurability}");
         }
 
         public void HandleEnd()
@@ -179,10 +186,18 @@ namespace SimpleSurvival.Actions
 
         private void StartChop()
         {
-            Debug.Log($"[GatherStart] StartChop at {Time.time:F2}, prevHitApplied={_hitAppliedThisChop}, toolDur={_toolStack?.CurrentDurability}");
             FacingTarget();
             _hitAppliedThisChop = false;
+            _chopTimer = 0f;
+            _currentSafetyTimeout = ResolveCurrentSafetyTimeout();
             _animator.SetTrigger(ParamGather);
+        }
+
+        private float ResolveCurrentSafetyTimeout()
+        {
+            if (_toolStack == null) return 3f;
+            ToolAbility tool = _toolStack.ItemData.GetAbility<ToolAbility>();
+            return tool != null ? tool.SafetyTimeout : 3f;
         }
 
         private void CompleteAction()

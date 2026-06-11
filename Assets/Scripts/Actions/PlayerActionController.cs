@@ -24,6 +24,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float unarmedAttackRange = 1.5f;
         [SerializeField] private int unarmedMaxComboIndex = 3;
         [SerializeField] private float comboWindowSeconds = 0.25f;
+        [SerializeField] private float unarmedSafetyTimeout = 3f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -96,10 +97,12 @@ namespace SimpleSurvival.Player
             float damage = ResolveAttackDamage();
             float range = ResolveAttackRange();
             int maxComboIndex = ResolveMaxComboIndex();
+            float safetyTimeout = ResolveAttackSafetyTimeout();
 
             AttackAction attack = new AttackAction(
                 this, animator, target,
-                damage, range, maxComboIndex, comboWindowSeconds);
+                damage, range, maxComboIndex, comboWindowSeconds,
+                safetyTimeout);
             return TryRequestAction(attack);
         }
 
@@ -188,6 +191,13 @@ namespace SimpleSurvival.Player
             WeaponAbility weapon = GetEquippedWeapon();
             if (weapon != null) return weapon.MaxComboIndex;
             return unarmedMaxComboIndex;
+        }
+
+        private float ResolveAttackSafetyTimeout()
+        {
+            WeaponAbility weapon = GetEquippedWeapon();
+            if (weapon != null) return weapon.SafetyTimeout;
+            return unarmedSafetyTimeout;
         }
 
         private WeaponAbility GetEquippedWeapon()

@@ -40,6 +40,10 @@ namespace SimpleSurvival.Items
         [SerializeField] private int maxComboIndex;
         [SerializeField] private WeaponCategory category;
 
+        [Header("Safety")]
+        [Tooltip("Max time (seconds) a single attack swing can run before force-completing. Catches missing animation events. Default 3s.")]
+        [SerializeField] private float safetyTimeout = 3f;
+
         [Header("Visuals - Body")]
         [SerializeField] private Mesh weaponMesh;
         [SerializeField] private Material weaponMaterial;
@@ -49,7 +53,6 @@ namespace SimpleSurvival.Items
         [SerializeField] private List<WeaponModSlotVisual> modSlots = new List<WeaponModSlotVisual>();
 
         public override string AbilityName => Name;
-
         public float Damage => damage;
         public float AttackSpeed => attackSpeed;
         public float Range => range;
@@ -59,6 +62,7 @@ namespace SimpleSurvival.Items
         public AnimatorOverrideController OverrideController => overrideController;
         public int MaxComboIndex => maxComboIndex;
         public WeaponCategory Category => category;
+        public float SafetyTimeout => safetyTimeout;
         public Mesh WeaponMesh => weaponMesh;
         public Material WeaponMaterial => weaponMaterial;
 
