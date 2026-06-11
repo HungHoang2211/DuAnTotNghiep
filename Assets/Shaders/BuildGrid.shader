@@ -1,4 +1,4 @@
-﻿Shader "Custom/BuildGrid"
+﻿Shader "SimpleSurvival/BuildGrid"
 {
     Properties
     {

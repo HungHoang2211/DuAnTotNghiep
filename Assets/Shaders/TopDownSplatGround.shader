@@ -1,4 +1,4 @@
-﻿Shader "Custom/TopDownSplatGround"
+﻿Shader "SimpleSurvival/TopDownSplatGround"
 {
     Properties
     {
