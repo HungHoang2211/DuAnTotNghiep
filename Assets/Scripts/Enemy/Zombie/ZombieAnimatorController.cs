@@ -64,6 +64,17 @@ public class ZombieAnimatorController : MonoBehaviour
     public void SetHowling(bool active) => _animator.SetBool(IsHowlingHash, active);
     public void TriggerAttack() => _animator.SetTrigger(IsAttackingHash);
 
+    /// <summary>
+    /// Huỷ giữa chừng animation attack: reset trigger + cross-fade về locomotion.
+    /// Gọi khi player thoát tầm đánh để animator khớp với NavMesh đang di chuyển.
+    /// </summary>
+    public void CancelAttack()
+    {
+        _animator.ResetTrigger(IsAttackingHash);
+        // Về đúng tên state gốc trong Animator Controller
+        _animator.CrossFade("movement_free_idle", 0.15f, 0);
+    }
+
     public void TriggerDeath()
     {
         _animator.enabled = false;

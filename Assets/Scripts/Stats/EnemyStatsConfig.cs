@@ -5,6 +5,8 @@ namespace SimpleSurvival.Stats
     [CreateAssetMenu(menuName = "Simple Survival/Stats/Enemy Config", fileName = "EnemyStatsConfig")]
     public class EnemyStatsConfig : BaseStatsConfig
     {
+        public bool IsRunner => isRunner;
+
         [Header("Identity")]
         [SerializeField] private EnemyKind kind;
         [SerializeField] private string displayName;
@@ -34,6 +36,7 @@ namespace SimpleSurvival.Stats
         [SerializeField] private float howlChance = 0.5f;
         [SerializeField] private float howlDuration = 2f;
         [SerializeField] private float despawnDelay = 120f;
+        [SerializeField] private bool isRunner = false;
 
         public EnemyKind Kind => kind;
         public string DisplayName => displayName;

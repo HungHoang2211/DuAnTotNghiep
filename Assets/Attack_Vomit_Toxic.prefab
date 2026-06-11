@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 4724804207875695}
   - component: {fileID: 198618682377417806}
   - component: {fileID: 199703437598541787}
+  - component: {fileID: 8644368521195311576}
+  - component: {fileID: 768961038263473737}
+  - component: {fileID: 6143802870125797208}
   m_Layer: 0
   m_Name: Attack_Vomit_Toxic
   m_TagString: Untagged
@@ -2366,6 +2369,52 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!135 &8644368521195311576
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.25
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &768961038263473737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0646839d0f0124c40986ad67eca05467, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6143802870125797208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lifetime: 0
 --- !u!1 &1730242686860875
 GameObject:
   m_ObjectHideFlags: 0

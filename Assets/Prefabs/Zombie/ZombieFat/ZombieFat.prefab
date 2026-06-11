@@ -1393,6 +1393,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1447032290849787826}
+  - {fileID: 7225899562995629718}
   m_Father: {fileID: 325274416278796207}
   m_LocalEulerAnglesHint: {x: -5.8497943e-16, y: -0.000020934209, z: 4.5239644}
 --- !u!135 &6097860939169990549
@@ -2584,6 +2585,37 @@ Transform:
   - {fileID: 559003793680314434}
   m_Father: {fileID: 4004754028846283864}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: 0}
+--- !u!1 &6835486852083493057
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7225899562995629718}
+  m_Layer: 8
+  m_Name: AcidPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7225899562995629718
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6835486852083493057}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.025, y: -0.163, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4333317241647201718}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6892215148768869479
 GameObject:
   m_ObjectHideFlags: 0
@@ -2820,7 +2852,8 @@ GameObject:
   - component: {fileID: 5804780784029234990}
   - component: {fileID: 7230465798756799081}
   - component: {fileID: 349651418300874036}
-  - component: {fileID: -137147942667614784}
+  - component: {fileID: 3618774041547770407}
+  - component: {fileID: 7866972255231827805}
   m_Layer: 8
   m_Name: ZombieFat
   m_TagString: Enemy
@@ -2859,7 +2892,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: a07c1b82edae7914cb6f6b3f95d33217, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -2964,33 +2997,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad696c1b7e807e94fa28c4de02d3b822, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wanderRadius: 2
-  _wanderIntervalMin: 2
-  _wanderIntervalMax: 5
-  _wanderSpeed: 2
-  _visionRange: 5
-  _visionAngle: 60
   _playerLayer:
     serializedVersion: 2
     m_Bits: 512
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
-  _hearingRadius: 7
-  _chaseSpeed: 4
-  _chaseRadius: 10
-  _loseTargetTime: 4
-  _attackRange: 1.5
-  _attackDamage: 20
-  _attackCooldown: 2
-  _specialCooldown: 10
-  _specialRange: 10
-  _specialDamage: 30
-  _acidEffectPrefab: {fileID: 0}
-  _mouthTransform: {fileID: 0}
-  _acidSpeed: 7
-  _acidLifetime: 3
-  _despawnDelay: 30
+  _acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
+  _mouthTransform: {fileID: 7225899562995629718}
 --- !u!114 &349651418300874036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3004,7 +3018,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lifetime: 0
---- !u!114 &-137147942667614784
+--- !u!114 &3618774041547770407
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3013,10 +3027,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa4c47e264b42ba4fa04c5ff49a48009, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e5e174f916a46d41b5dcf81b37000eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHealth: 150
+  baseConfig: {fileID: 11400000, guid: 6b931b4c69e76d042bc302fb6f20bf1a, type: 2}
+--- !u!114 &7866972255231827805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d16ec908cafa843b0c4df1f5a487c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
 --- !u!1 &8416963274110584342
 GameObject:
   m_ObjectHideFlags: 0

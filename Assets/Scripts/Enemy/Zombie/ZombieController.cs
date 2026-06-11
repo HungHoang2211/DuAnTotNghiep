@@ -9,10 +9,6 @@ using Xyla.Core;
 [RequireComponent(typeof(EnemyStats))]
 public class ZombieController : MonoBehaviour
 {
-    [Header("Variant")]
-    [Tooltip("Bật để Zombie dùng run animation khi chase. Tắt = walk. Tương ứng với 2 prefab variant.")]
-    [SerializeField] private bool _isRunner = false;
-
     [Header("Detection Layers")]
     [SerializeField] private LayerMask _playerLayer;
     [SerializeField] private LayerMask _obstacleLayer;
@@ -27,7 +23,8 @@ public class ZombieController : MonoBehaviour
     private Transform _player;
 
     private bool _isDead = false;
-    private bool _isAttacking = false;
+    private bool _isAttacking = false;       // đang trong animation attack (lock vị trí)
+    private bool _attackCancelled = false;   // flag để coroutine biết player đã thoát tầm
     private float _lastAttackTime = -999f;
     private float _lostTargetTimer = 0f;
     private Vector3 _homePosition;
@@ -70,6 +67,7 @@ public class ZombieController : MonoBehaviour
         _spawnPoint = spawnPoint;
         _isDead = false;
         _isAttacking = false;
+        _attackCancelled = false;
         _state = State.Wandering;
         _lostTargetTimer = 0f;
         _player = null;
@@ -80,8 +78,9 @@ public class ZombieController : MonoBehaviour
         _agent.speed = Config.WanderSpeed;
         _agent.autoBraking = true;
         _agent.stoppingDistance = 0.1f;
-        _agent.angularSpeed = 0f;
-        _agent.updateRotation = false;
+        _agent.angularSpeed = 360f;      // NavMeshAgent tự xoay nhanh
+        _agent.acceleration = 16f;       // tăng acceleration để bám animation tốt hơn
+        _agent.updateRotation = true;    // để NavMesh tự xử lý rotation — hết trượt
 
         if (_anim != null) _anim.ResetForSpawn();
 
@@ -106,6 +105,8 @@ public class ZombieController : MonoBehaviour
         if (_isDead) return;
         SmoothRotation();
 
+        // Khi đang attack: giữ agent đứng yên — chỉ áp dụng khi đang trong tầm tấn công
+        // (nếu player thoát tầm, UpdateChase sẽ cancel và cho di chuyển lại)
         if (_isAttacking)
         {
             _agent.isStopped = true;
@@ -117,28 +118,27 @@ public class ZombieController : MonoBehaviour
 
     private void SmoothRotation()
     {
+        // Khi đang attack: tắt updateRotation của NavMesh, tự xoay về phía player
         if (_isAttacking && _player != null)
         {
+            _agent.updateRotation = false;
             Vector3 dir = _player.position - transform.position;
             dir.y = 0;
             if (dir != Vector3.zero)
                 transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation, Quaternion.LookRotation(dir), 300f * Time.deltaTime);
+                    transform.rotation, Quaternion.LookRotation(dir), 360f * Time.deltaTime);
             return;
         }
 
-        if (_agent.velocity.sqrMagnitude < 0.05f) return;
-        Vector3 moveDir = _agent.velocity.normalized;
-        moveDir.y = 0;
-        if (moveDir == Vector3.zero) return;
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation, Quaternion.LookRotation(moveDir), 120f * Time.deltaTime);
+        // Khi di chuyển: để NavMeshAgent tự xoay (updateRotation = true) — không can thiệp
+        // tránh conflict gây trượt
+        _agent.updateRotation = true;
     }
 
     private void PlayChaseAnimation()
     {
-        if (_anim == null) return;
-        if (_isRunner)
+        if (_anim == null || Config == null) return;
+        if (Config.IsRunner)
             _anim.SetRunning(true);
         else
             _anim.SetWalking(true);
@@ -283,6 +283,7 @@ public class ZombieController : MonoBehaviour
 
         if (dist <= Config.AttackRange)
         {
+            // Trong tầm tấn công: đứng yên, tấn công
             _agent.isStopped = true;
             _agent.ResetPath();
             _agent.velocity = Vector3.zero;
@@ -291,9 +292,17 @@ public class ZombieController : MonoBehaviour
             return;
         }
 
+        // Ngoài tầm tấn công: nếu đang attack thì cancel để đuổi theo
+        if (_isAttacking)
+        {
+            _attackCancelled = true;
+            _isAttacking = false;
+            if (_anim != null) _anim.CancelAttack(); // reset animator về locomotion ngay
+        }
+
         _agent.isStopped = false;
         _agent.SetDestination(_player.position);
-        PlayChaseAnimation();
+        PlayChaseAnimation(); // set IsWalking/IsRunning bool đúng sau khi cancel
 
         bool canDetect = CanStillDetect();
         if (!canDetect)
@@ -338,6 +347,7 @@ public class ZombieController : MonoBehaviour
         if (_isDead) return;
 
         _isAttacking = true;
+        _attackCancelled = false;
         _lastAttackTime = Time.time;
 
         if (_anim != null) _anim.TriggerAttack();
@@ -348,7 +358,8 @@ public class ZombieController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.4f);
 
-        if (Config != null && !_isDead && _player != null)
+        // Chỉ apply damage nếu chưa bị cancel (player chưa thoát tầm)
+        if (!_attackCancelled && Config != null && !_isDead && _player != null)
         {
             float dist = Vector3.Distance(transform.position, _player.position);
             if (dist <= Config.AttackRange + 0.5f)
@@ -360,7 +371,10 @@ public class ZombieController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.8f);
-        _isAttacking = false;
+
+        // Chỉ clear flag nếu coroutine này chưa bị cancel từ bên ngoài
+        if (!_attackCancelled)
+            _isAttacking = false;
     }
 
     public void OnTakeDamage(Transform attacker)

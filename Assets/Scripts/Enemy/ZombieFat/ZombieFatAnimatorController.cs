@@ -60,6 +60,17 @@ public class ZombieFatAnimatorController : MonoBehaviour
     /// <summary>Kích hoạt animation tấn công đặc biệt (phun axit).</summary>
     public void TriggerSpecialAttack() => _animator.SetTrigger(IsSpecialAttackingHash);
 
+    /// <summary>
+    /// Huỷ giữa chừng animation attack (claw hoặc special): reset cả 2 trigger
+    /// + cross-fade về Locomotion để khớp với NavMesh đang di chuyển.
+    /// </summary>
+    public void CancelAttack()
+    {
+        _animator.ResetTrigger(IsAttackingClawHash);
+        _animator.ResetTrigger(IsSpecialAttackingHash);
+        _animator.CrossFade("Locomotion", 0.15f, 0);
+    }
+
     /// <summary>Kích hoạt ragdoll death.</summary>
     public void TriggerDeath()
     {
