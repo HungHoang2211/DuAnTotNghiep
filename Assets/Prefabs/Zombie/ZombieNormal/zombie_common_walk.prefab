@@ -1658,9 +1658,10 @@ GameObject:
   - component: {fileID: 2838710958577680903}
   - component: {fileID: 5086609391029368388}
   - component: {fileID: 3962708425763290768}
-  - component: {fileID: 8018777318532252}
   - component: {fileID: 7491070305570193813}
   - component: {fileID: 3671295169221039691}
+  - component: {fileID: 5544020701626167026}
+  - component: {fileID: 61767057311644362}
   m_Layer: 8
   m_Name: zombie_common_walk
   m_TagString: Enemy
@@ -1699,7 +1700,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 179aebbbde950a44ea099d0d3cf9d345, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -1781,42 +1782,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveType: 0
-  _wanderRadius: 2
-  _wanderIntervalMin: 2
-  _wanderIntervalMax: 5
-  _visionRange: 10
-  _visionAngle: 60
   _playerLayer:
     serializedVersion: 2
     m_Bits: 512
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
-  _hearingRadius: 8
-  _wanderSpeed: 1.5
-  _chaseSpeed: 2
-  _chaseRadius: 10
-  _loseTargetTime: 4
-  _attackRange: 1.5
-  _attackDamage: 15
-  _attackCooldown: 1.8
-  _howlChance: 0.7
-  _howlDuration: 2
-  _despawnDelay: 30
---- !u!114 &8018777318532252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5119254978460749445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa4c47e264b42ba4fa04c5ff49a48009, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _maxHealth: 100
 --- !u!114 &7491070305570193813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1853,6 +1824,32 @@ CapsuleCollider:
   m_Height: 1.8611606
   m_Direction: 1
   m_Center: {x: 0, y: 0.8862639, z: 0}
+--- !u!114 &5544020701626167026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5119254978460749445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e5e174f916a46d41b5dcf81b37000eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseConfig: {fileID: 11400000, guid: fbcf3d160b23f744ba08ec82f0d85023, type: 2}
+--- !u!114 &61767057311644362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5119254978460749445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d16ec908cafa843b0c4df1f5a487c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
 --- !u!1 &5119468214096648115
 GameObject:
   m_ObjectHideFlags: 0

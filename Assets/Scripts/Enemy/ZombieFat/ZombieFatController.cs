@@ -30,6 +30,7 @@ public class ZombieFatController : MonoBehaviour
 
     private bool _isDead = false;
     private bool _isAttacking = false;
+    private bool _attackCancelled = false;   // flag cancel khi player thoát tầm giữa chừng
     private float _lastAttackTime = -999f;
     private float _lastClawTime = -999f;
     private float _lostTargetTimer = 0f;
@@ -72,6 +73,7 @@ public class ZombieFatController : MonoBehaviour
         _spawnPoint = spawnPoint;
         _isDead = false;
         _isAttacking = false;
+        _attackCancelled = false;
         _state = State.Wandering;
         _lostTargetTimer = 0f;
         _player = null;
@@ -82,7 +84,9 @@ public class ZombieFatController : MonoBehaviour
         _agent.speed = Config.WanderSpeed;
         _agent.autoBraking = true;
         _agent.stoppingDistance = 0.1f;
-        _agent.updateRotation = false;
+        _agent.angularSpeed = 360f;
+        _agent.acceleration = 16f;
+        _agent.updateRotation = true;
 
         if (_anim != null) _anim.ResetForSpawn();
 
@@ -121,20 +125,16 @@ public class ZombieFatController : MonoBehaviour
     {
         if (_isAttacking && _player != null)
         {
+            _agent.updateRotation = false;
             Vector3 dir = _player.position - transform.position;
             dir.y = 0;
             if (dir != Vector3.zero)
                 transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation, Quaternion.LookRotation(dir), 300f * Time.deltaTime);
+                    transform.rotation, Quaternion.LookRotation(dir), 360f * Time.deltaTime);
             return;
         }
 
-        if (_agent.velocity.sqrMagnitude < 0.05f) return;
-        Vector3 moveDir = _agent.velocity.normalized;
-        moveDir.y = 0;
-        if (moveDir == Vector3.zero) return;
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation, Quaternion.LookRotation(moveDir), 120f * Time.deltaTime);
+        _agent.updateRotation = true;
     }
 
     private IEnumerator WanderRoutine()
@@ -264,12 +264,21 @@ public class ZombieFatController : MonoBehaviour
 
         if (dist <= Config.AttackRange)
         {
+            // Trong tầm: đứng yên tấn công
             _agent.isStopped = true;
             _agent.ResetPath();
             _agent.velocity = Vector3.zero;
             if (_anim != null) _anim.SetIdle();
             TryClawAttack();
             return;
+        }
+
+        // Ngoài tầm: cancel attack nếu đang đánh, chuyển sang đuổi
+        if (_isAttacking)
+        {
+            _attackCancelled = true;
+            _isAttacking = false;
+            if (_anim != null) _anim.CancelAttack(); // reset animator về locomotion ngay
         }
 
         _agent.isStopped = false;
@@ -319,6 +328,7 @@ public class ZombieFatController : MonoBehaviour
         if (_isDead) return;
 
         _isAttacking = true;
+        _attackCancelled = false;
         _lastAttackTime = Time.time;
 
         if (_anim != null) _anim.TriggerAttackClaw();
@@ -328,17 +338,21 @@ public class ZombieFatController : MonoBehaviour
     private IEnumerator ClawComboRoutine()
     {
         yield return new WaitForSeconds(0.4f);
-        ApplyClawDamage();
+        if (!_attackCancelled) ApplyClawDamage();
 
         yield return new WaitForSeconds(0.5f);
+        if (_attackCancelled) yield break;   // thoát sớm nếu đã cancel
 
         yield return new WaitForSeconds(0.35f);
-        ApplyClawDamage();
+        if (!_attackCancelled) ApplyClawDamage();
 
         yield return new WaitForSeconds(0.5f);
-        _isAttacking = false;
 
-        _lastClawTime = Time.time;
+        if (!_attackCancelled)
+        {
+            _isAttacking = false;
+            _lastClawTime = Time.time;
+        }
     }
 
     private void ApplyClawDamage()
@@ -355,18 +369,22 @@ public class ZombieFatController : MonoBehaviour
     private IEnumerator PerformSpecialAttack()
     {
         _isAttacking = true;
+        _attackCancelled = false;
 
         if (_anim != null) _anim.TriggerSpecialAttack();
 
         yield return new WaitForSeconds(0.6f);
 
-        if (!_isDead && _player != null)
+        if (!_attackCancelled && !_isDead && _player != null)
             FireAcid();
 
         yield return new WaitForSeconds(1f);
-        _isAttacking = false;
 
-        _lastClawTime = Time.time;
+        if (!_attackCancelled)
+        {
+            _isAttacking = false;
+            _lastClawTime = Time.time;
+        }
     }
 
     private void FireAcid()

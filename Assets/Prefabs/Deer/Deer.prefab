@@ -1393,10 +1393,11 @@ GameObject:
   - component: {fileID: 8809337738623663649}
   - component: {fileID: 856718213234412077}
   - component: {fileID: 8515481889967424379}
-  - component: {fileID: -5049814502456186076}
   - component: {fileID: 6942175452303524175}
   - component: {fileID: 8377792485242911752}
   - component: {fileID: -8257320707951265498}
+  - component: {fileID: 6958450369823907053}
+  - component: {fileID: -649633837559706084}
   m_Layer: 8
   m_Name: Deer
   m_TagString: Enemy
@@ -1478,22 +1479,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 356de88bfb8a29c408b4b1497beab0f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wanderRadius: 3
-  _wanderIntervalMin: 2
-  _wanderIntervalMax: 5
-  _grazeChance: 0.4
-  _grazeMinDuration: 3
-  _grazeMaxDuration: 7
-  _grazeCooldownAfterFlee: 10
-  _fleeDistance: 8
-  _fleeSpeed: 6
-  _normalSpeed: 2
-  _detectionRadius: 5
   _rotationSpeed: 6
   _acceleration: 10
   _deceleration: 10
   _angularSpeed: 0
-  _despawnDelay: 120
 --- !u!114 &8515481889967424379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1509,19 +1498,6 @@ MonoBehaviour:
   _walkAnimSpeed: 1
   _runAnimSpeed: 1
   _runThreshold: 3.5
---- !u!114 &-5049814502456186076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8462551463288136535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa4c47e264b42ba4fa04c5ff49a48009, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _maxHealth: 100
 --- !u!114 &6942175452303524175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1575,6 +1551,32 @@ MonoBehaviour:
   _lootCollider: {fileID: 0}
   _dropScatter: 0.6
   _usePool: 0
+--- !u!114 &6958450369823907053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8462551463288136535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e5e174f916a46d41b5dcf81b37000eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseConfig: {fileID: 11400000, guid: a08eb14d3514270499e629dbc3084f96, type: 2}
+--- !u!114 &-649633837559706084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8462551463288136535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d16ec908cafa843b0c4df1f5a487c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 1
 --- !u!1 &8852592913833031747
 GameObject:
   m_ObjectHideFlags: 0
