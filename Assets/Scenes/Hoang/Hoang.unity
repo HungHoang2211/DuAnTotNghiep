@@ -48360,6 +48360,7 @@ MonoBehaviour:
   animator: {fileID: 3095127015566962817}
   inputReader: {fileID: 8905305806091854569}
   playerEquipment: {fileID: 0}
+  toolSwapper: {fileID: 0}
   moveModeNormal: 0
   moveModeSneak: 1
   speedDampTime: 0.1
@@ -48393,9 +48394,12 @@ MonoBehaviour:
   playerStats: {fileID: 812480218}
   playerEquipment: {fileID: 140930709}
   inventoryQueries: {fileID: 719937943}
+  toolSwapper: {fileID: 0}
+  playerAnimator: {fileID: 0}
   unarmedAttackRange: 1.5
   unarmedMaxComboIndex: 3
   comboWindowSeconds: 0.25
+  unarmedSafetyTimeout: 3
 --- !u!114 &8905305806091854576
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48408,6 +48412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab83cc6ad827f047b415b9f84f8e002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  soundEmitter: {fileID: 0}
 --- !u!137 &8941299661710436805
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

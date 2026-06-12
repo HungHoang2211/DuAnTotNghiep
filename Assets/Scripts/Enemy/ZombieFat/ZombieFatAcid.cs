@@ -44,7 +44,19 @@ public class ZombieFatAcid : MonoBehaviour
         _hasHit = false;
         _spawnTime = Time.time;
 
-        if (_particles != null) _particles.Play();
+        if (_particles != null)
+        {
+            _particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _particles.Play();
+            Debug.Log($"[ZombieFatAcid] Particles: isPlaying={_particles.isPlaying}, isEmitting={_particles.isEmitting}, " +
+                      $"gameObject.active={_particles.gameObject.activeSelf}, " +
+                      $"localScale={_particles.transform.localScale}, " +
+                      $"emission.enabled={_particles.emission.enabled}");
+        }
+        else
+        {
+            Debug.LogError("[ZombieFatAcid] _particles là NULL! Kiểm tra lại ParticleSystem trên prefab.");
+        }
     }
 
     private void OnSpawnFromPool()
