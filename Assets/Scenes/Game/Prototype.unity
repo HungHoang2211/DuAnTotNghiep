@@ -45395,7 +45395,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -50131,6 +50131,7 @@ GameObject:
   - component: {fileID: 8905305806091854571}
   - component: {fileID: 8905305806091854576}
   - component: {fileID: 8905305806091854577}
+  - component: {fileID: 8905305806091854578}
   m_Layer: 9
   m_Name: MainPlayer
   m_TagString: Untagged
@@ -50246,6 +50247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab83cc6ad827f047b415b9f84f8e002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  soundEmitter: {fileID: 8905305806091854578}
 --- !u!114 &8905305806091854577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50259,6 +50261,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 3095127015566962817}
+--- !u!114 &8905305806091854578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905305806091854566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8c1edff47d5c84aa75d0bf45f19fd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sneakFootstepRadius: 2
+  walkFootstepRadius: 5
+  runFootstepRadius: 10
+  attackHitRadius: 6
+  gatherHitRadius: 8
+  gunshotRadius: 25
+  listenerLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  inputReader: {fileID: 8905305806091854569}
 --- !u!137 &8941299661710436805
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
