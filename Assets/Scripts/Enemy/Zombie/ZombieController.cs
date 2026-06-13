@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
 using Xyla.Core;
 
@@ -28,6 +29,7 @@ public class ZombieController : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _lostTargetTimer = 0f;
     private Vector3 _homePosition;
+    private PlayerInputReader _playerInputReader;
 
     private EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
 
@@ -71,6 +73,7 @@ public class ZombieController : MonoBehaviour
         _state = State.Wandering;
         _lostTargetTimer = 0f;
         _player = null;
+        _playerInputReader = null;
         _homePosition = transform.position;
         _lastAttackTime = -999f;
 
@@ -230,7 +233,21 @@ public class ZombieController : MonoBehaviour
         foreach (var hit in hits)
         {
             if (!hit.CompareTag("Player")) continue;
-            _player = hit.transform;
+
+            Transform target = hit.transform;
+
+            // Cache PlayerInputReader từ player
+            if (_playerInputReader == null)
+                _playerInputReader = target.GetComponentInParent<PlayerInputReader>();
+
+            // Khi player đang sneak: không tạo tiếng động → không bị nghe thấy
+            if (_playerInputReader != null && _playerInputReader.IsSneakHeld) continue;
+
+            // Khi không sneak: chỉ nghe thấy nếu player đang thực sự di chuyển
+            var cc = target.GetComponentInParent<CharacterController>();
+            if (cc != null && cc.velocity.magnitude < Config.HearingNoiseThreshold) continue;
+
+            _player = target;
             return true;
         }
         return false;

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
 using Xyla.Core;
 
@@ -34,6 +35,7 @@ public class ZombieFatController : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _lastClawTime = -999f;
     private float _lostTargetTimer = 0f;
+    private PlayerInputReader _playerInputReader;
 
     private ZombieFatStatsConfig Config => _stats != null ? _stats.EnemyConfig as ZombieFatStatsConfig : null;
 
@@ -77,6 +79,7 @@ public class ZombieFatController : MonoBehaviour
         _state = State.Wandering;
         _lostTargetTimer = 0f;
         _player = null;
+        _playerInputReader = null;
         _lastAttackTime = -999f;
         _lastClawTime = -999f;
 
@@ -112,8 +115,11 @@ public class ZombieFatController : MonoBehaviour
 
         if (_isAttacking)
         {
+            // Khoá hoàn toàn agent khi đang attack — không cho UpdateChase chen vào
             _agent.isStopped = true;
             _agent.velocity = Vector3.zero;
+            SmoothRotation();
+            return;  // ← thoát sớm, không gọi UpdateChase
         }
 
         SmoothRotation();
@@ -223,12 +229,25 @@ public class ZombieFatController : MonoBehaviour
         foreach (var hit in hits)
         {
             if (!hit.CompareTag("Player")) continue;
-            _player = hit.transform;
+
+            Transform target = hit.transform;
+
+            // Cache PlayerInputReader từ player
+            if (_playerInputReader == null)
+                _playerInputReader = target.GetComponentInParent<PlayerInputReader>();
+
+            // Khi player đang sneak: không tạo tiếng động → không bị nghe thấy
+            if (_playerInputReader != null && _playerInputReader.IsSneakHeld) continue;
+
+            // Khi không sneak: chỉ nghe thấy nếu player đang thực sự di chuyển
+            var cc = target.GetComponentInParent<CharacterController>();
+            if (cc != null && cc.velocity.magnitude < Config.HearingNoiseThreshold) continue;
+
+            _player = target;
             return true;
         }
         return false;
     }
-
     private void BeginChase()
     {
         if (Config == null) return;

@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Stats;
+using SimpleSurvival.Audio;
+using SimpleSurvival.Input;
 using Xyla.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
@@ -21,6 +23,10 @@ public class DeerController : MonoBehaviour
     private DeerAnimatorController _anim;
     private DeerSpawnPoint _spawnPoint;
     private EnemyStats _stats;
+    private EnemyHearing _hearing;
+
+    // Cache reference để kiểm tra trạng thái sneak của player
+    private PlayerInputReader _playerInput;
 
     private Coroutine _behaviorCoroutine;
     private bool _isDead = false;
@@ -33,6 +39,7 @@ public class DeerController : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<DeerAnimatorController>();
         _stats = GetComponent<EnemyStats>();
+        _hearing = GetComponent<EnemyHearing>();
 
         if (_stats == null)
         {
@@ -42,6 +49,9 @@ public class DeerController : MonoBehaviour
 
         _stats.OnDeath += HandleDeath;
         _stats.OnDamagedBy += HandleDamagedBy;
+
+        if (_hearing != null)
+            _hearing.OnSoundHeard += HandleSoundHeard;
     }
 
     private void OnDestroy()
@@ -51,6 +61,9 @@ public class DeerController : MonoBehaviour
             _stats.OnDeath -= HandleDeath;
             _stats.OnDamagedBy -= HandleDamagedBy;
         }
+
+        if (_hearing != null)
+            _hearing.OnSoundHeard -= HandleSoundHeard;
     }
 
     public void Initialize(DeerSpawnPoint spawnPoint)
@@ -65,6 +78,15 @@ public class DeerController : MonoBehaviour
         _isDead = false;
         _state = State.Wandering;
         _grazeBlockedUntil = 0f;
+
+        // Cache PlayerInputReader từ Player trong scene
+        if (_playerInput == null)
+        {
+            var player = GameObject.FindWithTag("Player");
+            if (player != null)
+                _playerInput = player.GetComponentInParent<PlayerInputReader>()
+                               ?? player.GetComponent<PlayerInputReader>();
+        }
 
         _agent.isStopped = false;
         _agent.speed = Config.MoveSpeed;
@@ -187,9 +209,16 @@ public class DeerController : MonoBehaviour
         return origin;
     }
 
+    /// <summary>
+    /// Vision detection — chỉ kích hoạt khi player KHÔNG sneak.
+    /// Khi sneak, deer không thể phát hiện bằng mắt.
+    /// </summary>
     private void CheckForPlayer()
     {
         if (Config == null) return;
+
+        // Nếu player đang sneak → bỏ qua vision hoàn toàn
+        if (_playerInput != null && _playerInput.IsSneakHeld) return;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, Config.DetectionRadius);
         foreach (var hit in hits)
@@ -199,6 +228,35 @@ public class DeerController : MonoBehaviour
                 StartCoroutine(FleeFrom(hit.transform.position));
                 return;
             }
+        }
+    }
+
+    /// <summary>
+    /// Sound detection qua EnemyHearing.
+    /// - AttackHit / GatherHit / Gunshot: luôn flee dù player đang sneak.
+    /// - Footstep: chỉ flee khi player KHÔNG sneak (sneak footstep radius nhỏ
+    ///   nên sound event thường không tới, nhưng guard thêm cho chắc).
+    /// </summary>
+    private void HandleSoundHeard(SoundEvent soundEvent)
+    {
+        if (_isDead || _state == State.Dead || _state == State.Fleeing) return;
+
+        bool playerIsSneaking = _playerInput != null && _playerInput.IsSneakHeld;
+
+        switch (soundEvent.Type)
+        {
+            case SoundType.AttackHit:
+            case SoundType.Gunshot:
+                // Luôn chạy khi bị tấn công, kể cả đang sneak
+                StartCoroutine(FleeFrom(soundEvent.Position));
+                break;
+
+            case SoundType.GatherHit:
+            case SoundType.Footstep:
+                // Chỉ phản ứng khi player không sneak
+                if (!playerIsSneaking)
+                    StartCoroutine(FleeFrom(soundEvent.Position));
+                break;
         }
     }
 
