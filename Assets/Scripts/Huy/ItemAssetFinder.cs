@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Linq;
 using UnityEditor;
 
@@ -15,3 +16,4 @@ namespace SimpleSurvival.Items.EditorTools
         }
     }
 }
+#endif

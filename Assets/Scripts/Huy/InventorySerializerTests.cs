@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using NUnit.Framework;
 using SimpleSurvival.Items;
 using UnityEditor;
@@ -150,3 +151,4 @@ namespace SimpleSurvival.SaveLoad.Tests
         }
     }
 }
+#endif

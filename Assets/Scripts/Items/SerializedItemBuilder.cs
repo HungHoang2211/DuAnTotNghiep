@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -9,8 +10,8 @@ namespace SimpleSurvival.Items.Tests
     /// still need to build items with known values, so this writes those fields
     /// through SerializedObject — the same mechanism the Inspector uses.
     ///
-    /// Editor-only: SerializedObject is not available in player builds, and
-    /// this file lives in the test assembly, so it never ships in the game.
+    /// Editor-only: SerializedObject is not available in player builds, so this
+    /// entire file is wrapped in #if UNITY_EDITOR and never ships in the game.
     /// </summary>
     public static class SerializedItemBuilder
     {
@@ -27,3 +28,4 @@ namespace SimpleSurvival.Items.Tests
         }
     }
 }
+#endif
