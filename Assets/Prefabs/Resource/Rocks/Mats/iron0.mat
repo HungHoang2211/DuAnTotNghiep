@@ -12,8 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - SPECULAR
+  m_InvalidKeywords: []
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -26,6 +25,10 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _AlphaR:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DissolveNoise:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -52,6 +55,10 @@ Material:
     - _Shininess: 8
     - _SrcBlend: 1
     - _Stencil: 0
+    - _UseAlphaClip: 0
+    - _UseDissolve: 0
+    - _UseEmission: 0
+    - _UseSpecular: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
