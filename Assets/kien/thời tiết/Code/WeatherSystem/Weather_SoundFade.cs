@@ -1,57 +1,45 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(AudioSource))]
 public class Weather_SoundFade : MonoBehaviour 
 {
-    /// <summary>
-    /// Do we want to fade the sound in our out
-    /// </summary>
-    private enum Fade
-    {
-        IN,
-        OUT
-    };
+    private enum Fade { IN, OUT }
+    private AudioSource _audioSource;
 
-    /// <summary>
-    /// Function to fade sounds in
-    /// </summary>
-    /// <param name="fTimeToFadeIn">How long it should take to fade the sound in as a float</param>
-    /// <param name="fEndVolume">The volume of the sound when the fade is finished. <i>*For max volume it should be set to 1.0f</i></param>
+    void Awake()
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
+
     public void FadeAudioIn(float fTimeToFadeIn, float fEndVolume)
     {
+        if (_audioSource == null) return;
+        StopAllCoroutines(); 
         StartCoroutine(FadeAudio(fTimeToFadeIn, fEndVolume, Fade.IN));
     }
 
-    /// <summary>
-    /// Function to fade sounds out
-    /// </summary>
-    /// <param name="fTimeToFadeIn">How long it should take to fade the sound out as a float</param>
-    /// <param name="fEndVolume">The volume of the sound when the fade is finished. <i>*For lowering the sound completly it should be set to 0.0f</i></param>
-    public void FadeAudioOut(float fTimeToFadeIn, float fEndVolume)
+    public void FadeAudioOut(float fTimeToFadeOut, float fEndVolume)
     {
-        StartCoroutine(FadeAudio(fTimeToFadeIn, fEndVolume, Fade.OUT));
+        if (_audioSource == null) return;
+        StopAllCoroutines(); 
+        StartCoroutine(FadeAudio(fTimeToFadeOut, fEndVolume, Fade.OUT));
     }
 
-    /// <summary>
-    /// Private function that we use to fade the sound and make sure it can not be canceld after starting. This is started by either FadeAudioIn or FadeAudioOut
-    /// </summary>
-    /// <param name="fTimeToFade">How long it should take for the sound to fade</param>
-    /// <param name="fSoundVolume">How loud we want the sound to be</param>
-    /// <param name="fadeType">Should it fade <b>in</b> our <b>out</b></param>
-    /// <returns></returns>
     IEnumerator FadeAudio(float fTimeToFade, float fSoundVolume, Fade fadeType)
     {
-        float start = fadeType == Fade.IN ? 0.0F : fSoundVolume; // Change the higher value to the value of the sounds volume
-        float end = fadeType == Fade.IN ? fSoundVolume : 0.0F; // Change the higher value to the value of the sounds volume
-        float i = 0.0F;
-        float step = 1.0f / fTimeToFade;
+        float startVolume = _audioSource.volume;
+        float endVolume = (fadeType == Fade.IN) ? fSoundVolume : fSoundVolume;
+        float currentTime = 0.0f;
 
-        while (i < 1.0f)
+        while (currentTime < fTimeToFade)
         {
-            i += Time.deltaTime * step;
-            this.GetComponent<AudioSource>().volume = Mathf.Lerp(start, end, i);
-            yield return new WaitForSeconds(step * Time.deltaTime);
+            currentTime += Time.deltaTime;
+            float normalizedProgress = currentTime / fTimeToFade;
+            _audioSource.volume = Mathf.Lerp(startVolume, endVolume, normalizedProgress);
+            yield return null; 
         }
-    } // IEnumerator end
-}
 
+        _audioSource.volume = endVolume;
+    }
+}

@@ -10,10 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 450602}
   - component: {fileID: 11439030}
-  - component: {fileID: 11411866}
   - component: {fileID: 11429778}
   - component: {fileID: 11465078}
-  - component: {fileID: 11430436}
   m_Layer: 0
   m_Name: WeatherMaster
   m_TagString: Untagged
@@ -64,19 +62,6 @@ MonoBehaviour:
   matSkybox: {fileID: 2100000, guid: a46bb5ebf1f910f469f4f759299304f3, type: 2}
   en_CurrWeather: 0
   en_LastWeather: 0
---- !u!114 &11411866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 141594}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8812af7ea53e55e4fac2bafabd6728e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  guiDebugSkin: {fileID: 11400000, guid: c8e8dedff5b6e7441ac0209a25b1461e, type: 2}
 --- !u!114 &11429778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,67 +170,3 @@ MonoBehaviour:
   _pSunsetParticle: {fileID: 0}
   _pNightParticle: {fileID: 0}
   _gPartRain: {fileID: 0}
---- !u!114 &11430436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 141594}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fc940a84cbb66b47b733f1e8a0d83d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bUseDifferentFadeTimes: 0
-  _fFadeTime: 7
-  _fSunriseFadeTime: 5
-  _fDayFadeTime: 5
-  _fSunsetFadeTime: 5
-  _fNightFadeTime: 5
-  _bUseInit: 0
-  _fInitTimerEnd: 12
-  _bUsingSound: 0
-  _adAmbientSound: {fileID: 0}
-  _fSoundVolume: 0.1
-  _fTimeToFadeSound: 2
-  _fLowestTemp: 0
-  _fHighestTemp: 30
-  _fSunrise_LightIntensity: 0.2
-  _fDay_LightIntensity: 0.4
-  _fSunset_LightIntensity: 0.2
-  _fNight_LightIntensity: 0
-  _cSunrise_LightColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cDay_LightColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cSunset_LightColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cNight_LightColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _fNight_MoonLightIntensity: 0.5
-  _cNight_MoonLightColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cSunrise_SkyTintColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cDay_SkyTintColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cSunset_SkyTintColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cNight_SkyTintColor: {r: 0.37647063, g: 0.37647063, b: 0.37647063, a: 1}
-  _cSunrise_SkyGroundColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  _cDay_SkyGroundColor: {r: 0, g: 1, b: 1, a: 1}
-  _cSunset_SkyGroundColor: {r: 1, g: 0, b: 0, a: 1}
-  _cNight_SkyGroundColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  _cCloudColor: {r: 0.32941177, g: 0.32941177, b: 0.32941177, a: 1}
-  _fFogAmount: 0.03
-  _fFogMorningAmount: 0.05
-  _bUseMorningFog: 0
-  _cFogColor: {r: 0.5955882, g: 0.5955882, b: 0.5955882, a: 1}
-  _pSunriseParticle: {fileID: 0}
-  _pDayParticle: {fileID: 0}
-  _pSunsetParticle: {fileID: 0}
-  _pNightParticle: {fileID: 0}
-  _gPartRain: {fileID: 0}
-  _fRandomThunderTimeMin: 4
-  _fRandomThunderTimeMax: 10
-  _fLightningIntensity: 5
-  _fLightningRange: 500
-  _fTimeBeforeLightningLightTurnsOff: 0.4
-  _adThunderSound: {fileID: 0}
-  _fLightningVolume: 1
-  _fLightningRangeFromWeatherMasterMin: 50
-  _fLightningRangeFromWeatherMasterMax: 50
-  _fLightningHeight: 50

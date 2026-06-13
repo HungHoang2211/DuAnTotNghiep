@@ -13,10 +13,7 @@ public class Weather_Controller : MonoBehaviour
 
     [SerializeField] private bool _bUsingProceduralSkybox;
     [SerializeField] private bool _bUseSun = true;
-    [SerializeField] private bool _bUseCloudy = true;
     [SerializeField] private bool _bUseRain = true;
-    [SerializeField] private bool _bUseThunderstorm = true;
-    [SerializeField] private bool _bUseSnow = true;
     [SerializeField] private bool _bUseRandomWeather = true;
     [SerializeField] private bool _bUseRandomDaysWeather;
 
@@ -33,22 +30,16 @@ public class Weather_Controller : MonoBehaviour
     public Material matClouds;
     public Material matSkybox;
 
-    // TỐI ƯU HIỆU SUẤT: Cache toàn bộ các Component để tránh gọi GetComponent liên tục
+    // TỐI ƯU HIỆU SUẤT: Chỉ giữ lại cache cho Sun và Rain
     private ToD_Base _cachedToD;
     private Weather_Sun _weatherSun;
-    private Weather_Cloudy _weatherCloudy;
     private Weather_Rain _weatherRain;
-    private Weather_Thunderstorm _weatherThunderstorm;
-    private Weather_Snow _weatherSnow;
 
     public enum WeatherType
     {
         RANDOM,
         SUN,
-        CLOUDY,
         RAIN,
-        THUNDERSTORM,
-        SNOW,
         NUMBEROFWEATHERTYPES
     };
 
@@ -66,10 +57,7 @@ public class Weather_Controller : MonoBehaviour
 
     public bool GetSet_bUsingProceduralSkybox { get { return _bUsingProceduralSkybox; } set { _bUsingProceduralSkybox = value; } }
     public bool GetSet_bUseSun { get { return _bUseSun; } set { _bUseSun = value; } }
-    public bool GetSet_bUseCloudy { get { return _bUseCloudy; } set { _bUseCloudy = value; } }
     public bool GetSet_bUseRain { get { return _bUseRain; } set { _bUseRain = value; } }
-    public bool GetSet_bUseThunderstorm { get { return _bUseThunderstorm; } set { _bUseThunderstorm = value; } }
-    public bool GetSet_bUseSnow { get { return _bUseSnow; } set { _bUseSnow = value; } }
     public bool GetSet_bUseRandomWeather { get { return _bUseRandomWeather; } set { _bUseRandomWeather = value; } }
     public bool GetSet_bUseRandomDaysWeather { get { return _bUseRandomDaysWeather; } set { _bUseRandomDaysWeather = value; } }
     public int GetSet_iChangeWeatherAfterDays { get { return _iChangeWeatherAfterDays; } set { _iChangeWeatherAfterDays = value; } }
@@ -83,14 +71,10 @@ public class Weather_Controller : MonoBehaviour
         _fTimeChangeWeatherStart = 0.0f;
         _fTimeChangeWeatherEnd = 5.0f;
 
-        // Khởi tạo và lưu cache linh hồn hệ thống thời gian/thời tiết từ ban đầu
         if (gTimeOfDay != null) _cachedToD = gTimeOfDay.GetComponent<ToD_Base>();
 
         _weatherSun = GetComponent<Weather_Sun>();
-        _weatherCloudy = GetComponent<Weather_Cloudy>();
         _weatherRain = GetComponent<Weather_Rain>();
-        _weatherThunderstorm = GetComponent<Weather_Thunderstorm>();
-        _weatherSnow = GetComponent<Weather_Snow>();
 
         if (_bUseRandomDaysWeather == true)
             _iAmountOfDaysToNewWeather = Random.Range(_iMinAmountOfDaysToNewWeather, _iMaxAmountOfDaysToNewWeather);
@@ -153,10 +137,7 @@ public class Weather_Controller : MonoBehaviour
     void CheckIfWeatherTypeIsOn(int NewWeatherType)
     {
         if (NewWeatherType == (int)WeatherType.SUN && _bUseSun) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
-        else if (NewWeatherType == (int)WeatherType.CLOUDY && _bUseCloudy) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
         else if (NewWeatherType == (int)WeatherType.RAIN && _bUseRain) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
-        else if (NewWeatherType == (int)WeatherType.THUNDERSTORM && _bUseThunderstorm) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
-        else if (NewWeatherType == (int)WeatherType.SNOW && _bUseSnow) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
         else
         {
             Debug.Log("Weather type was not on, so we are trying again!");
@@ -170,28 +151,10 @@ public class Weather_Controller : MonoBehaviour
         if (_weatherSun != null) { _weatherSun.enabled = true; _weatherSun.GetSet_bUseInit = true; }
     }
 
-    void ChangeWeatherToCloudy()
-    {
-        en_CurrWeather = WeatherType.CLOUDY;
-        if (_weatherCloudy != null) { _weatherCloudy.enabled = true; _weatherCloudy.GetSet_bUseInit = true; }
-    }
-
     void ChangeWeatherToRain()
     {
         en_CurrWeather = WeatherType.RAIN;
         if (_weatherRain != null) { _weatherRain.enabled = true; _weatherRain.GetSet_bUseInit = true; }
-    }
-
-    void ChangeWeatherToThunderstorm()
-    {
-        en_CurrWeather = WeatherType.THUNDERSTORM;
-        if (_weatherThunderstorm != null) { _weatherThunderstorm.enabled = true; _weatherThunderstorm.GetSet_bUseInit = true; }
-    }
-
-    void ChangeWeatherToSnow()
-    {
-        en_CurrWeather = WeatherType.SNOW;
-        if (_weatherSnow != null) { _weatherSnow.enabled = true; _weatherSnow.GetSet_bUseInit = true; }
     }
 
     void ExitCurrentWeather(int NewWeatherType)
@@ -218,21 +181,6 @@ public class Weather_Controller : MonoBehaviour
                 _bStartWeatherChange = false;
             }
         }
-        else if (en_CurrWeather == WeatherType.CLOUDY)
-        {
-            en_LastWeather = WeatherType.CLOUDY;
-            _fTimeChangeWeatherStart += Time.deltaTime;
-
-            if (_weatherCloudy != null) _weatherCloudy.ExitWeatherEffect(_weatherCloudy.GetSet_gSoundEffect);
-
-            if (_fTimeChangeWeatherStart >= _fTimeChangeWeatherEnd)
-            {
-                if (_weatherCloudy != null) _weatherCloudy.enabled = false;
-                EnterNewWeather(NewWeatherType);
-                _fTimeChangeWeatherStart = 0.0f;
-                _bStartWeatherChange = false;
-            }
-        }
         else if (en_CurrWeather == WeatherType.RAIN)
         {
             en_LastWeather = WeatherType.RAIN;
@@ -248,52 +196,18 @@ public class Weather_Controller : MonoBehaviour
                 _bStartWeatherChange = false;
             }
         }
-        else if (en_CurrWeather == WeatherType.THUNDERSTORM)
-        {
-            en_LastWeather = WeatherType.THUNDERSTORM;
-            _fTimeChangeWeatherStart += Time.deltaTime;
-
-            if (_weatherThunderstorm != null) _weatherThunderstorm.ExitWeatherEffect(_weatherThunderstorm.GetSet_gPartRain);
-
-            if (_fTimeChangeWeatherStart >= _fTimeChangeWeatherEnd)
-            {
-                if (_weatherThunderstorm != null) _weatherThunderstorm.enabled = false;
-                EnterNewWeather(NewWeatherType);
-                _fTimeChangeWeatherStart = 0.0f;
-                _bStartWeatherChange = false;
-            }
-        }
-        else if (en_CurrWeather == WeatherType.SNOW)
-        {
-            en_LastWeather = WeatherType.SNOW;
-            _fTimeChangeWeatherStart += Time.deltaTime;
-
-            if (_weatherSnow != null) _weatherSnow.ExitWeatherEffect(_weatherSnow.GetSet_gPartSnow);
-
-            if (_fTimeChangeWeatherStart >= _fTimeChangeWeatherEnd)
-            {
-                if (_weatherSnow != null) _weatherSnow.enabled = false;
-                EnterNewWeather(NewWeatherType);
-                _fTimeChangeWeatherStart = 0.0f;
-                _bStartWeatherChange = false;
-            }
-        }
     }
 
     private void EnterNewWeather(int NewWeather)
     {
         if (NewWeather == (int)WeatherType.SUN) ChangeWeatherToSun();
-        else if (NewWeather == (int)WeatherType.CLOUDY) ChangeWeatherToCloudy();
         else if (NewWeather == (int)WeatherType.RAIN) ChangeWeatherToRain();
-        else if (NewWeather == (int)WeatherType.THUNDERSTORM) ChangeWeatherToThunderstorm();
-        else if (NewWeather == (int)WeatherType.SNOW) ChangeWeatherToSnow();
     }
 
     public void UpdateAllWeather(float sunIntensity, Color sunLightColor, float moonIntensity, Color moonLightColor, Color skyTint, Color skyGround, Color cloudColor, float fogDensity, Color fogColor, float fadeTime)
     {
         if (_cachedToD == null) return;
 
-        // TỐI ƯU: Sử dụng biến ToD đã được cache sẵn
         if (_cachedToD.lSun != null)
         {
             _cachedToD.lSun.intensity = Mathf.Lerp(_cachedToD.lSun.intensity, sunIntensity, Time.deltaTime / fadeTime);
@@ -326,7 +240,6 @@ public class Weather_Controller : MonoBehaviour
         RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, fogColor, Time.deltaTime / fadeTime);
     }
 
-    // SỬA TRIỆT ĐỂ WARNING: Cập nhật hàm bật hiệu ứng bằng cấu trúc emission mới
     public void ActivateTimesetParticle(GameObject CurrParticles)
     {
         if (CurrParticles == null) return;
@@ -364,7 +277,6 @@ public class Weather_Controller : MonoBehaviour
         }
     }
 
-    // SỬA TRIỆT ĐỂ WARNING: Cập nhật hàm tắt hiệu ứng bằng cấu trúc emission mới
     public void DeactivateTimesetParticle(GameObject CurrParticles)
     {
         if (CurrParticles == null) return;

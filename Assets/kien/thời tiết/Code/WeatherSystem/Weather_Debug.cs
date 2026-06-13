@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Weather_Debug : MonoBehaviour 
+/// <summary>
+/// Debug: Handles debug overlay and inputs for our Weather system
+/// </summary>
+public class Weather_Debug : MonoBehaviour
 {
     private Weather_Controller _clWeatherController;
     private bool _bWeatherDebugOn;
@@ -9,63 +12,71 @@ public class Weather_Debug : MonoBehaviour
 
     public GUISkin guiDebugSkin;
 
-	void Start () 
+    void Start()
     {
-        _clWeatherController = (Weather_Controller)this.GetComponent(typeof(Weather_Controller));
+        // TỐI ƯU: Sử dụng Generic GetComponent để thay thế cách lấy Component kiểu cũ
+        _clWeatherController = GetComponent<Weather_Controller>();
         _bWeatherDebugOn = false;
-	}
+        _bMoreDebugInfo = false;
+    }
 
     void Update()
     {
         BasicDebugControls();
 
-        if (_bMoreDebugInfo == true)
+        // Chỉ kiểm tra các phím tắt nâng cao khi bảng thông tin chi tiết đang mở
+        if (_bWeatherDebugOn && _bMoreDebugInfo)
             AdvancedDebugControls();
     }
 
     private void BasicDebugControls()
     {
-        if (Input.GetKeyDown(KeyCode.O) && _bWeatherDebugOn == false)
-            _bWeatherDebugOn = true;
-        else if (Input.GetKeyDown(KeyCode.O) && _bWeatherDebugOn == true)
-            _bWeatherDebugOn = false;
-        else if (Input.GetKeyDown(KeyCode.H) && _bMoreDebugInfo == false)
-            _bMoreDebugInfo = true;
-        else if (Input.GetKeyDown(KeyCode.H) && _bMoreDebugInfo == true)
-            _bMoreDebugInfo = false;
+        if (_clWeatherController == null) return;
+
+        // Bật / tắt bảng hiển thị Debug bằng phím O
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            _bWeatherDebugOn = !_bWeatherDebugOn;
+        }
+
+        // Bật / tắt hướng dẫn đổi thời tiết bằng phím H
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            _bMoreDebugInfo = !_bMoreDebugInfo;
+        }
     }
 
     private void AdvancedDebugControls()
     {
+        if (_clWeatherController == null) return;
+
+        // ĐỒNG BỘ: Loại bỏ các thời tiết đã xóa, chỉ giữ lại các lựa chọn hợp lệ
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            _clWeatherController.UseWeatherTypeDebug(0);
+            _clWeatherController.UseWeatherTypeDebug(0); // Lấy thời tiết ngẫu nhiên (RANDOM)
         else if (Input.GetKeyDown(KeyCode.Alpha2))
             _clWeatherController.UseWeatherTypeDebug((int)Weather_Controller.WeatherType.SUN);
         else if (Input.GetKeyDown(KeyCode.Alpha3))
-            _clWeatherController.UseWeatherTypeDebug((int)Weather_Controller.WeatherType.CLOUDY);
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
             _clWeatherController.UseWeatherTypeDebug((int)Weather_Controller.WeatherType.RAIN);
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-            _clWeatherController.UseWeatherTypeDebug((int)Weather_Controller.WeatherType.THUNDERSTORM);
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-            _clWeatherController.UseWeatherTypeDebug((int)Weather_Controller.WeatherType.SNOW);
     }
 
     void OnGUI()
     {
+        if (_clWeatherController == null) return;
+
         if (guiDebugSkin != null)
+        {
             GUI.skin = guiDebugSkin;
-        else
-            Debug.Log("Missing Debug skin");
+        }
+        // ĐÃ SỬA: Loại bỏ Debug.Log ở đây để tránh làm tràn màn hình Console gây đứng game
 
         if (_bWeatherDebugOn == true)
         {
-            // Tells that debug mode is on
+            // Tiêu đề hệ thống Debug
             GUI.color = Color.yellow;
             GUI.Label(new Rect(Screen.width / 2 - 120, 20, 240, 30), "Debugging: WEATHER SYSTEM");
             GUI.Label(new Rect(Screen.width / 2 - 225, 40, 450, 30), "Press H for more Debug information and controls");
 
-            // What are we debugging
+            // Thông tin chi tiết về thời tiết hiện tại
             GUI.color = Color.red;
 
             GUI.Label(new Rect(20, 60, 300, 30), "Current weather:");
@@ -74,36 +85,31 @@ public class Weather_Debug : MonoBehaviour
             GUI.Label(new Rect(20, 90, 300, 30), "Last weather:");
             GUI.Label(new Rect(320, 90, 100, 30), _clWeatherController.en_LastWeather.ToString());
 
-            // *F2 means we show 2 of the floats decimals
-            GUI.Label(new Rect(20, 120, 300, 30), "Current temprature:");
-            GUI.Label(new Rect(320, 120, 100, 30), _clWeatherController.GetSet_fCurrTemp.ToString("F2"));
+            GUI.Label(new Rect(20, 120, 300, 30), "Current temperature:");
+            GUI.Label(new Rect(320, 120, 100, 30), _clWeatherController.GetSet_fCurrTemp.ToString("F2") + "°C");
 
-            // Weather change
+            // Tiến trình chu kỳ thay đổi thời tiết
             GUI.Label(new Rect(20, 180, 300, 30), "Next weather change (days):");
             GUI.Label(new Rect(320, 180, 100, 30), _clWeatherController.Get_iAmountOfDaysToNewWeather.ToString());
 
             GUI.Label(new Rect(20, 210, 300, 30), "Days since last weather change:");
             GUI.Label(new Rect(320, 210, 100, 30), _clWeatherController.GetSet_iAmountOfDaysSinceLastWeather.ToString());
 
-            GUI.Label(new Rect(20, 240, 300, 30), "Weather change:");
+            GUI.Label(new Rect(20, 240, 300, 30), "Weather changing now:");
             GUI.Label(new Rect(320, 240, 100, 30), _clWeatherController.Get_bStartWeatherChange.ToString());
 
-            GUI.Label(new Rect(20, 270, 300, 30), "Exiting Weather Timer:");
-            GUI.Label(new Rect(320, 270, 100, 30), _clWeatherController.Get_fTimeChangeWeatherStart.ToString());
+            GUI.Label(new Rect(20, 270, 300, 30), "Transition Timer:");
+            GUI.Label(new Rect(320, 270, 100, 30), _clWeatherController.Get_fTimeChangeWeatherStart.ToString("F1") + "s");
 
+            // Bảng phím tắt nâng cao để test nhanh thời tiết (Hiện khi nhấn H)
             if (_bMoreDebugInfo == true)
             {
-                GUI.color = Color.blue;
+                GUI.color = Color.cyan;
 
-                // More controls
-                GUI.Label(new Rect(20, 320, 600, 30), "Press 1 to try getting a new RANDOM weather");
-                GUI.Label(new Rect(20, 350, 600, 30), "Press 2 to get SUN");
-                GUI.Label(new Rect(20, 380, 600, 30), "Press 3 to get CLOUDY");
-                GUI.Label(new Rect(20, 410, 600, 30), "Press 4 to get RAIN");
-                GUI.Label(new Rect(20, 440, 600, 30), "Press 5 to get THUNDERSTORM");
-                GUI.Label(new Rect(20, 470, 600, 30), "Press 6 to get SNOW");
+                GUI.Label(new Rect(20, 320, 600, 30), "Press 1 to get a new RANDOM weather");
+                GUI.Label(new Rect(20, 350, 600, 30), "Press 2 to force SUNNY weather");
+                GUI.Label(new Rect(20, 380, 600, 30), "Press 3 to force RAINY weather");
             }
         }
     }
 }
-

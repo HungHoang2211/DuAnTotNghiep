@@ -8,19 +8,25 @@ public class WeatherController_Editor : Editor
 {
     public bool bShowTips;
 
-    private int iMinWidth = 30; // Was 30
-    private int iMedWidth = 60; // Was 60
-    private int iMaxWidth = 120; // Was 120
+    private int iMinWidth = 30;
+    private int iMedWidth = 60;
+    private int iMaxWidth = 120;
 
     public override void OnInspectorGUI()
     {
         DrawNewGUI();
-        EditorUtility.SetDirty(target);
+
+        // Đảm bảo lưu lại giá trị thay đổi trong Editor mà không bị mất khi lưu Scene
+        if (target != null)
+        {
+            EditorUtility.SetDirty(target);
+        }
     }
 
     private void DrawNewGUI()
     {
         Weather_Controller cl = target as Weather_Controller;
+        if (cl == null) return;
 
         // SHOW MORE TIPS
         GUILayout.BeginHorizontal();
@@ -29,9 +35,11 @@ public class WeatherController_Editor : Editor
         GUILayout.EndHorizontal();
 
         // GAMEOBJECTS AND MATERIALS
-        EditorGUILayout.HelpBox(("Add gameobjects, lights and materials"), MessageType.None, true);
+        EditorGUILayout.HelpBox("Add gameobjects, lights and materials", MessageType.None, true);
         if (bShowTips == true)
-            EditorGUILayout.HelpBox(("Time of Day: This should be the gameobject where you have the Time of day scripts on (See or use example in package) \n\nSkybox: Your skybox material (If you use a procedural skybox make sure to tick the option for this) \n\nCloud: The material you use for your clouds"), MessageType.Info, true);
+        {
+            EditorGUILayout.HelpBox("Time of Day: This should be the gameobject where you have the Time of day scripts on.\n\nSkybox: Your skybox material (Custom/Weather_Skybox).\n\nCloud: The material you use for your clouds.", MessageType.Info, true);
+        }
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Time of day (Gameobject): ");
@@ -49,9 +57,11 @@ public class WeatherController_Editor : Editor
         GUILayout.EndHorizontal();
 
         // STARTING WEATHER
-        EditorGUILayout.HelpBox(("Weather settings:"), MessageType.None, true);
+        EditorGUILayout.HelpBox("Weather settings:", MessageType.None, true);
         if (bShowTips == true)
-            EditorGUILayout.HelpBox(("With this you pick if you want to use random weather when the game starts or if you want to choose which weather you want to begin with. \n\nRANDOM & NUMBEROFWEATHERTYPES = Random Weather\nSUN,RAIN and so on = The game begins with that weathertype"), MessageType.Info, true);
+        {
+            EditorGUILayout.HelpBox("With this you pick if you want to use random weather when the game starts or if you want to choose which weather you want to begin with.\n\nRANDOM = Random Weather\nSUN or RAIN = The game begins with that weathertype", MessageType.Info, true);
+        }
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Starting weather: ");
@@ -60,7 +70,9 @@ public class WeatherController_Editor : Editor
 
         // PROCEDURAL SKYBOX
         if (bShowTips == true)
-            EditorGUILayout.HelpBox(("If you are using the Procedural Unity Skybox make sure to check this box!"), MessageType.None, true);
+        {
+            EditorGUILayout.HelpBox("If you are using the Procedural Unity Skybox make sure to check this box!", MessageType.None, true);
+        }
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Using procedural skybox");
@@ -68,7 +80,9 @@ public class WeatherController_Editor : Editor
         GUILayout.EndHorizontal();
 
         if (bShowTips == true)
-            EditorGUILayout.HelpBox(("If you want the weather to change during the game make sure this option is ticked on \n\n*If you don't want the weather to change, make sure to choose your starting weather. If you haven't picked weathertype it defaults to SUN"), MessageType.Info, true);
+        {
+            EditorGUILayout.HelpBox("If you want the weather to change during the game make sure this option is ticked on.\n\n*If you don't want the weather to change, make sure to choose your starting weather. If you haven't picked weathertype it defaults to SUN", MessageType.Info, true);
+        }
 
         // RANDOM WEATHER CHANGE
         GUILayout.BeginHorizontal();
@@ -78,14 +92,10 @@ public class WeatherController_Editor : Editor
 
         if (cl.GetSet_bUseRandomWeather == true)
         {
+            // ĐỒNG BỘ: Chỉ giữ lại 2 tùy chọn thời tiết Sun và Rain hợp lệ
             GUILayout.BeginHorizontal();
             GUILayout.Label("Use SUN: ");
             cl.GetSet_bUseSun = EditorGUILayout.Toggle(cl.GetSet_bUseSun, GUILayout.MaxWidth(iMinWidth));
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Use CLOUDY: ");
-            cl.GetSet_bUseCloudy = EditorGUILayout.Toggle(cl.GetSet_bUseCloudy, GUILayout.MaxWidth(iMinWidth));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -93,18 +103,10 @@ public class WeatherController_Editor : Editor
             cl.GetSet_bUseRain = EditorGUILayout.Toggle(cl.GetSet_bUseRain, GUILayout.MaxWidth(iMinWidth));
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Use THUNDERSTORM: ");
-            cl.GetSet_bUseThunderstorm = EditorGUILayout.Toggle(cl.GetSet_bUseThunderstorm, GUILayout.MaxWidth(iMinWidth));
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Use SNOW: ");
-            cl.GetSet_bUseSnow = EditorGUILayout.Toggle(cl.GetSet_bUseSnow, GUILayout.MaxWidth(iMinWidth));
-            GUILayout.EndHorizontal();
-
             if (bShowTips == true)
-                EditorGUILayout.HelpBox(("If you want the weather to change after random amount of day, check this box to get more options"), MessageType.Info, true);
+            {
+                EditorGUILayout.HelpBox("If you want the weather to change after random amount of day, check this box to get more options", MessageType.Info, true);
+            }
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("Random day weather change");
@@ -133,4 +135,3 @@ public class WeatherController_Editor : Editor
         }
     }
 }
-
