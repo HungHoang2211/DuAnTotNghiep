@@ -1,22 +1,29 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
 
 namespace SimpleSurvival.Targets
 {
+    [Serializable]
+    public class PickupItemEntry
+    {
+        public ItemData itemData;
+        public int quantity = 1;
+    }
+
     public class PickupTarget : TargetableBase
     {
-        [Header("Item Drop")]
-        [SerializeField] private ItemData itemData;
-        [SerializeField] private int quantity = 1;
+        [Header("Item Drops")]
+        [SerializeField] private List<PickupItemEntry> items = new List<PickupItemEntry>();
 
-        public ItemData ItemData => itemData;
-        public int Quantity => quantity;
+        public IReadOnlyList<PickupItemEntry> Items => items;
 
         public override TargetType Type => TargetType.Pickup;
 
         public override bool CanBeTargeted()
         {
-            return isActiveAndEnabled && itemData != null;
+            return isActiveAndEnabled && items != null && items.Count > 0;
         }
     }
 }

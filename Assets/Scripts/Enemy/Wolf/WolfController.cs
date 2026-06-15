@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Combat;
 using SimpleSurvival.Stats;
-using Xyla.Core;
+using SimpleSurvival.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyStats))]

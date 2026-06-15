@@ -21,9 +21,15 @@ namespace SimpleSurvival.Stats
                 Debug.LogError($"[{name}] HarvestStats config is null.", this);
                 return;
             }
+            ResetStats();
+        }
 
+        private void ResetStats()
+        {
+            if (config == null) return;
             HP = config.MaxHP;
             IsDepleted = false;
+            OnHPChanged?.Invoke(HP, MaxHP);
         }
 
         public void TakeDamage(float amount)
@@ -44,6 +50,11 @@ namespace SimpleSurvival.Stats
         {
             IsDepleted = true;
             OnDepleted?.Invoke();
+        }
+
+        private void OnSpawnFromPool()
+        {
+            ResetStats();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SimpleSurvival.UI
         [SerializeField] private PlayerTargetChecker targetChecker;
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
         [SerializeField] private Transform pressRoot;
-        [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Animator animator;
         [SerializeField] private Image iconImage;
 
         [Header("Icons")]
@@ -23,21 +23,17 @@ namespace SimpleSurvival.UI
         [SerializeField] private Sprite axeIcon;
         [SerializeField] private Sprite pickaxeIcon;
 
-        [Header("Visual States")]
-        [SerializeField, Range(0f, 1f)] private float availableAlpha = 1f;
-        [SerializeField, Range(0f, 1f)] private float unavailableAlpha = 0.4f;
-        [SerializeField] private float fadeSpeed = 8f;
+        private static readonly int ShowTrigger = Animator.StringToHash("Show");
+        private static readonly int HideTrigger = Animator.StringToHash("Hide");
 
         private ITargetable _currentTarget;
-        private float _currentAlpha;
+        private bool _isActive;
 
         private void Awake()
         {
-            if (canvasGroup == null)
-                canvasGroup = GetComponent<CanvasGroup>();
+            if (animator == null)
+                animator = GetComponent<Animator>();
 
-            _currentAlpha = unavailableAlpha;
-            ApplyAlpha();
             ApplyIcon(null);
         }
 
@@ -46,18 +42,17 @@ namespace SimpleSurvival.UI
             if (targetChecker != null)
                 targetChecker.OnUsableChanged += HandleTargetChanged;
 
-            HandleTargetChanged(targetChecker != null ? targetChecker.CurrentUsable : null);
+            ITargetable initial = targetChecker != null ? targetChecker.CurrentUsable : null;
+            HandleTargetChanged(initial);
+
+            // Restore animator state khi button re-enable
+            SetAnimatorState();
         }
 
         private void OnDisable()
         {
             if (targetChecker != null)
                 targetChecker.OnUsableChanged -= HandleTargetChanged;
-        }
-
-        private void Update()
-        {
-            UpdateAlphaFade();
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -87,7 +82,21 @@ namespace SimpleSurvival.UI
         private void HandleTargetChanged(ITargetable target)
         {
             _currentTarget = target;
+            SetActive(target != null);
             ApplyIcon(target);
+        }
+
+        private void SetActive(bool state)
+        {
+            if (_isActive == state) return;
+            _isActive = state;
+            SetAnimatorState();
+        }
+
+        private void SetAnimatorState()
+        {
+            if (animator == null) return;
+            animator.SetTrigger(_isActive ? ShowTrigger : HideTrigger);
         }
 
         private void ApplyIcon(ITargetable target)
@@ -143,23 +152,6 @@ namespace SimpleSurvival.UI
 
             var tool = stack.ItemData.GetAbility<SimpleSurvival.Items.ToolAbility>();
             return tool != null && tool.ToolType == required;
-        }
-
-        private void UpdateAlphaFade()
-        {
-            if (canvasGroup == null) return;
-
-            float target = _currentTarget != null ? availableAlpha : unavailableAlpha;
-            if (Mathf.Approximately(_currentAlpha, target)) return;
-
-            _currentAlpha = Mathf.MoveTowards(_currentAlpha, target, fadeSpeed * Time.deltaTime);
-            ApplyAlpha();
-        }
-
-        private void ApplyAlpha()
-        {
-            if (canvasGroup != null)
-                canvasGroup.alpha = _currentAlpha;
         }
     }
 }

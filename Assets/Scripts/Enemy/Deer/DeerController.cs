@@ -4,7 +4,7 @@ using UnityEngine.AI;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Audio;
 using SimpleSurvival.Input;
-using Xyla.Core;
+using SimpleSurvival.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyStats))]

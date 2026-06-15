@@ -1,5 +1,5 @@
 using UnityEngine;
-using Xyla.Core;
+using SimpleSurvival.Core;
 
 public class ZombieFatSpawnPoint : MonoBehaviour
 {

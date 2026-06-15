@@ -162,7 +162,7 @@ namespace SimpleSurvival.Player
             if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null || inventoryQueries == null) return false;
 
-            if (!inventoryQueries.CanAddItem(target.ItemData, target.Quantity))
+            if (!CanPickupAtLeastOneItem(target))
             {
                 Debug.Log("[ActionController] Inventory full, cannot pickup");
                 return false;
@@ -170,6 +170,16 @@ namespace SimpleSurvival.Player
 
             PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
             return TryRequestAction(pickup);
+        }
+
+        private bool CanPickupAtLeastOneItem(PickupTarget target)
+        {
+            foreach (var entry in target.Items)
+            {
+                if (entry == null || entry.itemData == null || entry.quantity <= 0) continue;
+                if (inventoryQueries.CanAddItem(entry.itemData, 1)) return true;
+            }
+            return false;
         }
 
         private float ResolveAttackDamage()

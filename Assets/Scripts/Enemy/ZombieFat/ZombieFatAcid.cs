@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using SimpleSurvival.Combat;
-using Xyla.Core;
+using SimpleSurvival.Core;
 
 /// <summary>
 /// Đạn axit của ZombieFat. Bay về phía player, chạm thì gây damage.

@@ -3,6 +3,7 @@ using UnityEngine;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Items;
+using SimpleSurvival.Core;
 
 namespace SimpleSurvival.Actions
 {
@@ -61,23 +62,30 @@ namespace SimpleSurvival.Actions
             if (_target == null || !_target.CanBeTargeted()) return;
             if (_inventoryQueries == null) return;
 
-            ItemData itemData = _target.ItemData;
-            int quantity = _target.Quantity;
+            int totalAdded = 0;
 
-            int remaining = _inventoryQueries.AddItem(itemData, quantity);
-            int added = quantity - remaining;
-
-            if (added > 0)
+            foreach (var entry in _target.Items)
             {
-                Debug.Log($"[Pickup] +{added} {itemData.ItemName}");
+                if (entry == null || entry.itemData == null || entry.quantity <= 0) continue;
 
-                if (remaining == 0)
-                    UnityEngine.Object.Destroy(_target.gameObject);
+                int remaining = _inventoryQueries.AddItem(entry.itemData, entry.quantity);
+                int added = entry.quantity - remaining;
+                totalAdded += added;
+
+                if (added > 0)
+                    Debug.Log($"[Pickup] +{added} {entry.itemData.ItemName}");
+
+                if (remaining > 0)
+                    Debug.Log($"[Pickup] Lost {remaining} {entry.itemData.ItemName} (inventory full)");
             }
-            else
+
+            if (totalAdded == 0)
             {
-                Debug.Log($"[Pickup] Inventory full, cannot pick up {itemData.ItemName}");
+                Debug.Log("[Pickup] Your inventory is full!");
+                return;
             }
+
+            ObjectPool.Instance.Return(_target.gameObject);
         }
 
         public void HandleEnd()

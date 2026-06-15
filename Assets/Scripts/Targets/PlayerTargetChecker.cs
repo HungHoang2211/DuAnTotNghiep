@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +11,10 @@ namespace SimpleSurvival.Targets
         [Header("Visual Markers")]
         [SerializeField] private TargetMarker enemyMarker;
         [SerializeField] private TargetMarker usableMarker;
+
+        [Header("Swap Hysteresis")]
+        [Tooltip("Margin (mét) target mới phải gần hơn current target để swap. Tránh flicker giữa 2 target distance gần nhau.")]
+        [SerializeField] private float swapHysteresis = 0.5f;
 
         public ITargetable CurrentEnemy { get; private set; }
         public ITargetable CurrentUsable { get; private set; }
@@ -49,12 +53,24 @@ namespace SimpleSurvival.Targets
         {
             if (!_visibleTargets.Remove(target)) return;
             target.OnDestroyed -= HandleTargetDestroyed;
+
+            if (CurrentEnemy == target)
+            {
+                CurrentEnemy = null;
+                OnEnemyChanged?.Invoke(null);
+            }
+
+            if (CurrentUsable == target)
+            {
+                CurrentUsable = null;
+                OnUsableChanged?.Invoke(null);
+            }
         }
 
         private void Update()
         {
-            ITargetable newEnemy = FindClosest(true);
-            ITargetable newUsable = FindClosest(false);
+            ITargetable newEnemy = PickBest(CurrentEnemy, enemyOnly: true);
+            ITargetable newUsable = PickBest(CurrentUsable, enemyOnly: false);
 
             UpdateMarker(enemyMarker, newEnemy, true);
             UpdateMarker(usableMarker, newUsable, false);
@@ -88,11 +104,27 @@ namespace SimpleSurvival.Targets
                 marker.Show(target.Transform.position, target.Radius);
         }
 
-        private ITargetable FindClosest(bool enemyOnly)
+        /// <summary>
+        /// Pick best target với hysteresis:
+        /// - Nếu current target vẫn valid → chỉ swap nếu candidate gần hơn current ÍT NHẤT swapHysteresis mét
+        /// - Nếu current target invalid → pick candidate gần nhất ngay
+        /// </summary>
+        private ITargetable PickBest(ITargetable current, bool enemyOnly)
         {
-            ITargetable best = null;
-            float bestDistance = float.MaxValue;
-            Vector3 playerPos = playerTransform.position;
+            ITargetable bestCandidate = null;
+            float bestCandidateDist = float.MaxValue;
+
+            float currentDist = float.MaxValue;
+            bool currentValid = current != null && current.Transform != null && current.CanBeTargeted();
+
+            if (currentValid)
+            {
+                bool currentMatchesType = (current.Type == TargetType.Enemy) == enemyOnly;
+                if (currentMatchesType)
+                    currentDist = ComputeDistance(current);
+                else
+                    currentValid = false;
+            }
 
             for (int i = _visibleTargets.Count - 1; i >= 0; i--)
             {
@@ -108,17 +140,30 @@ namespace SimpleSurvival.Targets
                 if (enemyOnly != isEnemy) continue;
                 if (!t.CanBeTargeted()) continue;
 
-                float dist = Vector3.Distance(t.Transform.position, playerPos) - t.Radius;
-                if (dist < 0f) dist = 0f;
+                float dist = ComputeDistance(t);
 
-                if (dist < bestDistance)
+                if (dist < bestCandidateDist)
                 {
-                    bestDistance = dist;
-                    best = t;
+                    bestCandidateDist = dist;
+                    bestCandidate = t;
                 }
             }
 
-            return best;
+            if (bestCandidate == null) return null;
+            if (!currentValid) return bestCandidate;
+            if (bestCandidate == current) return current;
+
+            if (bestCandidateDist < currentDist - swapHysteresis)
+                return bestCandidate;
+
+            return current;
+        }
+
+        private float ComputeDistance(ITargetable target)
+        {
+            Vector3 playerPos = playerTransform.position;
+            float dist = Vector3.Distance(target.Transform.position, playerPos) - target.Radius;
+            return dist < 0f ? 0f : dist;
         }
 
         private void OnDisable()
