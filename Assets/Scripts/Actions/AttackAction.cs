@@ -109,10 +109,21 @@ namespace SimpleSurvival.Actions
 
             if (_target == null || !_target.CanBeTargeted()) return;
 
-            float distance = Vector3.Distance(
-                _controller.PlayerTransform.position,
-                _target.Transform.position);
-            if (distance > _range + _target.Radius) return;
+            Vector3 playerPos = _controller.PlayerTransform.position;
+            float distance;
+
+            if (_target.DistanceCollider != null)
+            {
+                Vector3 closestPoint = _target.DistanceCollider.ClosestPoint(playerPos);
+                distance = Vector3.Distance(playerPos, closestPoint);
+            }
+            else
+            {
+                distance = Vector3.Distance(playerPos, _target.Transform.position) - _target.Radius;
+                if (distance < 0f) distance = 0f;
+            }
+
+            if (distance > _range) return;
 
             MonoBehaviour targetMb = _target as MonoBehaviour;
             if (targetMb == null) return;
