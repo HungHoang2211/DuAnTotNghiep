@@ -16,41 +16,20 @@ namespace SimpleSurvival.Targets
         [SerializeField] private ToolType requiredTool = ToolType.Axe;
 
         [Header("Despawn Timing")]
-        [Tooltip("Delay (giây) trước khi hide visual sau khi depleted. Nên >= dissolveStartDelay + dissolveDuration.")]
-        [SerializeField] private float hideVisualDelay = 3.5f;
+        [SerializeField] private float hideVisualDelay = 5f;
 
         [Header("Manual Fall (cho cây)")]
-        [Tooltip("Transform của mesh cây (Spruce_0). Sẽ rotate quanh pivot của transform này khi cây ngã.")]
         [SerializeField] private Transform fallTransform;
-
-        [Tooltip("Thời gian cây ngã hoàn toàn (giây).")]
         [SerializeField] private float fallDuration = 1.5f;
-
-        [Tooltip("Góc ngã cuối cùng (độ). 85-90 = nằm ngang.")]
         [SerializeField] private float fallEndAngle = 85f;
 
-        [Header("Depleted Effect — Animator (optional, cho đá vỡ)")]
-        [Tooltip("Animator cho animation vỡ. Trigger animation khi depleted.")]
-        [SerializeField] private Animator brokenAnimator;
-
-        [Tooltip("Tên trigger animation vỡ trên Animator.")]
-        [SerializeField] private string breakTrigger = "Break";
-
-        [Header("Depleted Effect — Fracture Swap (optional)")]
-        [Tooltip("GameObject mảnh vỡ (fracture). Enable khi depleted, swap với mesh chính.")]
+        [Header("Fracture Swap (cho đá vỡ)")]
         [SerializeField] private GameObject fractureObject;
-
-        [Tooltip("Renderer mesh chính. Disable khi enable fractureObject HOẶC khi hideVisualDelay timeout.")]
         [SerializeField] private Renderer mainRenderer;
 
-        [Header("Depleted Effect — Dissolve Material (optional)")]
-        [Tooltip("Renderer có material với shader SimpleSurvival/FoliageAlpha (có _Dissolve property).")]
+        [Header("Dissolve Material (optional)")]
         [SerializeField] private Renderer dissolveRenderer;
-
-        [Tooltip("Thời gian dissolve animation (giây).")]
         [SerializeField] private float dissolveDuration = 1.5f;
-
-        [Tooltip("Delay (giây) sau khi cây bị chặt trước khi bắt đầu dissolve. Để cây ngã xong trước khi tan biến.")]
         [SerializeField] private float dissolveStartDelay = 1.5f;
 
         private static readonly int DissolveProp = Shader.PropertyToID("_Dissolve");
@@ -86,6 +65,7 @@ namespace SimpleSurvival.Targets
 
         private void HandleDepleted()
         {
+            Debug.Log($"[Harvest] Depleted called. fractureObject={fractureObject?.name ?? "NULL"}, mainRenderer={mainRenderer?.name ?? "NULL"}");
             FireOnDestroyed();
             DisableTargetability();
             PlayDepletedEffect();
@@ -109,27 +89,25 @@ namespace SimpleSurvival.Targets
 
         private void PlayDepletedEffect()
         {
-            // Cây: manual tween rotation (không dùng physics)
             if (fallTransform != null)
             {
                 StartCoroutine(ManualFallRoutine(fallTransform));
             }
 
-            // Đá/quặng: fracture swap
             if (fractureObject != null)
             {
+                Debug.Log($"[Harvest] Activating fracture: {fractureObject.name}, was active: {fractureObject.activeSelf}");
                 fractureObject.SetActive(true);
+                Debug.Log($"[Harvest] After SetActive: {fractureObject.activeSelf}, activeInHierarchy: {fractureObject.activeInHierarchy}");
+
                 if (mainRenderer != null)
+                {
+                    Debug.Log($"[Harvest] Disabling mainRenderer: {mainRenderer.name}, was enabled: {mainRenderer.enabled}");
                     mainRenderer.enabled = false;
+                    Debug.Log($"[Harvest] After disable: {mainRenderer.enabled}");
+                }
             }
 
-            // Đá/quặng: animator trigger
-            if (brokenAnimator != null && !string.IsNullOrEmpty(breakTrigger))
-            {
-                brokenAnimator.SetTrigger(breakTrigger);
-            }
-
-            // Dissolve shader animation
             if (dissolveRenderer != null)
             {
                 _dissolveMaterial = dissolveRenderer.material;
