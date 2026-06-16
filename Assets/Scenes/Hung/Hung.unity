@@ -14909,12 +14909,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 311959855}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6267978902977204284}
+  m_Father: {fileID: 1480423396}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &311959857
 BoxCollider:
@@ -16402,12 +16402,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 349949253}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6267978902977204284}
+  m_Father: {fileID: 1480423396}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &350068254
 GameObject:
@@ -26157,12 +26157,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 582911530}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6267978902977204284}
+  m_Father: {fileID: 1480423396}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &583171348
 GameObject:
@@ -65183,6 +65183,9 @@ Transform:
   m_Children:
   - {fileID: 6268325921712299256}
   - {fileID: 6260691838159438188}
+  - {fileID: 582911532}
+  - {fileID: 349949256}
+  - {fileID: 311959856}
   m_Father: {fileID: 6267978902977204284}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1480688023
@@ -66825,7 +66828,7 @@ Transform:
   m_GameObject: {fileID: 1519792098}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 0.2, z: -2}
+  m_LocalPosition: {x: 4.79, y: 0.2, z: -2}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -75163,7 +75166,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 5
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1715950947
 Rigidbody:
@@ -75552,13 +75555,17 @@ MonoBehaviour:
   minQuantity: 3
   maxQuantity: 4
   requiredTool: 0
-  despawnDelay: 5
-  fallRigidbody: {fileID: 0}
-  fallTorqueAmount: 50
+  hideVisualDelay: 5
+  fallTransform: {fileID: 0}
+  fallDuration: 1.5
+  fallEndAngle: 85
   brokenAnimator: {fileID: 0}
   breakTrigger: Break
   fractureObject: {fileID: 0}
   mainRenderer: {fileID: 0}
+  dissolveRenderer: {fileID: 0}
+  dissolveDuration: 1.5
+  dissolveStartDelay: 2
 --- !u!114 &1721494308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90564,7 +90571,7 @@ Transform:
   m_GameObject: {fileID: 2085377289}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.067761, y: 1.1054336, z: -0.13275978}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -102537,6 +102544,7 @@ GameObject:
   - component: {fileID: 6267978902977204287}
   - component: {fileID: 6267978902977204286}
   - component: {fileID: 6267978902977204285}
+  - component: {fileID: 6267978902977204288}
   m_Layer: 0
   m_Name: tree0
   m_TagString: Untagged
@@ -102596,9 +102604,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1480423396}
-  - {fileID: 582911532}
-  - {fileID: 349949256}
-  - {fileID: 311959856}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!135 &6267978902977204285
@@ -102641,13 +102646,17 @@ MonoBehaviour:
   minQuantity: 3
   maxQuantity: 4
   requiredTool: 0
-  despawnDelay: 5
-  fallRigidbody: {fileID: 0}
-  fallTorqueAmount: 50
+  hideVisualDelay: 6
+  fallTransform: {fileID: 6268325921712299256}
+  fallDuration: 1.5
+  fallEndAngle: 85
   brokenAnimator: {fileID: 0}
   breakTrigger: Break
   fractureObject: {fileID: 0}
   mainRenderer: {fileID: 0}
+  dissolveRenderer: {fileID: 6244218149875170703}
+  dissolveDuration: 4
+  dissolveStartDelay: 0.3
 --- !u!114 &6267978902977204287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102661,6 +102670,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 50a6f317d08c3634fa39494fb5c03ecf, type: 2}
+--- !u!54 &6267978902977204288
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6266141166575420030}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!4 &6268325921712299256
 Transform:
   m_ObjectHideFlags: 0
@@ -116170,6 +116206,8 @@ MonoBehaviour:
   unarmedMaxComboIndex: 3
   comboWindowSeconds: 0.25
   unarmedSafetyTimeout: 3
+  pickupRange: 1
+  gatherRange: 1
 --- !u!114 &8905305806091854576
 MonoBehaviour:
   m_ObjectHideFlags: 0

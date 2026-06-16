@@ -7,13 +7,8 @@ namespace SimpleSurvival.Targets
     public abstract class TargetableBase : MonoBehaviour, ITargetable
     {
         [Header("Colliders")]
-        [Tooltip("SphereCollider isTrigger=true. Radius xác định size vòng marker dưới chân target.")]
         [SerializeField] protected SphereCollider useCollider;
-
-        [Tooltip("Collider isTrigger=false. Vừa block player vừa dùng cho ClosestPoint (attack range/distance check).")]
         [SerializeField] protected Collider distanceCollider;
-
-        [Tooltip("Optional. NavMeshObstacle để enemy AI tránh pathfind through target.")]
         [SerializeField] protected NavMeshObstacle navObstacle;
 
         private bool _destroyedFired = false;
@@ -38,11 +33,6 @@ namespace SimpleSurvival.Targets
             if (_destroyedFired) return;
             _destroyedFired = true;
             OnDestroyed?.Invoke(this);
-        }
-
-        protected virtual void OnSpawnFromPool()
-        {
-            _destroyedFired = false;
         }
     }
 }
