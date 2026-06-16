@@ -40,10 +40,25 @@ namespace SimpleSurvival.SaveLoad
 
             statsSerializer.Restore(data.stats, stats);
             equipmentSerializer.Restore(data.equipment, equipment.System);
-            inventory.ResizeBackpack(data.inventory.backpack.slotCount);
+            ResizeBackpackToFitEquipment();
             inventorySerializer.Restore(data.inventory.pockets, inventory.Pockets);
             inventorySerializer.Restore(data.inventory.backpack, inventory.Backpack);
             RestorePlacement(data.placement);
+        }
+
+        private void ResizeBackpackToFitEquipment()
+        {
+            inventory.ResizeBackpack(ReadEquippedBackpackSlots());
+        }
+
+        private int ReadEquippedBackpackSlots()
+        {
+            ItemStack backpackStack = equipment.System.GetSlot(EquipSlot.Backpack, 0);
+            if (backpackStack == null)
+                return 0;
+
+            ContainerAbility container = backpackStack.ItemData.GetAbility<ContainerAbility>();
+            return container != null ? container.ExtraSlots : 0;
         }
 
         private PlayerPlacementData CapturePlacement()
