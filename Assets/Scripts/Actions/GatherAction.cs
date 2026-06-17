@@ -10,6 +10,7 @@ namespace SimpleSurvival.Actions
     public class GatherAction : IAction
     {
         private static readonly int ParamGather = Animator.StringToHash("Gather");
+        private static readonly int ParamGatherIdle = Animator.StringToHash("GatherIdle");
 
         public ActionType Type => ActionType.Gather;
         public bool IsCompleted { get; private set; }
@@ -27,7 +28,6 @@ namespace SimpleSurvival.Actions
         private ItemStack _toolStack;
         private bool _hitAppliedThisChop;
         private bool _targetDepleted;
-
         private float _chopTimer;
         private float _currentSafetyTimeout;
 
@@ -87,7 +87,7 @@ namespace SimpleSurvival.Actions
 
         public void Cancel()
         {
-            CompleteAction();
+            CompleteAction(enterGatherIdle: false);
         }
 
         public void HandleHit()
@@ -109,7 +109,7 @@ namespace SimpleSurvival.Actions
             if (_targetDepleted)
             {
                 DropItems();
-                CompleteAction();
+                CompleteAction(enterGatherIdle: true);
                 return;
             }
 
@@ -117,8 +117,7 @@ namespace SimpleSurvival.Actions
             {
                 if (!TrySwapToReplacementTool())
                 {
-                    Debug.Log("[ToolBroken] No replacement tool available");
-                    CompleteAction();
+                    CompleteAction(enterGatherIdle: true);
                     return;
                 }
             }
@@ -129,7 +128,42 @@ namespace SimpleSurvival.Actions
                 return;
             }
 
-            CompleteAction();
+            CompleteAction(enterGatherIdle: true);
+        }
+
+        private void StartChop()
+        {
+            FacingTarget();
+            _hitAppliedThisChop = false;
+            _chopTimer = 0f;
+            _currentSafetyTimeout = ResolveCurrentSafetyTimeout();
+            _animator.SetTrigger(ParamGather);
+        }
+
+        private void CompleteAction(bool enterGatherIdle)
+        {
+            if (IsCompleted) return;
+
+            if (_target != null && _target.Stats != null)
+                _target.Stats.OnDepleted -= HandleTargetDepleted;
+
+            if (_isEphemeral && _toolSwapper != null && _toolSwapper.IsSwapped)
+            {
+                _toolSwapper.SwapOut();
+
+                if (_playerAnimator != null && _animator != null)
+                {
+                    AnimatorOverrideController weaponController = _playerAnimator.ResolveCurrentWeaponController();
+                    if (weaponController != null && _animator.runtimeAnimatorController != weaponController)
+                        _animator.runtimeAnimatorController = weaponController;
+                }
+            }
+
+            if (enterGatherIdle)
+                _animator.SetTrigger(ParamGatherIdle);
+
+            IsCompleted = true;
+            Completed?.Invoke(this);
         }
 
         private void ConsumeToolDurability()
@@ -179,20 +213,6 @@ namespace SimpleSurvival.Actions
                 _inventoryQueries.AddItem(_target.ItemData, qty);
         }
 
-        private void HandleTargetDepleted()
-        {
-            _targetDepleted = true;
-        }
-
-        private void StartChop()
-        {
-            FacingTarget();
-            _hitAppliedThisChop = false;
-            _chopTimer = 0f;
-            _currentSafetyTimeout = ResolveCurrentSafetyTimeout();
-            _animator.SetTrigger(ParamGather);
-        }
-
         private float ResolveCurrentSafetyTimeout()
         {
             if (_toolStack == null) return 3f;
@@ -200,27 +220,9 @@ namespace SimpleSurvival.Actions
             return tool != null ? tool.SafetyTimeout : 3f;
         }
 
-        private void CompleteAction()
+        private void HandleTargetDepleted()
         {
-            if (IsCompleted) return;
-
-            if (_target != null && _target.Stats != null)
-                _target.Stats.OnDepleted -= HandleTargetDepleted;
-
-            if (_isEphemeral && _toolSwapper != null && _toolSwapper.IsSwapped)
-            {
-                _toolSwapper.SwapOut();
-
-                if (_playerAnimator != null && _animator != null)
-                {
-                    AnimatorOverrideController weaponController = _playerAnimator.ResolveCurrentWeaponController();
-                    if (weaponController != null && _animator.runtimeAnimatorController != weaponController)
-                        _animator.runtimeAnimatorController = weaponController;
-                }
-            }
-
-            IsCompleted = true;
-            Completed?.Invoke(this);
+            _targetDepleted = true;
         }
 
         private void FacingTarget()

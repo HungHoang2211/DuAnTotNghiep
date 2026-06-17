@@ -162,6 +162,13 @@ namespace SimpleSurvival.Targets
         private float ComputeDistance(ITargetable target)
         {
             Vector3 playerPos = playerTransform.position;
+
+            if (target.DistanceCollider != null)
+            {
+                Vector3 closestPoint = target.DistanceCollider.ClosestPoint(playerPos);
+                return Vector3.Distance(playerPos, closestPoint);
+            }
+
             float dist = Vector3.Distance(target.Transform.position, playerPos) - target.Radius;
             return dist < 0f ? 0f : dist;
         }

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using SimpleSurvival.Items;
 using SimpleSurvival.Stats;
-using SimpleSurvival.Core;
 
 namespace SimpleSurvival.Targets
 {
@@ -16,32 +15,27 @@ namespace SimpleSurvival.Targets
         [Header("Tool Requirement")]
         [SerializeField] private ToolType requiredTool = ToolType.Axe;
 
-        [Header("Pool")]
-        [Tooltip("Delay (giây) trước khi return về pool sau khi depleted. Đủ thời gian cho animation/physics đổ.")]
-        [SerializeField] private float despawnDelay = 5f;
+        [Header("Despawn Timing")]
+        [SerializeField] private float hideVisualDelay = 5f;
 
-        [Header("Depleted Effect — Rigidbody (optional, cho cây đổ)")]
-        [Tooltip("Rigidbody của target. isKinematic=true ban đầu, set false khi depleted để physics activate.")]
-        [SerializeField] private Rigidbody fallRigidbody;
+        [Header("Manual Fall (cho cây)")]
+        [SerializeField] private Transform fallTransform;
+        [SerializeField] private float fallDuration = 1.5f;
+        [SerializeField] private float fallEndAngle = 85f;
 
-        [Tooltip("Torque random apply lên rigidbody khi depleted. Tweak để cây đổ realistic.")]
-        [SerializeField] private float fallTorqueAmount = 50f;
-
-        [Header("Depleted Effect — Animator (optional, cho đá vỡ)")]
-        [Tooltip("Animator cho animation vỡ. Trigger animation khi depleted.")]
-        [SerializeField] private Animator brokenAnimator;
-
-        [Tooltip("Tên trigger animation vỡ trên Animator.")]
-        [SerializeField] private string breakTrigger = "Break";
-
-        [Header("Depleted Effect — Fracture Swap (optional)")]
-        [Tooltip("GameObject mảnh vỡ (fracture). Enable khi depleted, swap với mesh chính.")]
+        [Header("Fracture Swap (cho đá vỡ)")]
         [SerializeField] private GameObject fractureObject;
-
-        [Tooltip("Renderer mesh chính. Disable khi enable fractureObject.")]
         [SerializeField] private Renderer mainRenderer;
 
+        [Header("Dissolve Material (optional)")]
+        [SerializeField] private Renderer dissolveRenderer;
+        [SerializeField] private float dissolveDuration = 1.5f;
+        [SerializeField] private float dissolveStartDelay = 1.5f;
+
+        private static readonly int DissolveProp = Shader.PropertyToID("_Dissolve");
+
         private HarvestStats _stats;
+        private Material _dissolveMaterial;
 
         public ItemData ItemData => itemData;
         public ToolType RequiredTool => requiredTool;
@@ -71,29 +65,33 @@ namespace SimpleSurvival.Targets
 
         private void HandleDepleted()
         {
+            Debug.Log("[Harvest] Depleted called");
             FireOnDestroyed();
             DisableTargetability();
             PlayDepletedEffect();
-            ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
+            Invoke(nameof(HideVisual), hideVisualDelay);
         }
 
         private void DisableTargetability()
         {
             var col = GetComponent<Collider>();
             if (col != null) col.enabled = false;
+
+            if (distanceCollider != null) distanceCollider.enabled = false;
+            if (navObstacle != null) navObstacle.enabled = false;
+
+            if (fallTransform != null)
+            {
+                var rbCollider = fallTransform.GetComponent<Collider>();
+                if (rbCollider != null) rbCollider.enabled = false;
+            }
         }
 
         private void PlayDepletedEffect()
         {
-            if (fallRigidbody != null)
+            if (fallTransform != null)
             {
-                fallRigidbody.isKinematic = false;
-                if (fallTorqueAmount > 0f)
-                {
-                    Vector3 torque = Random.insideUnitSphere * fallTorqueAmount;
-                    torque.y = 0f;
-                    fallRigidbody.AddTorque(torque, ForceMode.Impulse);
-                }
+                StartCoroutine(ManualFallRoutine(fallTransform));
             }
 
             if (fractureObject != null)
@@ -103,28 +101,61 @@ namespace SimpleSurvival.Targets
                     mainRenderer.enabled = false;
             }
 
-            if (brokenAnimator != null && !string.IsNullOrEmpty(breakTrigger))
+            if (dissolveRenderer != null)
             {
-                brokenAnimator.SetTrigger(breakTrigger);
+                _dissolveMaterial = dissolveRenderer.material;
+                Invoke(nameof(StartDissolve), dissolveStartDelay);
             }
         }
 
-        protected override void OnSpawnFromPool()
+        private System.Collections.IEnumerator ManualFallRoutine(Transform target)
         {
-            base.OnSpawnFromPool();
+            if (target == null) yield break;
 
-            var col = GetComponent<Collider>();
-            if (col != null) col.enabled = true;
+            float randomY = Random.Range(0f, 360f);
+            Vector3 fallDirection = Quaternion.Euler(0f, randomY, 0f) * Vector3.forward;
+            Vector3 fallAxis = Vector3.Cross(Vector3.up, fallDirection).normalized;
 
-            if (fallRigidbody != null)
+            Quaternion startRot = target.rotation;
+            Quaternion endRot = Quaternion.AngleAxis(fallEndAngle, fallAxis) * startRot;
+
+            float elapsed = 0f;
+            while (elapsed < fallDuration)
             {
-                fallRigidbody.isKinematic = true;
-                fallRigidbody.linearVelocity = Vector3.zero;
-                fallRigidbody.angularVelocity = Vector3.zero;
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / fallDuration);
+                t = t * t;
+                target.rotation = Quaternion.Slerp(startRot, endRot, t);
+                yield return null;
             }
 
+            target.rotation = endRot;
+        }
+
+        private void StartDissolve()
+        {
+            StartCoroutine(DissolveRoutine());
+        }
+
+        private System.Collections.IEnumerator DissolveRoutine()
+        {
+            float elapsed = 0f;
+            while (elapsed < dissolveDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / dissolveDuration);
+                if (_dissolveMaterial != null)
+                    _dissolveMaterial.SetFloat(DissolveProp, t);
+                yield return null;
+            }
+        }
+
+        private void HideVisual()
+        {
+            if (mainRenderer != null) mainRenderer.enabled = false;
+            if (dissolveRenderer != null && dissolveRenderer != mainRenderer)
+                dissolveRenderer.enabled = false;
             if (fractureObject != null) fractureObject.SetActive(false);
-            if (mainRenderer != null) mainRenderer.enabled = true;
         }
     }
 }
