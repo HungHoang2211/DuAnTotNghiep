@@ -65,7 +65,7 @@ namespace SimpleSurvival.Targets
 
         private void HandleDepleted()
         {
-            Debug.Log($"[Harvest] Depleted called. fractureObject={fractureObject?.name ?? "NULL"}, mainRenderer={mainRenderer?.name ?? "NULL"}");
+            Debug.Log("[Harvest] Depleted called");
             FireOnDestroyed();
             DisableTargetability();
             PlayDepletedEffect();
@@ -96,16 +96,9 @@ namespace SimpleSurvival.Targets
 
             if (fractureObject != null)
             {
-                Debug.Log($"[Harvest] Activating fracture: {fractureObject.name}, was active: {fractureObject.activeSelf}");
                 fractureObject.SetActive(true);
-                Debug.Log($"[Harvest] After SetActive: {fractureObject.activeSelf}, activeInHierarchy: {fractureObject.activeInHierarchy}");
-
                 if (mainRenderer != null)
-                {
-                    Debug.Log($"[Harvest] Disabling mainRenderer: {mainRenderer.name}, was enabled: {mainRenderer.enabled}");
                     mainRenderer.enabled = false;
-                    Debug.Log($"[Harvest] After disable: {mainRenderer.enabled}");
-                }
             }
 
             if (dissolveRenderer != null)
