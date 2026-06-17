@@ -1,9 +1,8 @@
-using System;
+﻿using System;
 using UnityEngine;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Items;
-using SimpleSurvival.Core;
 
 namespace SimpleSurvival.Actions
 {
@@ -85,7 +84,8 @@ namespace SimpleSurvival.Actions
                 return;
             }
 
-            ObjectPool.Instance.Return(_target.gameObject);
+            // Disable collider + hide mesh (giống harvest)
+            _target.OnPickedUp();
         }
 
         public void HandleEnd()

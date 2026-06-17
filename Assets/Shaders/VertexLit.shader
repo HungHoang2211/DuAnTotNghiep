@@ -3,62 +3,38 @@ Shader "SimpleSurvival/VertexLit"
     Properties
     {
         _Color      ("Tint Color", Color) = (1,1,1,1)
+        _MaskTex    ("Mask", 2D) = "white" {}
         [MainTexture] _MainTex ("Main Texture", 2D) = "white" {}
+        _AlphaR     ("Alpha Texture (R)", 2D) = "white" {}
+        _EmitTex    ("Emission Texture", 2D) = "black" {}
+        _EmitValue  ("Emission Value", Range(0,2)) = 0
+        _Shininess  ("Shininess", Range(0.5,50)) = 8
+        _Dissolve   ("Dissolve", Range(0,1)) = 0
 
         [Toggle(USE_ALPHA_CLIP)] _UseAlphaClip ("Use Alpha Clip", Float) = 0
-        _AlphaR     ("Alpha Texture (R)", 2D) = "white" {}
         _Cutoff     ("Alpha Cutoff", Range(0,1)) = 0.5
 
         [Toggle(EMISSION)] _UseEmission ("Use Emission", Float) = 0
-        _EmitTex    ("Emission Texture", 2D) = "black" {}
-        _EmitValue  ("Emission Value", Range(0,2)) = 0
-
         [Toggle(SPECULAR)] _UseSpecular ("Use Specular", Float) = 0
         _SpecColor  ("Specular Color", Color) = (0.4,0.4,0.4,1)
-        _Shininess  ("Shininess", Range(0.5,50)) = 8
-
-        [Toggle(DISSOLVE)] _UseDissolve ("Use Dissolve", Float) = 0
-        _DissolveNoise ("Dissolve Noise (R)", 2D) = "white" {}
-        _Dissolve   ("Dissolve", Range(0,1)) = 0
     }
 
     SubShader
     {
         Tags
         {
-            "RenderType"     = "Opaque"
-            "Queue"          = "Geometry"
+            "RenderType"     = "Transparent"
+            "Queue"          = "Transparent"
             "RenderPipeline" = "UniversalPipeline"
         }
         LOD 200
-
-        HLSLINCLUDE
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-
-        CBUFFER_START(UnityPerMaterial)
-            float4 _MainTex_ST;
-            float4 _AlphaR_ST;
-            float4 _EmitTex_ST;
-            float4 _DissolveNoise_ST;
-            half4  _Color;
-            half4  _SpecColor;
-            half   _Cutoff;
-            half   _EmitValue;
-            half   _Shininess;
-            half   _Dissolve;
-        CBUFFER_END
-
-        TEXTURE2D(_MainTex);        SAMPLER(sampler_MainTex);
-        TEXTURE2D(_AlphaR);         SAMPLER(sampler_AlphaR);
-        TEXTURE2D(_EmitTex);        SAMPLER(sampler_EmitTex);
-        TEXTURE2D(_DissolveNoise);  SAMPLER(sampler_DissolveNoise);
-        ENDHLSL
 
         Pass
         {
             Name "ForwardLit"
             Tags { "LightMode" = "UniversalForward" }
 
+            Blend SrcAlpha OneMinusSrcAlpha
             ZWrite On
             ZTest LEqual
             Cull Back
@@ -73,7 +49,26 @@ Shader "SimpleSurvival/VertexLit"
             #pragma shader_feature_local USE_ALPHA_CLIP
             #pragma shader_feature_local EMISSION
             #pragma shader_feature_local SPECULAR
-            #pragma shader_feature_local DISSOLVE
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                float4 _AlphaR_ST;
+                float4 _EmitTex_ST;
+                float4 _MaskTex_ST;
+                half4  _Color;
+                half4  _SpecColor;
+                half   _Cutoff;
+                half   _EmitValue;
+                half   _Shininess;
+                half   _Dissolve;
+            CBUFFER_END
+
+            TEXTURE2D(_MainTex);  SAMPLER(sampler_MainTex);
+            TEXTURE2D(_AlphaR);   SAMPLER(sampler_AlphaR);
+            TEXTURE2D(_EmitTex);  SAMPLER(sampler_EmitTex);
+            TEXTURE2D(_MaskTex);  SAMPLER(sampler_MaskTex);
 
             struct Attributes
             {
@@ -126,13 +121,8 @@ Shader "SimpleSurvival/VertexLit"
             half4 frag(Varyings IN) : SV_TARGET
             {
                 #ifdef USE_ALPHA_CLIP
-                    half alpha = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uv).r;
-                    clip(alpha - _Cutoff);
-                #endif
-
-                #ifdef DISSOLVE
-                    half noise = SAMPLE_TEXTURE2D(_DissolveNoise, sampler_DissolveNoise, IN.uv).r;
-                    clip(noise - _Dissolve);
+                    half alphaMask = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uv).r;
+                    clip(alphaMask - _Cutoff);
                 #endif
 
                 half3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).rgb * _Color.rgb;
@@ -144,7 +134,7 @@ Shader "SimpleSurvival/VertexLit"
                 #endif
 
                 color = MixFog(color, IN.fogFactor);
-                return half4(color, 1.0);
+                return half4(color, 1.0 - _Dissolve);
             }
             ENDHLSL
         }
@@ -163,9 +153,23 @@ Shader "SimpleSurvival/VertexLit"
             #pragma fragment shadowFrag
             #pragma target 3.0
             #pragma shader_feature_local USE_ALPHA_CLIP
-            #pragma shader_feature_local DISSOLVE
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                float4 _AlphaR_ST;
+                float4 _EmitTex_ST;
+                float4 _MaskTex_ST;
+                half4  _Color;
+                half4  _SpecColor;
+                half   _Cutoff;
+                half   _EmitValue;
+                half   _Shininess;
+                half   _Dissolve;
+            CBUFFER_END
+
+            TEXTURE2D(_AlphaR);  SAMPLER(sampler_AlphaR);
 
             float3 _LightDirection;
 
@@ -202,16 +206,11 @@ Shader "SimpleSurvival/VertexLit"
 
             half4 shadowFrag(VaryingsS IN) : SV_TARGET
             {
+                clip(0.5 - _Dissolve);
                 #ifdef USE_ALPHA_CLIP
-                    half alpha = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uv).r;
-                    clip(alpha - _Cutoff);
+                    half alphaMask = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uv).r;
+                    clip(alphaMask - _Cutoff);
                 #endif
-
-                #ifdef DISSOLVE
-                    half noise = SAMPLE_TEXTURE2D(_DissolveNoise, sampler_DissolveNoise, IN.uv).r;
-                    clip(noise - _Dissolve);
-                #endif
-
                 return 0;
             }
             ENDHLSL

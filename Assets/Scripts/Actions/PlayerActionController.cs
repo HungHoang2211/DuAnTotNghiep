@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using SimpleSurvival.Actions;
 using SimpleSurvival.Targets;
@@ -25,6 +25,13 @@ namespace SimpleSurvival.Player
         [SerializeField] private int unarmedMaxComboIndex = 3;
         [SerializeField] private float comboWindowSeconds = 0.25f;
         [SerializeField] private float unarmedSafetyTimeout = 3f;
+
+        [Header("Action Ranges")]
+        [Tooltip("Distance tối đa từ player đến target để pickup work.")]
+        [SerializeField] private float pickupRange = 1.5f;
+
+        [Tooltip("Distance tối đa từ player đến target để gather work.")]
+        [SerializeField] private float gatherRange = 2.0f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -135,6 +142,13 @@ namespace SimpleSurvival.Player
             if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null || inventoryQueries == null) return false;
 
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > gatherRange)
+            {
+                Debug.Log($"[Gather] Too far: {dist:F1}m > {gatherRange:F1}m");
+                return false;
+            }
+
             ToolType required = target.RequiredTool;
             GatherToolResolution resolution = ResolveGatherTool(required);
 
@@ -162,6 +176,13 @@ namespace SimpleSurvival.Player
             if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null || inventoryQueries == null) return false;
 
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > pickupRange)
+            {
+                Debug.Log($"[Pickup] Too far: {dist:F1}m > {pickupRange:F1}m");
+                return false;
+            }
+
             if (!CanPickupAtLeastOneItem(target))
             {
                 Debug.Log("[ActionController] Inventory full, cannot pickup");
@@ -180,6 +201,22 @@ namespace SimpleSurvival.Player
                 if (inventoryQueries.CanAddItem(entry.itemData, 1)) return true;
             }
             return false;
+        }
+
+        private float ComputeDistanceToTarget(ITargetable target)
+        {
+            if (target?.Transform == null) return float.MaxValue;
+
+            Vector3 playerPos = PlayerTransform.position;
+
+            if (target.DistanceCollider != null)
+            {
+                Vector3 closestPoint = target.DistanceCollider.ClosestPoint(playerPos);
+                return Vector3.Distance(playerPos, closestPoint);
+            }
+
+            float dist = Vector3.Distance(playerPos, target.Transform.position) - target.Radius;
+            return dist < 0f ? 0f : dist;
         }
 
         private float ResolveAttackDamage()

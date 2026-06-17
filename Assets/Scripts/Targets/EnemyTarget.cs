@@ -37,9 +37,9 @@ namespace SimpleSurvival.Targets
             FireOnDestroyed();
         }
 
-        protected override void OnSpawnFromPool()
-        {
-            base.OnSpawnFromPool();
-        }
+        //protected override void OnSpawnFromPool()
+        //{
+        //    base.OnSpawnFromPool();
+        //}
     }
 }

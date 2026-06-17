@@ -1,17 +1,24 @@
-using System;
+﻿using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace SimpleSurvival.Targets
 {
     public abstract class TargetableBase : MonoBehaviour, ITargetable
     {
-        [SerializeField] protected float radius = 0.5f;
+        [Header("Colliders")]
+        [SerializeField] protected SphereCollider useCollider;
+        [SerializeField] protected Collider distanceCollider;
+        [SerializeField] protected NavMeshObstacle navObstacle;
 
         private bool _destroyedFired = false;
 
         public Transform Transform => transform;
-        public float Radius => radius;
+        public float Radius => useCollider != null ? useCollider.radius : 0.5f;
+        public Collider DistanceCollider => distanceCollider;
+        public NavMeshObstacle NavObstacle => navObstacle;
         public abstract TargetType Type { get; }
+
         public event Action<ITargetable> OnDestroyed;
 
         public virtual bool CanBeTargeted() => isActiveAndEnabled;
@@ -26,11 +33,6 @@ namespace SimpleSurvival.Targets
             if (_destroyedFired) return;
             _destroyedFired = true;
             OnDestroyed?.Invoke(this);
-        }
-
-        protected virtual void OnSpawnFromPool()
-        {
-            _destroyedFired = false;
         }
     }
 }
