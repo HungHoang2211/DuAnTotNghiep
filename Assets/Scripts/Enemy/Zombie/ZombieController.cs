@@ -412,15 +412,37 @@ public class ZombieController : MonoBehaviour
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
+        _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
 
         if (_anim != null) { _anim.SetHowling(false); _anim.SetIdle(); _anim.TriggerDeath(); }
 
-        var col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
+        // Đổi sang layer "Corpse" — layer này cần được set KHÔNG va chạm với layer Enemy/Player
+        // trong Physics Layer Collision Matrix, để enemy còn sống đi qua không đẩy được xác
+        // ragdoll, nhưng xác vẫn rơi/va đất bình thường (Corpse vẫn va với Default/Ground)
+        SetLayerRecursive(transform, LayerMask.NameToLayer("Corpse"));
+
+        // Tắt TẤT CẢ collider (gốc + con) NGAY khi chết — đóng lỗ hổng va chạm trong khoảng
+        // thời gian chờ trước khi ragdoll kích hoạt (ragdoll sẽ tự enable lại collider bone nó cần)
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = false;
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
         if (_spawnPoint != null) _spawnPoint.Invoke("OnZombieDespawned", despawnDelay);
+    }
+
+    /// <summary>
+    /// Đổi layer của object gốc + toàn bộ object con (các bone ragdoll) sang layer chỉ định.
+    /// Dùng để chuyển xác chết qua layer "Corpse" — layer này được set KHÔNG va chạm với
+    /// layer "Enemy"/"Player" trong Physics Layer Collision Matrix, nên enemy còn sống đi
+    /// ngang qua sẽ không còn đẩy được xác ragdoll nữa, nhưng xác vẫn rơi/va đất bình thường.
+    /// </summary>
+    private void SetLayerRecursive(Transform root, int layer)
+    {
+        if (layer < 0) return; // layer "Corpse" chưa được tạo trong Project Settings
+        root.gameObject.layer = layer;
+        foreach (Transform child in root)
+            SetLayerRecursive(child, layer);
     }
 
     private void OnDrawGizmosSelected()

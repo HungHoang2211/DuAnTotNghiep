@@ -3,7 +3,8 @@ using SimpleSurvival.Combat;
 using SimpleSurvival.Core;
 
 /// <summary>
-/// Đạn axit của ZombieFat. Bay về phía player, chạm thì gây damage.
+/// Đạn axit của ZombieFat. Nhắm vào vị trí player lúc bắn rồi bay THẲNG
+/// theo hướng đó (không đuổi theo player), chạm thì gây damage.
 ///
 /// SETUP Prefab:
 ///   1. Tạo GameObject → đặt tên "ZombieFatAcidEffect"
@@ -15,7 +16,7 @@ using SimpleSurvival.Core;
 [RequireComponent(typeof(Collider))]
 public class ZombieFatAcid : MonoBehaviour
 {
-    private Transform _target;
+    private Vector3 _fixedDirection;
     private float _damage;
     private float _speed;
     private float _lifetime;
@@ -35,7 +36,20 @@ public class ZombieFatAcid : MonoBehaviour
     public void Initialize(Transform target, float damage, float speed,
                            float lifetime, GameObject source)
     {
-        _target = target;
+        // Tính hướng bay 1 LẦN DUY NHẤT lúc bắn, dựa trên vị trí target hiện tại.
+        // Sau đó acid bay thẳng theo hướng này, không bám/đuổi theo target nữa.
+        if (target != null)
+        {
+            Vector3 dir = (target.position + Vector3.up * 0.8f - transform.position).normalized;
+            _fixedDirection = dir.sqrMagnitude > 0.0001f ? dir : transform.forward;
+        }
+        else
+        {
+            _fixedDirection = transform.forward;
+        }
+
+        transform.rotation = Quaternion.LookRotation(_fixedDirection);
+
         _damage = damage;
         _speed = speed;
         _lifetime = lifetime;
@@ -61,9 +75,7 @@ public class ZombieFatAcid : MonoBehaviour
 
     private void OnSpawnFromPool()
     {
-        _initialized = false;
         _hasHit = false;
-        _target = null;
     }
 
     private void Update()
@@ -76,17 +88,8 @@ public class ZombieFatAcid : MonoBehaviour
             return;
         }
 
-        // Bay về player với homing nhẹ
-        if (_target != null)
-        {
-            Vector3 dir = (_target.position + Vector3.up * 0.8f - transform.position).normalized;
-            transform.position += dir * _speed * Time.deltaTime;
-            transform.rotation = Quaternion.LookRotation(dir);
-        }
-        else
-        {
-            transform.position += transform.forward * _speed * Time.deltaTime;
-        }
+        // Bay thẳng theo hướng đã chốt lúc bắn — không đuổi theo player.
+        transform.position += _fixedDirection * _speed * Time.deltaTime;
     }
 
     private void OnTriggerEnter(Collider other)
