@@ -1,11 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ZombieBossAnimatorController : MonoBehaviour
 {
     private Animator _animator;
-
-    private Rigidbody[] _ragdollRigidbodies;
-    private Collider[] _ragdollColliders;
 
     private static readonly int MoveSpeedParam = Animator.StringToHash("MoveSpeed");
     private static readonly int AttackClawTrigger = Animator.StringToHash("AttackClaw");
@@ -13,11 +10,16 @@ public class ZombieBossAnimatorController : MonoBehaviour
     private static readonly int HowlTrigger = Animator.StringToHash("Howl");
     private static readonly int DeathTrigger = Animator.StringToHash("Death");
 
+    [Header("Ragdoll")]
+    [Tooltip("Kéo tất cả Rigidbody trên bone ragdoll vào đây.")]
+    [SerializeField] private Rigidbody[] _ragdollBodies;
+
+    [Tooltip("Kéo tất cả Collider trên bone ragdoll vào đây.")]
+    [SerializeField] private Collider[] _ragdollColliders;
+
     private void Awake()
     {
         _animator = GetComponentInChildren<Animator>();
-        _ragdollRigidbodies = GetComponentsInChildren<Rigidbody>();
-        _ragdollColliders = GetComponentsInChildren<Collider>();
         SetRagdollEnabled(false);
     }
 
@@ -31,12 +33,14 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     public void ResetForSpawn()
     {
+        _animator.enabled = true;
         _animator.SetFloat(MoveSpeedParam, 0f);
         _animator.ResetTrigger(AttackClawTrigger);
         _animator.ResetTrigger(JumpAttackTrigger);
         _animator.ResetTrigger(HowlTrigger);
         _animator.ResetTrigger(DeathTrigger);
         _animator.Play("Movement", 0, 0f);
+        SetRagdollEnabled(false);
     }
 
     public void ActivateRagdoll(Vector3 forceDirection)
@@ -44,32 +48,32 @@ public class ZombieBossAnimatorController : MonoBehaviour
         if (_animator != null) _animator.enabled = false;
         SetRagdollEnabled(true);
 
-        Rigidbody hip = GetHipRigidbody();
-        if (hip != null)
-            hip.AddForce(forceDirection * 5f, ForceMode.Impulse);
+        if (_ragdollBodies != null && _ragdollBodies.Length > 0)
+        {
+            Rigidbody hip = _ragdollBodies[0];
+            if (hip != null)
+                hip.AddForce(forceDirection * 5f, ForceMode.Impulse);
+        }
     }
 
     private void SetRagdollEnabled(bool enabled)
     {
-        foreach (var rb in _ragdollRigidbodies)
+        if (_ragdollBodies != null)
         {
-            if (rb.gameObject == gameObject) continue;
-            rb.isKinematic = !enabled;
+            foreach (var rb in _ragdollBodies)
+            {
+                if (rb == null) continue;
+                rb.isKinematic = !enabled;
+            }
         }
 
-        foreach (var col in _ragdollColliders)
+        if (_ragdollColliders != null)
         {
-            if (col.gameObject == gameObject) continue;
-            col.enabled = enabled;
+            foreach (var col in _ragdollColliders)
+            {
+                if (col == null) continue;
+                col.enabled = enabled;
+            }
         }
-    }
-
-    private Rigidbody GetHipRigidbody()
-    {
-        foreach (var rb in _ragdollRigidbodies)
-        {
-            if (rb.gameObject != gameObject) return rb;
-        }
-        return null;
     }
 }

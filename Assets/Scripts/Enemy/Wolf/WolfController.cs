@@ -15,6 +15,8 @@ public class WolfController : MonoBehaviour
 
     [Header("Movement Feel")]
     [SerializeField] private float _rotationSpeed = 80f;
+    [Tooltip("Tốc độ xoay khi đang đuổi theo player (cao hơn để bám sát)")]
+    [SerializeField] private float _chaseRotationSpeed = 360f;
     [SerializeField] private float _acceleration = 10f;
     [SerializeField] private float _angularSpeed = 0f;
 
@@ -31,6 +33,7 @@ public class WolfController : MonoBehaviour
     private float _lastAttackTime = 0f;
     private float _lostTargetTimer = 0f;
     private Vector3 _homePosition;
+    private Vector3 _deathPosition;
 
     private WolfStatsConfig Config => _stats != null ? _stats.EnemyConfig as WolfStatsConfig : null;
 
@@ -105,7 +108,12 @@ public class WolfController : MonoBehaviour
 
     private void Update()
     {
-        if (_isDead) return;
+        if (_isDead)
+        {
+            // Failsafe: ép xác đứng yên tuyệt đối, không cho bất kỳ va chạm/lực nào dịch chuyển nó
+            transform.position = _deathPosition;
+            return;
+        }
 
         SmoothRotation();
 
@@ -134,6 +142,20 @@ public class WolfController : MonoBehaviour
         }
 
         if (_agent.velocity.sqrMagnitude < 0.1f) return;
+
+        // Khi chase: hướng thẳng về player thay vì theo velocity để không bị lag xoay
+        if (_state == State.Chasing && _player != null)
+        {
+            Vector3 dirToPlayer = _player.position - transform.position;
+            dirToPlayer.y = 0;
+            if (dirToPlayer != Vector3.zero)
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation,
+                    Quaternion.LookRotation(dirToPlayer),
+                    _chaseRotationSpeed * Time.deltaTime
+                );
+            return;
+        }
 
         Vector3 moveDir = _agent.velocity.normalized;
         moveDir.y = 0;
@@ -396,11 +418,18 @@ public class WolfController : MonoBehaviour
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
+        _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
+
+        _deathPosition = transform.position; // chốt vị trí chết, Update() sẽ ép giữ nguyên vị trí này
 
         if (_anim != null) { _anim.SetSpeed(0f); _anim.SetDead(true); _anim.SetHowling(false); }
 
         var loot = GetComponent<WolfLoot>();
         if (loot != null) loot.SetLootable(true);
+
+        // Tắt TẤT CẢ collider (gốc + con) — tránh trường hợp có hitbox/collider phụ ở object con
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = false;
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);

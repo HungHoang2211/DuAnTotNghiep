@@ -444,16 +444,34 @@ public class ZombieFatController : MonoBehaviour
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
+        _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
 
         if (_anim != null) { _anim.SetIdle(); _anim.TriggerDeath(); }
 
-        var col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
+        // Đổi sang layer "Corpse" — xem giải thích chi tiết trong ZombieController.cs
+        SetLayerRecursive(transform, LayerMask.NameToLayer("Corpse"));
+
+        // Tắt TẤT CẢ collider (gốc + con) NGAY khi chết — đóng lỗ hổng va chạm trong khoảng
+        // thời gian chờ trước khi ragdoll kích hoạt (ragdoll sẽ tự enable lại collider bone nó cần)
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = false;
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
         if (_spawnPoint != null)
             _spawnPoint.Invoke("OnZombieFatDespawned", despawnDelay);
+    }
+
+    /// <summary>
+    /// Đổi layer của object gốc + toàn bộ object con (các bone ragdoll) sang layer chỉ định.
+    /// Xem giải thích chi tiết trong ZombieController.cs
+    /// </summary>
+    private void SetLayerRecursive(Transform root, int layer)
+    {
+        if (layer < 0) return;
+        root.gameObject.layer = layer;
+        foreach (Transform child in root)
+            SetLayerRecursive(child, layer);
     }
 
     private void OnDrawGizmosSelected()

@@ -31,6 +31,7 @@ public class DeerController : MonoBehaviour
     private Coroutine _behaviorCoroutine;
     private bool _isDead = false;
     private float _grazeBlockedUntil = 0f;
+    private Vector3 _deathPosition;
 
     private DeerStatsConfig Config => _stats != null ? _stats.EnemyConfig as DeerStatsConfig : null;
 
@@ -118,7 +119,12 @@ public class DeerController : MonoBehaviour
 
     private void Update()
     {
-        if (_isDead) return;
+        if (_isDead)
+        {
+            // Failsafe: ép xác đứng yên tuyệt đối, không cho bất kỳ va chạm/lực nào dịch chuyển nó
+            transform.position = _deathPosition;
+            return;
+        }
 
         SmoothRotation();
 
@@ -306,11 +312,18 @@ public class DeerController : MonoBehaviour
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
+        _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
+
+        _deathPosition = transform.position; // chốt vị trí chết, Update() sẽ ép giữ nguyên vị trí này
 
         if (_anim != null) { _anim.SetGrazing(false); _anim.SetSpeed(0f); _anim.SetDead(true); }
 
         var loot = GetComponent<DeerLoot>();
         if (loot != null) loot.SetLootable(true);
+
+        // Tắt TẤT CẢ collider (gốc + con) — tránh trường hợp có hitbox/collider phụ ở object con
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = false;
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
