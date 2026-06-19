@@ -10,6 +10,7 @@ namespace SimpleSurvival.Actions
     {
         private static readonly int ParamAttack = Animator.StringToHash("Attack");
         private static readonly int ParamActionIndex = Animator.StringToHash("ActionIndex");
+        private static readonly int ParamAttackSpeed = Animator.StringToHash("AttackSpeed");
 
         public ActionType Type => ActionType.Attack;
         public bool IsCompleted { get; private set; }
@@ -29,6 +30,7 @@ namespace SimpleSurvival.Actions
         private readonly int _maxComboIndex;
         private readonly float _comboWindowSeconds;
         private readonly float _safetyTimeout;
+        private readonly float _attackSpeedMultiplier;
 
         private Phase _phase;
         private int _comboIndex;
@@ -44,7 +46,8 @@ namespace SimpleSurvival.Actions
             float range,
             int maxComboIndex,
             float comboWindowSeconds,
-            float safetyTimeout)
+            float safetyTimeout,
+            float attackSpeedMultiplier)
         {
             _controller = controller;
             _animator = animator;
@@ -54,6 +57,7 @@ namespace SimpleSurvival.Actions
             _maxComboIndex = Mathf.Max(0, maxComboIndex);
             _comboWindowSeconds = Mathf.Max(0f, comboWindowSeconds);
             _safetyTimeout = Mathf.Max(0.1f, safetyTimeout);
+            _attackSpeedMultiplier = Mathf.Max(0.1f, attackSpeedMultiplier);
         }
 
         public bool CanBeInterruptedBy(IAction newAction)
@@ -66,7 +70,8 @@ namespace SimpleSurvival.Actions
         {
             _controller.ConsumeAttackQueue();
             _controller.CancelSneak();
-            _comboIndex = 0;
+            _animator.SetFloat(ParamAttackSpeed, _attackSpeedMultiplier);
+            PickComboIndex();
             StartSwing();
         }
 
@@ -88,7 +93,7 @@ namespace SimpleSurvival.Actions
             if (_controller.IsAttackHeld || _controller.AttackInputQueued)
             {
                 _controller.ConsumeAttackQueue();
-                AdvanceComboIndex();
+                PickComboIndex();
                 StartSwing();
                 return;
             }
@@ -141,10 +146,17 @@ namespace SimpleSurvival.Actions
             _comboWindowRemaining = _comboWindowSeconds;
         }
 
-        private void AdvanceComboIndex()
+        private void PickComboIndex()
         {
-            int next = _comboIndex + 1;
-            _comboIndex = next > _maxComboIndex ? 0 : next;
+            int prev = _comboIndex;
+            if (_maxComboIndex <= 0)
+            {
+                _comboIndex = 0;
+                return;
+            }
+
+            _comboIndex = UnityEngine.Random.Range(0, _maxComboIndex + 1);
+            Debug.Log($"[Combo] Prev={prev}, New={_comboIndex}, Same={prev == _comboIndex}");
         }
 
         private void StartSwing()

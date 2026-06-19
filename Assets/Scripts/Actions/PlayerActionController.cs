@@ -25,13 +25,12 @@ namespace SimpleSurvival.Player
         [SerializeField] private int unarmedMaxComboIndex = 3;
         [SerializeField] private float comboWindowSeconds = 0.25f;
         [SerializeField] private float unarmedSafetyTimeout = 3f;
+        [SerializeField] private float unarmedAttackSpeed = 1.8f;
+        [SerializeField] private float unarmedAttackClipLength = 0.5f;
 
         [Header("Action Ranges")]
-        [Tooltip("Distance tối đa từ player đến target để pickup work.")]
-        [SerializeField] private float pickupRange = 1.5f;
-
-        [Tooltip("Distance tối đa từ player đến target để gather work.")]
-        [SerializeField] private float gatherRange = 2.0f;
+        [SerializeField] private float pickupRange = 1f;
+        [SerializeField] private float gatherRange = 1f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -105,11 +104,13 @@ namespace SimpleSurvival.Player
             float range = ResolveAttackRange();
             int maxComboIndex = ResolveMaxComboIndex();
             float safetyTimeout = ResolveAttackSafetyTimeout();
+            float speedMultiplier = ResolveAttackSpeedMultiplier();
 
             AttackAction attack = new AttackAction(
                 this, animator, target,
                 damage, range, maxComboIndex, comboWindowSeconds,
-                safetyTimeout);
+                safetyTimeout,
+                speedMultiplier);
             return TryRequestAction(attack);
         }
 
@@ -222,7 +223,6 @@ namespace SimpleSurvival.Player
         private float ResolveAttackDamage()
         {
             WeaponAbility weapon = GetEquippedWeapon();
-            Debug.Log($"[Attack] Weapon={weapon?.AbilityName ?? "null"}, Damage={weapon?.Damage ?? -1f}, BaseDamage={playerStats?.BaseDamage}");
             if (weapon != null) return weapon.Damage;
             return playerStats != null ? playerStats.BaseDamage : 0f;
         }
@@ -246,6 +246,13 @@ namespace SimpleSurvival.Player
             WeaponAbility weapon = GetEquippedWeapon();
             if (weapon != null) return weapon.SafetyTimeout;
             return unarmedSafetyTimeout;
+        }
+
+        private float ResolveAttackSpeedMultiplier()
+        {
+            WeaponAbility weapon = GetEquippedWeapon();
+            if (weapon != null) return weapon.AttackSpeed * weapon.AttackClipLength;
+            return unarmedAttackSpeed * unarmedAttackClipLength;
         }
 
         private WeaponAbility GetEquippedWeapon()

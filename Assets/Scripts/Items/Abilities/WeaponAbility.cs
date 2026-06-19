@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +25,8 @@ namespace SimpleSurvival.Items
         [Header("Stats - Common")]
         [SerializeField] private float damage;
         [SerializeField] private float attackSpeed;
+        [Tooltip("Length (giây) của clip animation attack chính. Designer nhập thủ công từ animation clip length.")]
+        [SerializeField] private float attackClipLength = 1f;
         [SerializeField] private float range;
         [SerializeField] private float weight;
 
@@ -55,6 +57,7 @@ namespace SimpleSurvival.Items
         public override string AbilityName => Name;
         public float Damage => damage;
         public float AttackSpeed => attackSpeed;
+        public float AttackClipLength => attackClipLength;
         public float Range => range;
         public float Weight => weight;
         public float Noise => noise;
