@@ -1,8 +1,20 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ZombieBossAnimatorController : MonoBehaviour
 {
     private Animator _animator;
+
+    /// <summary>
+    /// Được gọi bởi Animation Event ở frame cuối của clip Howl.
+    /// ZombieBossController đăng ký vào đây để biết khi nào howl xong.
+    /// </summary>
+    public event Action OnHowlFinished;
+
+    /// <summary>
+    /// Được gọi bởi Animation Event tại frame muốn spawn minion trong clip Howl.
+    /// </summary>
+    public event Action OnHowlSpawn;
 
     private static readonly int MoveSpeedParam = Animator.StringToHash("MoveSpeed");
     private static readonly int AttackClawTrigger = Animator.StringToHash("AttackClaw");
@@ -30,6 +42,16 @@ public class ZombieBossAnimatorController : MonoBehaviour
     public void TriggerJumpAttack() => _animator.SetTrigger(JumpAttackTrigger);
     public void TriggerHowl() => _animator.SetTrigger(HowlTrigger);
     public void TriggerDeath() => _animator.SetTrigger(DeathTrigger);
+
+    /// <summary>
+    /// Gọi method này từ Animation Event tại frame muốn spawn minion trong clip Howl.
+    /// </summary>
+    public void HowlSpawn() => OnHowlSpawn?.Invoke();
+
+    /// <summary>
+    /// Gọi method này từ Animation Event ở frame cuối của clip Howl trong Animator.
+    /// </summary>
+    public void HowlFinished() => OnHowlFinished?.Invoke();
 
     public void ResetForSpawn()
     {
