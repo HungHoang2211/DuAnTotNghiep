@@ -4,6 +4,7 @@ using SimpleSurvival.Actions;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Items;
 using SimpleSurvival.Stats;
+using SimpleSurvival.Loot;
 
 namespace SimpleSurvival.Player
 {
@@ -31,6 +32,10 @@ namespace SimpleSurvival.Player
         [Header("Action Ranges")]
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
+        [SerializeField] private float lootRange = 1.5f;
+
+        [Header("UI References")]
+        [SerializeField] private UnityEngine.Events.UnityEvent<LootContainer> onLootUIRequested;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -192,6 +197,27 @@ namespace SimpleSurvival.Player
 
             PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
             return TryRequestAction(pickup);
+        }
+
+        public bool RequestLoot(LootContainer target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > lootRange)
+            {
+                Debug.Log($"[Loot] Too far: {dist:F1}m > {lootRange:F1}m");
+                return false;
+            }
+
+            LootAction loot = new LootAction(this, animator, target, OnOpenLootUI);
+            return TryRequestAction(loot);
+        }
+
+        private void OnOpenLootUI(LootContainer container)
+        {
+            onLootUIRequested?.Invoke(container);
         }
 
         private bool CanPickupAtLeastOneItem(PickupTarget target)

@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Connects one InventorySystem to a row of CellUI cells. Listens for the
-    /// inventory's change event and redraws the cells. Reusable: the player's
-    /// pockets, the backpack, and loot containers each use their own instance.
-    /// </summary>
     public sealed class InventoryGridUI : MonoBehaviour
     {
         [Header("Cells")]

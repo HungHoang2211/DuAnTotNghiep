@@ -4,11 +4,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Coordinates cell selection across the whole inventory. Only one cell may
-    /// be selected at a time — even across pockets and backpack grids.
-    /// Also bridges hold events to the ItemInfoPanel tooltip.
-    /// </summary>
     public sealed class InventorySelection : MonoBehaviour
     {
         [Header("Cells")]
@@ -27,8 +22,6 @@ namespace SimpleSurvival.Items
 
         public event Action<CellUI> OnSelectionChanged;
         public event Action<CellUI> OnCellDoubleClicked;
-
-        // ── Unity lifecycle ──────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -61,7 +54,6 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Selection ────────────────────────────────────────────────────────
 
         private void HandleCellClicked(CellUI cell)
         {
@@ -99,8 +91,6 @@ namespace SimpleSurvival.Items
         {
             OnCellDoubleClicked?.Invoke(cell);
         }
-
-        // ── Tooltip ──────────────────────────────────────────────────────────
 
         private void HandleCellHeld(CellUI cell)
         {

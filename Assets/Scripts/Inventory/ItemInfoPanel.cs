@@ -4,11 +4,6 @@ using TMPro;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// A floating tooltip that shows an item's details. Caption shows the item
-    /// name; body shows the description and, for weapons/tools/equipment only,
-    /// a stats block. Consumables and containers show description only.
-    /// </summary>
     public sealed class ItemInfoPanel : MonoBehaviour
     {
         [Header("References")]
