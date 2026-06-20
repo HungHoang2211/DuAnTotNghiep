@@ -5,13 +5,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items.Tests
 {
-    /// <summary>
-    /// EditMode tests for ItemStack. These cover the boundary conditions
-    /// (overflow, capping, breaking, copy independence) that are easy to get
-    /// wrong and that the inventory system depends on.
-    ///
-    /// Run from Unity: Window > General > Test Runner > EditMode > Run All.
-    /// </summary>
     public sealed class ItemStackTests
     {
         private static ItemData CreateStackableItem(int maxStack)

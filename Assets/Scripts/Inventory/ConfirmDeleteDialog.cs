@@ -5,12 +5,6 @@ using UnityEngine.UI;
 
 namespace SimpleSurvival.UI
 {
-    /// <summary>
-    /// Dialog xác nhận trước khi xóa item.
-    /// Show() nhận callback — true = xác nhận xóa, false = hủy.
-    /// Background click hoặc ButtonCancel đều = hủy.
-    /// Dùng Animation component (2 clip: Show, Hide) để tween.
-    /// </summary>
     public sealed class ConfirmDeleteDialog : MonoBehaviour
     {
         [Header("References")]
@@ -30,11 +24,8 @@ namespace SimpleSurvival.UI
 
         private Action<bool> _onClose;
 
-        // ── Unity lifecycle ──────────────────────────────────────────────────
-
         private void Awake()
         {
-            // Ẩn ngay từ đầu, không block raycast
             SetInteractable(false);
 
             backgroundButton.onClick.AddListener(HandleCancel);
@@ -49,13 +40,6 @@ namespace SimpleSurvival.UI
             buttonDelete.onClick.RemoveListener(HandleConfirm);
         }
 
-        // ── Public API ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Hiện dialog với câu hỏi tùy chỉnh.
-        /// callback(true) = người dùng xác nhận xóa.
-        /// callback(false) = người dùng hủy.
-        /// </summary>
         public void Show(string question, Action<bool> callback)
         {
             _onClose = callback;
@@ -64,8 +48,6 @@ namespace SimpleSurvival.UI
             SetInteractable(true);
             PlayAnimation(showClipName);
         }
-
-        // ── Button handlers ──────────────────────────────────────────────────
 
         private void HandleConfirm()
         {
@@ -76,8 +58,6 @@ namespace SimpleSurvival.UI
         {
             Close(false);
         }
-
-        // ── Private helpers ──────────────────────────────────────────────────
 
         private void Close(bool confirmed)
         {

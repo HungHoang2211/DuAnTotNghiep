@@ -22,10 +22,6 @@ namespace SimpleSurvival.Items
                 CollectCellsFromChildren();
         }
 
-        /// <summary>
-        /// Binds this grid to an inventory and draws it. Call again with a
-        /// different inventory to reuse the same grid (e.g. opening a chest).
-        /// </summary>
         public void Bind(InventorySystem inventory)
         {
             Unbind();

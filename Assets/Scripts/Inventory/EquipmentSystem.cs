@@ -87,6 +87,9 @@ namespace SimpleSurvival.Items
             if (data.HasAbility<WeaponAbility>())
                 return EquipSlot.Weapon;
 
+            if (data.HasAbility<ContainerAbility>())
+                return EquipSlot.Backpack;
+
             EquipmentAbility equip = data.GetAbility<EquipmentAbility>();
             if (equip == null)
                 return null;
@@ -98,11 +101,15 @@ namespace SimpleSurvival.Items
                 EquipSlot.Pants => EquipSlot.Pants,
                 EquipSlot.Boots => EquipSlot.Boots,
                 EquipSlot.Backpack => EquipSlot.Backpack,
-                _ => null // QuickSlot excluded
+                _ => null
             };
         }
 
-        /// <summary>Returns true when the item can go into the given slot.</summary>
+        public bool IsEquippable(ItemStack stack)
+        {
+            return GetAutoEquipSlot(stack) != null;
+        }
+
         public bool CanEquipInSlot(ItemStack stack, EquipSlot slot)
         {
             ItemData data = stack.ItemData;

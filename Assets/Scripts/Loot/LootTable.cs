@@ -8,10 +8,12 @@ namespace SimpleSurvival.Loot
     public sealed class LootTable : ScriptableObject
     {
         [SerializeField] private string displayName;
+        [SerializeField] private Sprite displayIcon;
         [SerializeField] private int slotCount = 12;
         [SerializeField] private List<LootEntry> entries = new List<LootEntry>();
 
         public string DisplayName => displayName;
+        public Sprite DisplayIcon => displayIcon;
         public int SlotCount => slotCount;
         public IReadOnlyList<LootEntry> Entries => entries;
 

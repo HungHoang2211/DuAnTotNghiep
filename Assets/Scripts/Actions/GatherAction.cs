@@ -176,8 +176,7 @@ namespace SimpleSurvival.Actions
             {
                 Debug.Log($"[ToolBroken] {_toolStack.ItemData.ItemName} broke");
 
-                if (_isEphemeral && _inventoryQueries != null)
-                    _inventoryQueries.RemoveItemStack(_toolStack);
+                _controller.DestroyStackAnywhere(_toolStack);
 
                 _toolStack = null;
             }

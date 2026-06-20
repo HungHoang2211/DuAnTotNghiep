@@ -8,8 +8,10 @@ namespace SimpleSurvival.Items
     public sealed class ItemActionPanel : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private InventorySelection selection;
+        [SerializeField] private InventorySelection inventorySelection;
+        [SerializeField] private InventorySelection lootSelection;
         [SerializeField] private PlayerInventory playerInventory;
+        [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private EquipmentPanel equipmentPanel;
 
         [Header("Buttons")]
@@ -27,9 +29,16 @@ namespace SimpleSurvival.Items
         public event Action<ItemStack> OnUseConsumableRequested;
         public event Action<ItemStack> OnEquipRequested;
 
-        private CellUI _selectedEquipCell;
+        private enum Context
+        {
+            None,
+            Inventory,
+            Equipment,
+            Loot
+        }
 
-        // ── Unity lifecycle ──────────────────────────────────────────────────
+        private Context _activeContext = Context.None;
+        private CellUI _selectedEquipCell;
 
         private void Start()
         {
@@ -42,8 +51,11 @@ namespace SimpleSurvival.Items
 
         private void OnEnable()
         {
-            selection.OnSelectionChanged += HandleInventorySelectionChanged;
+            inventorySelection.OnSelectionChanged += HandleInventorySelectionChanged;
             equipmentPanel.OnEquipSelectionChanged += HandleEquipSelectionChanged;
+
+            if (lootSelection != null)
+                lootSelection.OnSelectionChanged += HandleLootSelectionChanged;
 
             buttonUse.onClick.AddListener(HandleUse);
             buttonSplit.onClick.AddListener(HandleSplit);
@@ -53,8 +65,11 @@ namespace SimpleSurvival.Items
 
         private void OnDisable()
         {
-            selection.OnSelectionChanged -= HandleInventorySelectionChanged;
+            inventorySelection.OnSelectionChanged -= HandleInventorySelectionChanged;
             equipmentPanel.OnEquipSelectionChanged -= HandleEquipSelectionChanged;
+
+            if (lootSelection != null)
+                lootSelection.OnSelectionChanged -= HandleLootSelectionChanged;
 
             if (playerInventory != null && playerInventory.Pockets != null)
             {
@@ -68,35 +83,109 @@ namespace SimpleSurvival.Items
             buttonDelete.onClick.RemoveListener(HandleDelete);
         }
 
-        // ── Selection handlers ───────────────────────────────────────────────
-
         private void HandleInventorySelectionChanged(CellUI cell)
         {
-            _selectedEquipCell = null;
+            if (cell != null)
+            {
+                _activeContext = Context.Inventory;
+                _selectedEquipCell = null;
+                if (lootSelection != null) lootSelection.Deselect();
+            }
+            else if (_activeContext == Context.Inventory)
+            {
+                _activeContext = Context.None;
+            }
             RefreshAllButtons();
         }
 
         private void HandleEquipSelectionChanged(CellUI cell)
         {
-            _selectedEquipCell = cell;
+            if (cell != null)
+            {
+                _activeContext = Context.Equipment;
+                _selectedEquipCell = cell;
+                inventorySelection.Deselect();
+                if (lootSelection != null) lootSelection.Deselect();
+            }
+            else if (_activeContext == Context.Equipment)
+            {
+                _activeContext = Context.None;
+                _selectedEquipCell = null;
+            }
             RefreshAllButtons();
         }
 
-        // ── Button state refresh ─────────────────────────────────────────────
+        private void HandleLootSelectionChanged(CellUI cell)
+        {
+            if (cell != null)
+            {
+                _activeContext = Context.Loot;
+                _selectedEquipCell = null;
+                inventorySelection.Deselect();
+            }
+            else if (_activeContext == Context.Loot)
+            {
+                _activeContext = Context.None;
+            }
+            RefreshAllButtons();
+        }
+
+        private CellUI GetActiveCell()
+        {
+            return _activeContext switch
+            {
+                Context.Inventory => inventorySelection.SelectedCell,
+                Context.Equipment => _selectedEquipCell,
+                Context.Loot => lootSelection != null ? lootSelection.SelectedCell : null,
+                _ => null
+            };
+        }
+
+        private InventorySelection GetActiveSelection()
+        {
+            return _activeContext switch
+            {
+                Context.Inventory => inventorySelection,
+                Context.Loot => lootSelection,
+                _ => null
+            };
+        }
 
         private void RefreshAllButtons()
         {
-            if (_selectedEquipCell != null)
+            switch (_activeContext)
             {
-                RefreshForEquipSelection();
-                return;
+                case Context.Equipment:
+                    RefreshForEquipSelection();
+                    break;
+                case Context.Loot:
+                    RefreshForGridSelection(isLoot: true);
+                    break;
+                case Context.Inventory:
+                    RefreshForGridSelection(isLoot: false);
+                    break;
+                default:
+                    RefreshForEmptySelection();
+                    break;
             }
+        }
 
-            RefreshForInventorySelection();
+        private void RefreshForEmptySelection()
+        {
+            buttonUse.interactable = false;
+            buttonSplit.interactable = false;
+            buttonDelete.interactable = false;
+            if (useButtonText != null) useButtonText.text = "Use";
         }
 
         private void RefreshForEquipSelection()
         {
+            if (_selectedEquipCell == null)
+            {
+                RefreshForEmptySelection();
+                return;
+            }
+
             bool hasItem = _selectedEquipCell.HasItem;
             buttonUse.interactable = hasItem;
             buttonSplit.interactable = false;
@@ -106,23 +195,19 @@ namespace SimpleSurvival.Items
                 useButtonText.text = "Unequip";
         }
 
-        private void RefreshForInventorySelection()
+        private void RefreshForGridSelection(bool isLoot)
         {
-            CellUI cell = selection.SelectedCell;
+            CellUI cell = GetActiveCell();
             bool hasItem = cell != null && cell.HasItem;
 
             if (!hasItem)
             {
-                buttonUse.interactable = false;
-                buttonSplit.interactable = false;
-                buttonDelete.interactable = false;
-                if (useButtonText != null) useButtonText.text = "Use";
+                RefreshForEmptySelection();
                 return;
             }
 
             ItemStack stack = cell.CurrentStack;
-            bool isEquippable = stack.ItemData.HasAbility<EquipmentAbility>()
-                             || stack.ItemData.HasAbility<WeaponAbility>();
+            bool isEquippable = playerEquipment.System.IsEquippable(stack);
             bool isConsumable = stack.ItemData.HasAbility<ConsumableAbility>();
 
             buttonUse.interactable = isConsumable || isEquippable;
@@ -130,9 +215,9 @@ namespace SimpleSurvival.Items
             if (useButtonText != null)
                 useButtonText.text = isEquippable ? "Equip" : "Use";
 
-            InventoryGridUI splitGrid = cell.GetComponentInParent<InventoryGridUI>();
-            bool hasFreeSlot = splitGrid != null
-                && HasFreeSlotForSplit(splitGrid.BoundInventory, splitGrid.IndexOf(cell));
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
+            bool hasFreeSlot = grid != null
+                && HasFreeSlotInGrid(grid.BoundInventory, grid.IndexOf(cell));
 
             buttonSplit.interactable = stack.ItemData.IsStackable
                 && stack.Quantity > 1
@@ -150,36 +235,62 @@ namespace SimpleSurvival.Items
             buttonSort.interactable = hasAnyItem;
         }
 
-        // ── Button handlers ──────────────────────────────────────────────────
-
         private void HandleUse()
         {
-            if (_selectedEquipCell != null && _selectedEquipCell.HasItem)
+            if (_activeContext == Context.Equipment)
             {
-                equipmentPanel.UnequipSelected();
+                if (_selectedEquipCell != null && _selectedEquipCell.HasItem)
+                    equipmentPanel.UnequipSelected();
                 return;
             }
 
-            if (!TryGetSelectedStack(out ItemStack stack))
-                return;
+            CellUI cell = GetActiveCell();
+            if (cell == null || !cell.HasItem) return;
+
+            ItemStack stack = cell.CurrentStack;
 
             ConsumableAbility consumable = stack.ItemData.GetAbility<ConsumableAbility>();
             if (consumable != null)
             {
                 OnUseConsumableRequested?.Invoke(stack);
-                ConsumeOne();
+                ConsumeOne(cell);
                 return;
             }
 
-            if (stack.ItemData.HasAbility<EquipmentAbility>()
-                || stack.ItemData.HasAbility<WeaponAbility>())
-                OnEquipRequested?.Invoke(stack);
+            if (playerEquipment.System.IsEquippable(stack))
+            {
+                EquipFromActiveCell(cell, stack);
+            }
+        }
+
+        private void EquipFromActiveCell(CellUI cell, ItemStack stack)
+        {
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
+            if (grid == null) return;
+
+            int index = grid.IndexOf(cell);
+            if (index < 0) return;
+
+            bool equipped = playerEquipment.System.TryAutoEquip(
+                stack, grid.BoundInventory, index);
+
+            if (equipped)
+            {
+                InventorySelection sel = GetActiveSelection();
+                if (sel != null) sel.Deselect();
+            }
         }
 
         private void HandleSplit()
         {
-            if (!TryFindSelectedLocation(out InventoryGridUI grid, out int index))
-                return;
+            CellUI cell = GetActiveCell();
+            if (cell == null || !cell.HasItem) return;
+
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
+            if (grid == null) return;
+
+            int index = grid.IndexOf(cell);
+            if (index < 0) return;
 
             InventorySystem inventory = grid.BoundInventory;
             ItemStack stack = inventory.GetSlot(index);
@@ -188,26 +299,15 @@ namespace SimpleSurvival.Items
                 return;
 
             int emptyIndex = FindEmptySlotExcluding(inventory, index);
-            InventorySystem targetInventory = inventory;
-
-            if (emptyIndex < 0)
-            {
-                InventorySystem other = GetOtherInventory(inventory);
-                if (other != null)
-                {
-                    emptyIndex = FindEmptySlotExcluding(other, -1);
-                    targetInventory = other;
-                }
-            }
-
             if (emptyIndex < 0) return;
 
             int splitAmount = stack.Quantity / 2;
             stack.RemoveQuantity(splitAmount);
-            targetInventory.SetSlot(emptyIndex, new ItemStack(stack.ItemData, splitAmount));
+            inventory.SetSlot(emptyIndex, new ItemStack(stack.ItemData, splitAmount));
 
-            if (stack.Quantity < 2)
-                selection.Deselect();
+            InventorySelection sel = GetActiveSelection();
+            if (stack.Quantity < 2 && sel != null)
+                sel.Deselect();
             else
                 inventory.NotifyChanged();
         }
@@ -219,34 +319,43 @@ namespace SimpleSurvival.Items
             else
                 playerInventory.Pockets.Sort();
 
-            selection.Deselect();
+            inventorySelection.Deselect();
         }
 
         private void HandleDelete()
         {
-            if (!TryFindSelectedLocation(out InventoryGridUI grid, out int index))
-                return;
+            CellUI cell = GetActiveCell();
+            if (cell == null || !cell.HasItem) return;
+
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
+            if (grid == null) return;
+
+            int index = grid.IndexOf(cell);
+            if (index < 0) return;
 
             ItemStack stack = grid.BoundInventory.GetSlot(index);
             if (stack == null) return;
+
+            InventorySystem inventory = grid.BoundInventory;
+            InventorySelection sel = GetActiveSelection();
 
             confirmDeleteDialog.Show(
                 $"Delete {stack.ItemData.ItemName}?",
                 confirmed =>
                 {
                     if (!confirmed) return;
-                    if (!TryFindSelectedLocation(out InventoryGridUI g, out int i)) return;
-                    g.BoundInventory.SetSlot(i, null);
-                    selection.Deselect();
+                    inventory.SetSlot(index, null);
+                    if (sel != null) sel.Deselect();
                 });
         }
 
-        // ── Private helpers ──────────────────────────────────────────────────
-
-        private void ConsumeOne()
+        private void ConsumeOne(CellUI cell)
         {
-            if (!TryFindSelectedLocation(out InventoryGridUI grid, out int index))
-                return;
+            InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
+            if (grid == null) return;
+
+            int index = grid.IndexOf(cell);
+            if (index < 0) return;
 
             InventorySystem inventory = grid.BoundInventory;
             ItemStack stack = inventory.GetSlot(index);
@@ -259,57 +368,13 @@ namespace SimpleSurvival.Items
             else
                 inventory.NotifyChanged();
 
-            selection.Deselect();
+            InventorySelection sel = GetActiveSelection();
+            if (sel != null) sel.Deselect();
         }
 
-        private bool TryGetSelectedStack(out ItemStack stack)
+        private bool HasFreeSlotInGrid(InventorySystem inventory, int excludeIndex)
         {
-            CellUI cell = selection.SelectedCell;
-            if (cell != null && cell.HasItem)
-            {
-                stack = cell.CurrentStack;
-                return true;
-            }
-            stack = null;
-            return false;
-        }
-
-        private bool TryFindSelectedLocation(out InventoryGridUI foundGrid, out int foundIndex)
-        {
-            CellUI cell = selection.SelectedCell;
-            if (cell != null)
-            {
-                InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
-                if (grid != null)
-                {
-                    int index = grid.IndexOf(cell);
-                    if (index >= 0)
-                    {
-                        foundGrid = grid;
-                        foundIndex = index;
-                        return true;
-                    }
-                }
-            }
-            foundGrid = null;
-            foundIndex = -1;
-            return false;
-        }
-
-        private bool HasFreeSlotForSplit(InventorySystem inventory, int excludeIndex)
-        {
-            if (FindEmptySlotExcluding(inventory, excludeIndex) >= 0)
-                return true;
-
-            InventorySystem other = GetOtherInventory(inventory);
-            return other != null && FindEmptySlotExcluding(other, -1) >= 0;
-        }
-
-        private InventorySystem GetOtherInventory(InventorySystem current)
-        {
-            if (current == playerInventory.Pockets) return playerInventory.Backpack;
-            if (current == playerInventory.Backpack) return playerInventory.Pockets;
-            return null;
+            return FindEmptySlotExcluding(inventory, excludeIndex) >= 0;
         }
 
         private static bool InventoryHasItem(InventorySystem inventory)

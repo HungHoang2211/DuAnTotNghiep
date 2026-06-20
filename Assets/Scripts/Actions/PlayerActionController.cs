@@ -5,6 +5,7 @@ using SimpleSurvival.Targets;
 using SimpleSurvival.Items;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Loot;
+using SimpleSurvival.UI;
 
 namespace SimpleSurvival.Player
 {
@@ -33,9 +34,6 @@ namespace SimpleSurvival.Player
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
         [SerializeField] private float lootRange = 1.5f;
-
-        [Header("UI References")]
-        [SerializeField] private UnityEngine.Events.UnityEvent<LootContainer> onLootUIRequested;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -71,6 +69,15 @@ namespace SimpleSurvival.Player
 
             CurrentAction = _idleAction;
             CurrentAction.Init();
+
+            if (playerStats != null)
+                playerStats.OnDamagedBy += HandlePlayerDamaged;
+        }
+
+        private void OnDestroy()
+        {
+            if (playerStats != null)
+                playerStats.OnDamagedBy -= HandlePlayerDamaged;
         }
 
         private void Update()
@@ -78,7 +85,64 @@ namespace SimpleSurvival.Player
             CurrentAction.Update(Time.deltaTime);
 
             if (CurrentAction.IsCompleted)
+            {
+                Debug.Log($"[Update] Action complete: {CurrentAction.GetType().Name}");
+                HandleActionCompletion(CurrentAction);
                 SwitchToIdle();
+            }
+        }
+
+        private void HandleActionCompletion(IAction action)
+        {
+            if (action is AttackAction attack)
+            {
+                Debug.Log($"[HandleCompletion] AttackAction, WeaponBroke={attack.WeaponBroke}, StackName={attack.WeaponStack?.ItemData.ItemName ?? "null"}");
+                if (attack.WeaponBroke)
+                {
+                    DestroyStackAnywhere(attack.WeaponStack);
+                }
+            }
+        }
+
+        public void DestroyStackAnywhere(ItemStack stack)
+        {
+            Debug.Log($"[DestroyStack] Stack: {stack?.ItemData.ItemName ?? "null"}");
+            if (stack == null) return;
+            if (DestroyStackFromEquipment(stack))
+            {
+                Debug.Log("[DestroyStack] Removed from equipment");
+                return;
+            }
+            if (inventoryQueries != null)
+            {
+                bool removed = inventoryQueries.RemoveItemStack(stack);
+                Debug.Log($"[DestroyStack] Removed from inventory: {removed}");
+            }
+        }
+
+        private bool DestroyStackFromEquipment(ItemStack target)
+        {
+            if (playerEquipment == null)
+            {
+                Debug.Log("[DestroyEquip] playerEquipment is null");
+                return false;
+            }
+            var system = playerEquipment.System;
+            foreach (var slot in system.Slots)
+            {
+                for (int i = 0; i < system.SlotCount(slot); i++)
+                {
+                    ItemStack inSlot = system.GetSlot(slot, i);
+                    if (inSlot == target)
+                    {
+                        Debug.Log($"[DestroyEquip] Match in {slot}[{i}]");
+                        system.SetSlotDirect(slot, i, null);
+                        return true;
+                    }
+                }
+            }
+            Debug.Log($"[DestroyEquip] Target {target.ItemData.ItemName} not found in any equipment slot");
+            return false;
         }
 
         public bool TryRequestAction(IAction newAction)
@@ -105,14 +169,16 @@ namespace SimpleSurvival.Player
         {
             if (animator == null) return false;
 
-            float damage = ResolveAttackDamage();
-            float range = ResolveAttackRange();
-            int maxComboIndex = ResolveMaxComboIndex();
-            float safetyTimeout = ResolveAttackSafetyTimeout();
-            float speedMultiplier = ResolveAttackSpeedMultiplier();
+            ItemStack weaponStack = GetEquippedWeaponStack();
+            float damage = ResolveAttackDamage(weaponStack);
+            float range = ResolveAttackRange(weaponStack);
+            int maxComboIndex = ResolveMaxComboIndex(weaponStack);
+            float safetyTimeout = ResolveAttackSafetyTimeout(weaponStack);
+            float speedMultiplier = ResolveAttackSpeedMultiplier(weaponStack);
 
             AttackAction attack = new AttackAction(
                 this, animator, target,
+                weaponStack,
                 damage, range, maxComboIndex, comboWindowSeconds,
                 safetyTimeout,
                 speedMultiplier);
@@ -211,13 +277,27 @@ namespace SimpleSurvival.Player
                 return false;
             }
 
-            LootAction loot = new LootAction(this, animator, target, OnOpenLootUI);
-            return TryRequestAction(loot);
+            if (target.IsUnlocked)
+            {
+                target.Open();
+                if (InventoryPanelController.Instance != null)
+                    InventoryPanelController.Instance.OpenLoot(target);
+                return true;
+            }
+
+            UnlockAction unlock = new UnlockAction(this, animator, target,
+                onComplete: () =>
+                {
+                    if (InventoryPanelController.Instance != null)
+                        InventoryPanelController.Instance.OpenLoot(target);
+                });
+            return TryRequestAction(unlock);
         }
 
-        private void OnOpenLootUI(LootContainer container)
+        private void HandlePlayerDamaged(GameObject attacker)
         {
-            onLootUIRequested?.Invoke(container);
+            if (CurrentAction is UnlockAction unlock)
+                unlock.Cancel();
         }
 
         private bool CanPickupAtLeastOneItem(PickupTarget target)
@@ -246,46 +326,68 @@ namespace SimpleSurvival.Player
             return dist < 0f ? 0f : dist;
         }
 
-        private float ResolveAttackDamage()
+        private ItemStack GetEquippedWeaponStack()
         {
-            WeaponAbility weapon = GetEquippedWeapon();
+            if (playerEquipment == null) return null;
+            var system = playerEquipment.System;
+
+            ItemStack mainWeapon = system.GetSlot(EquipSlot.Weapon, 0);
+            if (mainWeapon != null && !mainWeapon.IsBroken)
+                return mainWeapon;
+
+            for (int i = 0; i < system.SlotCount(EquipSlot.QuickSlot); i++)
+            {
+                ItemStack quickStack = system.GetSlot(EquipSlot.QuickSlot, i);
+                if (quickStack == null) continue;
+                if (!quickStack.ItemData.HasAbility<WeaponAbility>()) continue;
+                if (quickStack.IsBroken) continue;
+
+                system.SetSlotDirect(EquipSlot.Weapon, 0, quickStack);
+                system.SetSlotDirect(EquipSlot.QuickSlot, i, mainWeapon);
+                return quickStack;
+            }
+
+            return mainWeapon;
+        }
+
+        private float ResolveAttackDamage(ItemStack weaponStack)
+        {
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
             if (weapon != null) return weapon.Damage;
             return playerStats != null ? playerStats.BaseDamage : 0f;
         }
 
-        private float ResolveAttackRange()
+        private float ResolveAttackRange(ItemStack weaponStack)
         {
-            WeaponAbility weapon = GetEquippedWeapon();
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
             if (weapon != null) return weapon.Range;
             return unarmedAttackRange;
         }
 
-        private int ResolveMaxComboIndex()
+        private int ResolveMaxComboIndex(ItemStack weaponStack)
         {
-            WeaponAbility weapon = GetEquippedWeapon();
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
             if (weapon != null) return weapon.MaxComboIndex;
             return unarmedMaxComboIndex;
         }
 
-        private float ResolveAttackSafetyTimeout()
+        private float ResolveAttackSafetyTimeout(ItemStack weaponStack)
         {
-            WeaponAbility weapon = GetEquippedWeapon();
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
             if (weapon != null) return weapon.SafetyTimeout;
             return unarmedSafetyTimeout;
         }
 
-        private float ResolveAttackSpeedMultiplier()
+        private float ResolveAttackSpeedMultiplier(ItemStack weaponStack)
         {
-            WeaponAbility weapon = GetEquippedWeapon();
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
             if (weapon != null) return weapon.AttackSpeed * weapon.AttackClipLength;
             return unarmedAttackSpeed * unarmedAttackClipLength;
         }
 
-        private WeaponAbility GetEquippedWeapon()
+        private WeaponAbility GetWeaponAbility(ItemStack stack)
         {
-            if (playerEquipment == null) return null;
-            ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
-            if (stack == null) return null;
+            if (stack == null || stack.IsBroken) return null;
             return stack.ItemData.GetAbility<WeaponAbility>();
         }
 
@@ -366,5 +468,6 @@ namespace SimpleSurvival.Player
 
             OnActionChanged?.Invoke(oldAction, _idleAction);
         }
+
     }
 }

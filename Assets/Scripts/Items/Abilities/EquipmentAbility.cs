@@ -2,12 +2,6 @@ using UnityEngine;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Makes an item equippable into a specific slot and lets it contribute armor.
-    /// Also carries the mesh and material the visual system swaps onto the character's
-    /// SkinnedMeshRenderer when this item is equipped.
-    /// A backpack uses this with EquipSlot.Backpack and armorValue 0.
-    /// </summary>
     [CreateAssetMenu(menuName = "Simple Survival/Abilities/Equipment", fileName = "EquipmentAbility")]
     public sealed class EquipmentAbility : ItemAbility
     {

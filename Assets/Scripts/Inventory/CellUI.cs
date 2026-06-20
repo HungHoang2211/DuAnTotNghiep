@@ -6,14 +6,6 @@ using TMPro;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Unified cell for inventory slots, equipment slots, and loot containers.
-    /// Behavior is configured via Inspector fields:
-    ///   - equipSlot != None  → equipment cell (drag highlight, default icon)
-    ///   - defaultIcon != null → shows placeholder when empty
-    ///   - holdThreshold > 0   → enables hold-to-tooltip
-    ///   - lockedBackground    → enables lock/unlock (backpack expansion)
-    /// </summary>
     public sealed class CellUI : MonoBehaviour,
         IPointerClickHandler, IPointerDownHandler, IPointerUpHandler,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
@@ -57,10 +49,9 @@ namespace SimpleSurvival.Items
         private float _lastClickTime;
         private Color _defaultIconColor;
         private Vector2 _defaultIconSize;
+        private bool _cacheInitialized;
 
         private const float DoubleClickThreshold = 0.25f;
-
-        // ── Events ───────────────────────────────────────────────────────────
 
         public event Action<CellUI> OnClicked;
         public event Action<CellUI> OnDoubleClicked;
@@ -71,25 +62,22 @@ namespace SimpleSurvival.Items
         public event Action<CellUI, PointerEventData> OnEndDragEvent;
         public event Action<CellUI> OnDropEvent;
 
-        // ── Properties ───────────────────────────────────────────────────────
-
         public EquipSlot EquipSlot => equipSlot;
         public bool IsEquipCell => equipSlot != EquipSlot.None;
         public bool HasItem { get; private set; }
         public ItemStack CurrentStack { get; private set; }
 
-        // ── Unity lifecycle ──────────────────────────────────────────────────
-
         private void Awake()
         {
-            if (iconImage != null)
-            {
-                _defaultIconColor = iconImage.color;
-                _defaultIconSize = iconImage.rectTransform.sizeDelta;
-            }
+            InitCacheIfNeeded();
 
             if (selectionHighlight != null) selectionHighlight.SetActive(false);
             if (dragHighlight != null) dragHighlight.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeStack(CurrentStack);
         }
 
         private void Update()
@@ -104,13 +92,31 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Public API ───────────────────────────────────────────────────────
+        private void InitCacheIfNeeded()
+        {
+            if (_cacheInitialized) return;
+
+            if (iconImage != null)
+            {
+                _defaultIconColor = iconImage.color;
+                _defaultIconSize = iconImage.rectTransform.sizeDelta;
+            }
+
+            _cacheInitialized = true;
+        }
 
         public void SetStack(ItemStack stack)
         {
+            InitCacheIfNeeded();
+
             if (_isLocked) return;
 
-            CurrentStack = stack;
+            if (CurrentStack != stack)
+            {
+                UnsubscribeStack(CurrentStack);
+                CurrentStack = stack;
+                SubscribeStack(CurrentStack);
+            }
 
             if (stack == null)
             {
@@ -136,6 +142,8 @@ namespace SimpleSurvival.Items
 
         public void SetLocked(bool locked)
         {
+            InitCacheIfNeeded();
+
             _isLocked = locked;
 
             if (backgroundImage != null)
@@ -147,8 +155,6 @@ namespace SimpleSurvival.Items
                 SetSelected(false);
             }
         }
-
-        // ── Pointer events ───────────────────────────────────────────────────
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -181,8 +187,6 @@ namespace SimpleSurvival.Items
             else OnClicked?.Invoke(this);
         }
 
-        // ── Drag events ──────────────────────────────────────────────────────
-
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (_isLocked || !HasItem) return;
@@ -214,12 +218,32 @@ namespace SimpleSurvival.Items
             OnDropEvent?.Invoke(this);
         }
 
-        // ── Display helpers ──────────────────────────────────────────────────
+        private void SubscribeStack(ItemStack stack)
+        {
+            if (stack == null) return;
+            stack.OnChanged += HandleStackChanged;
+        }
+
+        private void UnsubscribeStack(ItemStack stack)
+        {
+            if (stack == null) return;
+            stack.OnChanged -= HandleStackChanged;
+        }
+
+        private void HandleStackChanged(ItemStack stack)
+        {
+            if (stack != CurrentStack) return;
+            if (stack == null || stack.IsEmpty)
+            {
+                ShowEmpty();
+                return;
+            }
+            ShowItem(stack);
+        }
 
         private void ShowEmpty()
         {
             HasItem = false;
-            CurrentStack = null;
 
             if (defaultIcon != null)
             {

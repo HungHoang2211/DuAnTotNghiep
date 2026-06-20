@@ -37,10 +37,17 @@ namespace SimpleSurvival.Items
             _equipmentSystem = playerEquipment.System;
 
             _allCells = new List<CellUI>
-            {
-                weaponCell, backpackCell, headCell, bodyCell,
-                legCell, bootsCell, quickSlotCell1, quickSlotCell2
-            };
+        {
+            weaponCell, backpackCell, headCell, bodyCell,
+            legCell, bootsCell, quickSlotCell1, quickSlotCell2
+        };
+            _equipmentSystem.OnSlotChanged += HandleSlotChanged;
+        }
+
+        private void OnDestroy()
+        {
+            if (_equipmentSystem != null)
+                _equipmentSystem.OnSlotChanged -= HandleSlotChanged;
         }
 
         private void OnEnable()
@@ -55,13 +62,14 @@ namespace SimpleSurvival.Items
             selection.OnSelectionChanged += HandleInventorySelectionChanged;
             selection.OnCellDoubleClicked += HandleInventoryDoubleClicked;
             actionPanel.OnEquipRequested += HandleEquipRequested;
-            _equipmentSystem.OnSlotChanged += HandleSlotChanged;
 
             if (dragController != null)
             {
                 dragController.OnDragBegan += HandleDragBegan;
                 dragController.OnDragEnded += HandleDragEnded;
             }
+
+            RefreshAllCells();
         }
 
         private void OnDisable()
@@ -76,12 +84,25 @@ namespace SimpleSurvival.Items
             selection.OnSelectionChanged -= HandleInventorySelectionChanged;
             selection.OnCellDoubleClicked -= HandleInventoryDoubleClicked;
             actionPanel.OnEquipRequested -= HandleEquipRequested;
-            _equipmentSystem.OnSlotChanged -= HandleSlotChanged;
 
             if (dragController != null)
             {
                 dragController.OnDragBegan -= HandleDragBegan;
                 dragController.OnDragEnded -= HandleDragEnded;
+            }
+        }
+
+        private void RefreshAllCells()
+        {
+            if (_equipmentSystem == null) return;
+            foreach (EquipSlot slot in _equipmentSystem.Slots)
+            {
+                for (int i = 0; i < _equipmentSystem.SlotCount(slot); i++)
+                {
+                    CellUI cell = GetCell(slot, i);
+                    if (cell != null)
+                        cell.SetStack(_equipmentSystem.GetSlot(slot, i));
+                }
             }
         }
 

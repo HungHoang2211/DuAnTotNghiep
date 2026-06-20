@@ -11,6 +11,8 @@ namespace SimpleSurvival.Loot
         [Header("Display")]
         [Tooltip("Optional. Overrides the LootTable's name. Leave empty to use table name.")]
         [SerializeField] private string displayNameOverride;
+        [Tooltip("Optional. Overrides the LootTable's icon. Leave null to use table icon.")]
+        [SerializeField] private Sprite displayIconOverride;
 
         [Header("Use Anchor")]
         [Tooltip("Optional. If set, distance is computed against this transform instead of root.")]
@@ -26,6 +28,10 @@ namespace SimpleSurvival.Loot
         [SerializeField] private LootTable lootTable;
         [SerializeField] private List<LootEntry> staticItems = new List<LootEntry>();
 
+        [Header("Unlock")]
+        [Tooltip("Time required to unlock this container. 0 = no unlock needed (open immediately).")]
+        [SerializeField] private float unlockDuration = 0f;
+
         [Header("Persistence")]
         [SerializeField] private bool persistWhenEmpty = true;
         [SerializeField] private float despawnDelayWhenEmpty = 2f;
@@ -34,13 +40,13 @@ namespace SimpleSurvival.Loot
         [SerializeField] private float decayTimer = 0f;
 
         [Header("Open Animation (Optional)")]
-        [Tooltip("Optional. Transform to rotate when container opens. Null for no animation.")]
         [SerializeField] private Transform openRotationTarget;
         [SerializeField] private Vector3 openRotation;
 
         private InventorySystem _inventory;
         private float _decayElapsed;
         private bool _hasBeenOpened;
+        private bool _isUnlocked;
         private bool _despawned;
 
         public override TargetType Type => TargetType.Container;
@@ -49,6 +55,8 @@ namespace SimpleSurvival.Loot
 
         public InventorySystem Inventory => _inventory;
         public int SlotCount => _inventory != null ? _inventory.SlotCount : ResolveSlotCount();
+        public float UnlockDuration => unlockDuration;
+        public bool IsUnlocked => _isUnlocked || unlockDuration <= 0f;
 
         public bool IsEmpty
         {
@@ -71,8 +79,19 @@ namespace SimpleSurvival.Loot
             }
         }
 
+        public Sprite DisplayIcon
+        {
+            get
+            {
+                if (displayIconOverride != null) return displayIconOverride;
+                if (lootTable != null && lootTable.DisplayIcon != null) return lootTable.DisplayIcon;
+                return null;
+            }
+        }
+
         public event Action<LootContainer> OnLooted;
         public event Action<LootContainer> OnOpened;
+        public event Action<LootContainer> OnUnlocked;
 
         private void Awake()
         {
@@ -164,6 +183,13 @@ namespace SimpleSurvival.Loot
                 openRotationTarget.localRotation = Quaternion.Euler(openRotation);
 
             OnOpened?.Invoke(this);
+        }
+
+        public void MarkUnlocked()
+        {
+            if (_isUnlocked) return;
+            _isUnlocked = true;
+            OnUnlocked?.Invoke(this);
         }
 
         private void CheckEmptyAndDespawn()

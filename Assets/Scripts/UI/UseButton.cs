@@ -1,4 +1,5 @@
 using SimpleSurvival.Items;
+using SimpleSurvival.Loot;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace SimpleSurvival.UI
         [SerializeField] private Sprite pickupIcon;
         [SerializeField] private Sprite axeIcon;
         [SerializeField] private Sprite pickaxeIcon;
+        [SerializeField] private Sprite lootIcon;
 
         private static readonly int ShowTrigger = Animator.StringToHash("Show");
         private static readonly int HideTrigger = Animator.StringToHash("Hide");
@@ -45,7 +47,6 @@ namespace SimpleSurvival.UI
             ITargetable initial = targetChecker != null ? targetChecker.CurrentUsable : null;
             HandleTargetChanged(initial);
 
-            // Restore animator state khi button re-enable
             SetAnimatorState();
         }
 
@@ -77,6 +78,8 @@ namespace SimpleSurvival.UI
 
             if (_currentTarget is PickupTarget pickup)
                 actionController.RequestPickup(pickup);
+            else if (_currentTarget is LootContainer container)
+                actionController.RequestLoot(container);
         }
 
         private void HandleTargetChanged(ITargetable target)
@@ -117,6 +120,9 @@ namespace SimpleSurvival.UI
                 case HarvestTarget harvest:
                     iconImage.sprite = harvest.RequiredTool == ToolType.Pickaxe ? pickaxeIcon : axeIcon;
                     break;
+                case LootContainer _:
+                    iconImage.sprite = lootIcon;
+                    break;
                 default:
                     iconImage.sprite = defaultIcon;
                     break;
@@ -144,13 +150,13 @@ namespace SimpleSurvival.UI
         {
             if (actionController == null) return false;
 
-            var equipment = actionController.GetComponentInChildren<SimpleSurvival.Items.PlayerEquipment>();
+            var equipment = actionController.GetComponentInChildren<PlayerEquipment>();
             if (equipment == null || equipment.System == null) return false;
 
-            var stack = equipment.System.GetSlot(SimpleSurvival.Items.EquipSlot.Weapon, 0);
+            var stack = equipment.System.GetSlot(EquipSlot.Weapon, 0);
             if (stack == null) return false;
 
-            var tool = stack.ItemData.GetAbility<SimpleSurvival.Items.ToolAbility>();
+            var tool = stack.ItemData.GetAbility<ToolAbility>();
             return tool != null && tool.ToolType == required;
         }
     }

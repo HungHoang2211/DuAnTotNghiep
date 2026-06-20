@@ -10,6 +10,8 @@ namespace SimpleSurvival.Items
         [SerializeField] private int quantity;
         [SerializeField] private int currentDurability;
 
+        public event Action<ItemStack> OnChanged;
+
         public ItemStack(ItemData itemData, int quantity)
         {
             Validate(itemData, quantity);
@@ -29,7 +31,6 @@ namespace SimpleSurvival.Items
         public ItemData ItemData => itemData;
         public int Quantity => quantity;
         public int CurrentDurability => currentDurability;
-
         public bool IsFull => quantity >= itemData.MaxStack;
         public bool IsEmpty => quantity <= 0;
         public bool IsBroken => itemData.IsDurable && currentDurability <= 0;
@@ -50,6 +51,9 @@ namespace SimpleSurvival.Items
             int accepted = Mathf.Min(amount, freeSpace);
             quantity += accepted;
 
+            if (accepted > 0)
+                OnChanged?.Invoke(this);
+
             return amount - accepted;
         }
 
@@ -61,6 +65,9 @@ namespace SimpleSurvival.Items
             int removed = Mathf.Min(amount, quantity);
             quantity -= removed;
 
+            if (removed > 0)
+                OnChanged?.Invoke(this);
+
             return removed;
         }
 
@@ -70,6 +77,8 @@ namespace SimpleSurvival.Items
                 return false;
 
             currentDurability--;
+            OnChanged?.Invoke(this);
+
             return currentDurability <= 0;
         }
 
@@ -79,7 +88,6 @@ namespace SimpleSurvival.Items
             {
                 if (!itemData.IsDurable)
                     return 1f;
-
                 return (float)currentDurability / itemData.MaxDurability;
             }
         }
@@ -94,7 +102,6 @@ namespace SimpleSurvival.Items
         {
             if (itemData == null)
                 throw new ArgumentNullException(nameof(itemData));
-
             if (quantity < 1)
                 throw new ArgumentException("Quantity must be at least 1.", nameof(quantity));
         }

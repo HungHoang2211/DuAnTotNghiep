@@ -3,10 +3,6 @@ using UnityEngine.EventSystems;
 
 namespace SimpleSurvival.UI
 {
-    /// <summary>
-    /// Scales Unity's pixelDragThreshold by the screen's DPI so drag feels
-    /// consistent across devices. Attach to the same GameObject as EventSystem.
-    /// </summary>
     [RequireComponent(typeof(EventSystem))]
     public sealed class DragCorrector : MonoBehaviour
     {
