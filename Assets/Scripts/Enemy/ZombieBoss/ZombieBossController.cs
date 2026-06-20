@@ -42,6 +42,16 @@ public class ZombieBossController : MonoBehaviour
     [SerializeField] private Transform _summonPoint2;
     [SerializeField] private GameObject _summonEffectPrefab;
 
+    [Header("Laser Attack")]
+    [Tooltip("Prefab laser AOE (phải có ZombieBossSkill + PooledObject script)")]
+    [SerializeField] private GameObject _orbPrefab;
+    [Tooltip("Tổng thời gian player ở trong attackRange để kích hoạt bắn laser khi howl (giây)")]
+    [SerializeField] private float _orbChargeTime = 20f;
+    [Tooltip("Range để tính tích lũy thời gian laser howl (thường bằng attackRange)")]
+    [SerializeField] private float _orbTriggerRange = 2f;
+    [Tooltip("Khi đang đuổi mà không tấn công được, cứ sau bao lâu thì bắn laser (giây)")]
+    [SerializeField] private float _chaseOrbInterval = 10f;
+
     [Header("Spawn")]
     [SerializeField] private float _despawnDelay = 180f;
 
@@ -56,12 +66,22 @@ public class ZombieBossController : MonoBehaviour
 
     private bool _isDead;
     private bool _isActing;
+    private bool _isSummoning;   // true khi đang trong SummonRoutine — không được cancel
     private bool _hasSummoned;
     private bool _hasJumped;
     private float _combatStartTime = -1f;
     private float _lastAttackTime = -999f;
     private bool _isInCombat;
     private bool _attackCancelled;
+    private bool _howlFinished;
+
+    // Orb: tích lũy thời gian player ở trong range, tạm dừng khi ra ngoài
+    private float _orbChargeAccumulated = 0f;
+    private bool _orbReady = false;
+
+    // Orb chase: đếm thời gian đuổi mà không tấn công được
+    private float _chaseWithoutAttackTimer = 0f;
+    private bool _isChaseOrbCooling = false;
 
     private void Awake()
     {
@@ -71,6 +91,12 @@ public class ZombieBossController : MonoBehaviour
 
         _stats.OnDeath += HandleDeath;
         _stats.OnDamagedBy += HandleDamagedBy;
+
+        if (_anim != null)
+        {
+            _anim.OnHowlSpawn += HandleHowlSpawn;
+            _anim.OnHowlFinished += () => _howlFinished = true;
+        }
     }
 
     private void OnDestroy()
@@ -78,6 +104,9 @@ public class ZombieBossController : MonoBehaviour
         if (_stats == null) return;
         _stats.OnDeath -= HandleDeath;
         _stats.OnDamagedBy -= HandleDamagedBy;
+
+        if (_anim != null)
+            _anim.OnHowlSpawn -= HandleHowlSpawn;
     }
 
     public void Initialize(ZombieBossSpawnPoint spawnPoint)
@@ -92,6 +121,12 @@ public class ZombieBossController : MonoBehaviour
         _state = State.Wandering;
         _player = null;
         _attackCancelled = false;
+        _howlFinished = false;
+        _isSummoning = false;
+        _orbChargeAccumulated = 0f;
+        _orbReady = false;
+        _chaseWithoutAttackTimer = 0f;
+        _isChaseOrbCooling = false;
 
         _agent.isStopped = false;
         _agent.speed = _wanderSpeed;
@@ -128,7 +163,11 @@ public class ZombieBossController : MonoBehaviour
         }
 
         if (_state == State.Chasing)
+        {
             UpdateChase();
+            UpdateOrbCharge();
+            UpdateChaseOrbTimer();
+        }
 
         float speed = _agent.velocity.magnitude / _chaseSpeed;
         if (_anim != null) _anim.SetMoveSpeed(speed);
@@ -136,6 +175,9 @@ public class ZombieBossController : MonoBehaviour
 
     private void CheckCancelAttack()
     {
+        // Đang summon: KHÔNG được cancel — phải đợi howl xong
+        if (_isSummoning) return;
+
         if (_player == null)
         {
             _attackCancelled = true;
@@ -173,12 +215,14 @@ public class ZombieBossController : MonoBehaviour
         {
             _agent.isStopped = true;
             _agent.ResetPath();
+            // Player vào tầm đánh — reset timer đuổi
+            _chaseWithoutAttackTimer = 0f;
             TryAttack(dist);
             return;
         }
 
-        // Player thoát tầm: cancel attack nếu đang đánh
-        if (_isActing)
+        // Player thoát tầm: cancel attack nếu đang đánh (nhưng không cancel khi đang summon)
+        if (_isActing && !_isSummoning)
         {
             _attackCancelled = true;
             _isActing = false;
@@ -399,6 +443,92 @@ public class ZombieBossController : MonoBehaviour
         _hasJumped = false;
         _isInCombat = false;
         _attackCancelled = true;
+        _chaseWithoutAttackTimer = 0f;
+    }
+
+    /// <summary>
+    /// Tích lũy thời gian player ở trong _orbTriggerRange.
+    /// Tạm dừng tích lũy khi player ra ngoài range.
+    /// Khi đủ _orbChargeTime thì đánh dấu _orbReady = true để bắn khi HowlSpawn fired.
+    /// </summary>
+    private void UpdateOrbCharge()
+    {
+        if (_orbReady || _player == null || _isDead) return;
+
+        float dist = Vector3.Distance(transform.position, _player.position);
+        if (dist <= _orbTriggerRange)
+        {
+            _orbChargeAccumulated += Time.deltaTime;
+            if (_orbChargeAccumulated >= _orbChargeTime)
+                _orbReady = true;
+        }
+        // Nếu player ra ngoài range: không reset, chỉ dừng tích lũy
+    }
+
+    /// <summary>
+    /// Đếm thời gian boss đang đuổi mà player vẫn ngoài _attackRange.
+    /// Cứ sau _chaseOrbInterval giây thì bắn 1 quả orb về phía player.
+    /// Timer reset lại sau mỗi lần bắn hoặc khi player vào tầm đánh.
+    /// </summary>
+    private void UpdateChaseOrbTimer()
+    {
+        if (_isDead || _isActing || _player == null) return;
+
+        float dist = Vector3.Distance(transform.position, _player.position);
+
+        // Chỉ đếm khi player đang NGOÀI tầm đánh (đang bị đuổi)
+        if (dist > _attackRange)
+        {
+            _chaseWithoutAttackTimer += Time.deltaTime;
+            if (_chaseWithoutAttackTimer >= _chaseOrbInterval)
+            {
+                _chaseWithoutAttackTimer = 0f;
+                StartCoroutine(ChaseOrbRoutine());
+            }
+        }
+    }
+
+    /// <summary>
+    /// Dừng lại, bắn laser xuống vị trí player hiện tại rồi tiếp tục đuổi.
+    /// Player vẫn có thể né nếu di chuyển trong thời gian warning của laser.
+    /// </summary>
+    private IEnumerator ChaseOrbRoutine()
+    {
+        if (_isDead || _isActing) yield break;
+
+        _isActing = true;
+        _agent.isStopped = true;
+        _agent.ResetPath();
+
+        // Quay mặt về phía player ngắn
+        float faceTime = 0.3f;
+        float elapsed = 0f;
+        while (elapsed < faceTime)
+        {
+            FacePlayer();
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Bắn laser xuống vị trí player lúc này
+        ShootLaser();
+
+        yield return new WaitForSeconds(0.2f);
+
+        _isActing = false;
+        if (!_isDead && _state == State.Chasing)
+            _agent.isStopped = false;
+    }
+
+    private void ShootLaser()
+    {
+        if (_orbPrefab == null || _player == null) return;
+
+        // Laser rơi từ trên xuống tại vị trí player hiện tại
+        var obj = ObjectPool.Instance.Get(_orbPrefab, _player.position, Quaternion.identity);
+        var laser = obj.GetComponent<ZombieBossSkill>();
+        if (laser != null)
+            laser.Launch(_player.position, gameObject);
     }
 
     private void CheckSummon()
@@ -412,15 +542,43 @@ public class ZombieBossController : MonoBehaviour
     {
         _hasSummoned = true;
         _isActing = true;
+        _isSummoning = true;
+        _howlFinished = false;
 
         if (_anim != null) _anim.TriggerHowl();
-        yield return new WaitForSeconds(0.5f);
 
+        // Chỉ chờ animation howl chạy hết (Animation Event: HowlFinished)
+        // Việc spawn minion được xử lý trực tiếp bởi HandleHowlSpawn khi Animation Event HowlSpawn fired
+        float timeout = 5f;
+        float elapsed = 0f;
+        while (!_howlFinished && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+        _isSummoning = false;
+        _isActing = false;
+    }
+
+    /// <summary>
+    /// Được gọi trực tiếp từ event OnHowlSpawn khi Animation Event HowlSpawn fired.
+    /// Spawn ngay lập tức, không qua coroutine để tránh delay 1 frame.
+    /// </summary>
+    private void HandleHowlSpawn()
+    {
+        if (_isDead) return;
         SpawnMinion(_summonPoint1);
         SpawnMinion(_summonPoint2);
 
-        yield return new WaitForSeconds(1.5f);
-        _isActing = false;
+        // Bắn laser nếu player đã tích lũy đủ thời gian trong range
+        if (_orbReady)
+        {
+            ShootLaser();
+            _orbReady = false;
+            _orbChargeAccumulated = 0f;
+        }
     }
 
     private void SpawnMinion(Transform point)
@@ -520,5 +678,7 @@ public class ZombieBossController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, _attackRange);
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, _jumpNearThreshold);
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, _orbTriggerRange);
     }
 }
