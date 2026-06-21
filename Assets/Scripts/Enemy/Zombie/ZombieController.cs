@@ -414,17 +414,21 @@ public class ZombieController : MonoBehaviour
         _agent.ResetPath();
         _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
 
-        if (_anim != null) { _anim.SetHowling(false); _anim.SetIdle(); _anim.TriggerDeath(); }
-
         // Đổi sang layer "Corpse" — layer này cần được set KHÔNG va chạm với layer Enemy/Player
         // trong Physics Layer Collision Matrix, để enemy còn sống đi qua không đẩy được xác
         // ragdoll, nhưng xác vẫn rơi/va đất bình thường (Corpse vẫn va với Default/Ground)
         SetLayerRecursive(transform, LayerMask.NameToLayer("Corpse"));
 
-        // Tắt TẤT CẢ collider (gốc + con) NGAY khi chết — đóng lỗ hổng va chạm trong khoảng
-        // thời gian chờ trước khi ragdoll kích hoạt (ragdoll sẽ tự enable lại collider bone nó cần)
+        // Tắt TẤT CẢ collider (gốc + con) NGAY khi chết — đóng lỗ hổng va chạm trong khoảnh khắc
+        // chuyển trạng thái. PHẢI làm TRƯỚC khi gọi TriggerDeath(), vì TriggerDeath() sẽ bật lại
+        // các collider ragdoll cần dùng — nếu tắt sau, sẽ vô tình tắt mất collider ragdoll vừa bật
+        // (đây là nguyên nhân khiến xác zombie triệu hồi mất ragdoll và "biến mất" khi chết).
         foreach (var c in GetComponentsInChildren<Collider>())
             c.enabled = false;
+
+        // Gọi TriggerDeath() SAU CÙNG để việc bật ragdoll (enable collider bone) không bị
+        // loop tắt collider ở trên ghi đè lại.
+        if (_anim != null) { _anim.SetHowling(false); _anim.SetIdle(); _anim.TriggerDeath(); }
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
