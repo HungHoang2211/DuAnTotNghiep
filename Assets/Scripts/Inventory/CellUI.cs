@@ -6,14 +6,6 @@ using TMPro;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Unified cell for inventory slots, equipment slots, and loot containers.
-    /// Behavior is configured via Inspector fields:
-    ///   - equipSlot != None  → equipment cell (drag highlight, default icon)
-    ///   - defaultIcon != null → shows placeholder when empty
-    ///   - holdThreshold > 0   → enables hold-to-tooltip
-    ///   - lockedBackground    → enables lock/unlock (backpack expansion)
-    /// </summary>
     public sealed class CellUI : MonoBehaviour,
         IPointerClickHandler, IPointerDownHandler, IPointerUpHandler,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
@@ -54,13 +46,14 @@ namespace SimpleSurvival.Items
         private float _pressTime;
         private bool _holdFired;
         private bool _isDragging;
+        private bool _routeToScrollRect;
         private float _lastClickTime;
         private Color _defaultIconColor;
         private Vector2 _defaultIconSize;
+        private bool _cacheInitialized;
+        private ScrollRect _parentScrollRect;
 
         private const float DoubleClickThreshold = 0.25f;
-
-        // ── Events ───────────────────────────────────────────────────────────
 
         public event Action<CellUI> OnClicked;
         public event Action<CellUI> OnDoubleClicked;
@@ -71,25 +64,23 @@ namespace SimpleSurvival.Items
         public event Action<CellUI, PointerEventData> OnEndDragEvent;
         public event Action<CellUI> OnDropEvent;
 
-        // ── Properties ───────────────────────────────────────────────────────
-
         public EquipSlot EquipSlot => equipSlot;
         public bool IsEquipCell => equipSlot != EquipSlot.None;
         public bool HasItem { get; private set; }
         public ItemStack CurrentStack { get; private set; }
 
-        // ── Unity lifecycle ──────────────────────────────────────────────────
-
         private void Awake()
         {
-            if (iconImage != null)
-            {
-                _defaultIconColor = iconImage.color;
-                _defaultIconSize = iconImage.rectTransform.sizeDelta;
-            }
+            InitCacheIfNeeded();
+            _parentScrollRect = GetComponentInParent<ScrollRect>();
 
             if (selectionHighlight != null) selectionHighlight.SetActive(false);
             if (dragHighlight != null) dragHighlight.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeStack(CurrentStack);
         }
 
         private void Update()
@@ -104,13 +95,31 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Public API ───────────────────────────────────────────────────────
+        private void InitCacheIfNeeded()
+        {
+            if (_cacheInitialized) return;
+
+            if (iconImage != null)
+            {
+                _defaultIconColor = iconImage.color;
+                _defaultIconSize = iconImage.rectTransform.sizeDelta;
+            }
+
+            _cacheInitialized = true;
+        }
 
         public void SetStack(ItemStack stack)
         {
+            InitCacheIfNeeded();
+
             if (_isLocked) return;
 
-            CurrentStack = stack;
+            if (CurrentStack != stack)
+            {
+                UnsubscribeStack(CurrentStack);
+                CurrentStack = stack;
+                SubscribeStack(CurrentStack);
+            }
 
             if (stack == null)
             {
@@ -136,6 +145,8 @@ namespace SimpleSurvival.Items
 
         public void SetLocked(bool locked)
         {
+            InitCacheIfNeeded();
+
             _isLocked = locked;
 
             if (backgroundImage != null)
@@ -148,8 +159,6 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Pointer events ───────────────────────────────────────────────────
-
         public void OnPointerDown(PointerEventData eventData)
         {
             if (_isLocked) return;
@@ -157,6 +166,7 @@ namespace SimpleSurvival.Items
             _isPressed = true;
             _holdFired = false;
             _isDragging = false;
+            _routeToScrollRect = false;
             _pressTime = Time.unscaledTime;
         }
 
@@ -170,7 +180,7 @@ namespace SimpleSurvival.Items
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (_isLocked || _holdFired || _isDragging)
+            if (_isLocked || _holdFired || _isDragging || _routeToScrollRect)
                 return;
 
             float now = Time.unscaledTime;
@@ -181,12 +191,19 @@ namespace SimpleSurvival.Items
             else OnClicked?.Invoke(this);
         }
 
-        // ── Drag events ──────────────────────────────────────────────────────
-
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_isLocked || !HasItem) return;
+            if (_isLocked || !HasItem || !_holdFired)
+            {
+                if (_parentScrollRect != null)
+                {
+                    _routeToScrollRect = true;
+                    _parentScrollRect.OnBeginDrag(eventData);
+                }
+                return;
+            }
 
+            _routeToScrollRect = false;
             _isDragging = true;
 
             if (_holdFired)
@@ -197,12 +214,25 @@ namespace SimpleSurvival.Items
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (_routeToScrollRect)
+            {
+                if (_parentScrollRect != null)
+                    _parentScrollRect.OnDrag(eventData);
+                return;
+            }
             if (!_isDragging) return;
             OnDragEvent?.Invoke(this, eventData);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (_routeToScrollRect)
+            {
+                if (_parentScrollRect != null)
+                    _parentScrollRect.OnEndDrag(eventData);
+                _routeToScrollRect = false;
+                return;
+            }
             if (!_isDragging) return;
             _isDragging = false;
             OnEndDragEvent?.Invoke(this, eventData);
@@ -214,12 +244,32 @@ namespace SimpleSurvival.Items
             OnDropEvent?.Invoke(this);
         }
 
-        // ── Display helpers ──────────────────────────────────────────────────
+        private void SubscribeStack(ItemStack stack)
+        {
+            if (stack == null) return;
+            stack.OnChanged += HandleStackChanged;
+        }
+
+        private void UnsubscribeStack(ItemStack stack)
+        {
+            if (stack == null) return;
+            stack.OnChanged -= HandleStackChanged;
+        }
+
+        private void HandleStackChanged(ItemStack stack)
+        {
+            if (stack != CurrentStack) return;
+            if (stack == null || stack.IsEmpty)
+            {
+                ShowEmpty();
+                return;
+            }
+            ShowItem(stack);
+        }
 
         private void ShowEmpty()
         {
             HasItem = false;
-            CurrentStack = null;
 
             if (defaultIcon != null)
             {

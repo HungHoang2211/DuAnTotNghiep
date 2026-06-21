@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using SimpleSurvival.Combat;
+using SimpleSurvival.Items;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 
@@ -25,6 +26,7 @@ namespace SimpleSurvival.Actions
         private readonly PlayerActionController _controller;
         private readonly Animator _animator;
         private readonly ITargetable _target;
+        private readonly ItemStack _weaponStack;
         private readonly float _damage;
         private readonly float _range;
         private readonly int _maxComboIndex;
@@ -37,11 +39,16 @@ namespace SimpleSurvival.Actions
         private bool _hitAppliedThisSwing;
         private float _comboWindowRemaining;
         private float _swingTimer;
+        private bool _weaponBrokeThisSwing;
+
+        public bool WeaponBroke => _weaponBrokeThisSwing;
+        public ItemStack WeaponStack => _weaponStack;
 
         public AttackAction(
             PlayerActionController controller,
             Animator animator,
             ITargetable target,
+            ItemStack weaponStack,
             float damage,
             float range,
             int maxComboIndex,
@@ -52,6 +59,7 @@ namespace SimpleSurvival.Actions
             _controller = controller;
             _animator = animator;
             _target = target;
+            _weaponStack = weaponStack;
             _damage = damage;
             _range = range;
             _maxComboIndex = Mathf.Max(0, maxComboIndex);
@@ -89,6 +97,12 @@ namespace SimpleSurvival.Actions
             }
 
             _comboWindowRemaining -= deltaTime;
+
+            if (_weaponBrokeThisSwing)
+            {
+                CompleteAction();
+                return;
+            }
 
             if (_controller.IsAttackHeld || _controller.AttackInputQueued)
             {
@@ -137,6 +151,8 @@ namespace SimpleSurvival.Actions
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(_damage, _controller.gameObject);
+
+            ConsumeWeaponDurability();
         }
 
         public void HandleEnd()
@@ -144,6 +160,19 @@ namespace SimpleSurvival.Actions
             if (_phase == Phase.ComboWindow) return;
             _phase = Phase.ComboWindow;
             _comboWindowRemaining = _comboWindowSeconds;
+        }
+
+        private void ConsumeWeaponDurability()
+        {
+            if (_weaponStack == null) return;
+            if (!_weaponStack.ItemData.IsDurable) return;
+
+            bool broke = _weaponStack.ReduceDurability();
+            if (broke)
+            {
+                _weaponBrokeThisSwing = true;
+                Debug.Log($"[WeaponBroken] {_weaponStack.ItemData.ItemName} broke");
+            }
         }
 
         private void PickComboIndex()

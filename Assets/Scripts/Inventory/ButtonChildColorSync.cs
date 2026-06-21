@@ -4,14 +4,6 @@ using UnityEngine.UI;
 
 namespace SimpleSurvival.UI
 {
-    /// <summary>
-    /// Keeps child graphics (icons, labels) in sync with the parent button's
-    /// interactable state. Drag any Image or TMP_Text into the Targets list —
-    /// both inherit from Graphic so they work with a single list.
-    ///
-    /// Use this alongside Sprite Swap on the Button itself: the Button handles
-    /// the background sprite, this script handles everything inside it.
-    /// </summary>
     [RequireComponent(typeof(Button))]
     public sealed class ButtonChildColorSync : MonoBehaviour
     {

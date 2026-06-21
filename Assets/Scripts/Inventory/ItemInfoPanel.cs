@@ -45,7 +45,6 @@ namespace SimpleSurvival.Items
             canvasGroup.blocksRaycasts = visible;
         }
 
-        // ── Body builder ─────────────────────────────────────────────────────
 
         private string BuildBody(ItemData item)
         {
@@ -63,15 +62,10 @@ namespace SimpleSurvival.Items
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Returns a stats block only for weapon, tool, and equipment.
-        /// Consumables and containers intentionally return empty string.
-        /// </summary>
         private string BuildStats(ItemData item)
         {
             StringBuilder sb = new StringBuilder();
 
-            // Weapon stats — shown for weapons and tools that double as weapons.
             WeaponAbility weapon = item.GetAbility<WeaponAbility>();
             if (weapon != null)
             {
@@ -79,14 +73,12 @@ namespace SimpleSurvival.Items
                 sb.AppendLine($"Attack Speed: {weapon.AttackSpeed}");
             }
 
-            // Tool type — shown alongside weapon stats when item is both.
             ToolAbility tool = item.GetAbility<ToolAbility>();
             if (tool != null)
             {
                 sb.AppendLine($"Tool: {tool.ToolType}");
             }
 
-            // Equipment armor — only when item is wearable gear.
             EquipmentAbility equipment = item.GetAbility<EquipmentAbility>();
             if (equipment != null && equipment.ArmorValue > 0f)
             {
@@ -96,7 +88,6 @@ namespace SimpleSurvival.Items
             return sb.ToString().TrimEnd();
         }
 
-        // ── Positioning ──────────────────────────────────────────────────────
 
         private void PositionBeside(RectTransform cellRect)
         {

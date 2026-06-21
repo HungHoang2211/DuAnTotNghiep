@@ -8,7 +8,11 @@ namespace SimpleSurvival.Items
     public sealed class InventoryDragController : MonoBehaviour
     {
         [Header("Grids")]
+        [Tooltip("Always-active inventory grids (pockets, backpack).")]
         [SerializeField] private List<InventoryGridUI> grids = new List<InventoryGridUI>();
+
+        [Tooltip("Optional loot grid. Cells get auto-subscribed when shown.")]
+        [SerializeField] private InventoryGridUI lootGrid;
 
         [Header("Equipment")]
         [SerializeField] private List<CellUI> equipCells = new List<CellUI>();
@@ -48,6 +52,10 @@ namespace SimpleSurvival.Items
 
             foreach (CellUI cell in equipCells)
                 Subscribe(cell);
+
+            if (lootGrid != null)
+                foreach (CellUI cell in lootGrid.GetComponentsInChildren<CellUI>(true))
+                    Subscribe(cell);
         }
 
         private void OnDisable()
@@ -188,6 +196,17 @@ namespace SimpleSurvival.Items
                 if (found >= 0)
                 {
                     grid = candidate;
+                    index = found;
+                    return true;
+                }
+            }
+
+            if (lootGrid != null)
+            {
+                int found = lootGrid.IndexOf(cell);
+                if (found >= 0)
+                {
+                    grid = lootGrid;
                     index = found;
                     return true;
                 }
