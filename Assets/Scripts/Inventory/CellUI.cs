@@ -193,13 +193,23 @@ namespace SimpleSurvival.Items
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_isLocked || !HasItem || !_holdFired)
+            if (_isLocked || !HasItem)
             {
                 if (_parentScrollRect != null)
                 {
                     _routeToScrollRect = true;
                     _parentScrollRect.OnBeginDrag(eventData);
                 }
+                return;
+            }
+
+            bool isVerticalDrag = Mathf.Abs(eventData.delta.y) > Mathf.Abs(eventData.delta.x);
+            bool scrollVertical = _parentScrollRect != null && _parentScrollRect.vertical;
+
+            if (isVerticalDrag && scrollVertical)
+            {
+                _routeToScrollRect = true;
+                _parentScrollRect.OnBeginDrag(eventData);
                 return;
             }
 

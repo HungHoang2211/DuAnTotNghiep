@@ -209,8 +209,9 @@ namespace SimpleSurvival.Items
             ItemStack stack = cell.CurrentStack;
             bool isEquippable = playerEquipment.System.IsEquippable(stack);
             bool isConsumable = stack.ItemData.HasAbility<ConsumableAbility>();
+            bool blockedByOccupiedBackpack = isEquippable && WouldReplaceOccupiedBackpack(stack);
 
-            buttonUse.interactable = isConsumable || isEquippable;
+            buttonUse.interactable = (isConsumable || isEquippable) && !blockedByOccupiedBackpack;
 
             if (useButtonText != null)
                 useButtonText.text = isEquippable ? "Equip" : "Use";
@@ -265,6 +266,8 @@ namespace SimpleSurvival.Items
 
         private void EquipFromActiveCell(CellUI cell, ItemStack stack)
         {
+            if (WouldReplaceOccupiedBackpack(stack)) return;
+
             InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();
             if (grid == null) return;
 
@@ -279,6 +282,12 @@ namespace SimpleSurvival.Items
                 InventorySelection sel = GetActiveSelection();
                 if (sel != null) sel.Deselect();
             }
+        }
+
+        private bool WouldReplaceOccupiedBackpack(ItemStack stack)
+        {
+            return playerEquipment.System.GetAutoEquipSlot(stack) == EquipSlot.Backpack
+                && playerInventory.IsBackpackOccupied();
         }
 
         private void HandleSplit()

@@ -31,16 +31,16 @@ namespace SimpleSurvival.Items
 
         public CellUI SelectedEquipCell => _selectedEquipCell;
 
-
         private void Awake()
         {
             _equipmentSystem = playerEquipment.System;
 
             _allCells = new List<CellUI>
-        {
-            weaponCell, backpackCell, headCell, bodyCell,
-            legCell, bootsCell, quickSlotCell1, quickSlotCell2
-        };
+            {
+                weaponCell, backpackCell, headCell, bodyCell,
+                legCell, bootsCell, quickSlotCell1, quickSlotCell2
+            };
+
             _equipmentSystem.OnSlotChanged += HandleSlotChanged;
         }
 
@@ -61,7 +61,6 @@ namespace SimpleSurvival.Items
 
             selection.OnSelectionChanged += HandleInventorySelectionChanged;
             selection.OnCellDoubleClicked += HandleInventoryDoubleClicked;
-            actionPanel.OnEquipRequested += HandleEquipRequested;
 
             if (dragController != null)
             {
@@ -83,7 +82,6 @@ namespace SimpleSurvival.Items
 
             selection.OnSelectionChanged -= HandleInventorySelectionChanged;
             selection.OnCellDoubleClicked -= HandleInventoryDoubleClicked;
-            actionPanel.OnEquipRequested -= HandleEquipRequested;
 
             if (dragController != null)
             {
@@ -151,7 +149,6 @@ namespace SimpleSurvival.Items
                 ClearEquipSelection();
         }
 
-
         private void HandleDragBegan(ItemStack stack)
         {
             foreach (CellUI cell in _allCells)
@@ -173,7 +170,6 @@ namespace SimpleSurvival.Items
             _selectedEquipCell?.SetSelected(true);
         }
 
-
         private void HandleInventoryDoubleClicked(CellUI cell)
         {
             if (!cell.HasItem) return;
@@ -190,24 +186,6 @@ namespace SimpleSurvival.Items
 
             if (equipped)
                 selection.Deselect();
-        }
-
-
-        private void HandleEquipRequested(ItemStack stack)
-        {
-            if (WouldReplaceOccupiedBackpack(stack)) return;
-
-            CellUI selectedCell = selection.SelectedCell;
-            if (selectedCell == null) return;
-
-            InventoryGridUI grid = selectedCell.GetComponentInParent<InventoryGridUI>();
-            if (grid == null) return;
-
-            int inventoryIndex = grid.IndexOf(selectedCell);
-            if (inventoryIndex < 0) return;
-
-            _equipmentSystem.TryAutoEquip(stack, grid.BoundInventory, inventoryIndex);
-            selection.Deselect();
         }
 
         public void UnequipSelected()
@@ -253,6 +231,9 @@ namespace SimpleSurvival.Items
         {
             if (!sourceCell.HasItem) return;
             if (IsBackpackOccupied(targetCell)) return;
+            if (targetCell.EquipSlot == EquipSlot.Backpack
+                && _equipmentSystem.CanEquipInSlot(sourceCell.CurrentStack, EquipSlot.Backpack)
+                && playerInventory.IsBackpackOccupied()) return;
 
             int slotIndex = GetSlotIndex(targetCell);
             _equipmentSystem.TryEquip(
@@ -305,28 +286,14 @@ namespace SimpleSurvival.Items
 
         private bool IsBackpackOccupied(CellUI cell)
         {
-            return cell.EquipSlot == EquipSlot.Backpack && HasItemsInBackpack();
+            return cell.EquipSlot == EquipSlot.Backpack && playerInventory.IsBackpackOccupied();
         }
 
         private bool WouldReplaceOccupiedBackpack(ItemStack stack)
         {
             return _equipmentSystem.GetAutoEquipSlot(stack) == EquipSlot.Backpack
-                && HasItemsInBackpack();
+                && playerInventory.IsBackpackOccupied();
         }
-
-        private bool HasItemsInBackpack()
-        {
-            if (playerInventory.Backpack == null) return false;
-
-            for (int i = 0; i < playerInventory.Backpack.SlotCount; i++)
-            {
-                if (playerInventory.Backpack.GetSlot(i) != null)
-                    return true;
-            }
-
-            return false;
-        }
-
 
         private CellUI GetCell(EquipSlot slot, int slotIndex)
         {
