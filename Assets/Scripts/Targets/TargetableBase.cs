@@ -13,7 +13,7 @@ namespace SimpleSurvival.Targets
 
         private bool _destroyedFired = false;
 
-        public Transform Transform => transform;
+        public virtual Transform Transform => transform;
         public float Radius => useCollider != null ? useCollider.radius : 0.5f;
         public Collider DistanceCollider => distanceCollider;
         public NavMeshObstacle NavObstacle => navObstacle;

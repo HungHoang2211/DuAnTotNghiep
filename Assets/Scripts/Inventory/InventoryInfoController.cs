@@ -4,11 +4,6 @@ using UnityEngine.EventSystems;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Connects cell hold events to the item info panel. When the player holds
-    /// a cell that contains an item, the panel appears beside it; releasing the
-    /// hold or beginning a drag hides it again.
-    /// </summary>
     public sealed class InventoryInfoController : MonoBehaviour
     {
         [SerializeField] private ItemInfoPanel infoPanel;

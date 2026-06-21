@@ -5,13 +5,6 @@ using UnityEngine.UI;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Manages the drag ghost and handles all drag-drop scenarios:
-    ///   - Inventory  → Inventory  : TransferOrSwap
-    ///   - Inventory  → EquipSlot  : Equip item
-    ///   - EquipSlot  → Inventory  : Unequip to target slot
-    ///   - EquipSlot  → EquipSlot  : Swap equipment
-    /// </summary>
     public sealed class InventoryDragController : MonoBehaviour
     {
         [Header("Grids")]
@@ -37,8 +30,6 @@ namespace SimpleSurvival.Items
 
         public event System.Action<ItemStack> OnDragBegan;
         public event System.Action OnDragEnded;
-
-        // ── Unity lifecycle ──────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -67,7 +58,6 @@ namespace SimpleSurvival.Items
             _subscribedCells.Clear();
         }
 
-        // ── Subscription ─────────────────────────────────────────────────────
 
         private void Subscribe(CellUI cell)
         {
@@ -86,7 +76,6 @@ namespace SimpleSurvival.Items
             cell.OnDropEvent -= HandleDrop;
         }
 
-        // ── Drag handlers ────────────────────────────────────────────────────
 
         private void HandleBeginDrag(CellUI cell, PointerEventData eventData)
         {
@@ -132,7 +121,6 @@ namespace SimpleSurvival.Items
             EndDrag();
         }
 
-        // ── Drop logic ───────────────────────────────────────────────────────
 
         private void DropOnInventory(CellUI targetCell)
         {
@@ -165,7 +153,6 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Ghost helpers ────────────────────────────────────────────────────
 
         private void ShowGhost(Sprite sprite, Vector2 screenPos)
         {
