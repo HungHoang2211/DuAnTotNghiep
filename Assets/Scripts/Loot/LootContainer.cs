@@ -148,16 +148,8 @@ namespace SimpleSurvival.Loot
                 rolled.RemoveRange(capacity, rolled.Count - capacity);
             }
 
-            List<int> availableSlots = new List<int>(capacity);
-            for (int i = 0; i < capacity; i++) availableSlots.Add(i);
-
-            foreach (var stack in rolled)
-            {
-                int pickIndex = UnityEngine.Random.Range(0, availableSlots.Count);
-                int slotIndex = availableSlots[pickIndex];
-                availableSlots.RemoveAt(pickIndex);
-                _inventory.SetSlot(slotIndex, stack);
-            }
+            for (int i = 0; i < rolled.Count; i++)
+                _inventory.SetSlot(i, rolled[i]);
         }
 
         private void HandleInventoryChanged()

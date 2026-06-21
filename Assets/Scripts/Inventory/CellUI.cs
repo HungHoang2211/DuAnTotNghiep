@@ -46,10 +46,12 @@ namespace SimpleSurvival.Items
         private float _pressTime;
         private bool _holdFired;
         private bool _isDragging;
+        private bool _routeToScrollRect;
         private float _lastClickTime;
         private Color _defaultIconColor;
         private Vector2 _defaultIconSize;
         private bool _cacheInitialized;
+        private ScrollRect _parentScrollRect;
 
         private const float DoubleClickThreshold = 0.25f;
 
@@ -70,6 +72,7 @@ namespace SimpleSurvival.Items
         private void Awake()
         {
             InitCacheIfNeeded();
+            _parentScrollRect = GetComponentInParent<ScrollRect>();
 
             if (selectionHighlight != null) selectionHighlight.SetActive(false);
             if (dragHighlight != null) dragHighlight.SetActive(false);
@@ -163,6 +166,7 @@ namespace SimpleSurvival.Items
             _isPressed = true;
             _holdFired = false;
             _isDragging = false;
+            _routeToScrollRect = false;
             _pressTime = Time.unscaledTime;
         }
 
@@ -176,7 +180,7 @@ namespace SimpleSurvival.Items
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (_isLocked || _holdFired || _isDragging)
+            if (_isLocked || _holdFired || _isDragging || _routeToScrollRect)
                 return;
 
             float now = Time.unscaledTime;
@@ -189,8 +193,17 @@ namespace SimpleSurvival.Items
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_isLocked || !HasItem) return;
+            if (_isLocked || !HasItem || !_holdFired)
+            {
+                if (_parentScrollRect != null)
+                {
+                    _routeToScrollRect = true;
+                    _parentScrollRect.OnBeginDrag(eventData);
+                }
+                return;
+            }
 
+            _routeToScrollRect = false;
             _isDragging = true;
 
             if (_holdFired)
@@ -201,12 +214,25 @@ namespace SimpleSurvival.Items
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (_routeToScrollRect)
+            {
+                if (_parentScrollRect != null)
+                    _parentScrollRect.OnDrag(eventData);
+                return;
+            }
             if (!_isDragging) return;
             OnDragEvent?.Invoke(this, eventData);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (_routeToScrollRect)
+            {
+                if (_parentScrollRect != null)
+                    _parentScrollRect.OnEndDrag(eventData);
+                _routeToScrollRect = false;
+                return;
+            }
             if (!_isDragging) return;
             _isDragging = false;
             OnEndDragEvent?.Invoke(this, eventData);
