@@ -39,6 +39,11 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     public void TriggerAttackClaw()
     {
+        // DEBUG TẠM: in stack trace để tìm xem có script nào khác (ngoài
+        // ZombieBossController.NormalAttackRoutine) đang gọi hàm này không.
+        // Xoá dòng Debug.Log này sau khi đã tìm ra nguyên nhân.
+        Debug.Log($"[ZombieBossAnimatorController] TriggerAttackClaw() called at {Time.time:F2}s:\n{System.Environment.StackTrace}");
+
         // Reset trigger Howl nếu còn "treo" — tránh trường hợp Howl bị đè ngược lại
         // bởi 1 trigger AttackClaw cũ chưa tiêu thụ, và đảm bảo 2 action không lẫn nhau.
         _animator.ResetTrigger(HowlTrigger);
@@ -47,6 +52,8 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     public void TriggerHowl()
     {
+        Debug.Log($"[ZombieBossAnimatorController] TriggerHowl() called at {Time.time:F2}s");
+
         // Reset trigger AttackClaw nếu còn "treo" từ lần trước chưa được Animator tiêu thụ
         // (ví dụ do Any State -> AttackClaw chưa kịp transition) — đây là nguyên nhân khiến
         // animation Howl bị AttackClaw "đè" lên giữa lúc đang triệu hồi.
