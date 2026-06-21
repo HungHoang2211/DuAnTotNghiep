@@ -551,15 +551,18 @@ public class ZombieFatController : MonoBehaviour
         _agent.ResetPath();
         _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
 
+        // Tắt CHỈ collider gốc (collider phát hiện/va chạm chính của zombie lúc còn sống).
+        // KHÔNG đụng tới collider trên các bone ragdoll con — chúng cần giữ nguyên trạng thái
+        // để ragdoll va chạm được với plane/địa hình sau khi TriggerDeath() bật chúng lên.
+        var rootCol = GetComponent<Collider>();
+        if (rootCol != null) rootCol.enabled = false;
+
+        // TriggerDeath() sẽ bật Rigidbody (isKinematic = false) + Collider trên các bone ragdoll.
+        // Phải gọi SAU khi đã tắt rootCol để không bị ghi đè/tắt nhầm.
         if (_anim != null) { _anim.SetIdle(); _anim.TriggerDeath(); }
 
         // Đổi sang layer "Corpse" — xem giải thích chi tiết trong ZombieController.cs
         SetLayerRecursive(transform, LayerMask.NameToLayer("Corpse"));
-
-        // Tắt TẤT CẢ collider (gốc + con) NGAY khi chết — đóng lỗ hổng va chạm trong khoảng
-        // thời gian chờ trước khi ragdoll kích hoạt (ragdoll sẽ tự enable lại collider bone nó cần)
-        foreach (var c in GetComponentsInChildren<Collider>())
-            c.enabled = false;
 
         float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
         ObjectPool.Instance.ReturnDelayed(gameObject, despawnDelay);
