@@ -1,21 +1,30 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// Điều khiển Animator của ZombieFat.
 /// - Movement state: Blend Tree 1D (Idle/Run) theo IsRunning
 /// - Attack thường: Attack_Claw_1 → Attack_Claw_2 (tay trái rồi tay phải)
 /// - Attack Special: Attack_Special (phun axit từ miệng, sau 10 giây)
-/// - Death: Ragdoll + rơi bộ phận ngẫu nhiên
+/// - Jump Attack: JumpAttack (giậm chân tại chỗ gây choáng)
+/// - Death: Ragdoll
 /// </summary>
 [RequireComponent(typeof(Animator))]
 public class ZombieFatAnimatorController : MonoBehaviour
 {
     private Animator _animator;
 
+    /// <summary>
+    /// Được gọi bởi Animation Event tại frame chân chạm đất trong clip JumpAttack.
+    /// ZombieFatController đăng ký vào đây để xử lý damage + stun + spawn effect.
+    /// </summary>
+    public event Action OnJumpAttackImpact;
+
     private static readonly int IsRunningHash = Animator.StringToHash("IsRunning");
     private static readonly int IsAttackingClawHash = Animator.StringToHash("IsAttackingClaw");
     private static readonly int IsSpecialAttackingHash = Animator.StringToHash("IsSpecialAttacking");
     private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+    private static readonly int JumpAttackHash = Animator.StringToHash("JumpAttack");
 
     [Header("Ragdoll")]
     [Tooltip("Kéo tất cả Rigidbody trên bone ragdoll vào đây.")]
@@ -23,16 +32,6 @@ public class ZombieFatAnimatorController : MonoBehaviour
 
     [Tooltip("Kéo tất cả Collider trên bone ragdoll vào đây.")]
     [SerializeField] private Collider[] _ragdollColliders;
-
-    [Header("Detachable Parts")]
-    [Tooltip("Các bộ phận rơi khi chết. Có thể là GameObject thường hoặc có SkinnedMeshRenderer.")]
-    [SerializeField] private GameObject[] _detachableParts;
-
-    [Tooltip("Lực văng ra khi bộ phận rơi.")]
-    [SerializeField] private float _detachForce = 4f;
-
-    [Tooltip("Xác suất rơi bộ phận khi chết (0=không bao giờ, 1=luôn luôn).")]
-    [SerializeField][Range(0f, 1f)] private float _detachChance = 0.6f;
 
     private void Awake()
     {
@@ -60,6 +59,15 @@ public class ZombieFatAnimatorController : MonoBehaviour
     /// <summary>Kích hoạt animation tấn công đặc biệt (phun axit).</summary>
     public void TriggerSpecialAttack() => _animator.SetTrigger(IsSpecialAttackingHash);
 
+    /// <summary>Kích hoạt animation JumpAttack (giậm chân tại chỗ).</summary>
+    public void TriggerJumpAttack() => _animator.SetTrigger(JumpAttackHash);
+
+    /// <summary>
+    /// Gọi method này từ Animation Event tại frame chân chạm đất trong clip JumpAttack.
+    /// ZombieFatController sẽ xử lý damage, stun và spawn effect tại đây.
+    /// </summary>
+    public void JumpAttackImpact() => OnJumpAttackImpact?.Invoke();
+
     /// <summary>
     /// Huỷ attack giữa chừng: reset trigger + set IsRunning = 2 để
     /// kích hoạt exit transition (IsRunning > 0.5) đã setup trong Animator Controller.
@@ -76,7 +84,6 @@ public class ZombieFatAnimatorController : MonoBehaviour
     {
         _animator.enabled = false;
         SetRagdollActive(true);
-        TryDetachRandomPart();
     }
 
     public void ResetForSpawn()
@@ -85,9 +92,9 @@ public class ZombieFatAnimatorController : MonoBehaviour
         _animator.enabled = true;
         _animator.SetBool(IsDeadHash, false);
         _animator.SetFloat(IsRunningHash, 0f);
+        _animator.ResetTrigger(JumpAttackHash);
         _animator.Rebind();
         _animator.Update(0f);
-        ReattachParts();
     }
 
     // ── Ragdoll ────────────────────────────────────────────
@@ -106,79 +113,4 @@ public class ZombieFatAnimatorController : MonoBehaviour
         }
     }
 
-    // ── Detach Parts ───────────────────────────────────────
-
-    private void TryDetachRandomPart()
-    {
-        if (_detachableParts == null || _detachableParts.Length == 0) return;
-        if (Random.value > _detachChance) return;
-
-        int index = Random.Range(0, _detachableParts.Length);
-        GameObject part = _detachableParts[index];
-        if (part == null) return;
-
-        var smr = part.GetComponent<SkinnedMeshRenderer>();
-        if (smr != null)
-            DetachSkinnedMesh(smr);
-        else
-            DetachRegularObject(part);
-    }
-
-    private void DetachSkinnedMesh(SkinnedMeshRenderer smr)
-    {
-        Mesh bakedMesh = new Mesh();
-        smr.BakeMesh(bakedMesh);
-
-        GameObject detached = new GameObject(smr.gameObject.name + "_Detached");
-        detached.transform.SetPositionAndRotation(smr.transform.position, smr.transform.rotation);
-
-        var mf = detached.AddComponent<MeshFilter>();
-        var mr = detached.AddComponent<MeshRenderer>();
-        mf.mesh = bakedMesh;
-        mr.materials = smr.materials;
-
-        var mc = detached.AddComponent<MeshCollider>();
-        mc.convex = true;
-        mc.sharedMesh = bakedMesh;
-
-        var rb = detached.AddComponent<Rigidbody>();
-        rb.mass = 0.8f;
-        rb.linearDamping = 0.3f;
-
-        Vector3 dir = (Vector3.up * 1.5f + Random.insideUnitSphere).normalized;
-        rb.AddForce(dir * _detachForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * _detachForce, ForceMode.Impulse);
-
-        smr.enabled = false;
-        Destroy(bakedMesh, 30f);
-        Destroy(detached, 30f);
-    }
-
-    private void DetachRegularObject(GameObject part)
-    {
-        part.transform.SetParent(null);
-
-        var rb = part.GetComponent<Rigidbody>();
-        if (rb == null) rb = part.AddComponent<Rigidbody>();
-
-        var col = part.GetComponent<Collider>();
-        if (col != null) col.enabled = true;
-
-        Vector3 dir = (Vector3.up + Random.insideUnitSphere).normalized;
-        rb.AddForce(dir * _detachForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * _detachForce, ForceMode.Impulse);
-
-        Destroy(part, 30f);
-    }
-
-    private void ReattachParts()
-    {
-        if (_detachableParts == null) return;
-        foreach (var part in _detachableParts)
-        {
-            if (part == null) continue;
-            var smr = part.GetComponent<SkinnedMeshRenderer>();
-            if (smr != null) smr.enabled = true;
-        }
-    }
 }

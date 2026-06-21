@@ -20,6 +20,18 @@ public class ZombieFatController : MonoBehaviour
     [Tooltip("Vị trí miệng zombie — kéo bone đầu hoặc empty object tại miệng.")]
     [SerializeField] private Transform _mouthTransform;
 
+    [Header("Jump Attack")]
+    [Tooltip("Prefab effect xuất hiện khi chân chạm đất (gắn qua Animation Event).")]
+    [SerializeField] private GameObject _jumpImpactEffectPrefab;
+    [Tooltip("Sau bao nhiêu giây liên tục đứng trong tầm _isAttacking thì dùng JumpAttack.")]
+    [SerializeField] private float _jumpAttackDelay = 5f;
+    [Tooltip("Bán kính vùng damage khi giậm chân.")]
+    [SerializeField] private float _jumpLandRadius = 1.5f;
+    [Tooltip("Damage của JumpAttack.")]
+    [SerializeField] private float _jumpDamage = 35f;
+    [Tooltip("Thời gian choáng áp lên player khi JumpAttack trúng.")]
+    [SerializeField] private float _jumpStunDuration = 2f;
+
     private enum State { Wandering, Chasing, Dead }
     private State _state = State.Wandering;
 
@@ -37,6 +49,11 @@ public class ZombieFatController : MonoBehaviour
     private float _lostTargetTimer = 0f;
     private PlayerInputReader _playerInputReader;
 
+    // Jump Attack
+    private float _firstClawTime = -999f;    // thời điểm lần đầu dùng claw trong combat
+    private bool _jumpAttackReady = false;   // true khi đủ 5 giây từ claw đầu tiên
+    private bool _isJumpAttacking = false;   // đang thực hiện JumpAttack
+
     private ZombieFatStatsConfig Config => _stats != null ? _stats.EnemyConfig as ZombieFatStatsConfig : null;
 
     private void Awake()
@@ -53,6 +70,9 @@ public class ZombieFatController : MonoBehaviour
 
         _stats.OnDeath += HandleDeath;
         _stats.OnDamagedBy += HandleDamagedBy;
+
+        if (_anim != null)
+            _anim.OnJumpAttackImpact += HandleJumpAttackImpact;
     }
 
     private void OnDestroy()
@@ -62,6 +82,9 @@ public class ZombieFatController : MonoBehaviour
             _stats.OnDeath -= HandleDeath;
             _stats.OnDamagedBy -= HandleDamagedBy;
         }
+
+        if (_anim != null)
+            _anim.OnJumpAttackImpact -= HandleJumpAttackImpact;
     }
 
     public void Initialize(ZombieFatSpawnPoint spawnPoint)
@@ -82,6 +105,9 @@ public class ZombieFatController : MonoBehaviour
         _playerInputReader = null;
         _lastAttackTime = -999f;
         _lastClawTime = -999f;
+        _firstClawTime = -999f;
+        _jumpAttackReady = false;
+        _isJumpAttacking = false;
 
         _agent.isStopped = false;
         _agent.speed = Config.WanderSpeed;
@@ -283,21 +309,42 @@ public class ZombieFatController : MonoBehaviour
 
         if (dist <= Config.AttackRange)
         {
-            // Trong tầm: đứng yên tấn công
+            // Trong tầm đánh: đứng yên
             _agent.isStopped = true;
             _agent.ResetPath();
             _agent.velocity = Vector3.zero;
             if (_anim != null) _anim.SetIdle();
+
+            // Đủ 5 giây kể từ lần đầu dùng claw → đánh dấu jump ready
+            if (!_jumpAttackReady && !_isJumpAttacking
+                && _firstClawTime > 0f
+                && Time.time >= _firstClawTime + _jumpAttackDelay)
+            {
+                _jumpAttackReady = true;
+            }
+
+            // Kích hoạt JumpAttack: chờ claw hiện tại xong rồi mới nhảy
+            if (_jumpAttackReady && !_isAttacking && !_isJumpAttacking)
+            {
+                _jumpAttackReady = false;
+                _firstClawTime = -999f; // reset để chu kỳ tiếp theo đếm lại
+                StartCoroutine(JumpAttackRoutine());
+                return;
+            }
+
             TryClawAttack();
             return;
         }
 
-        // Ngoài tầm: cancel attack nếu đang đánh, chuyển sang đuổi
+        // Player thoát tầm: reset hoàn toàn chu kỳ JumpAttack
+        _firstClawTime = -999f;
+        _jumpAttackReady = false;
+
         if (_isAttacking)
         {
             _attackCancelled = true;
             _isAttacking = false;
-            if (_anim != null) _anim.CancelAttack(); // reset animator về locomotion ngay
+            if (_anim != null) _anim.CancelAttack();
         }
 
         _agent.isStopped = false;
@@ -336,6 +383,8 @@ public class ZombieFatController : MonoBehaviour
         _agent.speed = Config.WanderSpeed;
         _player = null;
         _lostTargetTimer = 0f;
+        _firstClawTime = -999f;
+        _jumpAttackReady = false;
         if (_anim != null) _anim.SetIdle();
     }
 
@@ -345,6 +394,10 @@ public class ZombieFatController : MonoBehaviour
         if (_isAttacking) return;
         if (Time.time < _lastAttackTime + Config.AttackCooldown) return;
         if (_isDead) return;
+
+        // Ghi nhận lần đầu tiên dùng claw — để đếm 5 giây cho JumpAttack
+        if (_firstClawTime < 0f)
+            _firstClawTime = Time.time;
 
         _isAttacking = true;
         _attackCancelled = false;
@@ -383,6 +436,58 @@ public class ZombieFatController : MonoBehaviour
         var damageable = _player.GetComponentInParent<IDamageable>();
         if (damageable != null && !damageable.IsDead)
             damageable.TakeDamage(Config.BaseDamage, gameObject);
+    }
+
+    /// <summary>
+    /// JumpAttack tại chỗ — zombie không di chuyển, chỉ giậm chân xuống.
+    /// Damage + stun được xử lý bởi HandleJumpAttackImpact khi Animation Event fired.
+    /// </summary>
+    private IEnumerator JumpAttackRoutine()
+    {
+        _isJumpAttacking = true;
+        _isAttacking = true;
+        _attackCancelled = false;
+
+        // Khoá agent hoàn toàn — không trượt theo player
+        _agent.isStopped = true;
+        _agent.ResetPath();
+        _agent.velocity = Vector3.zero;
+
+        if (_anim != null) _anim.TriggerJumpAttack();
+
+        // Chờ animation kết thúc (thời gian ước lượng theo clip)
+        // Damage thực sự xử lý qua Animation Event → HandleJumpAttackImpact
+        yield return new WaitForSeconds(1.8f);
+
+        _isJumpAttacking = false;
+        _isAttacking = false;
+        _lastClawTime = Time.time; // reset cooldown để không bị special ngay sau jump
+    }
+
+    /// <summary>
+    /// Được gọi bởi Animation Event tại frame chân chạm đất trong clip JumpAttack.
+    /// Áp damage, stun và spawn effect tại đây.
+    /// </summary>
+    private void HandleJumpAttackImpact()
+    {
+        if (_isDead) return;
+
+        // Spawn effect tại vị trí chân zombie
+        if (_jumpImpactEffectPrefab != null)
+            ObjectPool.Instance.Get(_jumpImpactEffectPrefab, transform.position, Quaternion.identity);
+
+        // Kiểm tra player vẫn trong tầm tại thời điểm impact
+        if (_player == null) return;
+        float dist = Vector3.Distance(transform.position, _player.position);
+        if (dist > _jumpLandRadius) return;
+
+        var damageable = _player.GetComponentInParent<IDamageable>();
+        if (damageable == null || damageable.IsDead) return;
+
+        damageable.TakeDamage(_jumpDamage, gameObject);
+
+        var stunnable = _player.GetComponentInParent<IStunnable>();
+        stunnable?.ApplyStun(_jumpStunDuration);
     }
 
     private IEnumerator PerformSpecialAttack()
@@ -486,6 +591,8 @@ public class ZombieFatController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, Config.SpecialRange);
         Gizmos.color = new Color(1f, 0.5f, 0f);
         Gizmos.DrawWireSphere(transform.position, Config.ChaseRadius);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, _jumpLandRadius);
         float half = Config.VisionAngle * 0.5f;
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(transform.position,

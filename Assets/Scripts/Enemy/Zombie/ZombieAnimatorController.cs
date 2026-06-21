@@ -22,16 +22,6 @@ public class ZombieAnimatorController : MonoBehaviour
     [Tooltip("Kéo vào tất cả Collider trên các bone của ragdoll.")]
     [SerializeField] private Collider[] _ragdollColliders;
 
-    [Header("Detachable Parts (optional)")]
-    [Tooltip("Các bộ phận có thể rơi ra khi chết.")]
-    [SerializeField] private GameObject[] _detachableParts;
-
-    [Tooltip("Lực văng ra khi bộ phận rơi.")]
-    [SerializeField] private float _detachForce = 3f;
-
-    [Tooltip("Xác suất rơi bộ phận khi chết (0=không bao giờ, 1=luôn luôn).")]
-    [SerializeField][Range(0f, 1f)] private float _detachChance = 0.5f;
-
     private void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -79,7 +69,6 @@ public class ZombieAnimatorController : MonoBehaviour
     {
         _animator.enabled = false;
         SetRagdollActive(true);
-        TryDetachRandomPart();
     }
 
     public void ResetForSpawn()
@@ -92,7 +81,6 @@ public class ZombieAnimatorController : MonoBehaviour
         _animator.SetBool(IsRunningHash, false);
         _animator.Rebind();
         _animator.Update(0f);
-        ReattachParts();
     }
 
     // ── Ragdoll ────────────────────────────────────────────
@@ -111,79 +99,4 @@ public class ZombieAnimatorController : MonoBehaviour
         }
     }
 
-    // ── Detach Parts ───────────────────────────────────────
-
-    private void TryDetachRandomPart()
-    {
-        if (_detachableParts == null || _detachableParts.Length == 0) return;
-        if (Random.value > _detachChance) return;
-
-        int index = Random.Range(0, _detachableParts.Length);
-        GameObject part = _detachableParts[index];
-        if (part == null) return;
-
-        var smr = part.GetComponent<SkinnedMeshRenderer>();
-        if (smr != null)
-            DetachSkinnedMesh(smr);
-        else
-            DetachRegularObject(part);
-    }
-
-    private void DetachSkinnedMesh(SkinnedMeshRenderer smr)
-    {
-        Mesh bakedMesh = new Mesh();
-        smr.BakeMesh(bakedMesh);
-
-        GameObject detached = new GameObject(smr.gameObject.name + "_Detached");
-        detached.transform.SetPositionAndRotation(smr.transform.position, smr.transform.rotation);
-
-        var mf = detached.AddComponent<MeshFilter>();
-        var mr = detached.AddComponent<MeshRenderer>();
-        mf.mesh = bakedMesh;
-        mr.materials = smr.materials;
-
-        var mc = detached.AddComponent<MeshCollider>();
-        mc.convex = true;
-        mc.sharedMesh = bakedMesh;
-
-        var rb = detached.AddComponent<Rigidbody>();
-        rb.mass = 0.5f;
-        rb.linearDamping = 0.3f;
-
-        Vector3 dir = (Vector3.up * 1.5f + Random.insideUnitSphere).normalized;
-        rb.AddForce(dir * _detachForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * _detachForce, ForceMode.Impulse);
-
-        smr.enabled = false;
-        Destroy(bakedMesh, 30f);
-        Destroy(detached, 30f);
-    }
-
-    private void DetachRegularObject(GameObject part)
-    {
-        part.transform.SetParent(null);
-
-        var rb = part.GetComponent<Rigidbody>();
-        if (rb == null) rb = part.AddComponent<Rigidbody>();
-
-        var col = part.GetComponent<Collider>();
-        if (col != null) col.enabled = true;
-
-        Vector3 dir = (Vector3.up + Random.insideUnitSphere).normalized;
-        rb.AddForce(dir * _detachForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * _detachForce, ForceMode.Impulse);
-
-        Destroy(part, 30f);
-    }
-
-    private void ReattachParts()
-    {
-        if (_detachableParts == null) return;
-        foreach (var part in _detachableParts)
-        {
-            if (part == null) continue;
-            var smr = part.GetComponent<SkinnedMeshRenderer>();
-            if (smr != null) smr.enabled = true;
-        }
-    }
 }

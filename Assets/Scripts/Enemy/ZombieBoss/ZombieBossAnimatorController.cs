@@ -18,7 +18,6 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     private static readonly int MoveSpeedParam = Animator.StringToHash("MoveSpeed");
     private static readonly int AttackClawTrigger = Animator.StringToHash("AttackClaw");
-    private static readonly int JumpAttackTrigger = Animator.StringToHash("JumpAttack");
     private static readonly int HowlTrigger = Animator.StringToHash("Howl");
     private static readonly int DeathTrigger = Animator.StringToHash("Death");
 
@@ -38,9 +37,23 @@ public class ZombieBossAnimatorController : MonoBehaviour
     public void SetMoveSpeed(float speed) =>
         _animator.SetFloat(MoveSpeedParam, speed, 0.1f, Time.deltaTime);
 
-    public void TriggerAttackClaw() => _animator.SetTrigger(AttackClawTrigger);
-    public void TriggerJumpAttack() => _animator.SetTrigger(JumpAttackTrigger);
-    public void TriggerHowl() => _animator.SetTrigger(HowlTrigger);
+    public void TriggerAttackClaw()
+    {
+        // Reset trigger Howl nếu còn "treo" — tránh trường hợp Howl bị đè ngược lại
+        // bởi 1 trigger AttackClaw cũ chưa tiêu thụ, và đảm bảo 2 action không lẫn nhau.
+        _animator.ResetTrigger(HowlTrigger);
+        _animator.SetTrigger(AttackClawTrigger);
+    }
+
+    public void TriggerHowl()
+    {
+        // Reset trigger AttackClaw nếu còn "treo" từ lần trước chưa được Animator tiêu thụ
+        // (ví dụ do Any State -> AttackClaw chưa kịp transition) — đây là nguyên nhân khiến
+        // animation Howl bị AttackClaw "đè" lên giữa lúc đang triệu hồi.
+        _animator.ResetTrigger(AttackClawTrigger);
+        _animator.SetTrigger(HowlTrigger);
+    }
+
     public void TriggerDeath() => _animator.SetTrigger(DeathTrigger);
 
     /// <summary>
@@ -58,7 +71,6 @@ public class ZombieBossAnimatorController : MonoBehaviour
         _animator.enabled = true;
         _animator.SetFloat(MoveSpeedParam, 0f);
         _animator.ResetTrigger(AttackClawTrigger);
-        _animator.ResetTrigger(JumpAttackTrigger);
         _animator.ResetTrigger(HowlTrigger);
         _animator.ResetTrigger(DeathTrigger);
         _animator.Play("Movement", 0, 0f);
