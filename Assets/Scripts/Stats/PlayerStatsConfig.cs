@@ -9,33 +9,41 @@ namespace SimpleSurvival.Stats
         [SerializeField] private float maxHunger = 100f;
         [SerializeField] private float startHunger = 100f;
         [SerializeField] private float hungerDecayPerSec = 0.01f;
-        [SerializeField] private float starveDamagePerSec = 1f;
 
         [Header("Thirst")]
         [SerializeField] private float maxThirst = 100f;
         [SerializeField] private float startThirst = 100f;
         [SerializeField] private float thirstDecayPerSec = 0.03f;
-        [SerializeField] private float dehydrateDamagePerSec = 1.5f;
 
-        [Header("HP Regen")]
-        [SerializeField] private float hpRegenPerSec = 2f;
-        [SerializeField, Range(0f, 1f)] private float regenThreshold = 0.2f;
-        [SerializeField] private float hungerCostPerHPRegen = 0.5f;
-        [SerializeField] private float thirstCostPerHPRegen = 0.8f;
+        [Header("HP Regen (Tick-based)")]
+        [Tooltip("HP healed per tick.")]
+        [SerializeField] private float hpRegenAmount = 5f;
+        [Tooltip("Seconds between each regen tick.")]
+        [SerializeField] private float hpRegenInterval = 1f;
+
+        [Header("Starvation Damage (Tick-based)")]
+        [SerializeField] private float starveDamageAmount = 5f;
+        [SerializeField] private float starveDamageInterval = 1f;
+
+        [Header("Dehydrate Damage (Tick-based)")]
+        [SerializeField] private float dehydrateDamageAmount = 5f;
+        [SerializeField] private float dehydrateDamageInterval = 1f;
 
         public float MaxHunger => maxHunger;
         public float StartHunger => startHunger;
         public float HungerDecayPerSec => hungerDecayPerSec;
-        public float StarveDamagePerSec => starveDamagePerSec;
 
         public float MaxThirst => maxThirst;
         public float StartThirst => startThirst;
         public float ThirstDecayPerSec => thirstDecayPerSec;
-        public float DehydrateDamagePerSec => dehydrateDamagePerSec;
 
-        public float HPRegenPerSec => hpRegenPerSec;
-        public float RegenThreshold => regenThreshold;
-        public float HungerCostPerHPRegen => hungerCostPerHPRegen;
-        public float ThirstCostPerHPRegen => thirstCostPerHPRegen;
+        public float HPRegenAmount => hpRegenAmount;
+        public float HPRegenInterval => hpRegenInterval;
+
+        public float StarveDamageAmount => starveDamageAmount;
+        public float StarveDamageInterval => starveDamageInterval;
+
+        public float DehydrateDamageAmount => dehydrateDamageAmount;
+        public float DehydrateDamageInterval => dehydrateDamageInterval;
     }
 }
