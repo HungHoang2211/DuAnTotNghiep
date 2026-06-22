@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: a46bb5ebf1f910f469f4f759299304f3, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 1761616172}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5585,8 +5585,11 @@ MonoBehaviour:
   unarmedMaxComboIndex: 3
   comboWindowSeconds: 0.25
   unarmedSafetyTimeout: 3
+  unarmedAttackSpeed: 1.8
+  unarmedAttackClipLength: 0.5
   pickupRange: 1
   gatherRange: 1
+  lootRange: 1.5
 --- !u!95 &135702092
 Animator:
   serializedVersion: 7
@@ -18174,6 +18177,7 @@ MonoBehaviour:
   pickupIcon: {fileID: 21300000, guid: fca99d0da170d2f46b779a5cae59535c, type: 3}
   axeIcon: {fileID: 21300000, guid: 8ca35c081efa8cb4db745d0d10ba0f3c, type: 3}
   pickaxeIcon: {fileID: 21300000, guid: 6dd08558f74e5034fae4ff5c298ec3b5, type: 3}
+  lootIcon: {fileID: 0}
 --- !u!114 &383763897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19602,8 +19606,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c4b5c5dc3a31b46872b928206611cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selection: {fileID: 525919285}
+  inventorySelection: {fileID: 0}
+  lootSelection: {fileID: 0}
   playerInventory: {fileID: 1730144329}
+  playerEquipment: {fileID: 0}
   equipmentPanel: {fileID: 1774838174}
   buttonUse: {fileID: 270829856}
   buttonSplit: {fileID: 749205368}
@@ -50456,6 +50462,14 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0
       objectReference: {fileID: 0}
+    - target: {fileID: 8287616, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: d8afce294aff7a1489f9ae555d68e2ca, type: 3}
+    - target: {fileID: 19869850, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.a
+      value: 0.56078434
+      objectReference: {fileID: 0}
     - target: {fileID: 19888332, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
       propertyPath: InitialModule.startColor.maxColor.a
       value: 0.3647059
@@ -65917,6 +65931,7 @@ MonoBehaviour:
   grids:
   - {fileID: 352801403}
   - {fileID: 1764167773}
+  lootGrid: {fileID: 0}
   equipCells:
   - {fileID: 1840472449}
   - {fileID: 615061997}

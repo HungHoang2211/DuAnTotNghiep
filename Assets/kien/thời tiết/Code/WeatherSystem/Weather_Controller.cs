@@ -3,13 +3,11 @@ using System.Collections;
 
 public class Weather_Controller : MonoBehaviour
 {
-    /********** ----- VARIABLES ----- **********/
-
     private bool _bChangeWeather;
     private int _iNewWeather;
     private bool _bStartWeatherChange;
     private float _fTimeChangeWeatherStart;
-    private float _fTimeChangeWeatherEnd;
+    private float _fTimeChangeWeatherEnd = 5.0f; // Thời gian chuyển giao thời tiết (5 giây)
 
     [SerializeField] private bool _bUsingProceduralSkybox;
     [SerializeField] private bool _bUseSun = true;
@@ -30,298 +28,206 @@ public class Weather_Controller : MonoBehaviour
     public Material matClouds;
     public Material matSkybox;
 
-    // TỐI ƯU HIỆU SUẤT: Chỉ giữ lại cache cho Sun và Rain
     private ToD_Base _cachedToD;
     private Weather_Sun _weatherSun;
     private Weather_Rain _weatherRain;
 
     public enum WeatherType
     {
-        RANDOM,
-        SUN,
-        RAIN,
-        NUMBEROFWEATHERTYPES
-    };
+        RANDOM = 0,
+        SUN = 1,
+        RAIN = 2
+    }
 
-    public WeatherType en_CurrWeather;
+    [SerializeField] private WeatherType _enCurrWeather = WeatherType.SUN;
+    private WeatherType _enNewWeather;
 
-    [HideInInspector]
-    public WeatherType en_LastWeather;
-
-    /********** ----- GETTERS AND SETTERS ----- **********/
-
-    public bool Get_bChangeWeather { get { return _bChangeWeather; } }
-    public bool Get_bStartWeatherChange { get { return _bStartWeatherChange; } }
-    public float Get_fTimeChangeWeatherStart { get { return _fTimeChangeWeatherStart; } }
-    public int Get_iAmountOfDaysToNewWeather { get { return _iAmountOfDaysToNewWeather; } }
-
-    public bool GetSet_bUsingProceduralSkybox { get { return _bUsingProceduralSkybox; } set { _bUsingProceduralSkybox = value; } }
-    public bool GetSet_bUseSun { get { return _bUseSun; } set { _bUseSun = value; } }
-    public bool GetSet_bUseRain { get { return _bUseRain; } set { _bUseRain = value; } }
-    public bool GetSet_bUseRandomWeather { get { return _bUseRandomWeather; } set { _bUseRandomWeather = value; } }
-    public bool GetSet_bUseRandomDaysWeather { get { return _bUseRandomDaysWeather; } set { _bUseRandomDaysWeather = value; } }
-    public int GetSet_iChangeWeatherAfterDays { get { return _iChangeWeatherAfterDays; } set { _iChangeWeatherAfterDays = value; } }
-    public int GetSet_iAmountOfDaysSinceLastWeather { get { return _iAmountOfDaysSinceLastWeather; } set { _iAmountOfDaysSinceLastWeather = value; } }
-    public int GetSet_iMinAmountOfDaysToNewWeather { get { return _iMinAmountOfDaysToNewWeather; } set { _iMinAmountOfDaysToNewWeather = value; } }
-    public int GetSet_iMaxAmountOfDaysToNewWeather { get { return _iMaxAmountOfDaysToNewWeather; } set { _iMaxAmountOfDaysToNewWeather = value; } }
+    public WeatherType en_CurrWeather { get { return _enCurrWeather; } }
+    public WeatherType en_NewWeather { get { return _enNewWeather; } }
     public float GetSet_fCurrTemp { get { return _fCurrTemp; } set { _fCurrTemp = value; } }
+    public bool Get_bStartWeatherChange { get { return _bStartWeatherChange; } }
+    public int Get_iAmountOfDaysToNewWeather { get { return _iAmountOfDaysToNewWeather; } }
+    public int GetSet_iAmountOfDaysSinceLastWeather { get { return _iAmountOfDaysSinceLastWeather; } set { _iAmountOfDaysSinceLastWeather = value; } }
+
+    void Awake()
+    {
+        if (gTimeOfDay != null) _cachedToD = gTimeOfDay.GetComponent<ToD_Base>();
+        _weatherSun = GetComponent<Weather_Sun>();
+        _weatherRain = GetComponent<Weather_Rain>();
+    }
 
     void Start()
     {
-        _fTimeChangeWeatherStart = 0.0f;
-        _fTimeChangeWeatherEnd = 5.0f;
+        _bChangeWeather = false;
+        _bStartWeatherChange = false;
+        _iAmountOfDaysSinceLastWeather = 0;
 
-        if (gTimeOfDay != null) _cachedToD = gTimeOfDay.GetComponent<ToD_Base>();
-
-        _weatherSun = GetComponent<Weather_Sun>();
-        _weatherRain = GetComponent<Weather_Rain>();
-
-        if (_bUseRandomDaysWeather == true)
+        if (_bUseRandomDaysWeather)
             _iAmountOfDaysToNewWeather = Random.Range(_iMinAmountOfDaysToNewWeather, _iMaxAmountOfDaysToNewWeather);
         else
             _iAmountOfDaysToNewWeather = _iChangeWeatherAfterDays;
 
-        if ((en_CurrWeather == WeatherType.RANDOM || en_CurrWeather == WeatherType.NUMBEROFWEATHERTYPES) && _bUseRandomWeather == true)
-            PickRandomWeather();
-        else if ((en_CurrWeather == WeatherType.RANDOM || en_CurrWeather == WeatherType.NUMBEROFWEATHERTYPES) && _bUseRandomWeather == false)
-        {
-            Debug.LogWarning("You haven't picked which weather to use, we default to SUN...");
-            ExitCurrentWeather((int)WeatherType.SUN);
-        }
-        else
-            EnterNewWeather((int)en_CurrWeather);
+        SetInitialWeather();
     }
 
     void Update()
     {
-        if (_bUseRandomWeather == true)
+        if (_bChangeWeather)
         {
-            if (_bUseRandomDaysWeather == true)
-            {
-                if (_iAmountOfDaysSinceLastWeather >= _iAmountOfDaysToNewWeather)
-                {
-                    _bChangeWeather = true;
-                    _iAmountOfDaysSinceLastWeather = 0;
-                    _iAmountOfDaysToNewWeather = Random.Range(_iMinAmountOfDaysToNewWeather, _iMaxAmountOfDaysToNewWeather);
-                }
-            }
-            else
-            {
-                if (_iAmountOfDaysSinceLastWeather >= _iChangeWeatherAfterDays)
-                {
-                    _bChangeWeather = true;
-                    _iAmountOfDaysSinceLastWeather = 0;
-                }
-            }
+            _bChangeWeather = false;
+            ChooseNewWeather();
         }
 
-        if (_bChangeWeather == true)
-            PickRandomWeather();
+        // ĐÃ SỬA: Luôn cập nhật thời tiết mỗi khung hình để hạt mưa (Rain Particle) được Active kịp thời lúc chuyển giao
+        UpdateCurrentWeather();
 
-        if (_bStartWeatherChange == true)
-            ExitCurrentWeather(_iNewWeather);
-    }
-
-    private void PickRandomWeather()
-    {
-        int Weather = Random.Range(1, (int)WeatherType.NUMBEROFWEATHERTYPES);
-
-        if (Weather != (int)en_CurrWeather)
-            CheckIfWeatherTypeIsOn(Weather);
-        else
-            Debug.Log("We got the same weather no change will happen!");
-
-        _bChangeWeather = false;
-    }
-
-    void CheckIfWeatherTypeIsOn(int NewWeatherType)
-    {
-        if (NewWeatherType == (int)WeatherType.SUN && _bUseSun) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
-        else if (NewWeatherType == (int)WeatherType.RAIN && _bUseRain) { _iNewWeather = NewWeatherType; _bStartWeatherChange = true; }
-        else
+        if (_bStartWeatherChange)
         {
-            Debug.Log("Weather type was not on, so we are trying again!");
-            PickRandomWeather();
+            TransitionWeather();
         }
     }
 
-    void ChangeWeatherToSun()
+    private void SetInitialWeather()
     {
-        en_CurrWeather = WeatherType.SUN;
-        if (_weatherSun != null) { _weatherSun.enabled = true; _weatherSun.GetSet_bUseInit = true; }
+        if (_enCurrWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.TurnOnSound(this.gameObject);
+        else if (_enCurrWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.TurnOnSound(this.gameObject);
     }
 
-    void ChangeWeatherToRain()
+    private void ChooseNewWeather()
     {
-        en_CurrWeather = WeatherType.RAIN;
-        if (_weatherRain != null) { _weatherRain.enabled = true; _weatherRain.GetSet_bUseInit = true; }
-    }
+        if (!_bUseRandomWeather) return;
 
-    void ExitCurrentWeather(int NewWeatherType)
-    {
-        if (en_CurrWeather == WeatherType.RANDOM)
+        bool targetFound = false;
+        int attempts = 0;
+        while (!targetFound && attempts < 10)
         {
-            en_LastWeather = WeatherType.RANDOM;
-            EnterNewWeather(NewWeatherType);
-            _fTimeChangeWeatherStart = 0.0f;
+            attempts++;
+            int checkWeather = Random.Range(1, 3); // Bốc ngẫu nhiên 1 (SUN) hoặc 2 (RAIN)
+            if (checkWeather == (int)_enCurrWeather) continue;
+
+            if (checkWeather == 1 && _bUseSun) { _enNewWeather = WeatherType.SUN; targetFound = true; }
+            else if (checkWeather == 2 && _bUseRain) { _enNewWeather = WeatherType.RAIN; targetFound = true; }
+        }
+
+        if (targetFound)
+        {
+            StartWeatherTransition(_enNewWeather);
+        }
+    }
+
+    private void StartWeatherTransition(WeatherType newWeather)
+    {
+        _enNewWeather = newWeather;
+        _bStartWeatherChange = true;
+        _fTimeChangeWeatherStart = 0.0f;
+
+        if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.TurnOnSound(this.gameObject);
+        else if (_enNewWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.TurnOnSound(this.gameObject);
+    }
+
+    private void TransitionWeather()
+    {
+        _fTimeChangeWeatherStart += Time.deltaTime;
+        float progress = _fTimeChangeWeatherStart / _fTimeChangeWeatherEnd;
+
+        if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.ForceWeatherChange();
+        else if (_enNewWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.ForceWeatherChange();
+
+        if (_enNewWeather != _enCurrWeather)
+        {
+            if (_enCurrWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.ExitWeatherEffect(this.gameObject);
+            else if (_enCurrWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.ExitWeatherEffect(this.gameObject);
+        }
+
+        if (progress >= 1.0f)
+        {
             _bStartWeatherChange = false;
-        }
-        else if (en_CurrWeather == WeatherType.SUN)
-        {
-            en_LastWeather = WeatherType.SUN;
-            _fTimeChangeWeatherStart += Time.deltaTime;
-
-            if (_weatherSun != null) _weatherSun.ExitWeatherEffect(_weatherSun.GetSet_gSoundEffect);
-
-            if (_fTimeChangeWeatherStart >= _fTimeChangeWeatherEnd)
-            {
-                if (_weatherSun != null) _weatherSun.enabled = false;
-                EnterNewWeather(NewWeatherType);
-                _fTimeChangeWeatherStart = 0.0f;
-                _bStartWeatherChange = false;
-            }
-        }
-        else if (en_CurrWeather == WeatherType.RAIN)
-        {
-            en_LastWeather = WeatherType.RAIN;
-            _fTimeChangeWeatherStart += Time.deltaTime;
-
-            if (_weatherRain != null) _weatherRain.ExitWeatherEffect(_weatherRain.GetSet_gPartRain);
-
-            if (_fTimeChangeWeatherStart >= _fTimeChangeWeatherEnd)
-            {
-                if (_weatherRain != null) _weatherRain.enabled = false;
-                EnterNewWeather(NewWeatherType);
-                _fTimeChangeWeatherStart = 0.0f;
-                _bStartWeatherChange = false;
-            }
+            _enCurrWeather = _enNewWeather;
         }
     }
 
-    private void EnterNewWeather(int NewWeather)
+    private void UpdateCurrentWeather()
     {
-        if (NewWeather == (int)WeatherType.SUN) ChangeWeatherToSun();
-        else if (NewWeather == (int)WeatherType.RAIN) ChangeWeatherToRain();
+        // ĐÃ SỬA: Khi đang đổi thời tiết, cập nhật song song hiệu ứng ánh sáng/hạt của thời tiết MỚI đang chuyển tới
+        if (_bStartWeatherChange)
+        {
+            if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.RunWeather();
+            else if (_enNewWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.RunWeather();
+            return;
+        }
+
+        if (_enCurrWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.RunWeather();
+        else if (_enCurrWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.RunWeather();
     }
 
-    public void UpdateAllWeather(float sunIntensity, Color sunLightColor, float moonIntensity, Color moonLightColor, Color skyTint, Color skyGround, Color cloudColor, float fogDensity, Color fogColor, float fadeTime)
+    public void UpdateAllWeather(float lightInt, Color lightCol, float moonInt, Color moonCol, Color skyTint, Color skyGround, Color cloudCol, float fogAmount, Color fogCol, float fadeTime)
     {
         if (_cachedToD == null) return;
 
         if (_cachedToD.lSun != null)
         {
-            _cachedToD.lSun.intensity = Mathf.Lerp(_cachedToD.lSun.intensity, sunIntensity, Time.deltaTime / fadeTime);
-            _cachedToD.lSun.color = Color.Lerp(_cachedToD.lSun.color, sunLightColor, Time.deltaTime / fadeTime);
+            _cachedToD.lSun.intensity = Mathf.Lerp(_cachedToD.lSun.intensity, lightInt, Time.deltaTime / fadeTime);
+            _cachedToD.lSun.color = Color.Lerp(_cachedToD.lSun.color, lightCol, Time.deltaTime / fadeTime);
         }
 
-        if (_cachedToD.GetSet_bUseMoon == true && _cachedToD.lMoon != null)
+        if (_bUsingProceduralSkybox && matSkybox != null)
         {
-            _cachedToD.lMoon.intensity = Mathf.Lerp(_cachedToD.lMoon.intensity, moonIntensity, Time.deltaTime / fadeTime);
-            _cachedToD.lMoon.color = Color.Lerp(_cachedToD.lMoon.color, moonLightColor, Time.deltaTime / fadeTime);
-        }
-
-        if (RenderSettings.skybox != null)
-        {
-            if (_bUsingProceduralSkybox == false)
-                RenderSettings.skybox.SetColor("_Tint", Color.Lerp(RenderSettings.skybox.GetColor("_Tint"), skyTint, Time.deltaTime / fadeTime));
-            else
-            {
-                RenderSettings.skybox.SetColor("_SkyTint", Color.Lerp(RenderSettings.skybox.GetColor("_SkyTint"), skyTint, Time.deltaTime / fadeTime));
-                RenderSettings.skybox.SetColor("_GroundColor", Color.Lerp(RenderSettings.skybox.GetColor("_GroundColor"), skyGround, Time.deltaTime / fadeTime));
-            }
+            matSkybox.SetColor("_SkyTint", Color.Lerp(matSkybox.GetColor("_SkyTint"), skyTint, Time.deltaTime / fadeTime));
+            matSkybox.SetColor("_GroundColor", Color.Lerp(matSkybox.GetColor("_GroundColor"), skyGround, Time.deltaTime / fadeTime));
         }
 
         if (matClouds != null)
-            matClouds.color = Color.Lerp(matClouds.color, cloudColor, Time.deltaTime / fadeTime);
-        else
-            Debug.LogWarning("We have no cloud material attached to:" + this.gameObject);
+        {
+            matClouds.color = Color.Lerp(matClouds.color, cloudCol, Time.deltaTime / fadeTime);
+        }
 
-        RenderSettings.fogDensity = Mathf.Lerp(RenderSettings.fogDensity, fogDensity, Time.deltaTime / fadeTime);
-        RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, fogColor, Time.deltaTime / fadeTime);
+        RenderSettings.fogDensity = Mathf.Lerp(RenderSettings.fogDensity, fogAmount, Time.deltaTime / fadeTime);
+        RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, fogCol, Time.deltaTime / fadeTime);
     }
 
-    public void ActivateTimesetParticle(GameObject CurrParticles)
+    public void ActivateTimesetParticle(GameObject particle)
     {
-        if (CurrParticles == null) return;
-
-        ParticleSystem ps = CurrParticles.GetComponent<ParticleSystem>();
-        if (ps != null)
-        {
-            var emission = ps.emission;
-            if (!emission.enabled)
-            {
-                emission.enabled = true;
-
-                for (int iii = 0; iii < CurrParticles.transform.childCount; ++iii)
-                {
-                    ParticleSystem childPs = CurrParticles.transform.GetChild(iii).GetComponent<ParticleSystem>();
-                    if (childPs != null)
-                    {
-                        var childEmission = childPs.emission;
-                        childEmission.enabled = true;
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (int iii = 0; iii < CurrParticles.transform.childCount; ++iii)
-            {
-                ParticleSystem childPs = CurrParticles.transform.GetChild(iii).GetComponent<ParticleSystem>();
-                if (childPs != null)
-                {
-                    var childEmission = childPs.emission;
-                    childEmission.enabled = true;
-                }
-            }
-        }
+        if (particle == null) return;
+        if (!particle.activeSelf) particle.SetActive(true);
+        ParticleSystem ps = particle.GetComponent<ParticleSystem>();
+        if (ps != null) { var emission = ps.emission; emission.enabled = true; }
     }
 
-    public void DeactivateTimesetParticle(GameObject CurrParticles)
+    public void DeactivateTimesetParticle(GameObject particle)
     {
-        if (CurrParticles == null) return;
-
-        ParticleSystem ps = CurrParticles.GetComponent<ParticleSystem>();
-        if (ps != null)
-        {
-            var emission = ps.emission;
-            if (emission.enabled)
-            {
-                emission.enabled = false;
-
-                for (int iii = 0; iii < CurrParticles.transform.childCount; ++iii)
-                {
-                    ParticleSystem childPs = CurrParticles.transform.GetChild(iii).GetComponent<ParticleSystem>();
-                    if (childPs != null)
-                    {
-                        var childEmission = childPs.emission;
-                        childEmission.enabled = false;
-                    }
-                }
-            }
-        }
-        else
-        {
-            for (int iii = 0; iii < CurrParticles.transform.childCount; ++iii)
-            {
-                ParticleSystem childPs = CurrParticles.transform.GetChild(iii).GetComponent<ParticleSystem>();
-                if (childPs != null)
-                {
-                    var childEmission = childPs.emission;
-                    childEmission.enabled = false;
-                }
-            }
-        }
+        if (particle == null) return;
+        ParticleSystem ps = particle.GetComponent<ParticleSystem>();
+        if (ps != null) { var emission = ps.emission; emission.enabled = false; }
     }
 
-    public void UseWeatherTypeDebug(int WeatherType)
+    public void UseWeatherTypeDebug(int weatherTypeIndex)
     {
-        if (WeatherType == 0)
+        if (weatherTypeIndex == 0)
+        {
             _bChangeWeather = true;
+        }
         else
         {
-            _iNewWeather = WeatherType;
-            _bStartWeatherChange = true;
+            _iNewWeather = weatherTypeIndex;
+            StartWeatherTransition((WeatherType)weatherTypeIndex);
+        }
+    }
+
+    // ĐÃ THÊM: Logic xử lý qua ngày mới chuẩn xác, tự động đếm tích lũy để kích hoạt đổi thời tiết tự động
+    public void OnNewDayArrived()
+    {
+        _iAmountOfDaysSinceLastWeather += 1;
+
+        if (_iAmountOfDaysSinceLastWeather >= _iAmountOfDaysToNewWeather)
+        {
+            _iAmountOfDaysSinceLastWeather = 0;
+
+            if (_bUseRandomDaysWeather)
+                _iAmountOfDaysToNewWeather = Random.Range(_iMinAmountOfDaysToNewWeather, _iMaxAmountOfDaysToNewWeather);
+            else
+                _iAmountOfDaysToNewWeather = _iChangeWeatherAfterDays;
+
+            _bChangeWeather = true; // Bật cờ cho Update() tự chọn thời tiết ngẫu nhiên mới
         }
     }
 }
