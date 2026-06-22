@@ -44,9 +44,12 @@ namespace SimpleSurvival.UI
             _canvasRect = canvasRect;
             _running = true;
 
+            Vector3 localPos = _rect.localPosition;
+            localPos.z = 0f;
+            _rect.localPosition = localPos;
+
             if (root != null) root.SetActive(true);
             if (progressBarImage != null) progressBarImage.fillAmount = 0f;
-
             UpdatePosition();
         }
 
@@ -88,11 +91,6 @@ namespace SimpleSurvival.UI
             Vector3 worldPos = _target.position + _worldOffset;
             Vector3 screenPos = _gameCamera.WorldToScreenPoint(worldPos);
 
-            if (screenPos.z < 0f)
-            {
-                if (root != null && root.activeSelf) root.SetActive(false);
-                return;
-            }
             if (root != null && !root.activeSelf) root.SetActive(true);
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(

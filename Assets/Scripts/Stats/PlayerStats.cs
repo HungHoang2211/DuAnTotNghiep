@@ -10,16 +10,24 @@ namespace SimpleSurvival.Stats
 
         public float Hunger { get; private set; }
         public float Thirst { get; private set; }
-
         public float MaxHunger => Config != null ? Config.MaxHunger : 0f;
         public float MaxThirst => Config != null ? Config.MaxThirst : 0f;
+
+        [Header("Regen Settings")]
+        [Tooltip("Allow HP natural regen in current map. Disable for combat maps.")]
+        [SerializeField] private bool allowRegen = true;
+
+        public bool AllowRegen
+        {
+            get => allowRegen;
+            set => allowRegen = value;
+        }
 
         private PlayerStatsConfig Config => baseConfig as PlayerStatsConfig;
 
         protected override void Awake()
         {
             base.Awake();
-
             if (baseConfig != null && Config == null)
             {
                 Debug.LogError($"[{name}] PlayerStats requires PlayerStatsConfig, got {baseConfig.GetType().Name}", this);
@@ -29,12 +37,9 @@ namespace SimpleSurvival.Stats
         public override void ResetStats()
         {
             base.ResetStats();
-
             if (Config == null) return;
-
             Hunger = Mathf.Clamp(Config.StartHunger, 0f, Config.MaxHunger);
             Thirst = Mathf.Clamp(Config.StartThirst, 0f, Config.MaxThirst);
-
             OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
             OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
@@ -42,7 +47,6 @@ namespace SimpleSurvival.Stats
         public void RestoreSurvival(float hunger, float thirst)
         {
             if (Config == null) return;
-
             SetHunger(hunger);
             SetThirst(thirst);
         }
@@ -51,7 +55,6 @@ namespace SimpleSurvival.Stats
         {
             if (!IsAlive || Config == null)
                 return;
-
             float dt = Time.deltaTime;
             TickHunger(dt);
             TickThirst(dt);
@@ -76,6 +79,7 @@ namespace SimpleSurvival.Stats
 
         private void TickHPRegen(float dt)
         {
+            if (!allowRegen) return;
             if (HP >= MaxHP) return;
 
             bool hungerOk = Hunger / Config.MaxHunger >= Config.RegenThreshold;
@@ -100,7 +104,6 @@ namespace SimpleSurvival.Stats
         {
             if (Hunger <= 0f)
                 TakeDamage(Config.StarveDamagePerSec * dt);
-
             if (Thirst <= 0f)
                 TakeDamage(Config.DehydrateDamagePerSec * dt);
         }
@@ -109,7 +112,6 @@ namespace SimpleSurvival.Stats
         {
             float prev = Hunger;
             Hunger = Mathf.Clamp(value, 0f, Config.MaxHunger);
-
             if (!Mathf.Approximately(Hunger, prev))
                 OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
         }
@@ -118,7 +120,6 @@ namespace SimpleSurvival.Stats
         {
             float prev = Thirst;
             Thirst = Mathf.Clamp(value, 0f, Config.MaxThirst);
-
             if (!Mathf.Approximately(Thirst, prev))
                 OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }

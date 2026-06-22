@@ -1,4 +1,5 @@
 ﻿using System;
+using SimpleSurvival.Stats;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -253,8 +254,9 @@ namespace SimpleSurvival.Items
             ConsumableAbility consumable = stack.ItemData.GetAbility<ConsumableAbility>();
             if (consumable != null)
             {
-                OnUseConsumableRequested?.Invoke(stack);
-                ConsumeOne(cell);
+                bool consumed = TryConsume(stack, consumable);
+                if (consumed)
+                    ConsumeOne(cell);
                 return;
             }
 
@@ -262,6 +264,28 @@ namespace SimpleSurvival.Items
             {
                 EquipFromActiveCell(cell, stack);
             }
+        }
+
+        private bool TryConsume(ItemStack stack, ConsumableAbility ability)
+        {
+            OnUseConsumableRequested?.Invoke(stack);
+            return !AreAllStatsFull(ability);
+        }
+
+        private bool AreAllStatsFull(ConsumableAbility ability)
+        {
+            PlayerStats stats = playerEquipment.GetComponentInParent<SimpleSurvival.Stats.PlayerStats>();
+            if (stats == null) return false;
+
+            bool hpTarget = ability.RestoreHp > 0f;
+            bool hungerTarget = ability.RestoreHunger > 0f;
+            bool thirstTarget = ability.RestoreThirst > 0f;
+
+            bool hpFull = !hpTarget || stats.HP >= stats.MaxHP;
+            bool hungerFull = !hungerTarget || stats.Hunger >= stats.MaxHunger;
+            bool thirstFull = !thirstTarget || stats.Thirst >= stats.MaxThirst;
+
+            return hpFull && hungerFull && thirstFull;
         }
 
         private void EquipFromActiveCell(CellUI cell, ItemStack stack)
