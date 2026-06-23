@@ -25,6 +25,10 @@ namespace SimpleSurvival.Stats
 
         private PlayerStatsConfig Config => baseConfig as PlayerStatsConfig;
 
+        private float _hpRegenTimer;
+        private float _starveTimer;
+        private float _dehydrateTimer;
+
         protected override void Awake()
         {
             base.Awake();
@@ -40,6 +44,9 @@ namespace SimpleSurvival.Stats
             if (Config == null) return;
             Hunger = Mathf.Clamp(Config.StartHunger, 0f, Config.MaxHunger);
             Thirst = Mathf.Clamp(Config.StartThirst, 0f, Config.MaxThirst);
+            _hpRegenTimer = 0f;
+            _starveTimer = 0f;
+            _dehydrateTimer = 0f;
             OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
             OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
@@ -79,33 +86,49 @@ namespace SimpleSurvival.Stats
 
         private void TickHPRegen(float dt)
         {
-            if (!allowRegen) return;
-            if (HP >= MaxHP) return;
+            if (!allowRegen || HP >= MaxHP)
+            {
+                _hpRegenTimer = 0f;
+                return;
+            }
 
-            bool hungerOk = Hunger / Config.MaxHunger >= Config.RegenThreshold;
-            bool thirstOk = Thirst / Config.MaxThirst >= Config.RegenThreshold;
-            if (!hungerOk || !thirstOk) return;
-
-            float regenAmount = Config.HPRegenPerSec * dt;
-            float hungerCost = Config.HungerCostPerHPRegen * regenAmount;
-            float thirstCost = Config.ThirstCostPerHPRegen * regenAmount;
-
-            float scale = Mathf.Min(
-                hungerCost > 0f ? Hunger / hungerCost : 1f,
-                thirstCost > 0f ? Thirst / thirstCost : 1f,
-                1f);
-
-            Heal(regenAmount * scale);
-            SetHunger(Hunger - hungerCost * scale);
-            SetThirst(Thirst - thirstCost * scale);
+            _hpRegenTimer += dt;
+            if (_hpRegenTimer >= Config.HPRegenInterval)
+            {
+                Heal(Config.HPRegenAmount);
+                _hpRegenTimer -= Config.HPRegenInterval;
+            }
         }
 
         private void TickStarvation(float dt)
         {
             if (Hunger <= 0f)
-                TakeDamage(Config.StarveDamagePerSec * dt);
+            {
+                _starveTimer += dt;
+                if (_starveTimer >= Config.StarveDamageInterval)
+                {
+                    TakeDamage(Config.StarveDamageAmount);
+                    _starveTimer -= Config.StarveDamageInterval;
+                }
+            }
+            else
+            {
+                _starveTimer = 0f;
+            }
+
             if (Thirst <= 0f)
-                TakeDamage(Config.DehydrateDamagePerSec * dt);
+            {
+                _dehydrateTimer += dt;
+                if (_dehydrateTimer >= Config.DehydrateDamageInterval)
+                {
+                    TakeDamage(Config.DehydrateDamageAmount);
+                    _dehydrateTimer -= Config.DehydrateDamageInterval;
+                }
+            }
+            else
+            {
+                _dehydrateTimer = 0f;
+            }
         }
 
         private void SetHunger(float value)

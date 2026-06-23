@@ -3,27 +3,23 @@ using UnityEngine.UI;
 
 namespace SimpleSurvival.UI.HealthBar
 {
-    public class BarAnimation : MonoBehaviour
+    public sealed class BarAnimation : MonoBehaviour
     {
         [Header("Bars")]
+        [Tooltip("Front bar showing current value (e.g. green HP).")]
         [SerializeField] private Image bar;
+        [Tooltip("Back bar showing damage trail (e.g. red).")]
         [SerializeField] private Image barBack;
-
-        [Header("Colors")]
-        [SerializeField] private Color damageColor = new Color(0.85f, 0.3f, 0.3f);
-        [SerializeField] private Color healColor = new Color(0.5f, 0.85f, 0.5f);
+        [Tooltip("Optional back bar showing heal trail (e.g. green light). Leave null if not used.")]
+        [SerializeField] private Image healTrail;
 
         [Header("Animation")]
         [SerializeField] private float speed = 3f;
         [SerializeField] private float speedLimitMin = 0.1f;
         [SerializeField] private float speedLimitMax = 2f;
 
-        private static readonly Color WhiteColor = Color.white;
-
         private float _currentPercent;
-        private float _currentBlinkLevel;
         private bool _isAnimate;
-        private Color _barBackColor;
 
         public void SetValue(float value)
         {
@@ -31,16 +27,13 @@ namespace SimpleSurvival.UI.HealthBar
             _currentPercent = Mathf.Clamp01(value);
             if (bar != null) bar.fillAmount = _currentPercent;
             if (barBack != null) barBack.fillAmount = _currentPercent;
+            if (healTrail != null) healTrail.fillAmount = _currentPercent;
         }
 
         public void AnimateValue(float value)
         {
             _currentPercent = Mathf.Clamp01(value);
-            if (!_isAnimate)
-            {
-                _isAnimate = true;
-                _currentBlinkLevel = 1f;
-            }
+            _isAnimate = true;
         }
 
         public void SetBarColor(Color color)
@@ -50,46 +43,36 @@ namespace SimpleSurvival.UI.HealthBar
 
         private void Update()
         {
-            if (!_isAnimate || bar == null || barBack == null) return;
+            if (!_isAnimate || bar == null) return;
 
-            float fillAmount = bar.fillAmount;
-            float fillAmountBack = barBack.fillAmount;
+            float fillBar = bar.fillAmount;
+            float fillBack = barBack != null ? barBack.fillAmount : fillBar;
 
-            if (fillAmount < _currentPercent)
+            if (fillBar < _currentPercent)
             {
-                barBack.fillAmount = _currentPercent;
-                _barBackColor = healColor;
-                fillAmount = Mathf.MoveTowards(fillAmount, _currentPercent, GetSpeed(fillAmount));
-                bar.fillAmount = fillAmount;
+                if (healTrail != null) healTrail.fillAmount = _currentPercent;
+                if (barBack != null) barBack.fillAmount = _currentPercent;
 
-                if (Mathf.Approximately(fillAmount, _currentPercent))
+                fillBar = Mathf.MoveTowards(fillBar, _currentPercent, GetSpeed(fillBar));
+                bar.fillAmount = fillBar;
+
+                if (Mathf.Approximately(fillBar, _currentPercent))
                     _isAnimate = false;
             }
-            else if (fillAmountBack > _currentPercent)
+            else if (fillBack > _currentPercent)
             {
                 bar.fillAmount = _currentPercent;
-                _barBackColor = damageColor;
-                fillAmountBack = Mathf.MoveTowards(fillAmountBack, _currentPercent, GetSpeed(fillAmountBack));
-                barBack.fillAmount = fillAmountBack;
+                if (healTrail != null) healTrail.fillAmount = _currentPercent;
 
-                if (Mathf.Approximately(fillAmountBack, _currentPercent))
+                fillBack = Mathf.MoveTowards(fillBack, _currentPercent, GetSpeed(fillBack));
+                if (barBack != null) barBack.fillAmount = fillBack;
+
+                if (Mathf.Approximately(fillBack, _currentPercent))
                     _isAnimate = false;
-            }
-
-            UpdateBlink();
-        }
-
-        private void UpdateBlink()
-        {
-            if (_currentBlinkLevel > 0f)
-            {
-                _currentBlinkLevel = Mathf.MoveTowards(_currentBlinkLevel, 0f, Time.deltaTime);
-                Color color = Color.Lerp(_barBackColor, WhiteColor, _currentBlinkLevel);
-                barBack.color = color;
             }
             else
             {
-                barBack.color = _barBackColor;
+                _isAnimate = false;
             }
         }
 
