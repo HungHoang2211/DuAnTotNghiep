@@ -3040,9 +3040,8 @@ GameObject:
   - component: {fileID: 9030567769307981365}
   - component: {fileID: 5076356516408772191}
   - component: {fileID: 4959282023112273432}
-  - component: {fileID: 5804780784029234990}
-  - component: {fileID: 7230465798756799081}
-  - component: {fileID: 349651418300874036}
+  - component: {fileID: 6108856884516753053}
+  - component: {fileID: 9194245801679915162}
   - component: {fileID: 3618774041547770407}
   - component: {fileID: 7866972255231827805}
   - component: {fileID: -1269978873248641711}
@@ -3139,7 +3138,7 @@ CapsuleCollider:
   m_Height: 2.0147557
   m_Direction: 1
   m_Center: {x: 0, y: 0.89103436, z: 0}
---- !u!114 &5804780784029234990
+--- !u!114 &6108856884516753053
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3148,9 +3147,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e727481b2e703d145a85d10ac996af53, type: 3}
+  m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _variant: 1
   _ragdollBodies:
   - {fileID: 4349408155726648801}
   - {fileID: 2710812634063621323}
@@ -3175,7 +3175,7 @@ MonoBehaviour:
   - {fileID: 5483929175928143237}
   - {fileID: 6847817680094599037}
   - {fileID: 2391634667681411548}
---- !u!114 &7230465798756799081
+--- !u!114 &9194245801679915162
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3184,9 +3184,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad696c1b7e807e94fa28c4de02d3b822, type: 3}
+  m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _variant: 1
   _playerLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -3198,21 +3199,8 @@ MonoBehaviour:
   _jumpImpactEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
   _jumpAttackDelay: 5
   _jumpLandRadius: 1.5
-  _jumpDamage: 10
+  _jumpDamage: 15
   _jumpStunDuration: 2
---- !u!114 &349651418300874036
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8363300174663062271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lifetime: 0
 --- !u!114 &3618774041547770407
 MonoBehaviour:
   m_ObjectHideFlags: 0

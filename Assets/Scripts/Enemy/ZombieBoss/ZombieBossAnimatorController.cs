@@ -20,6 +20,10 @@ public class ZombieBossAnimatorController : MonoBehaviour
     private static readonly int AttackClawTrigger = Animator.StringToHash("AttackClaw");
     private static readonly int HowlTrigger = Animator.StringToHash("Howl");
     private static readonly int DeathTrigger = Animator.StringToHash("Death");
+    private static readonly int IsSummoningParam = Animator.StringToHash("IsSummoning");
+
+    [Tooltip("Tên state Howl trong Animator Controller (Base Layer) — dùng để kiểm tra animator đã thật sự rời state Howl chưa.")]
+    [SerializeField] private string _howlStateName = "Howl";
 
     [Header("Ragdoll")]
     [Tooltip("Kéo tất cả Rigidbody trên bone ragdoll vào đây.")]
@@ -39,11 +43,6 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     public void TriggerAttackClaw()
     {
-        // DEBUG TẠM: in stack trace để tìm xem có script nào khác (ngoài
-        // ZombieBossController.NormalAttackRoutine) đang gọi hàm này không.
-        // Xoá dòng Debug.Log này sau khi đã tìm ra nguyên nhân.
-        Debug.Log($"[ZombieBossAnimatorController] TriggerAttackClaw() called at {Time.time:F2}s:\n{System.Environment.StackTrace}");
-
         // Reset trigger Howl nếu còn "treo" — tránh trường hợp Howl bị đè ngược lại
         // bởi 1 trigger AttackClaw cũ chưa tiêu thụ, và đảm bảo 2 action không lẫn nhau.
         _animator.ResetTrigger(HowlTrigger);
@@ -52,13 +51,38 @@ public class ZombieBossAnimatorController : MonoBehaviour
 
     public void TriggerHowl()
     {
-        Debug.Log($"[ZombieBossAnimatorController] TriggerHowl() called at {Time.time:F2}s");
-
         // Reset trigger AttackClaw nếu còn "treo" từ lần trước chưa được Animator tiêu thụ
         // (ví dụ do Any State -> AttackClaw chưa kịp transition) — đây là nguyên nhân khiến
         // animation Howl bị AttackClaw "đè" lên giữa lúc đang triệu hồi.
         _animator.ResetTrigger(AttackClawTrigger);
         _animator.SetTrigger(HowlTrigger);
+    }
+
+    /// <summary>
+    /// Bật/tắt bool "IsSummoning" trên Animator. Dùng làm điều kiện chặn trên transition
+    /// "Any State -> AttackClaw" (và "Any State -> Howl") trong Animator Controller, để
+    /// AttackClaw không thể cắt ngang Howl bất kể timing phía code C# có trễ hay không.
+    /// PHẢI set true TRƯỚC khi gọi TriggerHowl(), và chỉ set false SAU KHI đã xác nhận
+    /// animator thật sự rời khỏi state Howl (xem IsInHowlState).
+    /// </summary>
+    public void SetSummoning(bool isSummoning) => _animator.SetBool(IsSummoningParam, isSummoning);
+
+    /// <summary>
+    /// True nếu Animator (layer 0) hiện đang ở state Howl HOẶC đang transition ra khỏi nó.
+    /// Dùng để xác nhận animation Howl đã thật sự kết thúc trên Animator trước khi cho
+    /// phép hành động khác (ví dụ AttackClaw) chạy tiếp — không chỉ dựa vào Animation Event
+    /// hay khoảng chờ cố định, vì giữa lúc Event bắn và lúc Animator thật sự đổi state vẫn
+    /// có thể còn vài frame trễ.
+    /// </summary>
+    public bool IsInHowlState
+    {
+        get
+        {
+            if (_animator == null) return false;
+            var info = _animator.GetCurrentAnimatorStateInfo(0);
+            if (info.IsName(_howlStateName)) return true;
+            return _animator.IsInTransition(0) && _animator.GetNextAnimatorStateInfo(0).IsName(_howlStateName);
+        }
     }
 
     public void TriggerDeath() => _animator.SetTrigger(DeathTrigger);
@@ -80,6 +104,7 @@ public class ZombieBossAnimatorController : MonoBehaviour
         _animator.ResetTrigger(AttackClawTrigger);
         _animator.ResetTrigger(HowlTrigger);
         _animator.ResetTrigger(DeathTrigger);
+        _animator.SetBool(IsSummoningParam, false);
         _animator.Play("Movement", 0, 0f);
         SetRagdollEnabled(false);
     }

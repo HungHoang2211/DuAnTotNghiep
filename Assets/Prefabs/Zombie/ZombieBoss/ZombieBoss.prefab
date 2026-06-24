@@ -3093,7 +3093,6 @@ GameObject:
   - component: {fileID: 7544124443967714629}
   - component: {fileID: 1047922514323431887}
   - component: {fileID: 8809611623597794888}
-  - component: {fileID: 8097183752984986085}
   - component: {fileID: 1669889388530796422}
   - component: {fileID: 4549055520721802404}
   m_Layer: 8
@@ -3201,6 +3200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6979d3f8dbcaf42458d0221493bad350, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _howlStateName: Howl
   _ragdollBodies:
   - {fileID: 8993903321890312345}
   - {fileID: 3068122872338066207}
@@ -3269,23 +3269,13 @@ MonoBehaviour:
   _minionPrefab: {fileID: 7002519786067054812, guid: 98314011f7e123344b0378d9239265d9, type: 3}
   _summonPoint1: {fileID: 606317479920691375}
   _summonPoint2: {fileID: 1813042087730128566}
-  _summonEffectPrefab: {fileID: 3377181292992421420, guid: e37cc2c8444ebec418b5a992491ce17b, type: 3}
+  _summonEffectPrefab: {fileID: 6526302276393259002, guid: 31b337d2fdb4bc04e807305a95a4d37f, type: 3}
+  _summonHpThresholds:
+  - 0.5
+  - 0.2
   _orbPrefab: {fileID: 7478731271839673279, guid: 2bf06ed786bb42a40b9da26ea13847f3, type: 3}
   _chaseOrbInterval: 10
   _despawnDelay: 1000
---- !u!114 &8097183752984986085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8670145069011650472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lifetime: 0
 --- !u!114 &1669889388530796422
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2548,7 +2548,6 @@ GameObject:
   - component: {fileID: -7656215154857311713}
   - component: {fileID: 7213027466504647735}
   - component: {fileID: 1956828932666080739}
-  - component: {fileID: 680019447985497470}
   - component: {fileID: 223015569284610420}
   - component: {fileID: 7072712761729223532}
   - component: {fileID: 4041750585481483695}
@@ -2657,6 +2656,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _variant: 0
   _ragdollBodies:
   - {fileID: 338737174633654037}
   - {fileID: 4601130191410222333}
@@ -2681,9 +2681,6 @@ MonoBehaviour:
   - {fileID: 586003563546607973}
   - {fileID: 773878627297666795}
   - {fileID: 773878627297666795}
-  _detachableParts: []
-  _detachForce: 2
-  _detachChance: 0.7
 --- !u!114 &1956828932666080739
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2696,25 +2693,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _variant: 0
   _playerLayer:
     serializedVersion: 2
     m_Bits: 512
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &680019447985497470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7002519786067054812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _lifetime: 0
+  _acidEffectPrefab: {fileID: 0}
+  _mouthTransform: {fileID: 0}
+  _jumpImpactEffectPrefab: {fileID: 0}
+  _jumpAttackDelay: 5
+  _jumpLandRadius: 1.5
+  _jumpDamage: 35
+  _jumpStunDuration: 2
 --- !u!114 &223015569284610420
 MonoBehaviour:
   m_ObjectHideFlags: 0
