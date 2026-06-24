@@ -1,199 +1,80 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
+using static Weather_Controller;
 
 public class Weather_Rain : Weather_Base
 {
-    /********** ----- VARIABLES ----- **********/
-
-    [SerializeField]
-    private GameObject _gPartRain;
-
+    [SerializeField] private GameObject _gPartRain;
     private float _fEndParticleTimerStart;
-    private float _fEndParticleTimerEnd;
-
-    // Tối ưu hiệu suất: Lưu cache thành phần ParticleSystem để tránh gọi GetComponent liên tục trong Update/Exit
+    private float _fEndParticleTimerEnd = 5.0f;
     private ParticleSystem _cachedParticleSystem;
-
-    /********** ----- GETTERS AND SETTERS ----- **********/
-
-    public GameObject GetSet_gPartRain
-    {
-        get { return _gPartRain; }
-        set { _gPartRain = value; }
-    }
+    private bool _bIsExitingWeather = false;
 
     private void Start()
     {
-        clWeatherController = (Weather_Controller)this.GetComponent(typeof(Weather_Controller));
-
-        // Khởi tạo cache ParticleSystem từ đầu
-        if (_gPartRain != null)
-        {
-            _cachedParticleSystem = _gPartRain.GetComponent<ParticleSystem>();
-        }
-
-        if (_bUseMorningFog == false)
-            _fFogMorningAmount = _fFogAmount;
+        clWeatherController = GetComponent<Weather_Controller>();
+        if (_gPartRain != null) _cachedParticleSystem = _gPartRain.GetComponent<ParticleSystem>();
+        if (!_bUseMorningFog) _fFogMorningAmount = _fFogAmount;
 
         _fSoundVolumeIn = _fSoundVolume;
-        _fSoundVolumeOut = _fSoundVolume;
-
+        _fSoundVolumeOut = 0f;
         _fEndParticleTimerStart = 0.0f;
-        _fEndParticleTimerEnd = 5.0f;
 
-        if (_bUsingSound == true && _gPartRain != null)
+        if (_gPartRain != null && clWeatherController != null && clWeatherController.en_CurrWeather != WeatherType.RAIN)
         {
-            if (_adAmbientSound != null)
-            {
-                AudioSource rainAudio = _gPartRain.GetComponent<AudioSource>();
-                if (rainAudio != null)
-                {
-                    _bGotAudioSource = true;
-                    rainAudio.clip = _adAmbientSound;
-                    rainAudio.volume = 0.0f;
-                    rainAudio.loop = true;
-                }
-                else
-                {
-                    rainAudio = _gPartRain.AddComponent<AudioSource>();
-                    rainAudio.clip = _adAmbientSound;
-                    rainAudio.volume = 0.0f;
-                    rainAudio.loop = true;
-                    Debug.LogWarning("There was no AUDIOSOURCE on " + _gPartRain + " this is now added");
-
-                    _bGotAudioSource = true;
-                }
-            }
-            else
-                Debug.Log("There is no AMBIENT SOUND attached to the WeatherController on type: " + clWeatherController.en_CurrWeather);
+            _gPartRain.SetActive(false);
+            if (_cachedParticleSystem != null) { var em = _cachedParticleSystem.emission; em.enabled = false; }
         }
     }
 
-    public override void Init()
-    {
-        base.Init();
-        TurnOnRain();
-
-        // SỬA LỖI: Cập nhật sang cú pháp Unity mới cho module Emission
-        if (_cachedParticleSystem != null)
-        {
-            var emission = _cachedParticleSystem.emission;
-            emission.enabled = true;
-        }
-    }
-
-    private void Update()
-    {
-        UpdateWeather();
-
-        if (_bUseInit == true)
-        {
-            _fInitTimerStart += Time.deltaTime;
-
-            if (_fInitTimerStart >= _fInitTimerEnd)
-            {
-                Init();
-                _fInitTimerStart = 0.0f;
-                _bUseInit = false;
-            }
-        }
-    }
-
-    public override void UpdateWeather()
-    {
-        if (_bUseDifferentFadeTimes == false)
-            OneFadeTimeToRuleThemAll();
-        else
-            DifferentFadeTimes();
-    }
-
-    private void OneFadeTimeToRuleThemAll()
-    {
-        var tod = clWeatherController.gTimeOfDay.GetComponent<ToD_Base>();
-        if (tod.enCurrTimeset == ToD_Base.Timeset.SUNRISE)
-        {
-            clWeatherController.UpdateAllWeather(_fSunrise_LightIntensity, _cSunrise_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cSunrise_SkyTintColor, _cSunrise_SkyGroundColor, _cCloudColor, _fFogMorningAmount, _cFogColor, _fFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pNightParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunriseParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.DAY)
-        {
-            clWeatherController.UpdateAllWeather(_fDay_LightIntensity, _cDay_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cDay_SkyTintColor, _cDay_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
-            clWeatherController.ActivateTimesetParticle(_pDayParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.SUNSET)
-        {
-            clWeatherController.UpdateAllWeather(_fSunset_LightIntensity, _cSunset_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cSunset_SkyTintColor, _cSunset_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pDayParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunsetParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.NIGHT)
-        {
-            clWeatherController.UpdateAllWeather(_fNight_LightIntensity, _cNight_LightColor, _fNight_MoonLightIntensity,
-                _cNight_MoonLightColor, _cNight_SkyTintColor, _cNight_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
-            clWeatherController.ActivateTimesetParticle(_pNightParticle);
-        }
-    }
-
-    private void DifferentFadeTimes()
-    {
-        var tod = clWeatherController.gTimeOfDay.GetComponent<ToD_Base>();
-        if (tod.enCurrTimeset == ToD_Base.Timeset.SUNRISE)
-        {
-            clWeatherController.UpdateAllWeather(_fSunrise_LightIntensity, _cSunrise_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cSunrise_SkyTintColor, _cSunrise_SkyGroundColor, _cCloudColor, _fFogMorningAmount, _cFogColor, _fSunriseFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pNightParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunriseParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.DAY)
-        {
-            clWeatherController.UpdateAllWeather(_fDay_LightIntensity, _cDay_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cDay_SkyTintColor, _cDay_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fDayFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
-            clWeatherController.ActivateTimesetParticle(_pDayParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.SUNSET)
-        {
-            clWeatherController.UpdateAllWeather(_fSunset_LightIntensity, _cSunset_LightColor, 0.0f, _cNight_MoonLightColor,
-                _cSunset_SkyTintColor, _cSunset_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fSunsetFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pDayParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunsetParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.NIGHT)
-        {
-            clWeatherController.UpdateAllWeather(_fNight_LightIntensity, _cNight_LightColor, _fNight_MoonLightIntensity, _cNight_MoonLightColor,
-                _cNight_SkyTintColor, _cNight_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _fNightFadeTime);
-
-            clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
-            clWeatherController.ActivateTimesetParticle(_pNightParticle);
-        }
-    }
-
-    private void TurnOnRain()
+    private void ActivateRainSystem()
     {
         if (_gPartRain != null)
         {
-            if (_gPartRain.activeInHierarchy == false)
+            if (!_gPartRain.activeSelf) _gPartRain.SetActive(true);
+            if (_cachedParticleSystem != null)
             {
-                _gPartRain.SetActive(true);
-
-                if (_bUsingSound == true)
-                    TurnOnSound(_gPartRain);
+                var em = _cachedParticleSystem.emission;
+                if (!em.enabled) em.enabled = true;
             }
         }
-        else
+    }
+
+    public override void RunWeather()
+    {
+        if (clWeatherController == null || clWeatherController.gTimeOfDay == null) return;
+        ToD_Base tod = clWeatherController.gTimeOfDay.GetComponent<ToD_Base>();
+
+        _bIsExitingWeather = false;
+        _fEndParticleTimerStart = 0.0f;
+
+        ActivateRainSystem();
+
+        float currentFade = _fFadeTime;
+
+        if (tod.enCurrTimeset == ToD_Base.Timeset.SUNRISE)
+        {
+            clWeatherController.UpdateAllWeather(_fSunrise_LightIntensity, _cSunrise_LightColor, 0f, Color.black, _cSunrise_SkyTintColor, _cSunrise_SkyGroundColor, _cCloudColor, _fFogMorningAmount, _cFogColor, currentFade);
+        }
+        else if (tod.enCurrTimeset == ToD_Base.Timeset.DAY)
+        {
+            clWeatherController.UpdateAllWeather(_fDay_LightIntensity, _cDay_LightColor, 0f, Color.black, _cDay_SkyTintColor, _cDay_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, currentFade);
+        }
+        else if (tod.enCurrTimeset == ToD_Base.Timeset.SUNSET)
+        {
+            clWeatherController.UpdateAllWeather(_fSunset_LightIntensity, _cSunset_LightColor, 0f, Color.black, _cSunset_SkyTintColor, _cSunset_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, currentFade);
+        }
+        else if (tod.enCurrTimeset == ToD_Base.Timeset.NIGHT)
+        {
+            clWeatherController.UpdateAllWeather(_fNight_LightIntensity, _cNight_LightColor, 0f, Color.black, _cNight_SkyTintColor, _cNight_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, currentFade);
+        }
+    }
+
+    public override void ForceWeatherChange()
+    {
+        ActivateRainSystem();
+
+        if (_gPartRain == null)
             Debug.LogError("We are missing rain particles on: " + this.gameObject + " For weather type: RAIN");
     }
 
@@ -205,34 +86,41 @@ public class Weather_Rain : Weather_Base
 
     public override void ExitWeatherEffect(GameObject gameobject)
     {
-        clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
-        clWeatherController.DeactivateTimesetParticle(_pDayParticle);
-        clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
-        clWeatherController.DeactivateTimesetParticle(_pNightParticle);
-
-        if (_gPartRain != null && _gPartRain.activeInHierarchy == true)
+        // SỬA LỖI CHÍ MẠNG: Chỉ chặn tắt mưa nếu thời tiết "sắp tới" cũng là RAIN. 
+        // Nếu en_NewWeather đang hướng tới SUN (1), chúng ta phải cho phép chạy xuống dưới để tắt hạt mưa!
+        if (clWeatherController != null && clWeatherController.en_NewWeather == WeatherType.RAIN)
         {
-            _fEndParticleTimerStart += Time.deltaTime;
+            _bIsExitingWeather = false;
+            return;
+        }
 
-            // SỬA LỖI: Thay đổi enableEmission lỗi thời bằng cách gọi trực tiếp qua thuộc tính cached mới
-            if (_cachedParticleSystem != null)
+        if (!_bIsExitingWeather)
+        {
+            _bIsExitingWeather = true;
+            _fEndParticleTimerStart = 0.0f;
+
+            if (_bTurnOffSoundAtExit)
             {
-                var emission = _cachedParticleSystem.emission;
-                emission.enabled = false;
-            }
-
-            if (_bTurnOffSoundAtExit == true)
-            {
-                if (_bUsingSound == true)
-                    base.ExitWeatherEffect(gameobject);
-
+                base.ExitWeatherEffect(gameobject);
                 _bTurnOffSoundAtExit = false;
             }
 
-            if (_fEndParticleTimerStart > _fEndParticleTimerEnd)
+            if (_cachedParticleSystem != null)
             {
-                _fEndParticleTimerStart = 0.0f;
+                var em = _cachedParticleSystem.emission;
+                em.enabled = false; // Tắt phun hạt mới để hạt cũ rơi nốt
+            }
+        }
+
+        // Tiến trình đếm ngược tắt hẳn object mưa
+        if (_bIsExitingWeather && _gPartRain != null && _gPartRain.activeSelf)
+        {
+            _fEndParticleTimerStart += Time.deltaTime;
+            if (_fEndParticleTimerStart >= _fEndParticleTimerEnd)
+            {
                 _gPartRain.SetActive(false);
+                _bIsExitingWeather = false;
+                _fEndParticleTimerStart = 0.0f;
             }
         }
     }

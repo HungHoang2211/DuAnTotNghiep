@@ -108,10 +108,10 @@ public class ToD_Base : MonoBehaviour
             _fCurrentTimeOfDay = 0.0f;
             _iAmountOfDaysPlayed += 1;
 
-            // TỐI ƯU: Sử dụng biến cache đã lưu từ Start thay vì dùng GetComponent liên tục
+            // ĐÃ SỬA: Thay vì chỉ tăng biến đếm, ta gọi hàm chuyên dụng bên Controller để nó tự động tính toán kiểm tra đổi sang trời mưa
             if (_bUseWeather && _cachedWeatherController != null)
             {
-                _cachedWeatherController.GetSet_iAmountOfDaysSinceLastWeather += 1;
+                _cachedWeatherController.OnNewDayArrived();
             }
         }
     }
