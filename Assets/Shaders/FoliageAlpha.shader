@@ -7,18 +7,17 @@
         _Dissolve ("Dissolve", Range(0,1)) = 0
         _AmbientBoost ("Ambient Floor (0..1)", Range(0,1)) = 0.25
 
-        // Đẩy các thuộc tính Stencil ra Inspector để tùy biến nhìn xuyên qua
-        _Stencil      ("Stencil ID", Float) = 1
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comp (Default: Always=8)", Float) = 8
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp   ("Stencil Op (Default: Keep=0)", Float) = 0
+        [HideInInspector] _Stencil     ("Stencil ID", Float) = 1
+        [HideInInspector] _StencilComp ("Stencil Comp", Float) = 8
+        [HideInInspector] _StencilOp   ("Stencil Op", Float) = 2
     }
 
     SubShader
     {
         Tags
         {
-            "RenderType"      = "Transparent"
-            "Queue"           = "Transparent+10" // Tăng Queue lên một chút để vẽ sau vật thể đặc
+            "RenderType"     = "Transparent"
+            "Queue"          = "Transparent"
             "RenderPipeline" = "UniversalPipeline"
             "IgnoreProjector" = "True"
         }
@@ -37,8 +36,8 @@
             Tags { "LightMode" = "UniversalForward" }
 
             Blend SrcAlpha OneMinusSrcAlpha
-            ZWrite Off // Tắt ZWrite để không che khuất các vật thể trong suốt khác khi nhìn xuyên
-            ZTest Always // ÉP BUỘC Shader luôn vẽ đè lên trên mọi vật thể (Nhìn xuyên tường)
+            ZWrite On
+            ZTest LEqual
             Cull Off
 
             HLSLPROGRAM
@@ -101,19 +100,14 @@
             half4 frag(Varyings IN) : SV_TARGET
             {
                 half alpha = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uv).r;
-                
-                // Kết hợp độ trong suốt của texture alpha và thanh trượt Dissolve gộp chung
-                half finalAlpha = alpha * (1.0 - _Dissolve);
-                
-                // Bỏ lệnh clip() cũ để hỗ trợ hiệu ứng trong suốt mượt mà nhìn xuyên qua 
-                if (finalAlpha < 0.1) discard; 
+                clip(alpha - 0.5);
 
                 half3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).rgb;
                 half3 lit    = albedo * IN.lighting;
                 half3 color  = lerp(lit, albedo, _AmbientBoost);
 
                 color = MixFog(color, IN.fogFactor);
-                return half4(color, finalAlpha);
+                return half4(color, 1.0 - _Dissolve);
             }
             ENDHLSL
         }
