@@ -8,7 +8,7 @@ using SimpleSurvival.Core;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyStats))]
-public class ZombieBossController : MonoBehaviour
+public class ZombieBossController : MonoBehaviour, ISpawnableEnemy
 {
     [Header("Detection")]
     [SerializeField] private LayerMask _playerLayer;
@@ -33,6 +33,8 @@ public class ZombieBossController : MonoBehaviour
     [SerializeField] private Transform _summonPoint1;
     [SerializeField] private Transform _summonPoint2;
     [SerializeField] private GameObject _summonEffectPrefab;
+    [Tooltip("Các mốc % HP (giảm dần) sẽ kích hoạt triệu hồi minion. Ví dụ: 0.5 = 50% HP, 0.2 = 20% HP.")]
+    [SerializeField] private float[] _summonHpThresholds = { 0.5f, 0.2f };
 
     [Header("Laser Attack")]
     [Tooltip("Prefab laser AOE (phải có ZombieBossSkill + PooledObject script)")]
@@ -49,13 +51,13 @@ public class ZombieBossController : MonoBehaviour
     private NavMeshAgent _agent;
     private ZombieBossAnimatorController _anim;
     private EnemyStats _stats;
-    private ZombieBossSpawnPoint _spawnPoint;
+    private IEnemySpawnPoint _spawnPoint;
     private Transform _player;
 
     private bool _isDead;
     private bool _isActing;
     private bool _isSummoning;   // true khi đang trong SummonRoutine — không được cancel
-    private bool _hasSummoned;
+    private int _nextSummonThresholdIndex; // mốc HP% kế tiếp (trong _summonHpThresholds) chưa được kích hoạt
     private float _combatStartTime = -1f;
     private float _lastAttackTime = -999f;
     private bool _isInCombat;
@@ -92,12 +94,12 @@ public class ZombieBossController : MonoBehaviour
             _anim.OnHowlSpawn -= HandleHowlSpawn;
     }
 
-    public void Initialize(ZombieBossSpawnPoint spawnPoint)
+    public void Initialize(IEnemySpawnPoint spawnPoint)
     {
         _spawnPoint = spawnPoint;
         _isDead = false;
         _isActing = false;
-        _hasSummoned = false;
+        _nextSummonThresholdIndex = 0;
         _combatStartTime = -1f;
         _lastAttackTime = -999f;
         _state = State.Wandering;
@@ -413,25 +415,42 @@ public class ZombieBossController : MonoBehaviour
             laser.Launch(_player.position, gameObject);
     }
 
+    /// <summary>
+    /// Kiểm tra xem HP hiện tại đã chạm mốc % kế tiếp trong _summonHpThresholds chưa
+    /// (mảng phải sắp giảm dần, ví dụ 50% rồi 20%). Mỗi mốc chỉ kích hoạt 1 lần,
+    /// theo đúng thứ tự — không thể nhảy cóc qua mốc.
+    /// </summary>
     private void CheckSummon()
     {
-        if (_hasSummoned || _stats == null) return;
+        if (_isDead || _stats == null) return;
         if (_isActing) return; // đang bận (đánh thường/laser...) — không cướp ngang, sẽ được check lại khi action hiện tại kết thúc
-        if (_stats.HP <= _stats.MaxHP * 0.5f)
+        if (_summonHpThresholds == null || _nextSummonThresholdIndex >= _summonHpThresholds.Length) return;
+
+        float hpPercent = _stats.HP / _stats.MaxHP;
+        if (hpPercent <= _summonHpThresholds[_nextSummonThresholdIndex])
+        {
+            _nextSummonThresholdIndex++;
             StartCoroutine(SummonRoutine());
+        }
     }
 
     private IEnumerator SummonRoutine()
     {
-        _hasSummoned = true;
         _isActing = true;
         _isSummoning = true;
         _howlFinished = false;
 
-        if (_anim != null) _anim.TriggerHowl();
+        // Set bool IsSummoning = true TRƯỚC khi trigger Howl. Trong Animator Controller,
+        // các transition "Any State -> AttackClaw" (và "Any State -> Howl") cần được thêm
+        // điều kiện "IsSummoning == false" để chặn tận gốc — không cho AttackClaw cắt ngang
+        // Howl dù code C# có trễ timing.
+        if (_anim != null)
+        {
+            _anim.SetSummoning(true);
+            _anim.TriggerHowl();
+        }
 
-        // Chỉ chờ animation howl chạy hết (Animation Event: HowlFinished)
-        // Việc spawn minion được xử lý trực tiếp bởi HandleHowlSpawn khi Animation Event HowlSpawn fired
+        // Chờ Animation Event HowlFinished (đặt ở cuối clip Howl)
         float timeout = 5f;
         float elapsed = 0f;
         while (!_howlFinished && elapsed < timeout)
@@ -440,7 +459,19 @@ public class ZombieBossController : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.5f);
+        // Animation Event thường bắn ra vài frame TRƯỚC khi Animator thật sự rời khỏi
+        // state Howl (đặc biệt khi Event đặt ở gần frame cuối clip). Đợi thêm cho tới khi
+        // Animator xác nhận đã thoát hẳn state Howl, để không mở khoá tấn công quá sớm.
+        float exitTimeout = 1.5f;
+        float exitElapsed = 0f;
+        while (_anim != null && _anim.IsInHowlState && exitElapsed < exitTimeout)
+        {
+            exitElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (_anim != null) _anim.SetSummoning(false);
+
         _isSummoning = false;
         _isActing = false;
     }
@@ -472,7 +503,7 @@ public class ZombieBossController : MonoBehaviour
             ObjectPool.Instance.ReturnDelayed(effect, 2f);
         }
 
-        var obj = ObjectPool.Instance.Get(_minionPrefab, point.position, point.rotation);
+        var obj = Instantiate(_minionPrefab, point.position, point.rotation);
         var controller = obj.GetComponent<ZombieController>();
         if (controller != null)
             controller.Initialize(null);
@@ -502,9 +533,9 @@ public class ZombieBossController : MonoBehaviour
         if (_anim != null) _anim.TriggerDeath();
         StartCoroutine(ActivateRagdollDelayed(forceDir));
 
-        ObjectPool.Instance.ReturnDelayed(gameObject, _despawnDelay);
+        Destroy(gameObject, _despawnDelay);
         if (_spawnPoint != null)
-            _spawnPoint.Invoke("OnBossDespawned", _despawnDelay);
+            _spawnPoint.NotifyDespawned(_despawnDelay);
     }
 
     private IEnumerator ActivateRagdollDelayed(Vector3 forceDir)
@@ -551,7 +582,7 @@ public class ZombieBossController : MonoBehaviour
             SetLayerRecursive(child, layer);
     }
 
-    private void OnDrawGizmosSelected() 
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, _detectionRange);
