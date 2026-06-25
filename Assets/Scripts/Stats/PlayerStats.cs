@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using SimpleSurvival.Items;
 
 namespace SimpleSurvival.Stats
 {
@@ -7,6 +8,7 @@ namespace SimpleSurvival.Stats
     {
         public event Action<float, float> OnHungerChanged;
         public event Action<float, float> OnThirstChanged;
+        public event Action OnCombatStatsChanged;
 
         public float Hunger { get; private set; }
         public float Thirst { get; private set; }
@@ -16,6 +18,9 @@ namespace SimpleSurvival.Stats
         [Header("Regen Settings")]
         [Tooltip("Allow HP natural regen in current map. Disable for combat maps.")]
         [SerializeField] private bool allowRegen = true;
+
+        [Header("Equipment Reference")]
+        [SerializeField] private PlayerEquipment playerEquipment;
 
         public bool AllowRegen
         {
@@ -29,6 +34,62 @@ namespace SimpleSurvival.Stats
         private float _starveTimer;
         private float _dehydrateTimer;
 
+        public float TotalDamage
+        {
+            get
+            {
+                ItemStack weapon = GetEquipped(EquipSlot.Weapon);
+                if (weapon != null && !weapon.IsBroken)
+                {
+                    WeaponAbility ability = weapon.ItemData.GetAbility<WeaponAbility>();
+                    if (ability != null) return ability.Damage;
+                }
+                return BaseDamage;
+            }
+        }
+
+        public float TotalAttackSpeed
+        {
+            get
+            {
+                ItemStack weapon = GetEquipped(EquipSlot.Weapon);
+                if (weapon != null && !weapon.IsBroken)
+                {
+                    WeaponAbility ability = weapon.ItemData.GetAbility<WeaponAbility>();
+                    if (ability != null) return ability.AttackSpeed;
+                }
+                return BaseAttackSpeed;
+            }
+        }
+
+        public float TotalDefense
+        {
+            get
+            {
+                float sum = 0f;
+                sum += GetArmorValue(EquipSlot.Helmet);
+                sum += GetArmorValue(EquipSlot.Jacket);
+                sum += GetArmorValue(EquipSlot.Pants);
+                sum += GetArmorValue(EquipSlot.Boots);
+                return sum;
+            }
+        }
+
+        public float TotalMoveSpeed
+        {
+            get
+            {
+                float speed = MoveSpeed;
+                ItemStack boots = GetEquipped(EquipSlot.Boots);
+                if (boots != null && !boots.IsBroken)
+                {
+                    EquipmentAbility ability = boots.ItemData.GetAbility<EquipmentAbility>();
+                    if (ability != null) speed *= (1f + ability.SpeedBonus);
+                }
+                return speed;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -36,6 +97,20 @@ namespace SimpleSurvival.Stats
             {
                 Debug.LogError($"[{name}] PlayerStats requires PlayerStatsConfig, got {baseConfig.GetType().Name}", this);
             }
+            if (playerEquipment == null)
+                playerEquipment = GetComponentInParent<PlayerEquipment>();
+        }
+
+        private void Start()
+        {
+            if (playerEquipment != null && playerEquipment.System != null)
+                playerEquipment.System.OnSlotChanged += HandleEquipmentSlotChanged;
+        }
+
+        private void OnDestroy()
+        {
+            if (playerEquipment != null && playerEquipment.System != null)
+                playerEquipment.System.OnSlotChanged -= HandleEquipmentSlotChanged;
         }
 
         public override void ResetStats()
@@ -49,6 +124,7 @@ namespace SimpleSurvival.Stats
             _dehydrateTimer = 0f;
             OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
             OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
+            OnCombatStatsChanged?.Invoke();
         }
 
         public void RestoreSurvival(float hunger, float thirst)
@@ -129,6 +205,26 @@ namespace SimpleSurvival.Stats
             {
                 _dehydrateTimer = 0f;
             }
+        }
+
+        private void HandleEquipmentSlotChanged(EquipSlot slot, int index, ItemStack stack)
+        {
+            OnCombatStatsChanged?.Invoke();
+        }
+
+        private ItemStack GetEquipped(EquipSlot slot)
+        {
+            if (playerEquipment == null || playerEquipment.System == null) return null;
+            return playerEquipment.System.GetSlot(slot, 0);
+        }
+
+        private float GetArmorValue(EquipSlot slot)
+        {
+            ItemStack stack = GetEquipped(slot);
+            if (stack == null || stack.IsBroken) return 0f;
+
+            EquipmentAbility ability = stack.ItemData.GetAbility<EquipmentAbility>();
+            return ability != null ? ability.ArmorValue : 0f;
         }
 
         private void SetHunger(float value)

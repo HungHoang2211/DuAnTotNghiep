@@ -12772,6 +12772,8 @@ GameObject:
   m_Component:
   - component: {fileID: 267793842}
   - component: {fileID: 267793843}
+  - component: {fileID: 267793845}
+  - component: {fileID: 267793844}
   m_Layer: 5
   m_Name: Defence
   m_TagString: Untagged
@@ -12817,6 +12819,39 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &267793844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267793841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae8d287d4ebe6144b8eb707b516e710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statType: 1
+  playerStats: {fileID: 812480218}
+--- !u!114 &267793845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267793841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b734be54e5d623f46a71d9eab511335c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statAnimation: {fileID: 267793843}
+  amountText: {fileID: 1441296938}
+  iconStat: {fileID: 947110587}
+  cacheAmountTransform: {fileID: 0}
+  decreaseColor: {r: 1, g: 0, b: 0, a: 1}
+  increaseColor: {r: 0, g: 1, b: 0, a: 1}
+  animationClipName: Stats_Show
 --- !u!1 &268597455
 GameObject:
   m_ObjectHideFlags: 0
@@ -36807,6 +36842,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseConfig: {fileID: 11400000, guid: ac7e72dedce99c544b9e68149c6c8cfb, type: 2}
   allowRegen: 1
+  playerEquipment: {fileID: 140930709}
 --- !u!1 &812840522
 GameObject:
   m_ObjectHideFlags: 0
@@ -37117,6 +37153,8 @@ GameObject:
   m_Component:
   - component: {fileID: 815326977}
   - component: {fileID: 815326978}
+  - component: {fileID: 815326980}
+  - component: {fileID: 815326979}
   m_Layer: 5
   m_Name: MoveSpeed
   m_TagString: Untagged
@@ -37162,6 +37200,39 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &815326979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815326976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae8d287d4ebe6144b8eb707b516e710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statType: 2
+  playerStats: {fileID: 812480218}
+--- !u!114 &815326980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 815326976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b734be54e5d623f46a71d9eab511335c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statAnimation: {fileID: 815326978}
+  amountText: {fileID: 1125506162}
+  iconStat: {fileID: 807465558}
+  cacheAmountTransform: {fileID: 0}
+  decreaseColor: {r: 1, g: 0, b: 0, a: 1}
+  increaseColor: {r: 0, g: 1, b: 0, a: 1}
+  animationClipName: Stats_Show
 --- !u!1 &818073625
 GameObject:
   m_ObjectHideFlags: 0
@@ -49300,6 +49371,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1122299454}
   - component: {fileID: 1122299455}
+  - component: {fileID: 1122299457}
+  - component: {fileID: 1122299456}
   m_Layer: 5
   m_Name: AttackSpeed
   m_TagString: Untagged
@@ -49345,6 +49418,39 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &1122299456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1122299453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae8d287d4ebe6144b8eb707b516e710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statType: 3
+  playerStats: {fileID: 812480218}
+--- !u!114 &1122299457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1122299453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b734be54e5d623f46a71d9eab511335c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statAnimation: {fileID: 1122299455}
+  amountText: {fileID: 1774403768}
+  iconStat: {fileID: 992441341}
+  cacheAmountTransform: {fileID: 0}
+  decreaseColor: {r: 1, g: 0, b: 0, a: 1}
+  increaseColor: {r: 0, g: 1, b: 0, a: 1}
+  animationClipName: Stats_Show
 --- !u!1 &1125506160
 GameObject:
   m_ObjectHideFlags: 0
@@ -76969,9 +77075,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6a43ae151e3843a4f845d2f1166c8be1, type: 2}
   - {fileID: 11400000, guid: af4157d9789bdae4abdff1a386e6aabb, type: 2}
   - {fileID: 11400000, guid: 9f57e12ff09c41b4bbeb5edc592f74a8, type: 2}
+  - {fileID: 11400000, guid: 07ce2c84e80992741af15d8b11688b97, type: 2}
   miscItems:
   - {fileID: 11400000, guid: 2676edec09ee26f44abe3d252b409f8e, type: 2}
-  - {fileID: 11400000, guid: 813252bcd6145084ab8bc3e2f2bff5a9, type: 2}
+  - {fileID: 11400000, guid: dbc6b9a092c39c5429e0600d6204201d, type: 2}
   - {fileID: 11400000, guid: 0a97d61ccd8275c4cb2ec8f62c5caa4c, type: 2}
   addAmount: 5
   backpackStep: 5
@@ -86801,6 +86908,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1997233078}
   - component: {fileID: 1997233079}
+  - component: {fileID: 1997233081}
+  - component: {fileID: 1997233080}
   m_Layer: 5
   m_Name: Attack
   m_TagString: Untagged
@@ -86846,6 +86955,39 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &1997233080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997233077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae8d287d4ebe6144b8eb707b516e710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statType: 0
+  playerStats: {fileID: 812480218}
+--- !u!114 &1997233081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997233077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b734be54e5d623f46a71d9eab511335c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statAnimation: {fileID: 1997233079}
+  amountText: {fileID: 1208806007}
+  iconStat: {fileID: 1499450901}
+  cacheAmountTransform: {fileID: 0}
+  decreaseColor: {r: 1, g: 0, b: 0, a: 1}
+  increaseColor: {r: 0, g: 1, b: 0, a: 1}
+  animationClipName: Stats_Show
 --- !u!1 &1997614755
 GameObject:
   m_ObjectHideFlags: 0
@@ -88297,7 +88439,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2025567105
 Transform:
   m_ObjectHideFlags: 0
