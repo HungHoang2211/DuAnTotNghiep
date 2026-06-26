@@ -7,19 +7,11 @@ using SimpleSurvival.Input;
 using SimpleSurvival.Core;
 using SimpleSurvival.Combat;
 
-/// <summary>
-/// Gộp từ DeerController (Passive) + WolfController (Predator).
-/// Dùng cờ _behaviorType để rẽ nhánh đúng logic gốc của từng loài —
-/// không thay đổi hành vi, chỉ gộp phần dùng chung (Awake/OnDestroy/Update/
-/// SmoothRotation khung/GetRandomNavMeshPoint/Die/OnDrawGizmosSelected khung)
-/// và loại bỏ trùng lặp.
-/// Đã bỏ DeerLoot/WolfLoot — AnimalController không xử lý loot.
-/// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyStats))]
 public class AnimalController : MonoBehaviour, ISpawnableEnemy
 {
-    public enum BehaviorType { Passive, Predator } // Passive = Deer (bỏ chạy) | Predator = Wolf (săn mồi)
+    public enum BehaviorType { Passive, Predator }
 
     [Header("Behavior Type")]
     [Tooltip("Set trong Inspector của từng prefab: Passive cho Deer, Predator cho Wolf. " +
@@ -46,21 +38,20 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
     private NavMeshAgent _agent;
     private AnimalAnimatorController _anim;
     private EnemyStats _stats;
-    private EnemyHearing _hearing; // [Passive] only
+    private EnemyHearing _hearing;
 
     private IEnemySpawnPoint _spawnPoint;
 
-    // Cache reference để kiểm tra trạng thái sneak của player — [Passive] only
     private PlayerInputReader _playerInput;
 
-    private Transform _player; // [Predator] only — target hiện tại
+    private Transform _player;
 
-    private Coroutine _behaviorCoroutine; // [Passive] only
+    private Coroutine _behaviorCoroutine;
     private bool _isDead = false;
-    private float _grazeBlockedUntil = 0f; // [Passive] only
-    private float _lastAttackTime = 0f;    // [Predator] only
-    private float _lostTargetTimer = 0f;   // [Predator] only
-    private Vector3 _homePosition;         // [Predator] only
+    private float _grazeBlockedUntil = 0f;
+    private float _lastAttackTime = 0f;
+    private float _lostTargetTimer = 0f;
+    private Vector3 _homePosition;      
     private Vector3 _deathPosition;
 
     private DeerStatsConfig DeerConfig => _stats != null ? _stats.EnemyConfig as DeerStatsConfig : null;
@@ -98,15 +89,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
             _hearing.OnSoundHeard -= HandleSoundHeard;
     }
 
-    // ===================================================================
-    // INITIALIZE
-    // ===================================================================
-
-    /// <summary>
-    /// Initialize dùng chung cho cả Passive (Deer) và Predator (Wolf) — behaviorType được
-    /// set sẵn qua _behaviorType trên Inspector của từng prefab, không còn cần phân biệt
-    /// qua type spawn point.
-    /// </summary>
     public void Initialize(IEnemySpawnPoint spawnPoint)
     {
         _spawnPoint = spawnPoint;
@@ -157,7 +139,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         }
     }
 
-    /// <summary>Phần Initialize dùng chung cho cả 2 loài.</summary>
     private void InitCommon()
     {
         _isDead = false;
@@ -195,15 +176,11 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
             OnTakeDamage(source.transform);
     }
 
-    // ===================================================================
-    // UPDATE / ROTATION (dùng chung khung, rẽ nhánh theo behaviorType)
-    // ===================================================================
 
     private void Update()
     {
         if (_isDead)
         {
-            // Failsafe: ép xác đứng yên tuyệt đối, không cho bất kỳ va chạm/lực nào dịch chuyển nó
             transform.position = _deathPosition;
             return;
         }
@@ -247,7 +224,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
 
             if (_agent.velocity.sqrMagnitude < 0.1f) return;
 
-            // Khi chase: hướng thẳng về player thay vì theo velocity để không bị lag xoay
             if (_state == State.Chasing && _player != null)
             {
                 Vector3 dirToPlayer = _player.position - transform.position;
@@ -271,7 +247,7 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
                 _rotationSpeed * Time.deltaTime
             );
         }
-        else // Passive (Deer) — dùng Slerp như bản gốc
+        else 
         {
             if (_agent.velocity.sqrMagnitude < 0.1f) return;
 
@@ -288,7 +264,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         }
     }
 
-    /// <summary>Dùng chung — y hệt code cũ ở cả DeerController và WolfController.</summary>
     private Vector3 GetRandomNavMeshPoint(Vector3 origin, float radius)
     {
         for (int i = 0; i < 10; i++)
@@ -300,10 +275,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         }
         return origin;
     }
-
-    // ===================================================================
-    // PASSIVE (Deer) — Wandering / Grazing / Flee
-    // ===================================================================
 
     private IEnumerator BehaviorRoutine()
     {
@@ -377,11 +348,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         }
     }
 
-    /// <summary>
-    /// Sound detection qua EnemyHearing.
-    /// - AttackHit / GatherHit / Gunshot: luôn flee dù player đang sneak.
-    /// - Footstep: chỉ flee khi player KHÔNG sneak.
-    /// </summary>
     private void HandleSoundHeard(SoundEvent soundEvent)
     {
         if (_behaviorType != BehaviorType.Passive) return;
@@ -442,9 +408,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         _grazeBlockedUntil = Time.time + DeerConfig.GrazeCooldownAfterFlee;
     }
 
-    // ===================================================================
-    // PREDATOR (Wolf) — Wandering / Howl / Chase / Attack / Return
-    // ===================================================================
 
     private IEnumerator WanderRoutine()
     {
@@ -676,10 +639,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
             BeginChase();
     }
 
-    // ===================================================================
-    // DIE / GIZMOS (dùng chung khung, rẽ nhánh theo behaviorType)
-    // ===================================================================
-
     public void Die()
     {
         if (_isDead) return;
@@ -689,9 +648,9 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
         StopAllCoroutines();
         _agent.isStopped = true;
         _agent.ResetPath();
-        _agent.enabled = false; // tắt hẳn NavMeshAgent — tránh bị các agent khác đẩy (avoidance) khi đã chết
+        _agent.enabled = false;
 
-        _deathPosition = transform.position; // chốt vị trí chết, Update() sẽ ép giữ nguyên vị trí này
+        _deathPosition = transform.position;
 
         float despawnDelay;
 
@@ -708,7 +667,6 @@ public class AnimalController : MonoBehaviour, ISpawnableEnemy
             despawnDelay = WolfConfig != null ? WolfConfig.DespawnDelay : 120f;
         }
 
-        // Tắt TẤT CẢ collider (gốc + con) — tránh trường hợp có hitbox/collider phụ ở object con
         foreach (var c in GetComponentsInChildren<Collider>())
             c.enabled = false;
 

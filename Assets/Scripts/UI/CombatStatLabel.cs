@@ -66,7 +66,7 @@ namespace SimpleSurvival.UI
             }
             else
             {
-                int value = Mathf.RoundToInt(raw);
+                int value = ConvertToInt(raw);
                 int last = Mathf.RoundToInt(_lastValue);
                 if (animated && value != last)
                 {
@@ -79,6 +79,13 @@ namespace SimpleSurvival.UI
                 }
                 _lastValue = value;
             }
+        }
+
+        private int ConvertToInt(float raw)
+        {
+            if (statType == StatType.Speed)
+                return Mathf.RoundToInt(raw * 10f);
+            return Mathf.RoundToInt(raw);
         }
 
         private float ReadValue()

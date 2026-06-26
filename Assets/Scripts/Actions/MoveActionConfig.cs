@@ -1,27 +1,27 @@
-using System;
 using UnityEngine;
 
 namespace SimpleSurvival.Actions
 {
-    [Serializable]
+    [System.Serializable]
     public class MoveActionConfig
     {
-        public float walkSpeed = 3f;
-        public float runSpeed = 6f;
-        public float sneakSpeed = 1.5f;
+        [Header("Speed Multipliers")]
+        [Tooltip("Walk speed = TotalMoveSpeed × walkMultiplier")]
+        public float walkMultiplier = 0.5f;
+        [Tooltip("Run speed = TotalMoveSpeed × runMultiplier")]
+        public float runMultiplier = 1.0f;
+        [Tooltip("Sneak speed = TotalMoveSpeed × sneakMultiplier")]
+        public float sneakMultiplier = 0.25f;
 
-        [Range(0.3f, 0.95f)]
-        public float runThreshold = 0.6f;
-
+        [Header("Movement")]
+        [Range(0f, 1f)] public float runThreshold = 0.6f;
         public float acceleration = 60f;
-
-        [Range(1f, 30f)]
         public float rotationSmoothness = 12f;
-
         public float gravity = -20f;
 
+        [Header("Sneak Collider")]
         public float sneakHeightReduction = 0.6f;
         public float sneakLerpSpeed = 10f;
-        public LayerMask standUpCheckMask = ~0;
+        public LayerMask standUpCheckMask;
     }
 }

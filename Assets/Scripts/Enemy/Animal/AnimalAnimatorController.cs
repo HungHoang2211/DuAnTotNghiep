@@ -1,12 +1,5 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Gộp từ DeerAnimatorController + WolfAnimatorController.
-/// Các method dùng chung (SetSpeed, SetDead) được giữ logic tổng quát nhất
-/// (theo bản Wolf, vì Deer chỉ là trường hợp riêng với _deathClipCount = 2).
-/// Các method riêng của từng loài (SetGrazing - Deer | TriggerAttack/SetHowling/OnAttackHit - Wolf)
-/// vẫn giữ nguyên, animal nào không dùng thì đơn giản là không gọi tới.
-/// </summary>
 [RequireComponent(typeof(Animator))]
 public class AnimalAnimatorController : MonoBehaviour
 {
@@ -37,7 +30,6 @@ public class AnimalAnimatorController : MonoBehaviour
 
     private void Awake() => _animator = GetComponent<Animator>();
 
-    /// <summary>Dùng chung cho mọi loài. Với Wolf giữ _walkAnimSpeed = _runAnimSpeed = 1f để không đổi hành vi cũ.</summary>
     public void SetSpeed(float speed)
     {
         _animator.SetFloat(SpeedHash, speed);
@@ -50,35 +42,26 @@ public class AnimalAnimatorController : MonoBehaviour
             _animator.speed = 1f;
     }
 
-    /// <summary>
-    /// Kích hoạt death với animation ngẫu nhiên qua Blend Tree.
-    /// DeathIndex được set TRƯỚC khi IsDead → Blend Tree nhận đúng clip.
-    /// Threshold layout: 0, 1, 2, ... (_deathClipCount - 1).
-    /// (Deer trước đây random 0/1 thủ công — tương đương Random.Range(0, 2) nên gộp về 1 logic chung.)
-    /// </summary>
     public void SetDead(bool isDead)
     {
         if (isDead)
         {
-            float randomIndex = Random.Range(0, _deathClipCount); // int range → exact threshold
+            float randomIndex = Random.Range(0, _deathClipCount);
             _animator.SetFloat(DeathIndexHash, randomIndex);
-            _animator.speed = 1f; // reset speed về bình thường
+            _animator.speed = 1f;
         }
 
         _animator.SetBool(IsDeadHash, isDead);
     }
 
-    // ===================== Deer-specific =====================
     public void SetGrazing(bool grazing)
     {
         _animator.SetBool(IsGrazingHash, grazing);
         if (grazing) _animator.speed = 1f;
     }
 
-    // ===================== Wolf-specific =====================
     public void TriggerAttack() => _animator.SetTrigger(IsAttackHash);
     public void SetHowling(bool isHowling) => _animator.SetBool(IsHowlingHash, isHowling);
 
-    // Gọi trong Animation Event của clip Attack khi cú đánh chạm
     public void OnAttackHit() { }
 }

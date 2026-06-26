@@ -9,6 +9,7 @@ namespace SimpleSurvival.Stats
         public event Action<float, float> OnHungerChanged;
         public event Action<float, float> OnThirstChanged;
         public event Action OnCombatStatsChanged;
+        public event Action<ItemStack, EquipSlot> OnArmorBroken;
 
         public float Hunger { get; private set; }
         public float Thirst { get; private set; }
@@ -33,6 +34,16 @@ namespace SimpleSurvival.Stats
         private float _hpRegenTimer;
         private float _starveTimer;
         private float _dehydrateTimer;
+
+        private static readonly EquipSlot[] ArmorSlots =
+        {
+            EquipSlot.Helmet,
+            EquipSlot.Jacket,
+            EquipSlot.Pants,
+            EquipSlot.Boots
+        };
+
+        public override float Armor => TotalDefense;
 
         public float TotalDamage
         {
@@ -67,10 +78,8 @@ namespace SimpleSurvival.Stats
             get
             {
                 float sum = 0f;
-                sum += GetArmorValue(EquipSlot.Helmet);
-                sum += GetArmorValue(EquipSlot.Jacket);
-                sum += GetArmorValue(EquipSlot.Pants);
-                sum += GetArmorValue(EquipSlot.Boots);
+                foreach (EquipSlot slot in ArmorSlots)
+                    sum += GetArmorValue(slot);
                 return sum;
             }
         }
@@ -79,14 +88,25 @@ namespace SimpleSurvival.Stats
         {
             get
             {
-                float speed = MoveSpeed;
+                float modifier = 1f;
+
                 ItemStack boots = GetEquipped(EquipSlot.Boots);
                 if (boots != null && !boots.IsBroken)
                 {
                     EquipmentAbility ability = boots.ItemData.GetAbility<EquipmentAbility>();
-                    if (ability != null) speed *= (1f + ability.SpeedBonus);
+                    if (ability != null) modifier += ability.SpeedBonus;
                 }
-                return speed;
+
+                ItemStack weapon = GetEquipped(EquipSlot.Weapon);
+                if (weapon != null && !weapon.IsBroken)
+                {
+                    WeaponAbility ability = weapon.ItemData.GetAbility<WeaponAbility>();
+                    if (ability != null && Config != null)
+                        modifier -= ability.Weight * Config.WeightSpeedFactor;
+                }
+
+                if (modifier < 0.1f) modifier = 0.1f;
+                return MoveSpeed * modifier;
             }
         }
 
@@ -132,6 +152,32 @@ namespace SimpleSurvival.Stats
             if (Config == null) return;
             SetHunger(hunger);
             SetThirst(thirst);
+        }
+
+        protected override void OnPostDamage(float rawDamage, GameObject source)
+        {
+            ReduceArmorDurability();
+        }
+
+        private void ReduceArmorDurability()
+        {
+            if (playerEquipment == null || playerEquipment.System == null) return;
+
+            foreach (EquipSlot slot in ArmorSlots)
+            {
+                ItemStack stack = playerEquipment.System.GetSlot(slot, 0);
+                if (stack == null) continue;
+                if (!stack.ItemData.IsDurable) continue;
+                if (stack.IsBroken) continue;
+
+                bool broke = stack.ReduceDurability();
+                if (broke)
+                {
+                    Debug.Log($"[ArmorBroken] {stack.ItemData.ItemName} in {slot}");
+                    playerEquipment.System.SetSlotDirect(slot, 0, null);
+                    OnArmorBroken?.Invoke(stack, slot);
+                }
+            }
         }
 
         private void Update()

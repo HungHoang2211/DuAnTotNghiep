@@ -83,7 +83,7 @@ namespace SimpleSurvival.Items
                     sb.AppendLine($"Armor: {equipment.ArmorValue}");
 
                 if (equipment.SpeedBonus > 0f)
-                    sb.AppendLine($"Speed: +{equipment.SpeedBonus * 100f:F0}%");
+                    sb.AppendLine($"Move Speed: +{equipment.SpeedBonus * 100f:F0}%");
             }
 
             return sb.ToString().TrimEnd();
