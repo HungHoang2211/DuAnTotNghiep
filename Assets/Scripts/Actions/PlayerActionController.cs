@@ -65,7 +65,7 @@ namespace SimpleSurvival.Player
             if (playerAnimator == null) playerAnimator = GetComponentInChildren<PlayerAnimator>();
 
             _idleAction = new IdleAction(this);
-            _moveAction = new MoveAction(this, moveConfig);
+            _moveAction = new MoveAction(this, moveConfig, playerStats);
 
             CurrentAction = _idleAction;
             CurrentAction.Init();
@@ -468,6 +468,5 @@ namespace SimpleSurvival.Player
 
             OnActionChanged?.Invoke(oldAction, _idleAction);
         }
-
     }
 }

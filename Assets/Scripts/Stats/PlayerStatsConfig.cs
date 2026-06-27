@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SimpleSurvival.Stats
 {
@@ -29,6 +29,11 @@ namespace SimpleSurvival.Stats
         [SerializeField] private float dehydrateDamageAmount = 5f;
         [SerializeField] private float dehydrateDamageInterval = 1f;
 
+        [Header("Movement")]
+        [Tooltip("Hệ số nhân với weight của vũ khí để tính phần trăm giảm tốc. " +
+            "Ví dụ 0.02 = mỗi 1 weight giảm 2% tốc độ chạy.")]
+        [SerializeField] private float weightSpeedFactor = 0.02f;
+
         public float MaxHunger => maxHunger;
         public float StartHunger => startHunger;
         public float HungerDecayPerSec => hungerDecayPerSec;
@@ -45,5 +50,7 @@ namespace SimpleSurvival.Stats
 
         public float DehydrateDamageAmount => dehydrateDamageAmount;
         public float DehydrateDamageInterval => dehydrateDamageInterval;
+
+        public float WeightSpeedFactor => weightSpeedFactor;
     }
 }

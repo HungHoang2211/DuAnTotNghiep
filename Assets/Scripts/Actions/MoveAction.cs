@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using SimpleSurvival.Player;
+using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.Actions
 {
@@ -16,6 +17,7 @@ namespace SimpleSurvival.Actions
 
         private readonly PlayerActionController _controller;
         private readonly CharacterController _cc;
+        private readonly PlayerStats _playerStats;
 
         private Vector3 _inputDirection;
         private float _inputMagnitude;
@@ -24,9 +26,9 @@ namespace SimpleSurvival.Actions
         private Vector3 _horizontalVelocity;
         private float _verticalVelocity;
 
-        private float _walkSpeed;
-        private float _runSpeed;
-        private float _sneakSpeed;
+        private float _walkMultiplier;
+        private float _runMultiplier;
+        private float _sneakMultiplier;
         private float _runThreshold;
         private float _acceleration;
         private float _rotationSmoothness;
@@ -39,14 +41,15 @@ namespace SimpleSurvival.Actions
         private LayerMask _standUpCheckMask;
         private bool _heightCaptured;
 
-        public MoveAction(PlayerActionController controller, MoveActionConfig config)
+        public MoveAction(PlayerActionController controller, MoveActionConfig config, PlayerStats playerStats)
         {
             _controller = controller;
             _cc = controller.Controller;
+            _playerStats = playerStats;
 
-            _walkSpeed = config.walkSpeed;
-            _runSpeed = config.runSpeed;
-            _sneakSpeed = config.sneakSpeed;
+            _walkMultiplier = config.walkMultiplier;
+            _runMultiplier = config.runMultiplier;
+            _sneakMultiplier = config.sneakMultiplier;
             _runThreshold = config.runThreshold;
             _acceleration = config.acceleration;
             _rotationSmoothness = config.rotationSmoothness;
@@ -140,9 +143,11 @@ namespace SimpleSurvival.Actions
             bool isMoving = _inputMagnitude > 0.1f;
             IsRunning = isMoving && !IsSneaking && _inputMagnitude >= _runThreshold;
 
-            float targetSpeed = IsSneaking ? _sneakSpeed
-                              : IsRunning ? _runSpeed
-                              : _walkSpeed;
+            float baseSpeed = _playerStats != null ? _playerStats.TotalMoveSpeed : 4f;
+
+            float targetSpeed = IsSneaking ? baseSpeed * _sneakMultiplier
+                              : IsRunning ? baseSpeed * _runMultiplier
+                              : baseSpeed * _walkMultiplier;
 
             Vector3 desiredVelocity = isMoving ? _inputDirection * targetSpeed : Vector3.zero;
 

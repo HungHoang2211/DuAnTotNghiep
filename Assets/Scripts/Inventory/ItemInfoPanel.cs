@@ -29,7 +29,6 @@ namespace SimpleSurvival.Items
 
             captionText.text = stack.ItemData.ItemName;
             bodyText.text = BuildBody(stack.ItemData);
-
             PositionBeside(cellRect);
             SetVisible(true);
         }
@@ -45,7 +44,6 @@ namespace SimpleSurvival.Items
             canvasGroup.blocksRaycasts = visible;
         }
 
-
         private string BuildBody(ItemData item)
         {
             StringBuilder sb = new StringBuilder();
@@ -58,7 +56,6 @@ namespace SimpleSurvival.Items
                 sb.AppendLine();
                 sb.Append(stats);
             }
-
             return sb.ToString();
         }
 
@@ -80,20 +77,22 @@ namespace SimpleSurvival.Items
             }
 
             EquipmentAbility equipment = item.GetAbility<EquipmentAbility>();
-            if (equipment != null && equipment.ArmorValue > 0f)
+            if (equipment != null)
             {
-                sb.AppendLine($"Armor: {equipment.ArmorValue}");
+                if (equipment.ArmorValue > 0f)
+                    sb.AppendLine($"Armor: {equipment.ArmorValue}");
+
+                if (equipment.SpeedBonus > 0f)
+                    sb.AppendLine($"Move Speed: +{equipment.SpeedBonus * 100f:F0}%");
             }
 
             return sb.ToString().TrimEnd();
         }
 
-
         private void PositionBeside(RectTransform cellRect)
         {
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(
                 uiCamera, cellRect.position);
-
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvasRect, screenPoint, uiCamera, out Vector2 cellLocal);
 

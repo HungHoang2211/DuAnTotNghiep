@@ -94,9 +94,11 @@ namespace SimpleSurvival.UI
 
         private void HandleChanged(float current, float max)
         {
-            bool isIncrease = current > _lastAmount;
+            int displayCurrent = Mathf.CeilToInt(current);
+            int displayLast = Mathf.CeilToInt(_lastAmount);
+            bool isIncrease = displayCurrent > displayLast;
             _lastAmount = current;
-            SetAmount((int)current, isIncrease);
+            SetAmount(displayCurrent, isIncrease);
         }
 
         private void SetAmount(int amount, bool isIncrease)
@@ -105,7 +107,9 @@ namespace SimpleSurvival.UI
 
             amountText.text = amount.ToString();
             _currentTextColor = GetColor(amount);
-            amountText.color = _currentTextColor;
+
+            if (!_isPlaying)
+                amountText.color = _currentTextColor;
 
             if (gameObject.activeInHierarchy && isIncrease)
                 StartCoroutine(ShowAnimation());
@@ -115,10 +119,12 @@ namespace SimpleSurvival.UI
         {
             Play();
             amountText.color = increaseColor;
+            _isPlaying = true;
 
             while (statAnimation != null && statAnimation.isPlaying)
                 yield return new WaitForEndOfFrame();
 
+            _isPlaying = false;
             amountText.color = _currentTextColor;
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using SimpleSurvival.Stats;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +12,7 @@ namespace SimpleSurvival.Items
         [SerializeField] private InventorySelection lootSelection;
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private PlayerEquipment playerEquipment;
+        [SerializeField] private SimpleSurvival.Player.PlayerConsumableHandler consumableHandler;
         [SerializeField] private EquipmentPanel equipmentPanel;
 
         [Header("Buttons")]
@@ -27,7 +27,6 @@ namespace SimpleSurvival.Items
         [Header("Dialogs")]
         [SerializeField] private SimpleSurvival.UI.ConfirmDeleteDialog confirmDeleteDialog;
 
-        public event Action<ItemStack> OnUseConsumableRequested;
         public event Action<ItemStack> OnEquipRequested;
 
         private enum Context
@@ -254,8 +253,7 @@ namespace SimpleSurvival.Items
             ConsumableAbility consumable = stack.ItemData.GetAbility<ConsumableAbility>();
             if (consumable != null)
             {
-                bool consumed = TryConsume(stack, consumable);
-                if (consumed)
+                if (consumableHandler != null && consumableHandler.TryConsume(stack))
                     ConsumeOne(cell);
                 return;
             }
@@ -264,28 +262,6 @@ namespace SimpleSurvival.Items
             {
                 EquipFromActiveCell(cell, stack);
             }
-        }
-
-        private bool TryConsume(ItemStack stack, ConsumableAbility ability)
-        {
-            OnUseConsumableRequested?.Invoke(stack);
-            return !AreAllStatsFull(ability);
-        }
-
-        private bool AreAllStatsFull(ConsumableAbility ability)
-        {
-            PlayerStats stats = playerEquipment.GetComponentInParent<SimpleSurvival.Stats.PlayerStats>();
-            if (stats == null) return false;
-
-            bool hpTarget = ability.RestoreHp > 0f;
-            bool hungerTarget = ability.RestoreHunger > 0f;
-            bool thirstTarget = ability.RestoreThirst > 0f;
-
-            bool hpFull = !hpTarget || stats.HP >= stats.MaxHP;
-            bool hungerFull = !hungerTarget || stats.Hunger >= stats.MaxHunger;
-            bool thirstFull = !thirstTarget || stats.Thirst >= stats.MaxThirst;
-
-            return hpFull && hungerFull && thirstFull;
         }
 
         private void EquipFromActiveCell(CellUI cell, ItemStack stack)
@@ -397,12 +373,15 @@ namespace SimpleSurvival.Items
             stack.RemoveQuantity(1);
 
             if (stack.IsEmpty)
+            {
                 inventory.SetSlot(index, null);
+                InventorySelection sel = GetActiveSelection();
+                if (sel != null) sel.Deselect();
+            }
             else
+            {
                 inventory.NotifyChanged();
-
-            InventorySelection sel = GetActiveSelection();
-            if (sel != null) sel.Deselect();
+            }
         }
 
         private bool HasFreeSlotInGrid(InventorySystem inventory, int excludeIndex)
