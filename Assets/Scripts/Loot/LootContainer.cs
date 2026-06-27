@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
@@ -43,14 +43,18 @@ namespace SimpleSurvival.Loot
         [SerializeField] private Transform openRotationTarget;
         [SerializeField] private Vector3 openRotation;
 
+        [Header("Runtime Init")]
+        [Tooltip("Nếu true, container không tự init ở Awake. Phải gọi InitializeRuntime sau (vd từ EnemyCorpseHandler).")]
+        [SerializeField] private bool deferInitialization = false;
+
         private InventorySystem _inventory;
         private float _decayElapsed;
         private bool _hasBeenOpened;
         private bool _isUnlocked;
         private bool _despawned;
+        private bool _isInitialized;
 
         public override TargetType Type => TargetType.Container;
-
         public override Transform Transform => useTransform != null ? useTransform : transform;
 
         public InventorySystem Inventory => _inventory;
@@ -95,16 +99,34 @@ namespace SimpleSurvival.Loot
 
         private void Awake()
         {
+            if (deferInitialization) return;
+            InitializeInternal();
+        }
+
+        public void InitializeRuntime(LootTable runtimeTable, float runtimeUnlockDuration = 0f)
+        {
+            if (_isInitialized) return;
+            lootTable = runtimeTable;
+            unlockDuration = runtimeUnlockDuration;
+            InitializeInternal();
+        }
+
+        private void InitializeInternal()
+        {
+            if (_isInitialized) return;
+            _isInitialized = true;
+
             int resolvedSlotCount = ResolveSlotCount();
             _inventory = new InventorySystem(Mathf.Max(1, resolvedSlotCount));
             InitializeItems();
             _inventory.OnInventoryChanged += HandleInventoryChanged;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             if (_inventory != null)
                 _inventory.OnInventoryChanged -= HandleInventoryChanged;
+            base.OnDestroy();
         }
 
         private void Update()
@@ -162,6 +184,7 @@ namespace SimpleSurvival.Loot
         {
             if (!isActiveAndEnabled) return false;
             if (_despawned) return false;
+            if (!_isInitialized) return false;
             if (IsEmpty && !persistWhenEmpty) return false;
             return true;
         }

@@ -1,9 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.Targets
 {
-    [RequireComponent(typeof(EnemyStats))]
     public class EnemyTarget : TargetableBase
     {
         private EnemyStats _stats;
@@ -12,16 +11,17 @@ namespace SimpleSurvival.Targets
 
         protected void Awake()
         {
-            _stats = GetComponent<EnemyStats>();
+            _stats = GetComponentInParent<EnemyStats>();
             if (_stats != null)
                 _stats.OnDeath += HandleDeath;
+            else
+                Debug.LogWarning($"[{name}] EnemyTarget không tìm thấy EnemyStats ở parent", this);
         }
 
         protected override void OnDestroy()
         {
             if (_stats != null)
                 _stats.OnDeath -= HandleDeath;
-
             base.OnDestroy();
         }
 
@@ -36,10 +36,5 @@ namespace SimpleSurvival.Targets
         {
             FireOnDestroyed();
         }
-
-        //protected override void OnSpawnFromPool()
-        //{
-        //    base.OnSpawnFromPool();
-        //}
     }
 }
