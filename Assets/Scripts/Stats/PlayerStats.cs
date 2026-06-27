@@ -20,6 +20,10 @@ namespace SimpleSurvival.Stats
         [Tooltip("Allow HP natural regen in current map. Disable for combat maps.")]
         [SerializeField] private bool allowRegen = true;
 
+        [Header("Decay Pause After Consume")]
+        [Tooltip("Thời gian (giây) tạm dừng decay Hunger/Thirst sau khi consume item.")]
+        [SerializeField] private float decayPauseAfterConsume = 5f;
+
         [Header("Equipment Reference")]
         [SerializeField] private PlayerEquipment playerEquipment;
 
@@ -34,6 +38,8 @@ namespace SimpleSurvival.Stats
         private float _hpRegenTimer;
         private float _starveTimer;
         private float _dehydrateTimer;
+        private float _hungerPauseUntil;
+        private float _thirstPauseUntil;
 
         private static readonly EquipSlot[] ArmorSlots =
         {
@@ -142,6 +148,8 @@ namespace SimpleSurvival.Stats
             _hpRegenTimer = 0f;
             _starveTimer = 0f;
             _dehydrateTimer = 0f;
+            _hungerPauseUntil = 0f;
+            _thirstPauseUntil = 0f;
             OnHungerChanged?.Invoke(Hunger, Config.MaxHunger);
             OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
             OnCombatStatsChanged?.Invoke();
@@ -203,8 +211,27 @@ namespace SimpleSurvival.Stats
             SetThirst(Thirst + amount);
         }
 
-        private void TickHunger(float dt) => SetHunger(Hunger - Config.HungerDecayPerSec * dt);
-        private void TickThirst(float dt) => SetThirst(Thirst - Config.ThirstDecayPerSec * dt);
+        public void PauseHungerDecay()
+        {
+            _hungerPauseUntil = Time.time + decayPauseAfterConsume;
+        }
+
+        public void PauseThirstDecay()
+        {
+            _thirstPauseUntil = Time.time + decayPauseAfterConsume;
+        }
+
+        private void TickHunger(float dt)
+        {
+            if (Time.time < _hungerPauseUntil) return;
+            SetHunger(Hunger - Config.HungerDecayPerSec * dt);
+        }
+
+        private void TickThirst(float dt)
+        {
+            if (Time.time < _thirstPauseUntil) return;
+            SetThirst(Thirst - Config.ThirstDecayPerSec * dt);
+        }
 
         private void TickHPRegen(float dt)
         {
