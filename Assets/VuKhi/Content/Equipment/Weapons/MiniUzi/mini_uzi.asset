@@ -1,0 +1,167 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: mini_uzi
+  m_EditorClassIdentifier:
+  WeaponId: mini_uzi
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: mini_uzi_main_default
+    Mesh: {fileID: 4300000, guid: a8d16de6f8f35464bb3824c7dba0daa5, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: mini_uzi_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: mini_uzi_accessory_default
+      Mesh: {fileID: 4300000, guid: 8346ee8715c95c740a043bf5d41f75c6, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_accessory_handle_improved
+      Mesh: {fileID: 4300000, guid: 541628173c272eb44bcc12a7de25d071, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_accessory_handle_ergonomic
+      Mesh: {fileID: 4300000, guid: 1d0a62f9f92679f458392c13f5229142, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_accessory_tactical_upgrade
+      Mesh: {fileID: 4300000, guid: 3da16bd32fed7bc41af8e318116febfc, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_accessory_handle
+      Mesh: {fileID: 4300000, guid: fba2743a06ba5ed4d868dd4a10775eea, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: mini_uzi_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: mini_uzi_barrel_default
+      Mesh: {fileID: 4300000, guid: f5c14af080b1cba43beedc11fc5791a5, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: da03d87ec2778564281ed9736127fb85, type: 2}
+        Position: {x: 0, y: 0.065, z: 0.27}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: mini_uzi_barrel_silencer_long
+      Mesh: {fileID: 4300000, guid: 97dc8578c8a9bc14f8d7d64258d04930, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f078c08798c3bf14fb35f080ea6f89fd, type: 2}
+        Position: {x: 0, y: 0.065, z: 0.45}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: mini_uzi_barrel_long
+      Mesh: {fileID: 4300000, guid: c52c8eedbb992e948b4354d2aa293f28, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f078c08798c3bf14fb35f080ea6f89fd, type: 2}
+        Position: {x: 0, y: 0.065, z: 0.4}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: mini_uzi_barrel_compensator
+      Mesh: {fileID: 4300000, guid: aab5b166bd0e5e247bd96f2e09bb5a06, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 930493130ec72f842872be5444049fe1, type: 2}
+        Position: {x: 0, y: 0.065, z: 0.32}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: mini_uzi_barrel_silencer
+      Mesh: {fileID: 4300000, guid: 8e20cc5069bd2dc45aafecd9b823b77c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f078c08798c3bf14fb35f080ea6f89fd, type: 2}
+        Position: {x: 0, y: 0.065, z: 0.4}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: mini_uzi_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: mini_uzi_magazine_default
+      Mesh: {fileID: 4300000, guid: f842f665e612f9f41b8272743582ae67, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_magazine_barrel
+      Mesh: {fileID: 4300000, guid: 94e48b476e88e59449f9eae7911c2411, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_magazine_extended
+      Mesh: {fileID: 4300000, guid: 22b7072e0255fd849a69412d4546915c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_magazine_double
+      Mesh: {fileID: 4300000, guid: 1abefe2cd60eab5469af6a359b96f062, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_magazine_double_barrel
+      Mesh: {fileID: 4300000, guid: 7be83bf7ba8e99a4da3fbf5037c0b152, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: mini_uzi_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: mini_uzi_sight_red_dot
+      Mesh: {fileID: 4300000, guid: e4cbdce7ac8e2f04d99a5e731edfd401, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_sight_x2_improved
+      Mesh: {fileID: 4300000, guid: 67cd61c2889e6c84d9afce66aec85884, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_sight_red_dot_improved
+      Mesh: {fileID: 4300000, guid: 8528f5b3df248584ba15b0b02627af7f, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_sight_x4
+      Mesh: {fileID: 4300000, guid: 44e155028b3225f42a2053f92a5525cf, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_sight_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: mini_uzi_stock
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: mini_uzi_stock_light
+      Mesh: {fileID: 4300000, guid: e1bfda98845703b40ad43fc7ca4ead8c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_stock_reinforced
+      Mesh: {fileID: 4300000, guid: 1b3d27323434e874592efe7fec96788f, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_stock_tactical
+      Mesh: {fileID: 4300000, guid: d63a4d5b5fb6050429ceb7e2e7e73436, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_stock_wooden
+      Mesh: {fileID: 4300000, guid: c99c8e6f864d8bb44817cabeb37453b7, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: mini_uzi_stock_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

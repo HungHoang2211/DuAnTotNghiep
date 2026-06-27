@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: pipe_pistol
+  m_EditorClassIdentifier:
+  WeaponId: pipe_pistol
+  IsSkinnedMeshRenderer: 0
+  DefaultModules: []
+  Slots:
+  - SlotId: pipe_pistol_base
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: pipe_pistol_base_default
+      Mesh: {fileID: 4300000, guid: a8f2b61230defe24cb59967cf1902fa9, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: StartAttackSfx
+        Object: {fileID: 1709254077376921, guid: 6b345842be5be904ea78c594b6c93573, type: 2}
+        Position: {x: 0, y: 0.086, z: -0.013}
+        Rotation: {x: -15, y: 0, z: 0}
+        Type: 2
+    - ModuleId: pipe_pistol_base_boltaction
+      Mesh: {fileID: 4300000, guid: dc79d0fa8f8c5ac4db0f5f304f1e0d9d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: StartAttackSfx
+        Object: {fileID: 1709254077376921, guid: 6b345842be5be904ea78c594b6c93573, type: 2}
+        Position: {x: 0, y: 0.079, z: -0.016}
+        Rotation: {x: -75, y: 0, z: 0}
+        Type: 2
+    - ModuleId: pipe_pistol_base_improved_boltaction
+      Mesh: {fileID: 4300000, guid: c02ee587c976bf5489434da583540efe, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: StartAttackSfx
+        Object: {fileID: 1709254077376921, guid: 6b345842be5be904ea78c594b6c93573, type: 2}
+        Position: {x: 0, y: 0.075, z: -0.01}
+        Rotation: {x: -75, y: 0, z: 0}
+        Type: 2
+    - ModuleId: pipe_pistol_base_revolver
+      Mesh: {fileID: 4300000, guid: cc1816615b201cf4b9ba157ca04e7034, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: StartAttackSfx
+        Object: {fileID: 1709254077376921, guid: bbf265dd13fbccc4cbc7909a5a3b1333, type: 2}
+        Position: {x: 0, y: 0.089, z: 0.01}
+        Rotation: {x: -30, y: 0, z: 0}
+        Type: 2
+    - ModuleId: pipe_pistol_base_improved_revolver
+      Mesh: {fileID: 4300000, guid: 8efbe6cf7a281e1428c1a365df32fac3, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: StartAttackSfx
+        Object: {fileID: 1709254077376921, guid: bbf265dd13fbccc4cbc7909a5a3b1333, type: 2}
+        Position: {x: 0, y: 0.096, z: 0.017}
+        Rotation: {x: -30, y: 0, z: 0}
+        Type: 2
+  - SlotId: pipe_pistol_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: pipe_pistol_barrel_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: da03d87ec2778564281ed9736127fb85, type: 2}
+        Position: {x: 0, y: 0.084, z: 0.227}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: pipe_pistol_barrel_handmade_muzzle_brake
+      Mesh: {fileID: 4300000, guid: 2ace3b0d029e8d1469d2fa183fd042c1, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 930493130ec72f842872be5444049fe1, type: 2}
+        Position: {x: 0, y: 0.0906, z: 0.295}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: pipe_pistol_barrel_handmade_silencer
+      Mesh: {fileID: 4300000, guid: e4998cbdce787ca408ed9861b5614532, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: ebbdfd2cba1a83b488a99ff90e68c89a, type: 2}
+        Position: {x: 0, y: 0.0868, z: 0.421}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: pipe_pistol_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: pipe_pistol_magazine_default
+      Mesh: {fileID: 4300000, guid: a2defb42dbef55a4982149618c8e4786, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: pipe_pistol_magazine_reinforced
+      Mesh: {fileID: 4300000, guid: d3838c1661eeb104a83d08166e4937cd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: pipe_pistol_magazine_comfortable
+      Mesh: {fileID: 4300000, guid: 150b7d1bd127bee4ca87b8c31e146ad2, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

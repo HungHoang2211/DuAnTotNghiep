@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: lead_pipe_fair
+  m_EditorClassIdentifier:
+  WeaponId: lead_pipe_fair
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: lead_pipe_main_default
+    Mesh: {fileID: 4300000, guid: 0a7ba6ce2bc85444dbaed6f532393fec, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BreakSfx
+      Object: {fileID: 1709254077376921, guid: 8e0a833ea6c89c2469ae8c2affa740bf, type: 2}
+      Position: {x: 0, y: 0.384, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 6
+    - SfxId: TrailSfx
+      Object: {fileID: 1709254077376921, guid: 799f225679d1f174498c922a73324f78, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 7
+  Slots:
+  - SlotId: lead_pipe_head
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: lead_pipe_head_default
+      Mesh: {fileID: 4300000, guid: 56f0991bcc99f204e955b379e7655b54, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_head_tincan
+      Mesh: {fileID: 4300000, guid: ce5934a09c0ea494194690ec53ab73ef, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_head_hatchet
+      Mesh: {fileID: 4300000, guid: 86ce6f664f31a194d86f561101db2ec0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_head_bone
+      Mesh: {fileID: 4300000, guid: cc6716f877c6a274ca5e9bd192287529, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_head_faucet
+      Mesh: {fileID: 4300000, guid: 5420af1c39f740e43bedda6f006b6e62, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: lead_pipe_handle
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: lead_pipe_handle_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_handle_balanced
+      Mesh: {fileID: 4300000, guid: 98992fe09459b7342ba85022de32880d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_handle_reinforced
+      Mesh: {fileID: 4300000, guid: b233c3b1ece9f6e4f9f70eb08740149f, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: lead_pipe_handle_spiked
+      Mesh: {fileID: 4300000, guid: d98e681c3e40a2d41adfb96530fb4e72, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

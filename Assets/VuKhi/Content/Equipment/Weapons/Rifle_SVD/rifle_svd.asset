@@ -1,0 +1,267 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: rifle_svd
+  m_EditorClassIdentifier:
+  WeaponId: rifle_svd
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: rifle_svd_main_default
+    Mesh: {fileID: 4300000, guid: 1300e04d94db7c846bad97985a8e2f5e, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0.013, y: 0.049, z: 0.233}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: rifle_svd_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_magazine_default
+      Mesh: {fileID: 4300000, guid: e82dcfd3a4f5fa74297860f4d6c9964f, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_magazine_big
+      Mesh: {fileID: 4300000, guid: 5b0c16976303e554ba8d46a540a96ea2, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_svd_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_sight_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_red_dot
+      Mesh: {fileID: 4300000, guid: 86bec77d780fa6e42a6d63d6d7dee929, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x2
+      Mesh: {fileID: 4300000, guid: 31e56c9f2c32762458613259dd1e37e9, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x3
+      Mesh: {fileID: 4300000, guid: 0336f7efb21fc1947a42e7e8b1679b9d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x4
+      Mesh: {fileID: 4300000, guid: 590fa966ef60e244c88fd32fb2375a3c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x5
+      Mesh: {fileID: 4300000, guid: 02c4627e07b3987448ee2ab1e99b2721, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x6
+      Mesh: {fileID: 4300000, guid: fc58f3da564454c40a9846198f5576ab, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x7
+      Mesh: {fileID: 4300000, guid: 33cbe011d84a3b5419dc1cb2533fab7e, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x8
+      Mesh: {fileID: 4300000, guid: 7f16600bc8338ab43806144f1f7c4bb1, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x10
+      Mesh: {fileID: 4300000, guid: f2127a7110cc99d4bad0690df3f2c8d2, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x17
+      Mesh: {fileID: 4300000, guid: 538b89a8e677d8748895e6ea4d0b51df, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_sight_x25
+      Mesh: {fileID: 4300000, guid: 47fc086ff3355634db06d76f05bea2df, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_svd_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_barrel_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: b733c3a72d3c16944aba72a073610f50, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.022}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_compensator_short
+      Mesh: {fileID: 4300000, guid: 7705a6d010322694ca725e1ca9ed8133, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 57de622674b3d9c4f9c0b3f543e0fc72, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.041}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_compensator_long
+      Mesh: {fileID: 4300000, guid: 1a6410b33c35bb74aa83a8f7a9c01e88, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 57de622674b3d9c4f9c0b3f543e0fc72, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.087}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_compensator_modify
+      Mesh: {fileID: 4300000, guid: 1d6bfeca05af9ce4aaef87f7a6d693d2, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 57de622674b3d9c4f9c0b3f543e0fc72, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.095}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_compensator_elite
+      Mesh: {fileID: 4300000, guid: c6742eb06bcad254ea5e26707fd27352, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 57de622674b3d9c4f9c0b3f543e0fc72, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.142}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_flamearestor_short
+      Mesh: {fileID: 4300000, guid: 05dedbb88d652024d9214d6c4829c608, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 4bccee9d6d206024c98ba77c82e2af2e, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.086}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_flamearestor_long
+      Mesh: {fileID: 4300000, guid: 29c1ce3f228035a4db950de07c042bdd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 4bccee9d6d206024c98ba77c82e2af2e, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.122}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_silencer_handmade
+      Mesh: {fileID: 4300000, guid: c77e86340d78fa9418aec37d28068def, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: ebbdfd2cba1a83b488a99ff90e68c89a, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.134}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_silencer_standart
+      Mesh: {fileID: 4300000, guid: 63c1d299a5395ca4990257c68acbb4bf, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: ebbdfd2cba1a83b488a99ff90e68c89a, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.273}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_svd_barrel_silencer_modify
+      Mesh: {fileID: 4300000, guid: 977543872e580104e9aa8089f1929e84, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: ebbdfd2cba1a83b488a99ff90e68c89a, type: 2}
+        Position: {x: 0, y: 0.051, z: 1.403}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: rifle_svd_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_accessory_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_accessory_laser_red
+      Mesh: {fileID: 4300000, guid: 6b4fef9cf9e591f4fbc24ee4420118ad, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: 0, y: 0.005, z: 0.58}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_svd_accessory_laser_green
+      Mesh: {fileID: 4300000, guid: 6b4fef9cf9e591f4fbc24ee4420118ad, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: 0, y: 0.005, z: 0.58}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_svd_accessory_atpial_1
+      Mesh: {fileID: 4300000, guid: 60f72fdbbbde5ba4d9bcb6c9641ba71b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: -0.037, y: 0.073, z: 0.42}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_svd_accessory_atpial_2
+      Mesh: {fileID: 4300000, guid: 786a71d8bf3222543a45a7d63d0312d0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: -0.037, y: 0.073, z: 0.428}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_svd_accessory_handle
+      Mesh: {fileID: 4300000, guid: b430590912dc59c43ac0dc471d36964d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_accessory_bipods
+      Mesh: {fileID: 4300000, guid: bfb4415093c12a841a3437109638ff5a, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_svd_frame
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_frame_default
+      Mesh: {fileID: 4300000, guid: ccdf8b7bd5a54e64e8ff17fbb944a781, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_frame_alluminium
+      Mesh: {fileID: 4300000, guid: 13f0c8bb1230a6340a57311c2b85c07e, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_frame_tactical
+      Mesh: {fileID: 4300000, guid: 9066c4538cb4c27459157a5a76579858, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_svd_stock
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_svd_stock_default
+      Mesh: {fileID: 4300000, guid: a9ee0421a1f46924fbd1a3cda1027227, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_stock_light
+      Mesh: {fileID: 4300000, guid: aab7d74947a2d2e4eb84556f3576cfe0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_stock_polymeric
+      Mesh: {fileID: 4300000, guid: 08b6600319c1cf447901554a491a64ba, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_svd_stock_tactical
+      Mesh: {fileID: 4300000, guid: e8e624567ed12004e8d42dc826291305, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

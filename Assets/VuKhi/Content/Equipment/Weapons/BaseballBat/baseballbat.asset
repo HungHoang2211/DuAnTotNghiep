@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: baseballbat
+  m_EditorClassIdentifier:
+  WeaponId: baseballbat
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: baseballbat_main_default
+    Mesh: {fileID: 4300000, guid: 857dc1e33b4adf043ac8c73d9cf807be, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BreakSfx
+      Object: {fileID: 1709254077376921, guid: 72cbb71195d3dc548b82680a36292262, type: 2}
+      Position: {x: 0, y: 0.5, z: 0}
+      Rotation: {x: 90, y: 0, z: 0}
+      Type: 6
+    - SfxId: TrailSfx
+      Object: {fileID: 1709254077376921, guid: dde860a6f0504064596a160960d196b4, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 7
+  Slots:
+  - SlotId: baseballbat_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: baseballbat_barrel_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_barrel_bolts
+      Mesh: {fileID: 4300000, guid: 9d6d969f57b75b54d9dd3685127d98af, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_barrel_nails
+      Mesh: {fileID: 4300000, guid: d9220bf85f4e8eb43a68f0c8ad45d38d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_barrel_barbed_wire
+      Mesh: {fileID: 4300000, guid: 20dc3c6a9f73fcc40816c47eade449fe, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_barrel_thorns
+      Mesh: {fileID: 4300000, guid: 34f43dfd7f567614e9afc5c8fe2a3a99, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: baseballbat_handle
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: baseballbat_handle_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_handle_duct_tape
+      Mesh: {fileID: 4300000, guid: 270b29365505442409cbb4bd7bb54afa, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_handle_leather
+      Mesh: {fileID: 4300000, guid: c629e502b9f5e624e911d61b75f52468, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_handle_heavy
+      Mesh: {fileID: 4300000, guid: 418626608a950be448b7e1c8e0c76d61, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: baseballbat_handle_defensive
+      Mesh: {fileID: 4300000, guid: fdd1dc8a6125f4f45985288089fbbfea, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

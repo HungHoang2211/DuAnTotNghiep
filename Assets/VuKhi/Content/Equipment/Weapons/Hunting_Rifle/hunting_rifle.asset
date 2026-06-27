@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: hunting_rifle
+  m_EditorClassIdentifier:
+  WeaponId: hunting_rifle
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: hunting_rifle_main_default
+    Mesh: {fileID: 4300000, guid: 591783cdaf378fb43a2fa4b9c876c56e, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0.016, y: 0.056, z: 0.192}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+    - SfxId: AttackSfx
+      Object: {fileID: 1709254077376921, guid: 84014231d4a4e094c9a82644dcdbfa75, type: 2}
+      Position: {x: -0.0015, y: 0.0774, z: 0.8727}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 1
+  Slots:
+  - SlotId: simple_slot
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: simple_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: sync_sawblade
+  m_EditorClassIdentifier:
+  WeaponId: sync_sawblade
+  IsSkinnedMeshRenderer: 1
+  DefaultModules:
+  - ModuleId: sawblade_main_default
+    Mesh: {fileID: 0}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BreakSfx
+      Object: {fileID: 1709254077376921, guid: 30eb91cfed35b4f46848ce424e4f4361, type: 2}
+      Position: {x: 0.05, y: 0.435, z: 0.04}
+      Rotation: {x: 0, y: 105.5, z: -77.5}
+      Type: 6
+    - SfxId: TrailSfx
+      Object: {fileID: 1709254077376921, guid: 8dbeb63aba8c6db4b91cf0d8aaf6d151, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 7
+  Slots:
+  - SlotId: sawblade_blade
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: sawblade_blade_default
+      Mesh: {fileID: 4300000, guid: a4c1ec6f717aef449ac0c09f03d7d0cf, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_blade_light
+      Mesh: {fileID: 4300000, guid: 0d373e8e878de1f4abc8ff069b2662af, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_blade_heavy
+      Mesh: {fileID: 4300000, guid: 0f444ec8dc4597f4a8562cc219e973cd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_blade_diamond
+      Mesh: {fileID: 4300000, guid: 04aa5832cf7a13b4abebdccaf331c814, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_blade_diablo
+      Mesh: {fileID: 4300000, guid: e4f03d6188451cf47bd62f5d89bea0b4, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: sawblade_holder
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: sawblade_holder_default
+      Mesh: {fileID: 4300000, guid: 5c2e2d387d914694e9103146ac091668, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_holder_improved
+      Mesh: {fileID: 4300000, guid: 2436956711546f7419c9d61445eb0089, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_holder_heavy
+      Mesh: {fileID: 4300000, guid: 476aaa2a9ed3d2544a791ad354e60265, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_holder_crane
+      Mesh: {fileID: 4300000, guid: 3b6c7825bb8fa734d8bb3ce2a55d0509, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_holder_engine
+      Mesh: {fileID: 4300000, guid: fec2a8312cd5e5a46a32e7f816f24d1c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: Sawblade_sfx
+        Object: {fileID: 1709254077376921, guid: 97adcb6535dd76144bcef802ced942a0, type: 2}
+        Position: {x: -0.06, y: 0.388, z: -0.087}
+        Rotation: {x: -23.36243, y: -137.1966, z: 4.282101}
+        Type: 10
+  - SlotId: sawblade_handle
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: sawblade_handle_default
+      Mesh: {fileID: 4300000, guid: 035d5ba48c838fb489080084d8481862, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_handle_oak
+      Mesh: {fileID: 4300000, guid: 59ea8f08efe02064b9c41b0b5244ce68, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_handle_heavy
+      Mesh: {fileID: 4300000, guid: bd54091eb35a0ec4bb1ddbe4a93ffcd8, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_handle_crane
+      Mesh: {fileID: 4300000, guid: bd28c5ba9516cd7459d49ffc5fcc129b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: sawblade_handle_ergonomic
+      Mesh: {fileID: 4300000, guid: 3a941a9ddf384eb4f8a451fc3ce86d77, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

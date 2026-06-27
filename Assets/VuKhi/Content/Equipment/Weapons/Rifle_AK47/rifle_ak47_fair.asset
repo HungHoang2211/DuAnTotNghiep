@@ -1,0 +1,178 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: rifle_ak47_fair
+  m_EditorClassIdentifier:
+  WeaponId: rifle_ak47_fair
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: rifle_ak47_main_default
+    Mesh: {fileID: 4300000, guid: 8098571a262b38340abe7cf4fd36c7c4, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0, y: 0.059, z: 0.121}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: rifle_ak47_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_ak47_magazine_default
+      Mesh: {fileID: 4300000, guid: ed2c3af25e566f145bb5d072158c8725, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_magazine_double
+      Mesh: {fileID: 4300000, guid: 6e3f759640e2935439f052d36e4ecf8a, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_magazine_extended
+      Mesh: {fileID: 4300000, guid: e1f9fa3e59b67174ca19a97bd97ae616, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_magazine_large
+      Mesh: {fileID: 4300000, guid: 9b6484cc23a19b24b9ca8a6fd7ea51bd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_ak47_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_ak47_sight_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_sight_red_dot
+      Mesh: {fileID: 4300000, guid: 4adfe6202fa148f4e85e5babc731bce0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_sight_x2
+      Mesh: {fileID: 4300000, guid: 038b9f6588494124294a10220e56313d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_sight_x4
+      Mesh: {fileID: 4300000, guid: 7582dddbe6c262247b09e0daf5aa2bad, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_sight_mechanical
+      Mesh: {fileID: 4300000, guid: df065640df9794b42a1ce5f19f1d794c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_ak47_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_ak47_barrel_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.049, z: 0.675}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_ak47_barrel_compensator
+      Mesh: {fileID: 4300000, guid: 46c86f5764472b64db1cc2da5f2b304f, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.049, z: 0.724}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_ak47_barrel_compensator_mod
+      Mesh: {fileID: 4300000, guid: c46d547fcdff77d48b2bcfa8e9c187bd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.0485, z: 0.7375}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_ak47_barrel_flash_hider
+      Mesh: {fileID: 4300000, guid: 64df5c444d1c27d4e8a56a875d210069, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.0485, z: 0.691}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_ak47_barrel_silencer
+      Mesh: {fileID: 4300000, guid: 9227ff94c84364649a12e9f84f6c70db, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.052, z: 0.736}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: rifle_ak47_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_ak47_accessory_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_accessory_laser_red
+      Mesh: {fileID: 4300000, guid: 10eacd07de911c44888010be47fe272b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: 0.0004, y: 0.0007, z: 0.4112}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_ak47_accessory_laser_green
+      Mesh: {fileID: 4300000, guid: 10eacd07de911c44888010be47fe272b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: 0.0004, y: 0.0007, z: 0.4112}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_ak47_accessory_grenade_launcher
+      Mesh: {fileID: 4300000, guid: 27b79453ccba64f4fa8577c9ce3bf872, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: SpellSfx
+        Object: {fileID: 1709254077376921, guid: 067f7b37b6a732c40a1a10f42b7e7c76, type: 2}
+        Position: {x: 0, y: 0, z: 0.521}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 3
+    - ModuleId: rifle_ak47_accessory_knife
+      Mesh: {fileID: 4300000, guid: 25e5c18d9b03f12438e7068ae658b949, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_ak47_stock
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_ak47_stock_default
+      Mesh: {fileID: 4300000, guid: 6795b0f2ef6ce0540a4352d821af3ffc, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_stock_empty
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_stock_reinforced
+      Mesh: {fileID: 4300000, guid: b15c4b5046bb6624eae75fc890653812, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_stock_light
+      Mesh: {fileID: 4300000, guid: b66cc529486a5a148a4ab3e528365ad7, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_ak47_stock_tactical
+      Mesh: {fileID: 4300000, guid: 5e1e46155c246484ab6ef637640a8589, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

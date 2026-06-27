@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: sync_paddle
+  m_EditorClassIdentifier:
+  WeaponId: sync_paddle
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: paddle_main_default
+    Mesh: {fileID: 0}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BreakSfx
+      Object: {fileID: 1709254077376921, guid: 51a33bdf7fa418d4ab845b76667e0fde, type: 2}
+      Position: {x: 0.05, y: 0.26, z: 0.044}
+      Rotation: {x: 0, y: 90, z: -83}
+      Type: 6
+    - SfxId: TrailSfx
+      Object: {fileID: 1709254077376921, guid: 75e6fc4f8353d044099f6ed61292e203, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 7
+  Slots:
+  - SlotId: simple_slot
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: simple_default
+      Mesh: {fileID: 4300000, guid: 81300aa0261688e4f81e8abe4e33d604, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
