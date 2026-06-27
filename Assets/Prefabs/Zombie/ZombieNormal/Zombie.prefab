@@ -1045,6 +1045,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1873542418123092995}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: 0}
+--- !u!1 &3448180861025123629
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8198964438243539908}
+  - component: {fileID: 8617023357389902057}
+  m_Layer: 15
+  m_Name: LootTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8198964438243539908
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3448180861025123629}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.96, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4848873153164738522}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &8617023357389902057
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3448180861025123629}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Radius: 1.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3583929674732065130
 GameObject:
   m_ObjectHideFlags: 0
@@ -2545,6 +2598,7 @@ GameObject:
   - component: {fileID: 2080896983015035953}
   - component: {fileID: 6988851730292404845}
   - component: {fileID: 6462454601432149408}
+  - component: {fileID: 6216416507251623279}
   - component: {fileID: -7656215154857311713}
   - component: {fileID: 7213027466504647735}
   - component: {fileID: 1956828932666080739}
@@ -2552,6 +2606,9 @@ GameObject:
   - component: {fileID: 7072712761729223532}
   - component: {fileID: 4041750585481483695}
   - component: {fileID: 3577357596216463923}
+  - component: {fileID: -6262705398337766745}
+  - component: {fileID: -2555138297317319743}
+  - component: {fileID: -5405073334439726052}
   m_Layer: 8
   m_Name: Zombie
   m_TagString: Enemy
@@ -2621,6 +2678,31 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!143 &6216416507251623279
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.94, z: 0}
 --- !u!136 &-7656215154857311713
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2656,7 +2738,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 0
   _ragdollBodies:
   - {fileID: 338737174633654037}
   - {fileID: 4601130191410222333}
@@ -2693,20 +2774,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 0
-  _playerLayer:
+  playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  _obstacleLayer:
+  obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
-  _acidEffectPrefab: {fileID: 0}
-  _mouthTransform: {fileID: 0}
-  _jumpImpactEffectPrefab: {fileID: 0}
-  _jumpAttackDelay: 5
-  _jumpLandRadius: 1.5
-  _jumpDamage: 35
-  _jumpStunDuration: 2
+  _skills:
+  - {fileID: -6262705398337766745}
+  _zombieAnimator: {fileID: 7213027466504647735}
+  _corpseHandler: {fileID: -2555138297317319743}
 --- !u!114 &223015569284610420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2767,6 +2844,68 @@ MonoBehaviour:
   - {fileID: 6723364570044214168}
   - {fileID: 2305891985814303949}
   - {fileID: 970739098950557393}
+--- !u!114 &-6262705398337766745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0b35b706b625f741a8c4603da01e193, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 1.2
+  priority: 1
+  damage: 10
+  damageRangeBonus: 0.5
+  animator: {fileID: 7213027466504647735}
+  controller: {fileID: 1956828932666080739}
+--- !u!114 &-2555138297317319743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4380c90dca35f274681559c66ea25a74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lootContainer: {fileID: -5405073334439726052}
+  lootTargetCollider: {fileID: 8617023357389902057}
+--- !u!114 &-5405073334439726052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95d52a261ac35a64784822dab8d25a66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useCollider: {fileID: 0}
+  distanceCollider: {fileID: 0}
+  navObstacle: {fileID: 0}
+  displayNameOverride: 
+  displayIconOverride: {fileID: 0}
+  useTransform: {fileID: 0}
+  slotCountOverride: 0
+  fallbackSlotCount: 12
+  lootTable: {fileID: 0}
+  staticItems: []
+  unlockDuration: 0
+  persistWhenEmpty: 1
+  despawnDelayWhenEmpty: 2
+  decayTimer: 0
+  openRotationTarget: {fileID: 0}
+  openRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &7015164926846652303
 GameObject:
   m_ObjectHideFlags: 0
@@ -3521,6 +3660,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4629098984089865202}
+  - {fileID: 8198964438243539908}
   m_Father: {fileID: 750730330445317860}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: 0}
 --- !u!1 &9108039340809213307

@@ -2552,6 +2552,7 @@ GameObject:
   - component: {fileID: 7072712761729223532}
   - component: {fileID: 4041750585481483695}
   - component: {fileID: 3577357596216463923}
+  - component: {fileID: -610677123522218241}
   m_Layer: 8
   m_Name: ZombieWinter
   m_TagString: Enemy
@@ -2656,7 +2657,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 0
   _ragdollBodies:
   - {fileID: 338737174633654037}
   - {fileID: 4601130191410222333}
@@ -2693,20 +2693,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 0
-  _playerLayer:
+  playerLayer:
     serializedVersion: 2
-    m_Bits: 512
-  _obstacleLayer:
+    m_Bits: 0
+  obstacleLayer:
     serializedVersion: 2
-    m_Bits: 64
-  _acidEffectPrefab: {fileID: 0}
-  _mouthTransform: {fileID: 0}
-  _jumpImpactEffectPrefab: {fileID: 0}
-  _jumpAttackDelay: 5
-  _jumpLandRadius: 1.5
-  _jumpDamage: 35
-  _jumpStunDuration: 2
+    m_Bits: 0
+  _skills: []
+  _zombieAnimator: {fileID: 0}
+  _corpseHandler: {fileID: 0}
 --- !u!114 &223015569284610420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2767,6 +2762,26 @@ MonoBehaviour:
   - {fileID: 6723364570044214168}
   - {fileID: 2305891985814303949}
   - {fileID: 970739098950557393}
+--- !u!114 &-610677123522218241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0b35b706b625f741a8c4603da01e193, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 2
+  priority: 1
+  damage: 10
+  damageRangeBonus: 0.5
+  animator: {fileID: 7213027466504647735}
+  controller: {fileID: 1956828932666080739}
 --- !u!1 &7015164926846652303
 GameObject:
   m_ObjectHideFlags: 0

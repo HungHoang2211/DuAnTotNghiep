@@ -3046,6 +3046,7 @@ GameObject:
   - component: {fileID: 7866972255231827805}
   - component: {fileID: -1269978873248641711}
   - component: {fileID: -4751557437910766561}
+  - component: {fileID: 2814872332320858185}
   m_Layer: 8
   m_Name: ZombieFat
   m_TagString: Enemy
@@ -3150,7 +3151,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 1
   _ragdollBodies:
   - {fileID: 4349408155726648801}
   - {fileID: 2710812634063621323}
@@ -3187,20 +3187,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _variant: 1
-  _playerLayer:
+  playerLayer:
     serializedVersion: 2
-    m_Bits: 512
-  _obstacleLayer:
+    m_Bits: 0
+  obstacleLayer:
     serializedVersion: 2
-    m_Bits: 64
-  _acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
-  _mouthTransform: {fileID: 7225899562995629718}
-  _jumpImpactEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
-  _jumpAttackDelay: 5
-  _jumpLandRadius: 1.5
-  _jumpDamage: 15
-  _jumpStunDuration: 2
+    m_Bits: 0
+  _skills: []
+  _zombieAnimator: {fileID: 0}
+  _corpseHandler: {fileID: 0}
 --- !u!114 &3618774041547770407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3262,6 +3257,26 @@ MonoBehaviour:
   - {fileID: 4845296240315050671}
   - {fileID: 6675680391514793416}
   - {fileID: 3236519379465018839}
+--- !u!114 &2814872332320858185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0b35b706b625f741a8c4603da01e193, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 2
+  priority: 1
+  damage: 10
+  damageRangeBonus: 0.5
+  animator: {fileID: 6108856884516753053}
+  controller: {fileID: 9194245801679915162}
 --- !u!1 &8416963274110584342
 GameObject:
   m_ObjectHideFlags: 0

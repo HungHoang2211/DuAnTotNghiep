@@ -5,9 +5,11 @@ using SimpleSurvival.Combat;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Input;
 using SimpleSurvival.Core;
+using SimpleSurvival.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(EnemyStats))]
+
 public class ZombieBossController : MonoBehaviour, ISpawnableEnemy
 {
     [Header("Detection")]
