@@ -46,27 +46,23 @@ namespace SimpleSurvival.UI.HealthBar
         private void HandleEnemyChanged(ITargetable target)
         {
             UnbindCurrent();
-
             if (target == null)
             {
                 panelRoot.SetActive(false);
                 return;
             }
-
             MonoBehaviour mb = target as MonoBehaviour;
             if (mb == null)
             {
                 panelRoot.SetActive(false);
                 return;
             }
-
-            EnemyStats stats = mb.GetComponent<EnemyStats>();
+            EnemyStats stats = mb.GetComponentInParent<EnemyStats>();
             if (stats == null)
             {
                 panelRoot.SetActive(false);
                 return;
             }
-
             BindEnemy(stats);
             Debug.Log($"[EnemyHealthUI] Enemy changed: {(target as MonoBehaviour)?.name ?? "null"}");
         }

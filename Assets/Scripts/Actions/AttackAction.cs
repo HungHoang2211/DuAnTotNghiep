@@ -147,12 +147,21 @@ namespace SimpleSurvival.Actions
             MonoBehaviour targetMb = _target as MonoBehaviour;
             if (targetMb == null) return;
 
-            IDamageable damageable = targetMb.GetComponent<IDamageable>();
+            IDamageable damageable = ResolveDamageable(targetMb);
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(_damage, _controller.gameObject);
 
             ConsumeWeaponDurability();
+        }
+
+        private static IDamageable ResolveDamageable(MonoBehaviour target)
+        {
+            IDamageable d = target.GetComponent<IDamageable>();
+            if (d != null) return d;
+            d = target.GetComponentInParent<IDamageable>();
+            if (d != null) return d;
+            return target.GetComponentInChildren<IDamageable>();
         }
 
         public void HandleEnd()
