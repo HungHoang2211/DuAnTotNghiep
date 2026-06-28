@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using SimpleSurvival.Player;
 using SimpleSurvival.Loot;
-using SimpleSurvival.UI;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Actions
 {
@@ -20,7 +20,6 @@ namespace SimpleSurvival.Actions
         private readonly LootContainer _target;
         private readonly Action _onComplete;
         private readonly float _duration;
-
         private bool _progressStarted;
         private bool _ended;
 
@@ -54,9 +53,10 @@ namespace SimpleSurvival.Actions
                 return;
             }
 
-            if (UnlockProgressBarManager.Instance != null)
+            HudManager hud = HudManager.Instance;
+            if (hud != null && hud.UnlockProgress != null)
             {
-                UnlockProgressBarManager.Instance.Show(
+                hud.UnlockProgress.Show(
                     _target.Transform,
                     _duration,
                     OnProgressComplete);
@@ -74,8 +74,9 @@ namespace SimpleSurvival.Actions
         {
             if (_progressStarted)
             {
-                if (UnlockProgressBarManager.Instance != null)
-                    UnlockProgressBarManager.Instance.Stop();
+                HudManager hud = HudManager.Instance;
+                if (hud != null && hud.UnlockProgress != null)
+                    hud.UnlockProgress.Stop();
                 _progressStarted = false;
             }
             Finish();
@@ -111,11 +112,9 @@ namespace SimpleSurvival.Actions
         private void FacingTarget()
         {
             if (_target == null) return;
-
             Vector3 toTarget = _target.Transform.position - _controller.PlayerTransform.position;
             toTarget.y = 0f;
             if (toTarget.sqrMagnitude < 0.001f) return;
-
             _controller.PlayerTransform.rotation = Quaternion.LookRotation(toTarget, Vector3.up);
         }
     }

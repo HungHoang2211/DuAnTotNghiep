@@ -2,47 +2,34 @@ using System;
 using UnityEngine;
 using SimpleSurvival.Core;
 
-namespace SimpleSurvival.UI
+namespace SimpleSurvival.UI.Hud
 {
-    public sealed class UnlockProgressBarManager : MonoBehaviour
+    public sealed class UnlockProgressManager : MonoBehaviour
     {
-        public static UnlockProgressBarManager Instance { get; private set; }
-
         [Header("Prefab")]
         [SerializeField] private GameObject unlockProgressBarPrefab;
-
-        [Header("References")]
-        [SerializeField] private RectTransform canvasRect;
-        [SerializeField] private Camera gameCamera;
-        [SerializeField] private Camera uiCamera;
 
         [Header("Settings")]
         [SerializeField] private Vector3 worldOffset = new Vector3(0f, 1.5f, 0f);
 
+        private HudManager _hud;
         private UnlockProgressBar _current;
         private Action _pendingCallback;
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-        }
-
-        private void OnDestroy()
-        {
-            if (Instance == this) Instance = null;
+            _hud = GetComponentInParent<HudManager>();
         }
 
         public void Show(Transform target, float duration, Action onComplete)
         {
             Stop();
-
-            if (unlockProgressBarPrefab == null || target == null) return;
+            if (unlockProgressBarPrefab == null || target == null || _hud == null) return;
 
             GameObject go = ObjectPool.Instance.Get(unlockProgressBarPrefab, Vector3.zero);
             if (go == null) return;
 
-            go.transform.SetParent(canvasRect, false);
+            go.transform.SetParent(_hud.CanvasRect, false);
 
             _current = go.GetComponent<UnlockProgressBar>();
             if (_current == null)
@@ -53,7 +40,7 @@ namespace SimpleSurvival.UI
 
             _pendingCallback = onComplete;
             _current.OnComplete += HandleComplete;
-            _current.Show(target, worldOffset, duration, gameCamera, uiCamera, canvasRect);
+            _current.Show(target, worldOffset, duration, _hud.GameCamera, _hud.UICamera, _hud.CanvasRect);
         }
 
         public void Stop()
@@ -69,7 +56,6 @@ namespace SimpleSurvival.UI
         {
             Action callback = _pendingCallback;
             UnlockProgressBar bar = _current;
-
             _pendingCallback = null;
             _current = null;
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using SimpleSurvival.Combat;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Stats
 {
@@ -11,6 +12,7 @@ namespace SimpleSurvival.Stats
         public event Action<GameObject> OnDamagedBy;
 
         [SerializeField] protected BaseStatsConfig baseConfig;
+
         private const float ArmorK = 0.06f;
         private float _armor;
         private float _moveSpeed;
@@ -24,6 +26,8 @@ namespace SimpleSurvival.Stats
         public float MoveSpeed => _moveSpeed;
         public bool IsAlive { get; private set; }
         public bool IsDead => !IsAlive;
+
+        protected virtual HpHudType HudDamageType => HpHudType.Damage;
 
         protected virtual void Awake()
         {
@@ -64,19 +68,27 @@ namespace SimpleSurvival.Stats
         {
             if (!IsAlive || rawDamage <= 0f)
                 return IsAlive;
+
             if (source != null)
             {
                 if (Time.frameCount == _lastDamageFrame)
                     return IsAlive;
                 _lastDamageFrame = Time.frameCount;
             }
+
             float reduction = ArmorReduction(Armor);
             float finalDamage = rawDamage * (1f - reduction);
             SetHP(HP - finalDamage);
+
             Debug.Log($"[{name}] Take damage: {rawDamage} (reduced to {finalDamage:F1}) from {(source != null ? source.name : "unknown")}, HP after: {HP}");
+
+            SpawnHpHud(finalDamage, HudDamageType);
+
             OnPostDamage(rawDamage, source);
+
             if (IsAlive && source != null)
                 OnDamagedBy?.Invoke(source);
+
             return IsAlive;
         }
 
@@ -86,7 +98,13 @@ namespace SimpleSurvival.Stats
         {
             if (!IsAlive || amount <= 0f)
                 return;
+
+            float prev = HP;
             SetHP(HP + amount);
+            float actual = HP - prev;
+            if (actual <= 0f) return;
+
+            SpawnHpHud(actual, HpHudType.Heal);
         }
 
         public void SetArmor(float value)
@@ -105,12 +123,20 @@ namespace SimpleSurvival.Stats
             return kA / (1f + kA);
         }
 
+        private void SpawnHpHud(float amount, HpHudType type)
+        {
+            HudManager hud = HudManager.Instance;
+            if (hud == null || hud.HpHud == null) return;
+            hud.HpHud.Spawn(transform, amount, type);
+        }
+
         private void SetHP(float value)
         {
             float prev = HP;
             HP = Mathf.Clamp(value, 0f, MaxHP);
             if (!Mathf.Approximately(HP, prev))
                 OnHPChanged?.Invoke(HP, MaxHP);
+
             if (HP <= 0f && IsAlive)
                 Die();
         }
