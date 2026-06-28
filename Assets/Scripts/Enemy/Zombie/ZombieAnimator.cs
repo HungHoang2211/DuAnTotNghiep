@@ -10,16 +10,6 @@ namespace SimpleSurvival.AI
         private static readonly int IsHowlingHash = Animator.StringToHash("IsHowling");
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
 
-        [Header("Ragdoll")]
-        [SerializeField] private Rigidbody[] _ragdollBodies;
-        [SerializeField] private Collider[] _ragdollColliders;
-
-        protected override void Awake()
-        {
-            base.Awake();
-            SetRagdollActive(false);
-        }
-
         public override void SetMoving(bool moving)
         {
             _animator.SetBool(IsWalkingHash, moving);
@@ -76,20 +66,6 @@ namespace SimpleSurvival.AI
         public override void CancelAttack()
         {
             _animator.ResetTrigger(IsAttackingHash);
-        }
-
-        private void SetRagdollActive(bool active)
-        {
-            foreach (var rb in _ragdollBodies)
-            {
-                if (rb == null) continue;
-                rb.isKinematic = !active;
-            }
-            foreach (var col in _ragdollColliders)
-            {
-                if (col == null) continue;
-                col.enabled = active;
-            }
         }
     }
 }
