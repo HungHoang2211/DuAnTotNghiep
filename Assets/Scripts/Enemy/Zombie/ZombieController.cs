@@ -107,18 +107,17 @@ namespace SimpleSurvival.AI
 
         protected override void OnDying()
         {
-            // Disable colliders alive TRƯỚC khi enable ragdoll
             if (_characterController != null)
                 _characterController.enabled = false;
 
             var mainCol = GetComponent<Collider>();
             if (mainCol != null) mainCol.enabled = false;
 
-            // Sau đó trigger death → enable ragdoll bone colliders
             if (_zombieAnimator != null)
             {
                 _zombieAnimator.SetHowling(false);
                 _zombieAnimator.SetIdle();
+                _zombieAnimator.SetRagdollLayer(LayerMask.NameToLayer("Corpse"));
                 _zombieAnimator.TriggerDeath();
             }
 
