@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: rifle_nomad
+  m_EditorClassIdentifier:
+  WeaponId: rifle_nomad
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: rifle_nomad_main_default
+    Mesh: {fileID: 4300000, guid: 470813e27da89674abee589dfdf846ee, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs: []
+  Slots:
+  - SlotId: simple_slot
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: simple_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: e446fb68fcf96ae47a7d51de5c28fa3b, type: 2}
+        Position: {x: 0, y: 0.0861, z: 0.9153}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+      - SfxId: HitSfx
+        Object: {fileID: 1709254077376921, guid: d97d1d8731f15c84185390c763ec9769, type: 2}
+        Position: {x: 0, y: 0, z: 0}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 5
