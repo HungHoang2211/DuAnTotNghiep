@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: sync_stabber
+  m_EditorClassIdentifier:
+  WeaponId: sync_stabber
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: sync_stabber_main_default
+    Mesh: {fileID: 4300000, guid: 10723d495545a0747b4887f758612375, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BreakSfx
+      Object: {fileID: 1709254077376921, guid: a26252af67292ab4c86b9c85181328da, type: 2}
+      Position: {x: 0, y: -0.036, z: 0.125}
+      Rotation: {x: -10, y: 180, z: -90}
+      Type: 6
+    - SfxId: TrailSfx
+      Object: {fileID: 1709254077376921, guid: bd9919c8954ebbc41a03cb121fa2dabe, type: 2}
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 7
+  Slots:
+  - SlotId: sync_stabber_blade
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: sync_stabber_blade_default
+      Mesh: {fileID: 4300000, guid: 7125369719eef9a4ea7f40b7d8bfaf09, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: sync_stabber_handle
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: sync_stabber_handle_default
+      Mesh: {fileID: 4300000, guid: 00e0279e1a5c3904cb087fec55023e0e, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

@@ -1,0 +1,148 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: vss_vintorez
+  m_EditorClassIdentifier:
+  WeaponId: vss_vintorez
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: vss_vintorez_main_default
+    Mesh: {fileID: 4300000, guid: 8ce103daa34e0e941a44d750426c37c5, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: AttackSfx
+      Object: {fileID: 1709254077376921, guid: 539ba50eebb7bec4dbd9281d07395ae9, type: 2}
+      Position: {x: 0, y: 0.039, z: 0.609}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 1
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0, y: 0.033, z: 0.088}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: vss_vintorez_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: vss_vintorez_magazine_default
+      Mesh: {fileID: 4300000, guid: 5acc58eba1d335d45877a5bcce091708, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_magazine_extended
+      Mesh: {fileID: 4300000, guid: a12f2b14df8d153459bd57ca5fb81505, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_magazine_double
+      Mesh: {fileID: 4300000, guid: 4ca3cc7fe6d953045aa6c62f20272270, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: vss_vintorez_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: vss_vintorez_sight_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_x2
+      Mesh: {fileID: 4300000, guid: a8f74256a81d9a0459c010037b1bbcd7, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_x4
+      Mesh: {fileID: 4300000, guid: f5c05e11767806043b20060478207e61, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_x4_collimator
+      Mesh: {fileID: 4300000, guid: 0b09fad1f9ca52643b63c6e45eda1186, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_x5
+      Mesh: {fileID: 4300000, guid: 333e27f53b139a140b3f6ff3b34d2652, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_x8
+      Mesh: {fileID: 4300000, guid: a0f85b25b16c6324f85901d277c582a6, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_sight_red_dot
+      Mesh: {fileID: 4300000, guid: 27da527ab884686488f6becdfe860aed, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: vss_vintorez_stock
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: vss_vintorez_stock_default
+      Mesh: {fileID: 4300000, guid: 027ca7dfeb2e03548aff3f0b961f5d38, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_stock_light
+      Mesh: {fileID: 4300000, guid: f2c69c4ce36452547b84a93ce1f8efdc, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_stock_cheekpad
+      Mesh: {fileID: 4300000, guid: 77a01fc83ee4e654db7b00aa6499a424, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_stock_tactical
+      Mesh: {fileID: 4300000, guid: 8476df214adcdf741844143a1576bac6, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: vss_vintorez_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: vss_vintorez_accessory_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_accessory_laser_red
+      Mesh: {fileID: 4300000, guid: 3b54bc5b2c26f184481903a55a436893, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: 0, y: -0.0342, z: 0.3898}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: vss_vintorez_accessory_laser_green
+      Mesh: {fileID: 4300000, guid: 3b54bc5b2c26f184481903a55a436893, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: 0, y: -0.0342, z: 0.3898}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: vss_vintorez_accessory_atpial_1
+      Mesh: {fileID: 4300000, guid: 084c057b29267e3459bd5ed298be7602, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: -0.0395, y: 0.0529, z: 0.4243}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: vss_vintorez_accessory_atpial_2
+      Mesh: {fileID: 4300000, guid: 084c057b29267e3459bd5ed298be7602, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: -0.0395, y: 0.0529, z: 0.4243}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: vss_vintorez_accessory_handle
+      Mesh: {fileID: 4300000, guid: d03d2d99392e4944cb0f393768685899, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: vss_vintorez_accessory_bipods
+      Mesh: {fileID: 4300000, guid: 73f593178f096fe4085b029438d6adbd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

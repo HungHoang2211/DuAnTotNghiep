@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: awp_sniper_rifle
+  m_EditorClassIdentifier:
+  WeaponId: awp_sniper_rifle
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: awp_sniper_rifle_default
+    Mesh: {fileID: 4300000, guid: 74f735c7db5077541bc8d5ddeddd91ff, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: AttackSfx
+      Object: {fileID: 1709254077376921, guid: 6765a75504e712e42b7b796f8b4faf25, type: 2}
+      Position: {x: 0, y: -0.014, z: 0.691}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 1
+  Slots:
+  - SlotId: simple_slot
+    SecondWeapon: 1
+    Modules:
+    - ModuleId: simple_default
+      Mesh: {fileID: 4300000, guid: 74f735c7db5077541bc8d5ddeddd91ff, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []

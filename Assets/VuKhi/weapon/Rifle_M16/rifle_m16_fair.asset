@@ -1,0 +1,146 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: rifle_m16_fair
+  m_EditorClassIdentifier:
+  WeaponId: rifle_m16_fair
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: rifle_m16_main_default
+    Mesh: {fileID: 4300000, guid: 15d659de33efd4740a31a8866364352f, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0, y: 0.0719, z: 0.1358}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: rifle_m16_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_m16_magazine_default
+      Mesh: {fileID: 4300000, guid: 56329a3ab4383ed4d9f92769618979c3, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_magazine_extended
+      Mesh: {fileID: 4300000, guid: 7a57edb245da0af4d8bb91adbeb3843c, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_magazine_double
+      Mesh: {fileID: 4300000, guid: 8be70859e1fdddf44844947f34386042, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_magazine_barrel
+      Mesh: {fileID: 4300000, guid: c30f25f6ea4305a40ae2223385478f69, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_magazine_handle
+      Mesh: {fileID: 4300000, guid: 9907b86a560b86d438f1d4ff5509667b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_m16_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_m16_sight_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_sight_red_dot
+      Mesh: {fileID: 4300000, guid: 1c504753502e78c4891e95dd2529af54, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_sight_x2
+      Mesh: {fileID: 4300000, guid: 14a53069c70bf0e4eb20b6c40556711d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_sight_x4
+      Mesh: {fileID: 4300000, guid: 8af80fd4dc148bc449a8af0492fc093e, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_sight_x8
+      Mesh: {fileID: 4300000, guid: f5074ce8de1cb2949a26f493992c1618, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: rifle_m16_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_m16_barrel_default
+      Mesh: {fileID: 4300000, guid: e47458488a29b4142aaaac190cb3101b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.066, z: 0.6991}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_m16_barrel_flash_hider
+      Mesh: {fileID: 4300000, guid: 83af6aa6ec1dd5c459a2944ccbfe7ac1, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.066, z: 0.684}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_m16_barrel_silencer_handmade
+      Mesh: {fileID: 4300000, guid: dad6091f2a9417843a990e9eeaa09320, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.066, z: 0.783}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_m16_barrel_silencer
+      Mesh: {fileID: 4300000, guid: 6d9b5cf0f9860f34ab451e7110e56313, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.066, z: 0.852}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: rifle_m16_barrel_muzzle_brake
+      Mesh: {fileID: 4300000, guid: f28392c87ed8d654a91a567959f90da2, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: f417e6787f6811849b4806201719545e, type: 2}
+        Position: {x: 0, y: 0.066, z: 0.7155}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: rifle_m16_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: rifle_m16_accessory_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: rifle_m16_accessory_laser_red
+      Mesh: {fileID: 4300000, guid: c0380806fb74065418e8b5f10c4dc536, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: 0, y: 0.035, z: 0.603}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: rifle_m16_accessory_laser_green
+      Mesh: {fileID: 4300000, guid: c0380806fb74065418e8b5f10c4dc536, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: 0, y: 0.035, z: 0.603}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0

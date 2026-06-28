@@ -1,0 +1,165 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34ac17c5052e809b8e90a8c22888eac, type: 3}
+  m_Name: glock_battler
+  m_EditorClassIdentifier:
+  WeaponId: glock_battler
+  IsSkinnedMeshRenderer: 0
+  DefaultModules:
+  - ModuleId: glock_main_default
+    Mesh: {fileID: 4300000, guid: a1202f25975af034f8a703298d80470b, type: 2}
+    TextureMask: {fileID: 0}
+    ModulesSfxs:
+    - SfxId: BulletShellSfx
+      Object: {fileID: 1709254077376921, guid: 2cb96b4a831a7364e958826597e04339, type: 2}
+      Position: {x: 0, y: 0.075, z: -0.0071}
+      Rotation: {x: 0, y: 0, z: 0}
+      Type: 4
+  Slots:
+  - SlotId: glock_magazine
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: glock_magazine_default
+      Mesh: {fileID: 4300000, guid: c796abc47f3b1fd49aac771fdec2e9dc, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_magazine_lightweight
+      Mesh: {fileID: 4300000, guid: c796abc47f3b1fd49aac771fdec2e9dc, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_magazine_comfortable
+      Mesh: {fileID: 4300000, guid: 4a802267a3525e5458b7e62c952b9412, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_magazine_big
+      Mesh: {fileID: 4300000, guid: 9dbb6e6674706d2448a7e8af307f2c4b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: glock_sight
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: glock_sight_default
+      Mesh: {fileID: 4300000, guid: 8af3833a98e3e80469bdf0a93bee106d, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_sight_bead
+      Mesh: {fileID: 4300000, guid: 7af64af1e1f66a645ace0ad428bb1468, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_sight_collimator
+      Mesh: {fileID: 4300000, guid: 39492da8892a79947a35f1da3f73c5e7, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_sight_support_collimator
+      Mesh: {fileID: 4300000, guid: 9ba407a2e8d53a647b5870d50c9be8d0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_sight_support_collimator_closed
+      Mesh: {fileID: 4300000, guid: b3c008572d0011c43aec51f9e820f2f8, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: glock_barrel
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: glock_barrel_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: a41aafcbd6d3e8e42b57ce23bbdf1f40, type: 2}
+        Position: {x: 0, y: 0.0743, z: 0.135}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: glock_barrel_compensator
+      Mesh: {fileID: 4300000, guid: 6efb162f73ce5e04696b59edeb2fc92a, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 75bef57529c4cdf439d60b89f93554c0, type: 2}
+        Position: {x: 0, y: 0.0743, z: 0.154}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: glock_barrel_compensator_double
+      Mesh: {fileID: 4300000, guid: e9b3891f1af63b04b84097f2e228d232, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 75bef57529c4cdf439d60b89f93554c0, type: 2}
+        Position: {x: 0, y: 0.0743, z: 0.152}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: glock_barrel_compensator_long
+      Mesh: {fileID: 4300000, guid: 084daf056833a714ca46635a91cc206b, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: 75bef57529c4cdf439d60b89f93554c0, type: 2}
+        Position: {x: 0, y: 0.0743, z: 0.175}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+    - ModuleId: glock_barrel_silencer
+      Mesh: {fileID: 4300000, guid: d78933fe6e36daa48bf8ddb4db8d7afa, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: AttackSfx
+        Object: {fileID: 1709254077376921, guid: c64d6523c84cc364997dbdd743152967, type: 2}
+        Position: {x: 0, y: 0.072, z: 0.369}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 1
+  - SlotId: glock_shutter
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: glock_shutter_default
+      Mesh: {fileID: 4300000, guid: 1d22e852914c87f4ba5576ef90d3a4fd, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_shutter_improved
+      Mesh: {fileID: 4300000, guid: 225637eaf23787d4387a3b88c44acb2a, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_shutter_lightweight
+      Mesh: {fileID: 4300000, guid: cd1a50dd9f4d1734da7cd011bbeaed39, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_shutter_modified
+      Mesh: {fileID: 4300000, guid: b93166c9e4e2bc240bcfc4493f0c8394, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_shutter_elite
+      Mesh: {fileID: 4300000, guid: dbd8a0677e04fbc4db2fb0ac303736fa, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+  - SlotId: glock_accessory
+    SecondWeapon: 0
+    Modules:
+    - ModuleId: glock_accessory_default
+      Mesh: {fileID: 0}
+      TextureMask: {fileID: 0}
+      ModulesSfxs: []
+    - ModuleId: glock_accessory_laser_red
+      Mesh: {fileID: 4300000, guid: 1e974af4c9b1b10478e45f124b598ba0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: 4aad6f50db88eee4b8cc3de32c7ef2b0, type: 2}
+        Position: {x: -0.0014, y: 0.0148, z: 0.0572}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0
+    - ModuleId: glock_accessory_laser_green
+      Mesh: {fileID: 4300000, guid: 1e974af4c9b1b10478e45f124b598ba0, type: 2}
+      TextureMask: {fileID: 0}
+      ModulesSfxs:
+      - SfxId: LaserSfx
+        Object: {fileID: 1709254077376921, guid: b79229ee0d92cb047bb4c6de405dc835, type: 2}
+        Position: {x: -0.0014, y: 0.0148, z: 0.0572}
+        Rotation: {x: 0, y: 0, z: 0}
+        Type: 0

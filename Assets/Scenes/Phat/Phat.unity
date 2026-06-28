@@ -37202,6 +37202,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseConfig: {fileID: 11400000, guid: ac7e72dedce99c544b9e68149c6c8cfb, type: 2}
   allowRegen: 1
+  decayPauseAfterConsume: 5
+  playerEquipment: {fileID: 0}
 --- !u!1 &812840522
 GameObject:
   m_ObjectHideFlags: 0
@@ -44452,6 +44454,7 @@ MonoBehaviour:
   lootSelection: {fileID: 237925745}
   playerInventory: {fileID: 719937944}
   playerEquipment: {fileID: 140930709}
+  consumableHandler: {fileID: 0}
   equipmentPanel: {fileID: 480375770}
   buttonUse: {fileID: 1174152177}
   buttonSplit: {fileID: 415857781}
@@ -76127,7 +76130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e471c40d9ce6df408aeab1f129ea62d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checker: {fileID: 1715950948}
+  zone: {fileID: 0}
 --- !u!135 &1715950946
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -76188,10 +76191,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d12b8db7b19453549a14b7e25da8d005, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 3610616496864412710}
+  enemyZone: {fileID: 0}
+  useZone: {fileID: 0}
   enemyMarker: {fileID: 376522979449400510}
   usableMarker: {fileID: 5237411}
-  swapHysteresis: 0.5
 --- !u!1 &1716006279
 GameObject:
   m_ObjectHideFlags: 0
@@ -94283,7 +94286,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!95 &376522979449400509
 Animator:
   serializedVersion: 7
@@ -101430,9 +101433,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveConfig:
-    walkSpeed: 3
-    runSpeed: 6
-    sneakSpeed: 1.5
+    walkMultiplier: 0.5
+    runMultiplier: 1
+    sneakMultiplier: 0.25
     runThreshold: 0.6
     acceleration: 60
     rotationSmoothness: 12
@@ -101841,7 +101844,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 956092804}
   - {fileID: 1052517918}
   - {fileID: 5237414}
   - {fileID: 71949035}
@@ -101858,3 +101860,4 @@ SceneRoots:
   - {fileID: 189225956}
   - {fileID: 232679025}
   - {fileID: 317230785966186275}
+  - {fileID: 956092804}
