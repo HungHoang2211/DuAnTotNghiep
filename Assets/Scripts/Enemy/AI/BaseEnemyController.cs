@@ -80,6 +80,11 @@ namespace SimpleSurvival.AI
             else if (_state == EnemyState.Attacking) UpdateAttacking();
         }
 
+        protected virtual Vector3 GetChaseDestination()
+        {
+            return _player != null ? _player.position : transform.position;
+        }
+
         protected virtual void UpdateChase()
         {
             if (Config == null || _player == null)
@@ -107,16 +112,14 @@ namespace SimpleSurvival.AI
             }
 
             _agent.isStopped = false;
-            _agent.SetDestination(_player.position);
+            _agent.SetDestination(GetChaseDestination());
 
-            // Hybrid: tự move bằng CharacterController theo desiredVelocity của agent
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * Config.MoveSpeed;
             move.y += Physics.gravity.y * Time.deltaTime;
             _characterController.Move(move * Time.deltaTime);
             _agent.nextPosition = transform.position;
 
-            // Tự xoay theo hướng di chuyển
             Vector3 lookDir = new Vector3(desiredVel.x, 0, desiredVel.z);
             if (lookDir.sqrMagnitude > 0.01f)
             {

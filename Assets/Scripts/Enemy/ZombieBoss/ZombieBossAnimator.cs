@@ -7,7 +7,18 @@ namespace SimpleSurvival.AI
         private static readonly int MoveSpeedHash = Animator.StringToHash("MoveSpeed");
         private static readonly int AttackClawHash = Animator.StringToHash("AttackClaw");
         private static readonly int ClawIndexHash = Animator.StringToHash("ClawIndex");
+        private static readonly int HowlHash = Animator.StringToHash("Howl");
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+
+        public bool IsInAttackState
+        {
+            get
+            {
+                if (_animator == null) return false;
+                var info = _animator.GetCurrentAnimatorStateInfo(0);
+                return info.IsTag("Attack");
+            }
+        }
 
         public override void SetMoving(bool moving)
         {
@@ -33,6 +44,11 @@ namespace SimpleSurvival.AI
         {
             _animator.SetInteger(ClawIndexHash, Random.Range(0, 2));
             _animator.SetTrigger(AttackClawHash);
+        }
+
+        public void TriggerHowl()
+        {
+            _animator.SetTrigger(HowlHash);
         }
 
         public override void TriggerDeath()

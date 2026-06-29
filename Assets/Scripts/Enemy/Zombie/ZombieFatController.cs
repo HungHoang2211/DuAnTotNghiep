@@ -1,13 +1,12 @@
-﻿using System.Collections;
 using UnityEngine;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.AI
 {
-    public sealed class ZombieBossController : BaseEnemyController
+    public sealed class ZombieFatController : BaseEnemyController
     {
         [Header("Refs")]
-        [SerializeField] private ZombieBossAnimator _bossAnimator;
+        [SerializeField] private ZombieFatAnimator _fatAnimator;
         [SerializeField] private EnemyCorpseHandler _corpseHandler;
 
         [Header("Stuck Detection")]
@@ -16,8 +15,6 @@ namespace SimpleSurvival.AI
         [SerializeField] private float unstuckRadius = 4f;
         [SerializeField] private float unstuckDuration = 1.2f;
 
-        private ZombieBossStatsConfig BossConfig => Config as ZombieBossStatsConfig;
-
         private Vector3 _lastTrackedPosition;
         private float _nextStuckCheckTime;
         private Vector3 _unstuckPoint;
@@ -25,44 +22,10 @@ namespace SimpleSurvival.AI
 
         protected override void OnEnemyInitialized()
         {
-            if (_bossAnimator != null) _bossAnimator.ResetForSpawn();
+            if (_fatAnimator != null) _fatAnimator.ResetForSpawn();
             _lastTrackedPosition = transform.position;
             _nextStuckCheckTime = 0f;
             _unstuckUntil = 0f;
-        }
-
-        protected override void OnPlayerDetected()
-        {
-            if (Config == null || _player == null)
-            {
-                BeginChase();
-                return;
-            }
-
-            float dist = Vector3.Distance(transform.position, _player.position);
-            if (dist <= Config.AttackRange)
-            {
-                BeginChase();
-                return;
-            }
-
-            StartCoroutine(HowlThenChase());
-        }
-
-        private IEnumerator HowlThenChase()
-        {
-            if (Config == null) yield break;
-
-            _state = EnemyState.Detected;
-            _agent.isStopped = true;
-            _agent.ResetPath();
-
-            if (_player != null) FaceTarget(_player, Config.RotationSpeed);
-
-            if (_bossAnimator != null) _bossAnimator.TriggerHowl();
-            yield return new WaitForSeconds(Config.HowlDuration);
-
-            if (!_isDead) BeginChase();
         }
 
         protected override Vector3 GetChaseDestination()
@@ -74,7 +37,7 @@ namespace SimpleSurvival.AI
 
         protected override void UpdateChase()
         {
-            if (_bossAnimator != null && _bossAnimator.IsInAttackState)
+            if (_fatAnimator != null && _fatAnimator.IsInAttackState)
             {
                 _agent.isStopped = true;
                 _agent.nextPosition = transform.position;
@@ -84,10 +47,10 @@ namespace SimpleSurvival.AI
 
             base.UpdateChase();
 
-            if (_bossAnimator != null)
+            if (_fatAnimator != null)
             {
                 float speed = _characterController != null ? _characterController.velocity.magnitude : 0f;
-                _bossAnimator.SetMoveSpeed(speed);
+                _fatAnimator.SetMoveSpeed(speed);
             }
 
             CheckStuck();
@@ -115,14 +78,14 @@ namespace SimpleSurvival.AI
         public override void NotifySkillComplete()
         {
             base.NotifySkillComplete();
-            if (_bossAnimator != null && _player != null)
-                _bossAnimator.SetMoveSpeed(Config != null ? Config.MoveSpeed : 1f);
+            if (_fatAnimator != null && _player != null)
+                _fatAnimator.SetMoveSpeed(Config != null ? Config.MoveSpeed : 1f);
         }
 
         protected override void BeginIdle()
         {
             base.BeginIdle();
-            if (_bossAnimator != null) _bossAnimator.SetIdle();
+            if (_fatAnimator != null) _fatAnimator.SetIdle();
         }
 
         protected override void OnDying()
@@ -133,17 +96,17 @@ namespace SimpleSurvival.AI
             var mainCol = GetComponent<Collider>();
             if (mainCol != null) mainCol.enabled = false;
 
-            if (_bossAnimator != null)
+            if (_fatAnimator != null)
             {
-                _bossAnimator.SetIdle();
-                _bossAnimator.SetRagdollLayer(LayerMask.NameToLayer("Corpse"));
-                _bossAnimator.TriggerDeath();
+                _fatAnimator.SetIdle();
+                _fatAnimator.SetRagdollLayer(LayerMask.NameToLayer("Corpse"));
+                _fatAnimator.TriggerDeath();
             }
 
             if (_corpseHandler != null)
                 _corpseHandler.SpawnCorpseLoot(Config?.CorpseLootTable);
 
-            float despawnDelay = Config != null ? Config.DespawnDelay : 180f;
+            float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
             Destroy(gameObject, despawnDelay);
             if (_spawnPoint != null)
                 _spawnPoint.NotifyDespawned(despawnDelay);
