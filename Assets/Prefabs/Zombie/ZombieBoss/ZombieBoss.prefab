@@ -3188,6 +3188,7 @@ GameObject:
   - component: {fileID: 667846146574605970}
   - component: {fileID: 5833720096776462294}
   - component: {fileID: 325679386106819092}
+  - component: {fileID: -4990881395917173338}
   m_Layer: 8
   m_Name: ZombieBoss
   m_TagString: Enemy
@@ -3366,7 +3367,6 @@ MonoBehaviour:
   - {fileID: 0}
   _bossAnimator: {fileID: 7544124443967714629}
   _corpseHandler: {fileID: 325679386106819092}
-  cancelAttackBuffer: 1.5
 --- !u!114 &1047922514323431887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3448,6 +3448,22 @@ MonoBehaviour:
   lootContainer: {fileID: 203178993830837243}
   enemyTarget: {fileID: 8767026502878714030}
   useTargetRoot: {fileID: 6073931995085380908}
+--- !u!114 &-4990881395917173338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8670145069011650472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de2b5f6e949767e42952032e0a3e5ec7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intensity: 0.1
+  duration: 0.2
+  maxDistanceToPlayer: 15
+  player: {fileID: 0}
 --- !u!1 &8764333647128767434
 GameObject:
   m_ObjectHideFlags: 0

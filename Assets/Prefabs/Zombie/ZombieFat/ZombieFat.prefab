@@ -1570,7 +1570,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 2
+  m_Radius: 0.4
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &8124199504213473286
 MonoBehaviour:
@@ -3193,12 +3193,13 @@ GameObject:
   - component: {fileID: 5076356516408772191}
   - component: {fileID: 5470110574749613295}
   - component: {fileID: 4959282023112273432}
-  - component: {fileID: 6108856884516753053}
-  - component: {fileID: 9194245801679915162}
+  - component: {fileID: 4711444196372439310}
+  - component: {fileID: 1459689864417276761}
+  - component: {fileID: 346001004579633958}
+  - component: {fileID: 183499491934538240}
   - component: {fileID: 3618774041547770407}
   - component: {fileID: -1269978873248641711}
   - component: {fileID: -4751557437910766561}
-  - component: {fileID: 2814872332320858185}
   - component: {fileID: 6007042303744301811}
   m_Layer: 8
   m_Name: ZombieFat
@@ -3263,9 +3264,9 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 0
-  m_StoppingDistance: 0.1
+  m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
@@ -3319,7 +3320,7 @@ CapsuleCollider:
   m_Height: 2.0147557
   m_Direction: 1
   m_Center: {x: 0, y: 0.89103436, z: 0}
---- !u!114 &6108856884516753053
+--- !u!114 &4711444196372439310
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3328,9 +3329,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
+  m_Script: {fileID: 11500000, guid: 91cff362c15382b4997ea3784dfd8160, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _animator: {fileID: 9030567769307981365}
   _ragdollBodies:
   - {fileID: 4349408155726648801}
   - {fileID: 2710812634063621323}
@@ -3355,7 +3357,7 @@ MonoBehaviour:
   - {fileID: 5483929175928143237}
   - {fileID: 6847817680094599037}
   - {fileID: 2391634667681411548}
---- !u!114 &9194245801679915162
+--- !u!114 &1459689864417276761
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3364,18 +3366,68 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 735508599ad6fa043a7a69d6c9ee2e09, type: 3}
+  m_Script: {fileID: 11500000, guid: 150eedb97fa59e24587cad7bfd51fcb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
-  _skills: []
-  _zombieAnimator: {fileID: 0}
-  _corpseHandler: {fileID: 0}
+    m_Bits: 64
+  _skills:
+  - {fileID: 346001004579633958}
+  - {fileID: 183499491934538240}
+  _fatAnimator: {fileID: 4711444196372439310}
+  _corpseHandler: {fileID: 6007042303744301811}
+  stuckCheckInterval: 0.8
+  stuckDistanceThreshold: 0.15
+  unstuckRadius: 4
+  unstuckDuration: 1.2
+--- !u!114 &346001004579633958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0939cf4dc0d65b4a92bf3c5d7619f8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 2
+  priority: 1
+  damagePerHit: 15
+  damageRangeBonus: 0.5
+  animator: {fileID: 4711444196372439310}
+  controller: {fileID: 1459689864417276761}
+--- !u!114 &183499491934538240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2d354c2dfec6d04cb5cae9c2f99bdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 2
+  priority: 1
+  damage: 20
+  aoeRadius: 2
+  animator: {fileID: 4711444196372439310}
+  controller: {fileID: 1459689864417276761}
+  impactEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &3618774041547770407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3422,26 +3474,6 @@ MonoBehaviour:
   - {fileID: 4845296240315050671}
   - {fileID: 6675680391514793416}
   - {fileID: 3236519379465018839}
---- !u!114 &2814872332320858185
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8363300174663062271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b35b706b625f741a8c4603da01e193, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cooldown: 1.5
-  minRange: 0
-  maxRange: 2
-  priority: 1
-  damage: 10
-  damageRangeBonus: 0.5
-  animator: {fileID: 6108856884516753053}
-  controller: {fileID: 9194245801679915162}
 --- !u!114 &6007042303744301811
 MonoBehaviour:
   m_ObjectHideFlags: 0
