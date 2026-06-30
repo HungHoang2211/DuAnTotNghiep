@@ -18,6 +18,8 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
     [Tooltip("Danh sách prefab enemy có thể spawn tại điểm này. Mỗi lần spawn sẽ random chọn 1 theo Weight.")]
     [SerializeField] private EnemyEntry[] _enemyEntries;
 
+    public Vector3 Position => transform.position;
+
     private GameObject _currentEnemy;
 
     private void Start() => Spawn();

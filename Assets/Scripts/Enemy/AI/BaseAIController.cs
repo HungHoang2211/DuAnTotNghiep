@@ -74,6 +74,29 @@ namespace SimpleSurvival.AI
         protected abstract void HandleDeath();
         protected abstract void HandleDamagedBy(GameObject source);
 
+        /// <summary>
+        /// Di chuyển GameObject theo path của NavMeshAgent nhưng thực thi
+        /// bằng CharacterController (hybrid: NavMeshAgent chỉ pathfinding).
+        /// Dùng chung cho cả enemy chủ động (chase) và creature bị động (wander/flee).
+        /// </summary>
+        protected void MoveAlongAgentPath(float moveSpeed, float rotationSpeed)
+        {
+            Vector3 desiredVel = _agent.desiredVelocity;
+            Vector3 move = desiredVel.normalized * moveSpeed;
+            move.y += Physics.gravity.y * Time.deltaTime;
+            _characterController.Move(move * Time.deltaTime);
+            _agent.nextPosition = transform.position;
+
+            Vector3 lookDir = new Vector3(desiredVel.x, 0, desiredVel.z);
+            if (lookDir.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(lookDir);
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation, targetRot,
+                    rotationSpeed * Time.deltaTime);
+            }
+        }
+
         protected Vector3 GetRandomNavMeshPoint(Vector3 origin, float radius)
         {
             for (int i = 0; i < 10; i++)

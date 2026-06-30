@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.AI
@@ -15,6 +16,9 @@ namespace SimpleSurvival.AI
         [SerializeField] private float unstuckRadius = 4f;
         [SerializeField] private float unstuckDuration = 1.2f;
 
+        [Header("Hearing")]
+        [SerializeField] private float footstepMinSpeed = 0.1f;
+
         private Vector3 _lastTrackedPosition;
         private float _nextStuckCheckTime;
         private Vector3 _unstuckPoint;
@@ -26,6 +30,36 @@ namespace SimpleSurvival.AI
             _lastTrackedPosition = transform.position;
             _nextStuckCheckTime = 0f;
             _unstuckUntil = 0f;
+        }
+
+        protected override bool DetectByHearing()
+        {
+            if (Config == null) return false;
+
+            Collider[] hits = playerLayer == 0
+                ? Physics.OverlapSphere(transform.position, Config.HearingRadius)
+                : Physics.OverlapSphere(transform.position, Config.HearingRadius, playerLayer);
+
+            foreach (var hit in hits)
+            {
+                if (!hit.CompareTag("Player")) continue;
+
+                Transform target = hit.transform;
+
+                var inputReader = target.GetComponentInParent<PlayerInputReader>();
+                if (inputReader == null) inputReader = target.root.GetComponentInChildren<PlayerInputReader>();
+                if (inputReader != null && inputReader.IsSneakHeld) continue; // sneak -> luôn không nghe thấy, bất kể tốc độ
+
+                float playerSpeed = 0f;
+                var cc = target.GetComponentInParent<CharacterController>();
+                if (cc != null) playerSpeed = cc.velocity.magnitude;
+
+                if (playerSpeed < footstepMinSpeed) continue; // đứng yên -> không nghe thấy
+
+                _player = target;
+                return true;
+            }
+            return false;
         }
 
         protected override Vector3 GetChaseDestination()

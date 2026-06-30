@@ -114,20 +114,7 @@ namespace SimpleSurvival.AI
             _agent.isStopped = false;
             _agent.SetDestination(GetChaseDestination());
 
-            Vector3 desiredVel = _agent.desiredVelocity;
-            Vector3 move = desiredVel.normalized * Config.MoveSpeed;
-            move.y += Physics.gravity.y * Time.deltaTime;
-            _characterController.Move(move * Time.deltaTime);
-            _agent.nextPosition = transform.position;
-
-            Vector3 lookDir = new Vector3(desiredVel.x, 0, desiredVel.z);
-            if (lookDir.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(lookDir);
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation, targetRot,
-                    Config.RotationSpeed * Time.deltaTime);
-            }
+            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
 
             if (!CanStillDetect())
             {

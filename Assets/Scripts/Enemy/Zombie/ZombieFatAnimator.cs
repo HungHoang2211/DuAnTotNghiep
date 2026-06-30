@@ -8,6 +8,7 @@ namespace SimpleSurvival.AI
         private static readonly int AttackClawHash = Animator.StringToHash("AttackClaw");
         private static readonly int ClawIndexHash = Animator.StringToHash("ClawIndex");
         private static readonly int JumpAttackHash = Animator.StringToHash("JumpAttack");
+        private static readonly int AcidAttackHash = Animator.StringToHash("AcidAttack");
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
 
         public bool IsInAttackState
@@ -51,6 +52,11 @@ namespace SimpleSurvival.AI
             _animator.SetTrigger(JumpAttackHash);
         }
 
+        public void TriggerAcidAttack()
+        {
+            _animator.SetTrigger(AcidAttackHash);
+        }
+
         public override void TriggerDeath()
         {
             _animator.SetBool(IsDeadHash, true);
@@ -73,6 +79,7 @@ namespace SimpleSurvival.AI
         {
             _animator.ResetTrigger(AttackClawHash);
             _animator.ResetTrigger(JumpAttackHash);
+            _animator.ResetTrigger(AcidAttackHash);
         }
     }
 }

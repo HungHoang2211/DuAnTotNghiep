@@ -3195,12 +3195,13 @@ GameObject:
   - component: {fileID: 4959282023112273432}
   - component: {fileID: 4711444196372439310}
   - component: {fileID: 1459689864417276761}
-  - component: {fileID: 346001004579633958}
-  - component: {fileID: 183499491934538240}
   - component: {fileID: 3618774041547770407}
   - component: {fileID: -1269978873248641711}
   - component: {fileID: -4751557437910766561}
   - component: {fileID: 6007042303744301811}
+  - component: {fileID: 346001004579633958}
+  - component: {fileID: 183499491934538240}
+  - component: {fileID: 3716840381642877900}
   m_Layer: 8
   m_Name: ZombieFat
   m_TagString: Enemy
@@ -3384,50 +3385,7 @@ MonoBehaviour:
   stuckDistanceThreshold: 0.15
   unstuckRadius: 4
   unstuckDuration: 1.2
---- !u!114 &346001004579633958
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8363300174663062271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0939cf4dc0d65b4a92bf3c5d7619f8c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cooldown: 1.5
-  minRange: 0
-  maxRange: 2
-  priority: 1
-  damagePerHit: 15
-  damageRangeBonus: 0.5
-  animator: {fileID: 4711444196372439310}
-  controller: {fileID: 1459689864417276761}
---- !u!114 &183499491934538240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8363300174663062271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2d354c2dfec6d04cb5cae9c2f99bdaa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cooldown: 1.5
-  minRange: 0
-  maxRange: 2
-  priority: 1
-  damage: 20
-  aoeRadius: 2
-  animator: {fileID: 4711444196372439310}
-  controller: {fileID: 1459689864417276761}
-  impactEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 512
+  footstepMinSpeed: 0.1
 --- !u!114 &3618774041547770407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3489,6 +3447,78 @@ MonoBehaviour:
   lootContainer: {fileID: 8124199504213473286}
   enemyTarget: {fileID: 5429463611006696695}
   useTargetRoot: {fileID: 4526880269990774453}
+--- !u!114 &346001004579633958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0939cf4dc0d65b4a92bf3c5d7619f8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 1.5
+  priority: 1
+  damagePerHit: 15
+  damageRangeBonus: 0.5
+  animator: {fileID: 4711444196372439310}
+  controller: {fileID: 1459689864417276761}
+--- !u!114 &183499491934538240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2d354c2dfec6d04cb5cae9c2f99bdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 10
+  minRange: 0
+  maxRange: 1.5
+  priority: 1
+  damage: 20
+  aoeRadius: 2
+  animator: {fileID: 4711444196372439310}
+  controller: {fileID: 1459689864417276761}
+  impactEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  endDelayAfterImpact: 0.5
+--- !u!114 &3716840381642877900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8363300174663062271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ae1e83130c95844a6be9bc3de8765a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1.5
+  minRange: 0
+  maxRange: 5
+  priority: 1.5
+  damage: 25
+  coneRange: 4
+  coneAngle: 60
+  animator: {fileID: 4711444196372439310}
+  controller: {fileID: 1459689864417276761}
+  acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
+  spawnPoint: {fileID: 7225899562995629718}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  endDelayAfterImpact: 0.5
 --- !u!1 &8416963274110584342
 GameObject:
   m_ObjectHideFlags: 0

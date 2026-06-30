@@ -3185,7 +3185,6 @@ GameObject:
   - component: {fileID: 8809611623597794888}
   - component: {fileID: 1047922514323431887}
   - component: {fileID: 4549055520721802404}
-  - component: {fileID: 667846146574605970}
   - component: {fileID: 5833720096776462294}
   - component: {fileID: 325679386106819092}
   - component: {fileID: -4990881395917173338}
@@ -3364,9 +3363,12 @@ MonoBehaviour:
     m_Bits: 64
   _skills:
   - {fileID: 5833720096776462294}
-  - {fileID: 0}
   _bossAnimator: {fileID: 7544124443967714629}
   _corpseHandler: {fileID: 325679386106819092}
+  stuckCheckInterval: 0.8
+  stuckDistanceThreshold: 0.15
+  unstuckRadius: 4
+  unstuckDuration: 1.2
 --- !u!114 &1047922514323431887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3400,19 +3402,6 @@ MonoBehaviour:
   - {fileID: 3090625260113707320}
   - {fileID: 4940344637681503276}
   - {fileID: 7506573047543781982}
---- !u!114 &667846146574605970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8670145069011650472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e5e174f916a46d41b5dcf81b37000eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseConfig: {fileID: 11400000, guid: eabf309056b59a8498520069bc608d3e, type: 2}
 --- !u!114 &5833720096776462294
 MonoBehaviour:
   m_ObjectHideFlags: 0

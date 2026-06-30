@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SimpleSurvival.Combat;
 
 namespace SimpleSurvival.AI
