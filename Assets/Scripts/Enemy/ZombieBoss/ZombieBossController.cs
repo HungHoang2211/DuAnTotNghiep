@@ -31,6 +31,42 @@ namespace SimpleSurvival.AI
             _unstuckUntil = 0f;
         }
 
+        /// <summary>
+        /// ZombieBoss không dùng vision cone — detect player bằng proximity (ChaseRadius)
+        /// ở mọi state, đảm bảo boss luôn đuổi và tấn công khi player vào tầm.
+        /// </summary>
+        protected override IEnumerator DetectionRoutine()
+        {
+            while (!_isDead)
+            {
+                yield return new WaitForSeconds(0.2f);
+                if (_state == EnemyState.Dead) yield break;
+                if (_state == EnemyState.Attacking) continue;
+
+                float searchRadius = Config != null ? Config.ChaseRadius : 15f;
+                Collider[] hits = playerLayer == 0
+                    ? Physics.OverlapSphere(transform.position, searchRadius)
+                    : Physics.OverlapSphere(transform.position, searchRadius, playerLayer);
+
+                Transform detected = null;
+                foreach (var hit in hits)
+                {
+                    if (hit.CompareTag("Player")) { detected = hit.transform; break; }
+                }
+
+                if (detected != null)
+                {
+                    _player = detected;
+                    if (_state == EnemyState.Idle)
+                        OnPlayerDetected();
+                }
+                else if (_state == EnemyState.Chasing)
+                {
+                    _player = null;
+                }
+            }
+        }
+
         protected override void OnPlayerDetected()
         {
             if (Config == null || _player == null)

@@ -2690,6 +2690,7 @@ GameObject:
   - component: {fileID: 3577357596216463923}
   - component: {fileID: -6262705398337766745}
   - component: {fileID: -2555138297317319743}
+  - component: {fileID: -2583732202539663839}
   m_Layer: 8
   m_Name: Zombie
   m_TagString: Enemy
@@ -2821,7 +2822,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce80d124d95637c4ab635e6e0feb169a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 0}
+  _animator: {fileID: 6988851730292404845}
   _ragdollBodies:
   - {fileID: 338737174633654037}
   - {fileID: 4601130191410222333}
@@ -2846,6 +2847,7 @@ MonoBehaviour:
   - {fileID: 586003563546607973}
   - {fileID: 773878627297666795}
   - {fileID: 773878627297666795}
+  _bodyPartDetacher: {fileID: -2583732202539663839}
 --- !u!114 &1956828932666080739
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2948,6 +2950,28 @@ MonoBehaviour:
   lootContainer: {fileID: 5447163621522743264}
   enemyTarget: {fileID: 4820622456989531992}
   useTargetRoot: {fileID: 5357945185934790888}
+--- !u!114 &-2583732202539663839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7002519786067054812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435ac950812bfef4db6e9db4dd38c9b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _detachableParts:
+  - bone: {fileID: 1962053638247269738}
+    detachedMeshPrefab: {fileID: 1638841011304536061, guid: 89ddb8704aabfc54eb21ab35eecf20ac, type: 3}
+    skinnedRendererToHide: {fileID: 2438476245055071411}
+  _bloodEffectPrefab: {fileID: 198099118695303065, guid: fd7ff1981c213774382291fcc8970d64, type: 3}
+  _detachDelay: 0.08
+  _detachForceMin: 1.5
+  _detachForceMax: 4
+  _upwardBias: 0.4
+  _detachedPartLifetime: 30
 --- !u!1 &7015164926846652303
 GameObject:
   m_ObjectHideFlags: 0
