@@ -90,6 +90,18 @@ namespace SimpleSurvival.AI
             CheckStuck();
         }
 
+        protected override void UpdateAttacking()
+        {
+            base.UpdateAttacking();
+
+            // Khi chuyển sang Attacking, UpdateChase() không còn được gọi nên MoveSpeed
+            // có thể bị "đóng băng" ở giá trị cuối cùng khác 0, gây giật chân khi animation
+            // tấn công (Claw/Jump) đang chạy. Ép về 0 mỗi frame trong lúc Attacking để
+            // tránh Blend Tree đi/đứng tiếp tục blend chồng lên animation tấn công.
+            if (_fatAnimator != null)
+                _fatAnimator.SetMoveSpeed(0f);
+        }
+
         private void CheckStuck()
         {
             if (_state != EnemyState.Chasing) return;
