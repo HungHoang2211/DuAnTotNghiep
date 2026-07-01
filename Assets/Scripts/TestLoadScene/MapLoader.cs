@@ -1,0 +1,64 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace SimpleSurvival.World
+{
+    public class MapLoader : MonoBehaviour
+    {
+        public static MapLoader Instance { get; private set; }
+
+        [SerializeField] private Transform player;
+
+        public event Action PlayerRepositioned;
+
+        private string currentMapScene;
+
+        public string CurrentMapScene => currentMapScene;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+        }
+
+        public IEnumerator SwapRoutine(string mapScene)
+        {
+            if (!string.IsNullOrEmpty(currentMapScene))
+            {
+                yield return SceneManager.UnloadSceneAsync(currentMapScene);
+            }
+
+            yield return SceneManager.LoadSceneAsync(mapScene, LoadSceneMode.Additive);
+
+            Scene loaded = SceneManager.GetSceneByName(mapScene);
+            SceneManager.SetActiveScene(loaded);
+            currentMapScene = mapScene;
+
+            RepositionPlayerToSpawn();
+        }
+
+        private void RepositionPlayerToSpawn()
+        {
+            if (player == null) return;
+
+            MapSpawnPoint spawn = FindFirstObjectByType<MapSpawnPoint>();
+            if (spawn == null) return;
+
+            CharacterController controller = player.GetComponent<CharacterController>();
+            if (controller != null) controller.enabled = false;
+
+            player.SetPositionAndRotation(spawn.transform.position, spawn.transform.rotation);
+
+            if (controller != null) controller.enabled = true;
+
+            PlayerRepositioned?.Invoke();
+        }
+    }
+}
