@@ -14,6 +14,7 @@ namespace SimpleSurvival.UI.Hud
         [Header("Sub-managers")]
         [SerializeField] private UnlockProgressManager unlockProgress;
         [SerializeField] private HpHudManager hpHud;
+        [SerializeField] private SpeechManager speech;
 
         public RectTransform CanvasRect => canvasRect;
         public Camera GameCamera => gameCamera;
@@ -21,6 +22,7 @@ namespace SimpleSurvival.UI.Hud
 
         public UnlockProgressManager UnlockProgress => unlockProgress;
         public HpHudManager HpHud => hpHud;
+        public SpeechManager Speech => speech;
 
         private void Awake()
         {

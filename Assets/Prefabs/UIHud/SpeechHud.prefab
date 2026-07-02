@@ -424,6 +424,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3828055890334185180}
   - component: {fileID: 5787074214439957017}
+  - component: {fileID: 8470386807460293117}
+  - component: {fileID: 1177140261838470052}
   m_Layer: 10
   m_Name: SpeechHud
   m_TagString: Untagged
@@ -464,3 +466,36 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!114 &8470386807460293117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9212537510779370140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aca794cdcfca8e4ea4bc8189ad1fdcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 5787074214439957017}
+  label: {fileID: 8664695693119179899}
+  rootLayout: {fileID: 1193993130263447196}
+  goodColor: {r: 0.3137255, g: 0.9137255, b: 0.14901961, a: 1}
+  badColor: {r: 0.9764706, g: 0.62352943, b: 0.21176471, a: 1}
+  neutralColor: {r: 1, g: 1, b: 1, a: 1}
+  showTime: 2
+  fadeDuration: 0.3
+--- !u!114 &1177140261838470052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9212537510779370140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a7b4b81ca119044b4e18e846e23062, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _lifetime: 0

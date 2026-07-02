@@ -38086,6 +38086,7 @@ GameObject:
   - component: {fileID: 812480217}
   - component: {fileID: 812480218}
   - component: {fileID: 812480219}
+  - component: {fileID: 812480220}
   m_Layer: 9
   m_Name: Stats
   m_TagString: Untagged
@@ -38137,6 +38138,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStats: {fileID: 812480218}
+--- !u!114 &812480220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 812480216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d155adcdaf08946be2e6abf0260449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStats: {fileID: 812480218}
+  followTransform: {fileID: 812480217}
+  threshold: 20
+  hungryMessage: I'm hungry!
+  thirstyMessage: I'm thirsty!
 --- !u!1 &812840522
 GameObject:
   m_ObjectHideFlags: 0
@@ -82589,6 +82607,7 @@ GameObject:
   - component: {fileID: 1846278195}
   - component: {fileID: 1846278194}
   - component: {fileID: 1846278193}
+  - component: {fileID: 1846278196}
   m_Layer: 10
   m_Name: HudManager
   m_TagString: Untagged
@@ -82660,6 +82679,21 @@ MonoBehaviour:
   uiCamera: {fileID: 35043086}
   unlockProgress: {fileID: 1846278194}
   hpHud: {fileID: 1846278193}
+  speech: {fileID: 1846278196}
+--- !u!114 &1846278196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1846278191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f984bc1d592454ca541b387d35589b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speechHudPrefab: {fileID: 9212537510779370140, guid: ab4682617c2fdc44ab4c609578fe5476, type: 3}
+  worldOffset: {x: 0, y: 2, z: 0}
 --- !u!1 &1847323522
 GameObject:
   m_ObjectHideFlags: 0
