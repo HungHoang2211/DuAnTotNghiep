@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.Characters.Appearance
@@ -9,15 +8,21 @@ namespace SimpleSurvival.Characters.Appearance
         [SerializeField] private string bodypartId;
         [SerializeField] private Mesh mesh;
         [SerializeField] private Texture2D texture;
-        [SerializeField] private Texture2D tintMask;
-        [SerializeField] private Color tintColor = Color.white;
-        [SerializeField] private List<string> hiddenCosmetics = new List<string>();
+        [SerializeField] private Texture2D regionMask;
+        [SerializeField] private Texture2D detailTexture;
+        [SerializeField] private Vector2 detailTiling = Vector2.one;
+        [SerializeField] private Vector2 detailOffset;
+        [SerializeField] private bool disableHaircut;
+        [SerializeField] private bool disableBeard;
 
         public string BodypartId => bodypartId;
         public Mesh Mesh => mesh;
         public Texture2D Texture => texture;
-        public Texture2D TintMask => tintMask;
-        public Color TintColor => tintColor;
-        public IReadOnlyList<string> HiddenCosmetics => hiddenCosmetics;
+        public Texture2D RegionMask => regionMask;
+        public Texture2D DetailTexture => detailTexture;
+        public Vector2 DetailTiling => detailTiling;
+        public Vector2 DetailOffset => detailOffset;
+        public bool DisableHaircut => disableHaircut;
+        public bool DisableBeard => disableBeard;
     }
 }

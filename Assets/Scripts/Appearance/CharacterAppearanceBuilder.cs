@@ -6,12 +6,12 @@ namespace SimpleSurvival.Characters.Appearance
     public readonly struct BodypartView
     {
         public readonly BodypartResource Resource;
-        public readonly BodypartSlotConfig SlotConfig;
+        public readonly BodypartSlotEntry SlotEntry;
 
-        public BodypartView(BodypartResource resource, BodypartSlotConfig slotConfig)
+        public BodypartView(BodypartResource resource, BodypartSlotEntry slotEntry)
         {
             Resource = resource;
-            SlotConfig = slotConfig;
+            SlotEntry = slotEntry;
         }
     }
 
@@ -38,7 +38,7 @@ namespace SimpleSurvival.Characters.Appearance
             return combinedMesh;
         }
 
-        public static Texture2D BakeAtlas(IReadOnlyList<BodypartView> views, int atlasSize, TextureFormat format)
+        public static Texture2D BakeAtlas(IReadOnlyList<BodypartView> views, int atlasSize, TextureFormat format, Color haircutTint)
         {
             Texture2D atlas = new Texture2D(atlasSize, atlasSize, format, mipChain: false)
             {
@@ -50,8 +50,17 @@ namespace SimpleSurvival.Characters.Appearance
 
             foreach (BodypartView view in views)
             {
-                RectInt rect = view.SlotConfig.AtlasRect;
-                Color[] regionPixels = ExtractRegionPixels(view.Resource, rect.width, rect.height);
+                RectInt rect = view.SlotEntry.AtlasRect;
+                Color[] regionPixels = ExtractRegionPixels(
+                    view.Resource.Texture,
+                    view.Resource.RegionMask,
+                    view.Resource.DetailTexture,
+                    view.Resource.DetailTiling,
+                    view.Resource.DetailOffset,
+                    haircutTint,
+                    rect.width,
+                    rect.height);
+
                 atlas.SetPixels(rect.x, rect.y, rect.width, rect.height, regionPixels);
             }
 
@@ -59,30 +68,42 @@ namespace SimpleSurvival.Characters.Appearance
             return atlas;
         }
 
-        public static Texture2D BuildTintedTexture(BodypartResource resource)
+        public static Texture2D BuildStandaloneTexture(
+            Texture2D baseTexture,
+            Texture2D regionMask,
+            Texture2D detailTexture,
+            Vector2 detailTiling,
+            Vector2 detailOffset,
+            Color haircutTint)
         {
-            if (resource.TintMask == null)
-                return resource.Texture;
+            if (regionMask == null)
+                return baseTexture;
 
-            int width = resource.Texture.width;
-            int height = resource.Texture.height;
-            Color[] pixels = ExtractRegionPixels(resource, width, height);
+            int width = baseTexture.width;
+            int height = baseTexture.height;
+            Color[] pixels = ExtractRegionPixels(
+                baseTexture, regionMask, detailTexture, detailTiling, detailOffset, haircutTint, width, height);
 
-            Texture2D tinted = new Texture2D(width, height, TextureFormat.RGBA32, false)
+            Texture2D result = new Texture2D(width, height, TextureFormat.RGBA32, false)
             {
-                name = resource.BodypartId + "_Tinted"
+                name = "GeneratedTintedTexture"
             };
-            tinted.SetPixels(pixels);
-            tinted.Apply();
+            result.SetPixels(pixels);
+            result.Apply();
 
-            return tinted;
+            return result;
         }
 
-        private static Color[] ExtractRegionPixels(BodypartResource resource, int targetWidth, int targetHeight)
+        private static Color[] ExtractRegionPixels(
+            Texture2D baseTexture,
+            Texture2D regionMask,
+            Texture2D detailTexture,
+            Vector2 detailTiling,
+            Vector2 detailOffset,
+            Color haircutTint,
+            int targetWidth,
+            int targetHeight)
         {
-            Texture2D source = resource.Texture;
-            Texture2D mask = resource.TintMask;
-            Color tintColor = resource.TintColor;
             Color[] pixels = new Color[targetWidth * targetHeight];
 
             for (int y = 0; y < targetHeight; y++)
@@ -91,22 +112,46 @@ namespace SimpleSurvival.Characters.Appearance
                 for (int x = 0; x < targetWidth; x++)
                 {
                     float u = (x + 0.5f) / targetWidth;
-                    pixels[y * targetWidth + x] = SamplePixel(source, mask, tintColor, u, v);
+                    pixels[y * targetWidth + x] = SamplePixel(
+                        baseTexture, regionMask, detailTexture, detailTiling, detailOffset, haircutTint, u, v);
                 }
             }
 
             return pixels;
         }
 
-        private static Color SamplePixel(Texture2D source, Texture2D mask, Color tintColor, float u, float v)
+        private static Color SamplePixel(
+            Texture2D baseTexture,
+            Texture2D regionMask,
+            Texture2D detailTexture,
+            Vector2 detailTiling,
+            Vector2 detailOffset,
+            Color haircutTint,
+            float u,
+            float v)
         {
-            Color sourceColor = source.GetPixelBilinear(u, v);
-            if (mask == null)
-                return sourceColor;
+            Color baseColor = baseTexture.GetPixelBilinear(u, v);
+            if (regionMask == null)
+                return baseColor;
 
-            float maskAmount = mask.GetPixelBilinear(u, v).r;
-            Color tintedColor = sourceColor * tintColor;
-            return Color.Lerp(sourceColor, tintedColor, maskAmount);
+            Color mask = regionMask.GetPixelBilinear(u, v);
+            Color tintedColor = baseColor * haircutTint;
+            Color result = Color.Lerp(baseColor, tintedColor, mask.g);
+
+            if (detailTexture != null && mask.b > 0f)
+            {
+                float du = Wrap(u * detailTiling.x + detailOffset.x);
+                float dv = Wrap(v * detailTiling.y + detailOffset.y);
+                Color detailColor = detailTexture.GetPixelBilinear(du, dv);
+                result = Color.Lerp(result, detailColor, mask.b);
+            }
+
+            return result;
+        }
+
+        private static float Wrap(float value)
+        {
+            return value - Mathf.Floor(value);
         }
     }
 }

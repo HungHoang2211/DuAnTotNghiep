@@ -8,12 +8,12 @@ namespace SimpleSurvival.Characters.Appearance
     {
         [SerializeField] private int atlasSize = 512;
         [SerializeField] private TextureFormat atlasFormat = TextureFormat.RGBA32;
-        [SerializeField] private List<BodypartSlotConfig> bodySlots = new List<BodypartSlotConfig>();
-        [SerializeField] private List<CosmeticMeshConfig> cosmetics = new List<CosmeticMeshConfig>();
+        [SerializeField] private List<BodypartSlotEntry> slots = new List<BodypartSlotEntry>();
+        [SerializeField] private List<Color> haircutPalette = new List<Color>();
 
         public int AtlasSize => atlasSize;
         public TextureFormat AtlasFormat => atlasFormat;
-        public IReadOnlyList<BodypartSlotConfig> BodySlots => bodySlots;
-        public IReadOnlyList<CosmeticMeshConfig> Cosmetics => cosmetics;
+        public IReadOnlyList<BodypartSlotEntry> Slots => slots;
+        public IReadOnlyList<Color> HaircutPalette => haircutPalette;
     }
 }
