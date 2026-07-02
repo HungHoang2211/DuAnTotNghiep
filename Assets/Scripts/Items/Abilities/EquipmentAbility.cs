@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SimpleSurvival.Characters.Appearance;
 
 namespace SimpleSurvival.Items
 {
@@ -15,15 +16,13 @@ namespace SimpleSurvival.Items
         [SerializeField, Range(0f, 1f)] private float speedBonus;
 
         [Header("Visuals")]
-        [Tooltip("Mesh swapped onto the character's SkinnedMeshRenderer when this item is equipped.")]
-        [SerializeField] private Mesh equipMesh;
-        [SerializeField] private Material equipMaterial;
+        [Tooltip("Bodypart resource dùng bởi CharacterAppearance khi item này được equip. Null = dùng default resource của slot.")]
+        [SerializeField] private BodypartResource appearanceResource;
 
         public override string AbilityName => Name;
         public EquipSlot EquipSlot => equipSlot;
         public float ArmorValue => armorValue;
         public float SpeedBonus => speedBonus;
-        public Mesh EquipMesh => equipMesh;
-        public Material EquipMaterial => equipMaterial;
+        public BodypartResource AppearanceResource => appearanceResource;
     }
 }
