@@ -7,6 +7,7 @@ using SimpleSurvival.Stats;
 using SimpleSurvival.Loot;
 using SimpleSurvival.UI;
 using SimpleSurvival.UI.Hud;
+using SimpleSurvival.AI;
 
 namespace SimpleSurvival.Player
 {
@@ -36,6 +37,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
         [SerializeField] private float lootRange = 1.5f;
+        [SerializeField] private float npcInteractRange = 1.5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -310,6 +312,24 @@ namespace SimpleSurvival.Player
                         InventoryPanelController.Instance.OpenLoot(target);
                 });
             return TryRequestAction(unlock);
+        }
+
+        public bool RequestNPCInteract(SimpleSurvival.Targets.NPCTargetable target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > npcInteractRange)
+            {
+                Debug.Log($"[NPC] Too far: {dist:F1}m > {npcInteractRange:F1}m");
+                return false;
+            }
+
+            var giver = target.GetComponentInParent<SimpleSurvival.AI.NPCQuestGiver>();
+            if (giver == null) return false;
+
+            giver.OnPlayerInteract(gameObject);
+            return true;
         }
 
         private void HandlePlayerDamaged(GameObject attacker)

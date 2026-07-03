@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SimpleSurvival.Items
@@ -6,6 +7,7 @@ namespace SimpleSurvival.Items
     public class PlayerInventoryQueries : MonoBehaviour
     {
         private PlayerInventory _playerInventory;
+        public event Action<ItemData, int> OnItemAdded;
 
         private void Awake()
         {
@@ -72,6 +74,11 @@ namespace SimpleSurvival.Items
             int remaining = _playerInventory.Pockets.AddItem(itemData, quantity);
             if (remaining > 0 && _playerInventory.Backpack != null)
                 remaining = _playerInventory.Backpack.AddItem(itemData, remaining);
+
+            int added = quantity - remaining;
+            if (added > 0)
+                OnItemAdded?.Invoke(itemData, added);
+
             return remaining;
         }
 
