@@ -123,7 +123,8 @@ namespace SimpleSurvival.Items
                 EquipSlot.Pants => MatchesEquipSlot(data, EquipSlot.Pants),
                 EquipSlot.Boots => MatchesEquipSlot(data, EquipSlot.Boots),
                 EquipSlot.QuickSlot => data.HasAbility<ConsumableAbility>()
-                                    || data.HasAbility<WeaponAbility>(),
+                                    || data.HasAbility<WeaponAbility>()
+                                    || data.HasAbility<ToolAbility>(),
                 _ => false
             };
         }

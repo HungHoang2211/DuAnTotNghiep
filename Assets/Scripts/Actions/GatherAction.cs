@@ -4,6 +4,7 @@ using SimpleSurvival.Items;
 using SimpleSurvival.Player;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Targets;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Actions
 {
@@ -176,6 +177,9 @@ namespace SimpleSurvival.Actions
             {
                 Debug.Log($"[ToolBroken] {_toolStack.ItemData.ItemName} broke");
 
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify($"{_toolStack.ItemData.ItemName} broke!", SpeechHudType.Bad);
+
                 _controller.DestroyStackAnywhere(_toolStack);
 
                 _toolStack = null;
@@ -209,7 +213,12 @@ namespace SimpleSurvival.Actions
 
             int qty = _target.RollQuantity();
             if (qty > 0)
+            {
                 _inventoryQueries.AddItem(_target.ItemData, qty);
+
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify($"+{qty} {_target.ItemData.ItemName}", SpeechHudType.Good);
+            }
         }
 
         private float ResolveCurrentSafetyTimeout()

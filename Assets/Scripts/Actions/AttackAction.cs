@@ -25,7 +25,8 @@ namespace SimpleSurvival.Actions
 
         private readonly PlayerActionController _controller;
         private readonly Animator _animator;
-        private readonly ITargetable _target;
+        private readonly PlayerTargetChecker _targetChecker;
+        private ITargetable _target;
         private readonly ItemStack _weaponStack;
         private readonly float _damage;
         private readonly float _range;
@@ -48,6 +49,7 @@ namespace SimpleSurvival.Actions
             PlayerActionController controller,
             Animator animator,
             ITargetable target,
+            PlayerTargetChecker targetChecker,
             ItemStack weaponStack,
             float damage,
             float range,
@@ -59,6 +61,7 @@ namespace SimpleSurvival.Actions
             _controller = controller;
             _animator = animator;
             _target = target;
+            _targetChecker = targetChecker;
             _weaponStack = weaponStack;
             _damage = damage;
             _range = range;
@@ -107,6 +110,7 @@ namespace SimpleSurvival.Actions
             if (_controller.IsAttackHeld || _controller.AttackInputQueued)
             {
                 _controller.ConsumeAttackQueue();
+                RefreshTarget();
                 PickComboIndex();
                 StartSwing();
                 return;
@@ -155,6 +159,19 @@ namespace SimpleSurvival.Actions
             ConsumeWeaponDurability();
         }
 
+        public void HandleEnd()
+        {
+            if (_phase == Phase.ComboWindow) return;
+            _phase = Phase.ComboWindow;
+            _comboWindowRemaining = _comboWindowSeconds;
+        }
+
+        private void RefreshTarget()
+        {
+            if (_targetChecker == null) return;
+            _target = _targetChecker.CurrentEnemy;
+        }
+
         private static IDamageable ResolveDamageable(MonoBehaviour target)
         {
             IDamageable d = target.GetComponent<IDamageable>();
@@ -162,13 +179,6 @@ namespace SimpleSurvival.Actions
             d = target.GetComponentInParent<IDamageable>();
             if (d != null) return d;
             return target.GetComponentInChildren<IDamageable>();
-        }
-
-        public void HandleEnd()
-        {
-            if (_phase == Phase.ComboWindow) return;
-            _phase = Phase.ComboWindow;
-            _comboWindowRemaining = _comboWindowSeconds;
         }
 
         private void ConsumeWeaponDurability()
@@ -186,7 +196,6 @@ namespace SimpleSurvival.Actions
 
         private void PickComboIndex()
         {
-            int prev = _comboIndex;
             if (_maxComboIndex <= 0)
             {
                 _comboIndex = 0;
@@ -194,7 +203,6 @@ namespace SimpleSurvival.Actions
             }
 
             _comboIndex = UnityEngine.Random.Range(0, _maxComboIndex + 1);
-            Debug.Log($"[Combo] Prev={prev}, New={_comboIndex}, Same={prev == _comboIndex}");
         }
 
         private void StartSwing()
