@@ -33,6 +33,7 @@ namespace SimpleSurvival.UI.Hud
         private void Awake()
         {
             _rect = (RectTransform)transform;
+            canvasGroup.alpha = 0f;
         }
 
         public void Show(string text, SpeechHudType type)
@@ -77,6 +78,8 @@ namespace SimpleSurvival.UI.Hud
             }
 
             canvasGroup.alpha = 0f;
+            label.text = string.Empty;
+            _rect.localPosition = slideFrom;
             IsAnimated = false;
             _routine = null;
         }

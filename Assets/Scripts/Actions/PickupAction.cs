@@ -76,7 +76,7 @@ namespace SimpleSurvival.Actions
                 {
                     Debug.Log($"[Pickup] +{added} {entry.itemData.ItemName}");
                     if (FollowNotifyManager.Instance != null)
-                        FollowNotifyManager.Instance.Notify($"+{added} {entry.itemData.ItemName}", SpeechHudType.Good);
+                        FollowNotifyManager.Instance.Notify($"+{added} {entry.itemData.ItemName}", SpeechHudType.Neutral);
                 }
 
                 if (remaining > 0)
