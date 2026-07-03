@@ -1,12 +1,12 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace SimpleSurvival.Quests
 {
     public sealed class QuestLogEntryUI : MonoBehaviour
     {
-        [SerializeField] private Text questNameText;
-        [SerializeField] private Text objectiveText;
+        [SerializeField] private TMP_Text questNameText;
+        [SerializeField] private TMP_Text objectiveText;
 
         public void SetQuestName(string value)
         {

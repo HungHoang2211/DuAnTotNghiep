@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using SimpleSurvival.Items;
@@ -7,7 +8,7 @@ namespace SimpleSurvival.Quests
     public sealed class QuestRewardEntryUI : MonoBehaviour
     {
         [SerializeField] private Image iconImage;
-        [SerializeField] private Text quantityText;
+        [SerializeField] private TMP_Text quantityText;
 
         public void SetReward(ItemData itemData, int quantity)
         {
