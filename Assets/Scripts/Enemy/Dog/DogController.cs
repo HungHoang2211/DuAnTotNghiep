@@ -34,9 +34,11 @@ namespace SimpleSurvival.Pets
         [SerializeField] private float rotationSpeed = 360f;
 
         [Header("Combat Settings")]
-        [SerializeField] private float loseTargetTime = 2f;
         [Tooltip("Sau khi player bị 1 enemy đánh trúng, Dog vẫn coi enemy đó là mối đe doạ trong khoảng thời gian này dù player không tấn công.")]
         [SerializeField] private float playerAttackedGraceTime = 3f;
+        [Tooltip("Sau khi hạ gục mục tiêu, Dog tự dò tìm enemy còn sống trong bán kính này để đánh tiếp, không cần chờ tín hiệu mới từ Player.")]
+        [SerializeField] private float nearbyEnemyScanRadius = 6f;
+        [SerializeField] private LayerMask enemyLayer;
 
         [Header("Reaction Delay")]
         [Tooltip("Dog phản ứng chậm hơn Player bao nhiêu giây trước khi bắt đầu đuổi theo hoặc vào combat.")]
@@ -48,14 +50,23 @@ namespace SimpleSurvival.Pets
         private Transform _combatTarget;
         private Transform _enemyAttacker;
         private float _lastPlayerDamagedTime = -999f;
-        private float _lostTargetTimer;
         private bool _isFollowing;
         private float _nextPathUpdateTime;
 
         private Transform _pendingCombatTarget;
         private float _pendingCombatTimer;
 
+        private Vector3 _lastStuckCheckPos;
+        private float _stuckCheckTimer;
+        private float _stuckTimer;
+        private int _rerouteAttempts;
+        private NavMeshPath _scratchPath;
+
         private const float PathUpdateInterval = 0.2f;
+        private const float StuckCheckInterval = 0.5f;
+        private const float StuckMoveThreshold = 0.15f;
+        private const float StuckTimeToReroute = 0.8f;
+        private const float MinStuckTimeToReroute = 0.25f;
 
         private void Awake()
         {
@@ -64,8 +75,11 @@ namespace SimpleSurvival.Pets
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
-            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.GoodQualityObstacleAvoidance;
+            _agent.avoidancePriority = 30;
             _agent.nextPosition = transform.position;
+            _lastStuckCheckPos = transform.position;
+            _scratchPath = new NavMeshPath();
         }
 
         private void OnEnable()
@@ -102,6 +116,57 @@ namespace SimpleSurvival.Pets
 
         private void UpdateCombatTarget()
         {
+            Transform desiredTarget = ResolveDesiredTarget();
+
+            if (_state == DogState.Combat)
+            {
+                // Mục tiêu hiện tại còn sống -> tiếp tục đánh, không xét gì thêm.
+                if (_combatTarget != null && IsAttackerAlive(_combatTarget))
+                    return;
+
+                // Mục tiêu cũ đã chết -> ưu tiên tín hiệu từ Player, nếu không có thì tự dò enemy gần đó.
+                if (desiredTarget == null)
+                    desiredTarget = ScanNearbyEnemy();
+
+                if (desiredTarget != null)
+                {
+                    _combatTarget = desiredTarget;
+                    attackSkill?.Cancel();
+                    return;
+                }
+
+                _combatTarget = null;
+                _enemyAttacker = null;
+                attackSkill?.Cancel();
+                _state = DogState.Follow;
+                return;
+            }
+
+            // Đang Follow: cần chờ actionDelay trước khi nhập trận lần đầu.
+            if (desiredTarget == null)
+            {
+                _pendingCombatTarget = null;
+                _pendingCombatTimer = 0f;
+                return;
+            }
+
+            if (_pendingCombatTarget != desiredTarget)
+            {
+                _pendingCombatTarget = desiredTarget;
+                _pendingCombatTimer = 0f;
+            }
+
+            _pendingCombatTimer += Time.deltaTime;
+            if (_pendingCombatTimer < actionDelay) return;
+
+            _combatTarget = desiredTarget;
+            _pendingCombatTarget = null;
+            _isFollowing = false;
+            _state = DogState.Combat;
+        }
+
+        private Transform ResolveDesiredTarget()
+        {
             bool playerAttacking = playerActionController != null &&
                                     playerActionController.CurrentAction is AttackAction;
 
@@ -112,51 +177,34 @@ namespace SimpleSurvival.Pets
                                               (Time.time - _lastPlayerDamagedTime) <= playerAttackedGraceTime &&
                                               IsAttackerAlive(_enemyAttacker);
 
-            Transform desiredTarget = null;
+            if (playerAttacking && targetValid) return target.Transform;
+            if (enemyStillAttackingPlayer) return _enemyAttacker;
+            return null;
+        }
 
-            if (playerAttacking && targetValid)
-                desiredTarget = target.Transform;
-            else if (enemyStillAttackingPlayer)
-                desiredTarget = _enemyAttacker;
+        private Transform ScanNearbyEnemy()
+        {
+            if (enemyLayer == 0) return null;
 
-            if (desiredTarget != null)
+            Collider[] hits = Physics.OverlapSphere(transform.position, nearbyEnemyScanRadius, enemyLayer);
+            Transform best = null;
+            float bestDist = float.MaxValue;
+
+            foreach (var hit in hits)
             {
-                if (_state == DogState.Combat && _combatTarget == desiredTarget)
+                IDamageable damageable = hit.GetComponent<IDamageable>();
+                if (damageable == null) damageable = hit.GetComponentInParent<IDamageable>();
+                if (damageable == null || damageable.IsDead) continue;
+
+                float dist = Vector3.Distance(transform.position, hit.transform.position);
+                if (dist < bestDist)
                 {
-                    _lostTargetTimer = 0f;
-                    return;
+                    bestDist = dist;
+                    best = hit.transform;
                 }
-
-                if (_pendingCombatTarget != desiredTarget)
-                {
-                    _pendingCombatTarget = desiredTarget;
-                    _pendingCombatTimer = 0f;
-                }
-
-                _pendingCombatTimer += Time.deltaTime;
-                if (_pendingCombatTimer < actionDelay) return;
-
-                _combatTarget = desiredTarget;
-                _pendingCombatTarget = null;
-                _isFollowing = false;
-                _lostTargetTimer = 0f;
-                _state = DogState.Combat;
-                return;
             }
 
-            _pendingCombatTarget = null;
-            _pendingCombatTimer = 0f;
-
-            if (_state != DogState.Combat) return;
-
-            _lostTargetTimer += Time.deltaTime;
-            if (_lostTargetTimer >= loseTargetTime)
-            {
-                _combatTarget = null;
-                _enemyAttacker = null;
-                attackSkill?.Cancel();
-                _state = DogState.Follow;
-            }
+            return best;
         }
 
         private bool IsAttackerAlive(Transform attacker)
@@ -245,10 +293,82 @@ namespace SimpleSurvival.Pets
 
         private void UpdateAgentDestination(Vector3 destination)
         {
+            UpdateStuckTimer();
+
+            if (_stuckTimer >= CurrentStuckThreshold())
+            {
+                Vector3 alt = FindAlternateApproachPoint(destination);
+                _agent.SetDestination(alt);
+                _nextPathUpdateTime = Time.time + PathUpdateInterval;
+                _stuckTimer = 0f;
+                _rerouteAttempts++;
+                return;
+            }
+
             if (Time.time < _nextPathUpdateTime) return;
             _agent.SetDestination(destination);
             _nextPathUpdateTime = Time.time + PathUpdateInterval;
         }
+
+        private float CurrentStuckThreshold()
+        {
+            float t = StuckTimeToReroute * Mathf.Pow(0.5f, _rerouteAttempts);
+            return Mathf.Max(t, MinStuckTimeToReroute);
+        }
+
+        private void UpdateStuckTimer()
+        {
+            _stuckCheckTimer += Time.deltaTime;
+            if (_stuckCheckTimer < StuckCheckInterval) return;
+
+            float moved = Vector3.Distance(transform.position, _lastStuckCheckPos);
+            _lastStuckCheckPos = transform.position;
+            _stuckCheckTimer = 0f;
+
+            if (moved < StuckMoveThreshold)
+                _stuckTimer += StuckCheckInterval;
+            else
+            {
+                _stuckTimer = 0f;
+                _rerouteAttempts = 0;
+            }
+        }
+
+        private void ResetStuckState()
+        {
+            _stuckTimer = 0f;
+            _stuckCheckTimer = 0f;
+            _rerouteAttempts = 0;
+            _lastStuckCheckPos = transform.position;
+        }
+
+        private static readonly float[] ApproachAngles = { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
+
+        private Vector3 FindAlternateApproachPoint(Vector3 destination)
+        {
+            float angleOffset = Random.Range(0f, 45f);
+
+            foreach (float radius in ApproachRadii)
+            {
+                foreach (float baseAngle in ApproachAngles)
+                {
+                    float angle = baseAngle + angleOffset;
+                    Vector3 offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * radius;
+                    Vector3 candidate = destination + offset;
+
+                    if (!NavMesh.SamplePosition(candidate, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+                        continue;
+
+                    if (_agent.CalculatePath(hit.position, _scratchPath) &&
+                        _scratchPath.status == NavMeshPathStatus.PathComplete)
+                        return hit.position;
+                }
+            }
+
+            return destination;
+        }
+
+        private static readonly float[] ApproachRadii = { 2f, 3.5f };
 
         private Transform GetFollowTarget()
         {
@@ -264,6 +384,7 @@ namespace SimpleSurvival.Pets
             _agent.isStopped = true;
             _agent.ResetPath();
             _agent.nextPosition = transform.position;
+            ResetStuckState();
         }
 
         private void MoveAlongAgentPath(float moveSpeed, float rotSpeed)

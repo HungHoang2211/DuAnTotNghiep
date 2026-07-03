@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 using SimpleSurvival.Audio;
 using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
@@ -12,13 +13,36 @@ namespace SimpleSurvival.AI
         [SerializeField] private ZombieAnimator _zombieAnimator;
         [SerializeField] private EnemyCorpseHandler _corpseHandler;
 
+        [Header("Obstacle Avoidance")]
+        [SerializeField] private float stuckCheckInterval = 0.5f;
+        [SerializeField] private float stuckDistanceThreshold = 0.1f;
+        [SerializeField] private float stuckTimeThreshold = 1f;
+        [SerializeField] private float detourRadius = 2.5f;
+        [SerializeField] private float detourReachedDistance = 0.5f;
+
+        private Vector3 _lastCheckedPosition;
+        private float _stuckCheckTimer;
+        private float _stuckTimer;
+        private bool _detourActive;
+        private Vector3 _detourTarget;
+
         private PlayerInputReader _playerInputReader;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+        }
 
         protected override void OnEnemyInitialized()
         {
             if (_zombieAnimator != null) _zombieAnimator.ResetForSpawn();
 
             _playerInputReader = null;
+            _detourActive = false;
+            _stuckTimer = 0f;
+            _stuckCheckTimer = 0f;
+            _lastCheckedPosition = transform.position;
         }
 
         protected override void OnPlayerDetected()
@@ -43,16 +67,62 @@ namespace SimpleSurvival.AI
             if (!_isDead) BeginChase();
         }
 
+        protected override Vector3 GetChaseDestination()
+        {
+            if (_detourActive)
+            {
+                if (Vector3.Distance(transform.position, _detourTarget) > detourReachedDistance)
+                    return _detourTarget;
+
+                _detourActive = false;
+            }
+            return base.GetChaseDestination();
+        }
+
         protected override void UpdateChase()
         {
             base.UpdateChase();
 
-            if (_zombieAnimator == null) return;
+            if (_zombieAnimator != null)
+            {
+                float speed = _characterController.velocity.magnitude;
+                bool isMoving = speed > 0.1f;
+                bool isRunner = Config != null && Config.IsRunner;
+                _zombieAnimator.SetLocomotion(isMoving, isRunner);
+            }
 
-            float speed = _characterController.velocity.magnitude;
-            bool isMoving = speed > 0.1f;
-            bool isRunner = Config != null && Config.IsRunner;
-            _zombieAnimator.SetLocomotion(isMoving, isRunner);
+            CheckStuck();
+        }
+
+        private void CheckStuck()
+        {
+            _stuckCheckTimer += Time.deltaTime;
+            if (_stuckCheckTimer < stuckCheckInterval) return;
+
+            float moved = Vector3.Distance(transform.position, _lastCheckedPosition);
+            _lastCheckedPosition = transform.position;
+            _stuckCheckTimer = 0f;
+
+            if (_agent.isStopped || _player == null)
+            {
+                _stuckTimer = 0f;
+                return;
+            }
+
+            if (moved < stuckDistanceThreshold)
+            {
+                _stuckTimer += stuckCheckInterval;
+                if (_stuckTimer >= stuckTimeThreshold)
+                {
+                    _detourTarget = GetRandomNavMeshPoint(transform.position, detourRadius);
+                    _detourActive = true;
+                    _stuckTimer = 0f;
+                }
+            }
+            else
+            {
+                _stuckTimer = 0f;
+            }
         }
 
         public override void NotifySkillComplete()
@@ -103,6 +173,7 @@ namespace SimpleSurvival.AI
                 _zombieAnimator.SetHowling(false);
                 _zombieAnimator.SetIdle();
             }
+            _detourActive = false;
         }
 
         protected override void OnDying()
@@ -110,8 +181,11 @@ namespace SimpleSurvival.AI
             if (_characterController != null)
                 _characterController.enabled = false;
 
-            var mainCol = GetComponent<Collider>();
-            if (mainCol != null) mainCol.enabled = false;
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = false;
+            }
 
             if (_zombieAnimator != null)
             {

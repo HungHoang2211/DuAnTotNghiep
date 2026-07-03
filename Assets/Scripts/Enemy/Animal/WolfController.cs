@@ -96,8 +96,11 @@ namespace SimpleSurvival.AI
             if (_characterController != null)
                 _characterController.enabled = false;
 
-            var mainCol = GetComponent<Collider>();
-            if (mainCol != null) mainCol.enabled = false;
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = false;
+            }
 
             if (_wolfAnimator != null)
                 _wolfAnimator.TriggerDeath();

@@ -464,6 +464,7 @@ GameObject:
   - component: {fileID: 8445274476779364357}
   - component: {fileID: 1618554757922049043}
   - component: {fileID: 8903293882864604833}
+  - component: {fileID: 6568454444507781349}
   - component: {fileID: 5172500344030081942}
   - component: {fileID: 7757687813534903484}
   - component: {fileID: 6926075252273754152}
@@ -471,7 +472,6 @@ GameObject:
   - component: {fileID: 6905422421373612345}
   - component: {fileID: 2409327548995420516}
   - component: {fileID: 8731169572987673170}
-  - component: {fileID: 6568454444507781349}
   m_Layer: 8
   m_Name: Bear
   m_TagString: Enemy
@@ -560,13 +560,36 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 2.7
-  m_Radius: 0.99
+  m_Height: 3
+  m_Radius: 0.97
   m_SlopeLimit: 0
-  m_StepOffset: 0.3
+  m_StepOffset: 0.1
   m_SkinWidth: 0.01
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 1.27, z: 0.07}
+  m_Center: {x: 0, y: 1.48, z: 0}
+--- !u!136 &6568454444507781349
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837835535960132627}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.9560615
+  m_Height: 3.0177097
+  m_Direction: 1
+  m_Center: {x: -0.00000011920929, y: 1.4809313, z: -0.0027850866}
 --- !u!114 &5172500344030081942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -714,29 +737,6 @@ MonoBehaviour:
   damageRangeBonus: 0.5
   animator: {fileID: 5172500344030081942}
   controller: {fileID: 7757687813534903484}
---- !u!136 &6568454444507781349
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1837835535960132627}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.9793493
-  m_Height: 2.7029781
-  m_Direction: 1
-  m_Center: {x: -0.000000059604645, y: 1.2660384, z: 0}
 --- !u!1 &1878662058745316843
 GameObject:
   m_ObjectHideFlags: 0

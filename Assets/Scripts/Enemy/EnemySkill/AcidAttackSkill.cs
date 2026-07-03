@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using SimpleSurvival.Combat;
 
 namespace SimpleSurvival.AI
 {
@@ -8,8 +7,6 @@ namespace SimpleSurvival.AI
     {
         [Header("Damage")]
         [SerializeField] private float damage = 25f;
-        [SerializeField] private float coneRange = 4f;
-        [SerializeField] private float coneAngle = 60f;
 
         [Header("Refs")]
         [SerializeField] private ZombieFatAnimator animator;
@@ -21,10 +18,10 @@ namespace SimpleSurvival.AI
 
         private float _timeInRange = 0f;
 
-        [Header("Effect")]
+        [Header("Projectile")]
+        [Tooltip("Prefab phải có component AcidProjectile gắn sẵn. Bắn thẳng theo hướng tới player tại thời điểm phun, có thể né được.")]
         [SerializeField] private GameObject acidEffectPrefab;
         [SerializeField] private Transform spawnPoint;
-        [SerializeField] private LayerMask playerLayer;
 
         [Header("Failsafe")]
         [Tooltip("Nếu quên gắn Animation Event OnAcidEnd ở cuối clip, skill sẽ tự kết thúc sau thời gian này để tránh kẹt state")]
@@ -63,29 +60,19 @@ namespace SimpleSurvival.AI
         {
             if (!_isExecuting) return;
 
-            if (acidEffectPrefab != null)
+            if (acidEffectPrefab != null && _target != null)
             {
                 Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : transform.position + transform.forward;
-                Quaternion spawnRot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
-                Instantiate(acidEffectPrefab, spawnPos, spawnRot);
-            }
 
-            Collider[] hits = playerLayer == 0
-                ? Physics.OverlapSphere(transform.position, coneRange)
-                : Physics.OverlapSphere(transform.position, coneRange, playerLayer);
+                // Bắn thẳng theo hướng tới player TẠI THỜI ĐIỂM PHUN - không tự bám đuổi,
+                // nên player có thể né bằng cách di chuyển ra khỏi đường bay sau đó.
+                Vector3 dir = (_target.position - spawnPos).normalized;
+                Quaternion spawnRot = dir != Vector3.zero ? Quaternion.LookRotation(dir) : transform.rotation;
 
-            foreach (var hit in hits)
-            {
-                if (!hit.CompareTag("Player")) continue;
-
-                Vector3 dir = (hit.transform.position - transform.position).normalized;
-                float angle = Vector3.Angle(transform.forward, dir);
-                if (angle > coneAngle * 0.5f) continue;
-
-                var damageable = ResolveDamageable(hit.transform);
-                if (damageable == null || damageable.IsDead) continue;
-
-                damageable.TakeDamage(damage, gameObject);
+                var go = Instantiate(acidEffectPrefab, spawnPos, spawnRot);
+                var projectile = go.GetComponent<AcidProjectile>();
+                if (projectile != null)
+                    projectile.Init(damage, gameObject, controller);
             }
         }
 
@@ -121,17 +108,6 @@ namespace SimpleSurvival.AI
             _timeInRange = 0f;
             if (animator != null) animator.CancelAttack();
             _target = null;
-        }
-
-        private IDamageable ResolveDamageable(Transform target)
-        {
-            var direct = target.GetComponent<IDamageable>();
-            if (direct != null) return direct;
-
-            var inChildren = target.GetComponentInChildren<IDamageable>();
-            if (inChildren != null) return inChildren;
-
-            return target.GetComponentInParent<IDamageable>();
         }
     }
 }

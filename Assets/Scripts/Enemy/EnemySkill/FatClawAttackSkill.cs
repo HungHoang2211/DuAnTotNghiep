@@ -48,6 +48,7 @@ namespace SimpleSurvival.AI
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(damagePerHit, gameObject);
+            if (controller != null) controller.NotifyDamageDealt();
         }
 
         private IDamageable ResolveDamageable(Transform target)

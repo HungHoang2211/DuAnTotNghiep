@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
 
@@ -24,6 +25,12 @@ namespace SimpleSurvival.AI
         private Vector3 _unstuckPoint;
         private float _unstuckUntil;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+        }
+
         protected override void OnEnemyInitialized()
         {
             if (_fatAnimator != null) _fatAnimator.ResetForSpawn();
@@ -36,9 +43,6 @@ namespace SimpleSurvival.AI
         {
             base.BeginChase();
 
-            // Đảm bảo Claw luôn là đòn đầu tiên: ép JumpAttack vào cooldown ngay khi
-            // bắt đầu chase (mỗi lần bắt đầu 1 lượt combat mới). Jump chỉ thực sự
-            // available sau đúng Cooldown giây (hiện = 10s) kể từ lúc này.
             foreach (var skill in _skills)
             {
                 if (skill is JumpAttackSkill jumpSkill)
@@ -62,13 +66,13 @@ namespace SimpleSurvival.AI
 
                 var inputReader = target.GetComponentInParent<PlayerInputReader>();
                 if (inputReader == null) inputReader = target.root.GetComponentInChildren<PlayerInputReader>();
-                if (inputReader != null && inputReader.IsSneakHeld) continue; // sneak -> luôn không nghe thấy, bất kể tốc độ
+                if (inputReader != null && inputReader.IsSneakHeld) continue;
 
                 float playerSpeed = 0f;
                 var cc = target.GetComponentInParent<CharacterController>();
                 if (cc != null) playerSpeed = cc.velocity.magnitude;
 
-                if (playerSpeed < footstepMinSpeed) continue; // đứng yên -> không nghe thấy
+                if (playerSpeed < footstepMinSpeed) continue;
 
                 _player = target;
                 return true;
@@ -107,18 +111,10 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            // Không dùng thẳng Config.AttackRange (tầm cận chiến) làm mốc dừng, vì AcidAttack
-            // là skill tầm xa, cần được xét đến ngay cả khi player còn ở xa ngoài AttackRange.
-            // engageRange = max(AttackRange cận chiến, MaxRange xa nhất trong các skill đang có).
             float engageRange = GetMaxEngageRange();
 
             if (dist <= engageRange)
             {
-                // Luôn thử dùng skill khi đã vào tầm xa nhất. Chỉ đứng yên nếu skill THỰC SỰ
-                // được thi triển (state chuyển sang Attacking). Nếu không skill nào sẵn sàng
-                // ngay lúc này (vd: Acid còn đang chờ đủ 3s trong tầm hoặc đang cooldown, còn
-                // Claw/Jump thì player chưa đủ gần), phải tiếp tục tiến lại gần chứ không được
-                // đứng khựng lại ở khoảng cách xa chờ mãi.
                 FaceTarget(_player, Config.RotationSpeed);
                 TryUseSkill();
 
@@ -168,10 +164,6 @@ namespace SimpleSurvival.AI
         {
             base.UpdateAttacking();
 
-            // Khi chuyển sang Attacking, UpdateChase() không còn được gọi nên MoveSpeed
-            // có thể bị "đóng băng" ở giá trị cuối cùng khác 0, gây giật chân khi animation
-            // tấn công (Claw/Jump) đang chạy. Ép về 0 mỗi frame trong lúc Attacking để
-            // tránh Blend Tree đi/đứng tiếp tục blend chồng lên animation tấn công.
             if (_fatAnimator != null)
                 _fatAnimator.SetMoveSpeed(0f);
         }
@@ -213,8 +205,11 @@ namespace SimpleSurvival.AI
             if (_characterController != null)
                 _characterController.enabled = false;
 
-            var mainCol = GetComponent<Collider>();
-            if (mainCol != null) mainCol.enabled = false;
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = false;
+            }
 
             if (_fatAnimator != null)
             {
