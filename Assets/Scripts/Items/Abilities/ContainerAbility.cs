@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using SimpleSurvival.Characters.Appearance;
 
 namespace SimpleSurvival.Items
 {
@@ -9,8 +10,12 @@ namespace SimpleSurvival.Items
 
         [SerializeField] private int extraSlots;
 
-        public override string AbilityName => Name;
+        [Header("Visuals")]
+        [Tooltip("Mesh + texture rigid của balo, gán trực tiếp cho BackpackTransform khi equip.")]
+        [SerializeField] private BodypartResource backpackResource;
 
+        public override string AbilityName => Name;
         public int ExtraSlots => extraSlots;
+        public BodypartResource BackpackResource => backpackResource;
     }
 }

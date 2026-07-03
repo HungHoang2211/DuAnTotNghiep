@@ -80,6 +80,8 @@ namespace SimpleSurvival.UI
                 actionController.RequestPickup(pickup);
             else if (_currentTarget is LootContainer container)
                 actionController.RequestLoot(container);
+            else if (_currentTarget is SimpleSurvival.Targets.NPCTargetable npc)
+                actionController.RequestNPCInteract(npc);
         }
 
         private void HandleTargetChanged(ITargetable target)

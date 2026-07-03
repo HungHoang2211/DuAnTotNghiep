@@ -6,6 +6,8 @@ using SimpleSurvival.Items;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Loot;
 using SimpleSurvival.UI;
+using SimpleSurvival.UI.Hud;
+using SimpleSurvival.AI;
 
 namespace SimpleSurvival.Player
 {
@@ -21,6 +23,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
         [SerializeField] private PlayerToolSwapper toolSwapper;
         [SerializeField] private PlayerAnimator playerAnimator;
+        [SerializeField] private PlayerTargetChecker targetChecker;
 
         [Header("Combat Defaults (Unarmed)")]
         [SerializeField] private float unarmedAttackRange = 1.5f;
@@ -34,6 +37,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
         [SerializeField] private float lootRange = 1.5f;
+        [SerializeField] private float npcInteractRange = 1.5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -63,6 +67,7 @@ namespace SimpleSurvival.Player
             if (inventoryQueries == null) inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
             if (toolSwapper == null) toolSwapper = GetComponentInChildren<PlayerToolSwapper>();
             if (playerAnimator == null) playerAnimator = GetComponentInChildren<PlayerAnimator>();
+            if (targetChecker == null) targetChecker = GetComponentInChildren<PlayerTargetChecker>();
 
             _idleAction = new IdleAction(this);
             _moveAction = new MoveAction(this, moveConfig, playerStats);
@@ -90,6 +95,12 @@ namespace SimpleSurvival.Player
                 HandleActionCompletion(CurrentAction);
                 SwitchToIdle();
             }
+
+            if (CurrentAction == _idleAction && IsAttackHeld)
+            {
+                ITargetable enemy = targetChecker != null ? targetChecker.CurrentEnemy : null;
+                RequestAttack(enemy);
+            }
         }
 
         private void HandleActionCompletion(IAction action)
@@ -99,7 +110,11 @@ namespace SimpleSurvival.Player
                 Debug.Log($"[HandleCompletion] AttackAction, WeaponBroke={attack.WeaponBroke}, StackName={attack.WeaponStack?.ItemData.ItemName ?? "null"}");
                 if (attack.WeaponBroke)
                 {
+                    string brokenName = attack.WeaponStack != null ? attack.WeaponStack.ItemData.ItemName : "Weapon";
                     DestroyStackAnywhere(attack.WeaponStack);
+
+                    if (FollowNotifyManager.Instance != null)
+                        FollowNotifyManager.Instance.Notify($"{brokenName} broke!", SpeechHudType.Bad);
                 }
             }
         }
@@ -168,6 +183,7 @@ namespace SimpleSurvival.Player
         public bool RequestAttack(ITargetable target)
         {
             if (animator == null) return false;
+            if (CurrentAction.Type == ActionType.Attack) return false;
 
             ItemStack weaponStack = GetEquippedWeaponStack();
             float damage = ResolveAttackDamage(weaponStack);
@@ -177,7 +193,7 @@ namespace SimpleSurvival.Player
             float speedMultiplier = ResolveAttackSpeedMultiplier(weaponStack);
 
             AttackAction attack = new AttackAction(
-                this, animator, target,
+                this, animator, target, targetChecker,
                 weaponStack,
                 damage, range, maxComboIndex, comboWindowSeconds,
                 safetyTimeout,
@@ -227,6 +243,8 @@ namespace SimpleSurvival.Player
             if (!resolution.HasTool)
             {
                 Debug.Log($"[NoTool] Missing tool: {required}");
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify($"Need {required}", SpeechHudType.Bad);
                 return false;
             }
 
@@ -258,6 +276,8 @@ namespace SimpleSurvival.Player
             if (!CanPickupAtLeastOneItem(target))
             {
                 Debug.Log("[ActionController] Inventory full, cannot pickup");
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify("Inventory full!", SpeechHudType.Bad);
                 return false;
             }
 
@@ -292,6 +312,24 @@ namespace SimpleSurvival.Player
                         InventoryPanelController.Instance.OpenLoot(target);
                 });
             return TryRequestAction(unlock);
+        }
+
+        public bool RequestNPCInteract(SimpleSurvival.Targets.NPCTargetable target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > npcInteractRange)
+            {
+                Debug.Log($"[NPC] Too far: {dist:F1}m > {npcInteractRange:F1}m");
+                return false;
+            }
+
+            var giver = target.GetComponentInParent<SimpleSurvival.AI.NPCQuestGiver>();
+            if (giver == null) return false;
+
+            giver.OnPlayerInteract(gameObject);
+            return true;
         }
 
         private void HandlePlayerDamaged(GameObject attacker)

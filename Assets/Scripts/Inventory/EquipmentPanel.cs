@@ -205,9 +205,10 @@ namespace SimpleSurvival.Items
         }
 
         public void HandleEquipDropToInventory(CellUI sourceCell,
-            InventorySystem targetInventory, int targetIndex)
+    InventorySystem targetInventory, int targetIndex)
         {
             if (IsBackpackOccupied(sourceCell)) return;
+            if (IsDroppingBackpackIntoItself(sourceCell, targetInventory)) return;
 
             int slotIndex = GetSlotIndex(sourceCell);
             ItemStack equipped = _equipmentSystem.GetSlot(sourceCell.EquipSlot, slotIndex);
@@ -224,6 +225,12 @@ namespace SimpleSurvival.Items
 
             _equipmentSystem.SetSlotDirect(sourceCell.EquipSlot, slotIndex, existing);
             targetInventory.SetSlot(targetIndex, equipped);
+        }
+
+        private bool IsDroppingBackpackIntoItself(CellUI sourceCell, InventorySystem targetInventory)
+        {
+            return sourceCell.EquipSlot == EquipSlot.Backpack
+                && targetInventory == playerInventory.Backpack;
         }
 
         public void HandleInventoryDropToEquip(CellUI sourceCell,

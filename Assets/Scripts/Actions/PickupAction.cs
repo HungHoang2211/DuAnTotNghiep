@@ -3,6 +3,7 @@ using UnityEngine;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Items;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Actions
 {
@@ -72,7 +73,11 @@ namespace SimpleSurvival.Actions
                 totalAdded += added;
 
                 if (added > 0)
+                {
                     Debug.Log($"[Pickup] +{added} {entry.itemData.ItemName}");
+                    if (FollowNotifyManager.Instance != null)
+                        FollowNotifyManager.Instance.Notify($"+{added} {entry.itemData.ItemName}", SpeechHudType.Neutral);
+                }
 
                 if (remaining > 0)
                     Debug.Log($"[Pickup] Lost {remaining} {entry.itemData.ItemName} (inventory full)");
@@ -81,6 +86,8 @@ namespace SimpleSurvival.Actions
             if (totalAdded == 0)
             {
                 Debug.Log("[Pickup] Your inventory is full!");
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify("Inventory full!", SpeechHudType.Bad);
                 return;
             }
 
