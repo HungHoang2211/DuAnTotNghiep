@@ -5,9 +5,6 @@ namespace SimpleSurvival.Quests
 {
     public sealed class QuestLogUI : MonoBehaviour
     {
-        [Header("Root")]
-        [SerializeField] private GameObject panelRoot;
-
         [Header("Entry")]
         [SerializeField] private QuestLogEntryUI entryPrefab;
         [SerializeField] private Transform entryContainer;
@@ -45,8 +42,6 @@ namespace SimpleSurvival.Quests
             entry.SetQuestName(quest.QuestName);
             entry.SetObjectiveText(BuildObjectiveText(quest, 0));
             _entries[quest] = entry;
-
-            if (panelRoot != null) panelRoot.SetActive(true);
         }
 
         private void HandleProgress(QuestData quest, int objectiveIndex)

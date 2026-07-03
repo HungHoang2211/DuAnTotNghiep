@@ -217,7 +217,7 @@ namespace SimpleSurvival.Actions
                 _inventoryQueries.AddItem(_target.ItemData, qty);
 
                 if (FollowNotifyManager.Instance != null)
-                    FollowNotifyManager.Instance.Notify($"+{qty} {_target.ItemData.ItemName}", SpeechHudType.Good);
+                    FollowNotifyManager.Instance.Notify($"+{qty} {_target.ItemData.ItemName}", SpeechHudType.Neutral);
             }
         }
 
