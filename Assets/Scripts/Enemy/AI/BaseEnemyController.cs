@@ -205,6 +205,8 @@ namespace SimpleSurvival.AI
         protected override void HandleDamagedBy(GameObject source)
         {
             if (source == null || _isDead) return;
+            if (!source.CompareTag("Player")) return; // bỏ qua damage từ Dog / nguồn không phải Player thật
+
             _player = source.transform;
 
             if (_state == EnemyState.Idle)

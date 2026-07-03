@@ -32,6 +32,20 @@ namespace SimpleSurvival.AI
             _unstuckUntil = 0f;
         }
 
+        protected override void BeginChase()
+        {
+            base.BeginChase();
+
+            // Đảm bảo Claw luôn là đòn đầu tiên: ép JumpAttack vào cooldown ngay khi
+            // bắt đầu chase (mỗi lần bắt đầu 1 lượt combat mới). Jump chỉ thực sự
+            // available sau đúng Cooldown giây (hiện = 10s) kể từ lúc này.
+            foreach (var skill in _skills)
+            {
+                if (skill is JumpAttackSkill jumpSkill)
+                    jumpSkill.PutOnCooldown();
+            }
+        }
+
         protected override bool DetectByHearing()
         {
             if (Config == null) return false;
@@ -79,7 +93,48 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            base.UpdateChase();
+            if (Config == null || _player == null)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, _player.position);
+
+            if (dist > Config.ChaseRadius)
+            {
+                BeginIdle();
+                return;
+            }
+
+            // Không dùng thẳng Config.AttackRange (tầm cận chiến) làm mốc dừng, vì AcidAttack
+            // là skill tầm xa, cần được xét đến ngay cả khi player còn ở xa ngoài AttackRange.
+            // engageRange = max(AttackRange cận chiến, MaxRange xa nhất trong các skill đang có).
+            float engageRange = GetMaxEngageRange();
+
+            if (dist <= engageRange)
+            {
+                // Luôn thử dùng skill khi đã vào tầm xa nhất. Chỉ đứng yên nếu skill THỰC SỰ
+                // được thi triển (state chuyển sang Attacking). Nếu không skill nào sẵn sàng
+                // ngay lúc này (vd: Acid còn đang chờ đủ 3s trong tầm hoặc đang cooldown, còn
+                // Claw/Jump thì player chưa đủ gần), phải tiếp tục tiến lại gần chứ không được
+                // đứng khựng lại ở khoảng cách xa chờ mãi.
+                FaceTarget(_player, Config.RotationSpeed);
+                TryUseSkill();
+
+                if (_state == EnemyState.Attacking)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                    _agent.nextPosition = transform.position;
+                    if (_fatAnimator != null) _fatAnimator.SetMoveSpeed(0f);
+                    return;
+                }
+            }
+
+            _agent.isStopped = false;
+            _agent.SetDestination(GetChaseDestination());
+            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
 
             if (_fatAnimator != null)
             {
@@ -87,7 +142,26 @@ namespace SimpleSurvival.AI
                 _fatAnimator.SetMoveSpeed(speed);
             }
 
+            if (!CanStillDetect())
+            {
+                _lostTargetTimer += Time.deltaTime;
+                if (_lostTargetTimer >= Config.LoseTargetTime)
+                    BeginIdle();
+            }
+            else _lostTargetTimer = 0f;
+
             CheckStuck();
+        }
+
+        private float GetMaxEngageRange()
+        {
+            float max = Config.AttackRange;
+            foreach (var skill in _skills)
+            {
+                if (skill != null && skill.MaxRange > max)
+                    max = skill.MaxRange;
+            }
+            return max;
         }
 
         protected override void UpdateAttacking()
