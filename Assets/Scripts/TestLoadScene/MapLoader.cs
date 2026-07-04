@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -49,7 +49,14 @@ namespace SimpleSurvival.World
             if (player == null) return;
 
             MapSpawnPoint spawn = FindFirstObjectByType<MapSpawnPoint>();
-            if (spawn == null) return;
+
+            if (spawn == null)
+            {
+                Debug.LogError($"[MapLoader] KHÔNG tìm thấy MapSpawnPoint trong scene '{currentMapScene}'!");
+                return;
+            }
+
+            Debug.Log($"[MapLoader] Reposition -> {spawn.name} tại {spawn.transform.position}, scene hiện tại: {currentMapScene}");
 
             CharacterController controller = player.GetComponent<CharacterController>();
             if (controller != null) controller.enabled = false;
