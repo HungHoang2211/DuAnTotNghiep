@@ -55,6 +55,7 @@ namespace SimpleSurvival.Player
 
         private IdleAction _idleAction;
         private MoveAction _moveAction;
+        private SimpleSurvival.Input.PlayerInputReader _inputReader;
 
         private void Awake()
         {
@@ -77,12 +78,19 @@ namespace SimpleSurvival.Player
 
             if (playerStats != null)
                 playerStats.OnDamagedBy += HandlePlayerDamaged;
+
+            _inputReader = GetComponent<SimpleSurvival.Input.PlayerInputReader>();
+            if (_inputReader != null)
+                _inputReader.OnSneakChanged += HandleSneakChanged;
         }
 
         private void OnDestroy()
         {
             if (playerStats != null)
                 playerStats.OnDamagedBy -= HandlePlayerDamaged;
+
+            if (_inputReader != null)
+                _inputReader.OnSneakChanged -= HandleSneakChanged;
         }
 
         private void Update()
@@ -336,6 +344,15 @@ namespace SimpleSurvival.Player
         {
             if (CurrentAction is UnlockAction unlock)
                 unlock.Cancel();
+        }
+
+        private void HandleSneakChanged(bool isSneaking)
+        {
+            if (!isSneaking) return;
+            if (CurrentAction.Type != ActionType.Attack) return;
+
+            CurrentAction.Cancel();
+            SwitchToIdle();
         }
 
         private bool CanPickupAtLeastOneItem(PickupTarget target)
