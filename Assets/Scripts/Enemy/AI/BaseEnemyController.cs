@@ -17,6 +17,17 @@ namespace SimpleSurvival.AI
 
         protected EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
 
+        /// <summary>
+        /// Thoi diem enemy nay gay dame len player lan cuoi (bat ky skill nao).
+        /// Skill goi NotifyDamageDealt() sau khi TakeDamage() thanh cong.
+        /// </summary>
+        public float LastDamageDealtTime { get; private set; } = -999f;
+
+        public void NotifyDamageDealt()
+        {
+            LastDamageDealtTime = Time.time;
+        }
+
         protected override void OnInitialized()
         {
             if (Config == null)
@@ -28,6 +39,7 @@ namespace SimpleSurvival.AI
             _state = EnemyState.Idle;
             _lostTargetTimer = 0f;
             _agent.speed = Config.MoveSpeed;
+            LastDamageDealtTime = -999f;
 
             OnEnemyInitialized();
 

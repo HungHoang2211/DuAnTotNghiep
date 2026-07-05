@@ -695,7 +695,7 @@ CharacterController:
   m_Height: 2.7
   m_Radius: 0.99
   m_SlopeLimit: 0
-  m_StepOffset: 0.3
+  m_StepOffset: 0.1
   m_SkinWidth: 0.01
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 1.27, z: 0.07}
@@ -760,6 +760,11 @@ MonoBehaviour:
   - {fileID: 4266558753971501906}
   _bearAnimator: {fileID: 3566210274771536032}
   _corpseHandler: {fileID: 4802174967028173836}
+  stuckCheckInterval: 0.5
+  stuckDistanceThreshold: 0.1
+  stuckTimeThreshold: 1
+  detourRadius: 2.5
+  detourReachedDistance: 0.5
 --- !u!114 &5717147819697974500
 MonoBehaviour:
   m_ObjectHideFlags: 0

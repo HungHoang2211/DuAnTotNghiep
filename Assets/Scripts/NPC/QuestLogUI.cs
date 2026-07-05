@@ -5,14 +5,19 @@ namespace SimpleSurvival.Quests
 {
     public sealed class QuestLogUI : MonoBehaviour
     {
-        [Header("Entry")]
-        [SerializeField] private QuestLogEntryUI entryPrefab;
-        [SerializeField] private Transform entryContainer;
+        [Header("Fixed Slots")]
+        [SerializeField] private List<QuestLogEntryUI> slots = new List<QuestLogEntryUI>();
 
-        private readonly Dictionary<QuestData, QuestLogEntryUI> _entries = new Dictionary<QuestData, QuestLogEntryUI>();
+        private readonly Dictionary<QuestData, QuestLogEntryUI> _assignedSlots = new Dictionary<QuestData, QuestLogEntryUI>();
+        private readonly Queue<QuestData> _pendingQuests = new Queue<QuestData>();
 
         private void Start()
         {
+            foreach (var slot in slots)
+            {
+                if (slot != null) slot.gameObject.SetActive(false);
+            }
+
             QuestManager manager = QuestManager.Instance;
             if (manager != null)
             {
@@ -35,26 +40,54 @@ namespace SimpleSurvival.Quests
 
         private void HandleQuestStarted(QuestData quest)
         {
-            if (entryPrefab == null || entryContainer == null) return;
-            if (_entries.ContainsKey(quest)) return;
+            if (_assignedSlots.ContainsKey(quest)) return;
 
-            QuestLogEntryUI entry = Instantiate(entryPrefab, entryContainer);
-            entry.SetQuestName(quest.QuestName);
-            entry.SetObjectiveText(BuildObjectiveText(quest, 0));
-            _entries[quest] = entry;
+            QuestLogEntryUI freeSlot = FindFreeSlot();
+            if (freeSlot == null)
+            {
+                _pendingQuests.Enqueue(quest);
+                return;
+            }
+
+            AssignSlot(freeSlot, quest);
         }
 
         private void HandleProgress(QuestData quest, int objectiveIndex)
         {
-            if (!_entries.TryGetValue(quest, out QuestLogEntryUI entry)) return;
-            entry.SetObjectiveText(BuildObjectiveText(quest, objectiveIndex));
+            if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
+            slot.SetObjectiveText(BuildObjectiveText(quest, objectiveIndex));
         }
 
         private void HandleQuestCompleted(QuestData quest)
         {
-            if (!_entries.TryGetValue(quest, out QuestLogEntryUI entry)) return;
-            Destroy(entry.gameObject);
-            _entries.Remove(quest);
+            if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
+
+            slot.gameObject.SetActive(false);
+            _assignedSlots.Remove(quest);
+
+            if (_pendingQuests.Count > 0)
+            {
+                QuestData nextQuest = _pendingQuests.Dequeue();
+                AssignSlot(slot, nextQuest);
+            }
+        }
+
+        private void AssignSlot(QuestLogEntryUI slot, QuestData quest)
+        {
+            slot.SetQuestName(quest.QuestName);
+            slot.SetObjectiveText(BuildObjectiveText(quest, 0));
+            slot.gameObject.SetActive(true);
+            _assignedSlots[quest] = slot;
+        }
+
+        private QuestLogEntryUI FindFreeSlot()
+        {
+            foreach (var slot in slots)
+            {
+                if (slot == null) continue;
+                if (!slot.gameObject.activeSelf) return slot;
+            }
+            return null;
         }
 
         private string BuildObjectiveText(QuestData quest, int objectiveIndex)

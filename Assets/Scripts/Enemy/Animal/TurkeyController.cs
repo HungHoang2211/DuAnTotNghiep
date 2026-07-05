@@ -247,8 +247,11 @@ namespace SimpleSurvival.AI
                 _turkeyAnimator.TriggerDeath();
             }
 
-            foreach (var c in GetComponentsInChildren<Collider>())
-                c.enabled = false;
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = false;
+            }
 
             if (_corpseHandler != null)
                 _corpseHandler.SpawnCorpseLoot(TurkeyConfig?.CorpseLootTable);

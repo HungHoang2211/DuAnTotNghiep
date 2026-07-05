@@ -3201,7 +3201,7 @@ GameObject:
   - component: {fileID: 6007042303744301811}
   - component: {fileID: 346001004579633958}
   - component: {fileID: 183499491934538240}
-  - component: {fileID: 3716840381642877900}
+  - component: {fileID: 6089525440330368098}
   m_Layer: 8
   m_Name: ZombieFat
   m_TagString: Enemy
@@ -3294,7 +3294,7 @@ CharacterController:
   m_Height: 2.1
   m_Radius: 0.64
   m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_StepOffset: 0.1
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.95, z: 0.03}
@@ -3379,7 +3379,7 @@ MonoBehaviour:
   _skills:
   - {fileID: 346001004579633958}
   - {fileID: 183499491934538240}
-  - {fileID: 3716840381642877900}
+  - {fileID: 0}
   _fatAnimator: {fileID: 4711444196372439310}
   _corpseHandler: {fileID: 6007042303744301811}
   stuckCheckInterval: 0.8
@@ -3493,7 +3493,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   endDelayAfterImpact: 0.5
---- !u!114 &3716840381642877900
+--- !u!114 &6089525440330368098
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3502,25 +3502,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8363300174663062271}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ae1e83130c95844a6be9bc3de8765a, type: 3}
+  m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cooldown: 3
-  minRange: 2
-  maxRange: 5
-  priority: 2
-  damage: 25
-  coneRange: 4
-  coneAngle: 60
-  animator: {fileID: 4711444196372439310}
-  controller: {fileID: 1459689864417276761}
-  requiredTimeInRange: 3
-  acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
-  spawnPoint: {fileID: 0}
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  failsafeDuration: 3
 --- !u!1 &8416963274110584342
 GameObject:
   m_ObjectHideFlags: 0
