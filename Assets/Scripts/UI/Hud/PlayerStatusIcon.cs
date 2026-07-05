@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.UI.Hud
@@ -17,7 +18,8 @@ namespace SimpleSurvival.UI.Hud
         [SerializeField] private float threshold = 20f;
 
         [Header("Visual")]
-        [SerializeField] private GameObject root;
+        [SerializeField] private Image background;
+        [SerializeField] private GameObject icon;
 
         private void OnEnable()
         {
@@ -49,7 +51,10 @@ namespace SimpleSurvival.UI.Hud
 
         private void UpdateState(float current)
         {
-            if (root != null) root.SetActive(current < threshold);
+            bool visible = current < threshold;
+
+            if (background != null) background.enabled = visible;
+            if (icon != null) icon.SetActive(visible);
         }
     }
 }

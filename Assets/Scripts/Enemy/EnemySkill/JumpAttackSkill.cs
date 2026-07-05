@@ -47,6 +47,7 @@ namespace SimpleSurvival.AI
                 if (damageable == null || damageable.IsDead) continue;
 
                 damageable.TakeDamage(damage, gameObject);
+                if (controller != null) controller.NotifyDamageDealt();
             }
 
             if (_endRoutine != null) StopCoroutine(_endRoutine);

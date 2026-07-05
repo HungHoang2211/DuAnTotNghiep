@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SimpleSurvival.AI
 {
@@ -50,6 +50,15 @@ namespace SimpleSurvival.AI
         protected void MarkComplete()
         {
             _isExecuting = false;
+        }
+
+        /// <summary>
+        /// Ép skill vào trạng thái cooldown tính từ thời điểm gọi (dùng Cooldown riêng của skill).
+        /// Dùng để trì hoãn lần dùng đầu tiên của skill này khi bắt đầu 1 lượt combat mới.
+        /// </summary>
+        public void PutOnCooldown()
+        {
+            _lastExecuteTime = Time.time;
         }
     }
 }

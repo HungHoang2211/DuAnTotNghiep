@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using SimpleSurvival.Input;
 using SimpleSurvival.Stats;
 
@@ -24,12 +25,29 @@ namespace SimpleSurvival.AI
         private Vector3 _unstuckPoint;
         private float _unstuckUntil;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            _agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+        }
+
         protected override void OnEnemyInitialized()
         {
             if (_fatAnimator != null) _fatAnimator.ResetForSpawn();
             _lastTrackedPosition = transform.position;
             _nextStuckCheckTime = 0f;
             _unstuckUntil = 0f;
+        }
+
+        protected override void BeginChase()
+        {
+            base.BeginChase();
+
+            foreach (var skill in _skills)
+            {
+                if (skill is JumpAttackSkill jumpSkill)
+                    jumpSkill.PutOnCooldown();
+            }
         }
 
         protected override bool DetectByHearing()
@@ -48,13 +66,13 @@ namespace SimpleSurvival.AI
 
                 var inputReader = target.GetComponentInParent<PlayerInputReader>();
                 if (inputReader == null) inputReader = target.root.GetComponentInChildren<PlayerInputReader>();
-                if (inputReader != null && inputReader.IsSneakHeld) continue; // sneak -> luôn không nghe thấy, bất kể tốc độ
+                if (inputReader != null && inputReader.IsSneakHeld) continue;
 
                 float playerSpeed = 0f;
                 var cc = target.GetComponentInParent<CharacterController>();
                 if (cc != null) playerSpeed = cc.velocity.magnitude;
 
-                if (playerSpeed < footstepMinSpeed) continue; // đứng yên -> không nghe thấy
+                if (playerSpeed < footstepMinSpeed) continue;
 
                 _player = target;
                 return true;
@@ -79,7 +97,40 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            base.UpdateChase();
+            if (Config == null || _player == null)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, _player.position);
+
+            if (dist > Config.ChaseRadius)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float engageRange = GetMaxEngageRange();
+
+            if (dist <= engageRange)
+            {
+                FaceTarget(_player, Config.RotationSpeed);
+                TryUseSkill();
+
+                if (_state == EnemyState.Attacking)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                    _agent.nextPosition = transform.position;
+                    if (_fatAnimator != null) _fatAnimator.SetMoveSpeed(0f);
+                    return;
+                }
+            }
+
+            _agent.isStopped = false;
+            _agent.SetDestination(GetChaseDestination());
+            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
 
             if (_fatAnimator != null)
             {
@@ -87,17 +138,32 @@ namespace SimpleSurvival.AI
                 _fatAnimator.SetMoveSpeed(speed);
             }
 
+            if (!CanStillDetect())
+            {
+                _lostTargetTimer += Time.deltaTime;
+                if (_lostTargetTimer >= Config.LoseTargetTime)
+                    BeginIdle();
+            }
+            else _lostTargetTimer = 0f;
+
             CheckStuck();
+        }
+
+        private float GetMaxEngageRange()
+        {
+            float max = Config.AttackRange;
+            foreach (var skill in _skills)
+            {
+                if (skill != null && skill.MaxRange > max)
+                    max = skill.MaxRange;
+            }
+            return max;
         }
 
         protected override void UpdateAttacking()
         {
             base.UpdateAttacking();
 
-            // Khi chuyển sang Attacking, UpdateChase() không còn được gọi nên MoveSpeed
-            // có thể bị "đóng băng" ở giá trị cuối cùng khác 0, gây giật chân khi animation
-            // tấn công (Claw/Jump) đang chạy. Ép về 0 mỗi frame trong lúc Attacking để
-            // tránh Blend Tree đi/đứng tiếp tục blend chồng lên animation tấn công.
             if (_fatAnimator != null)
                 _fatAnimator.SetMoveSpeed(0f);
         }
@@ -139,8 +205,11 @@ namespace SimpleSurvival.AI
             if (_characterController != null)
                 _characterController.enabled = false;
 
-            var mainCol = GetComponent<Collider>();
-            if (mainCol != null) mainCol.enabled = false;
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = false;
+            }
 
             if (_fatAnimator != null)
             {

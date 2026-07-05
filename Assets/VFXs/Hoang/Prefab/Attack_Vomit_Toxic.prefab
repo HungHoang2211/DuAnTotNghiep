@@ -12,8 +12,10 @@ GameObject:
   - component: {fileID: 198618682377417806}
   - component: {fileID: 199703437598541787}
   - component: {fileID: 5378157648020700603}
+  - component: {fileID: 2671619420128632003}
+  - component: {fileID: 8476041817224265718}
   - component: {fileID: 6143802870125797208}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Attack_Vomit_Toxic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,7 +55,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 0
+  playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -83,7 +85,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 5
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -1684,7 +1686,7 @@ ParticleSystem:
   CollisionModule:
     enabled: 1
     serializedVersion: 4
-    type: 0
+    type: 1
     collisionMode: 0
     colliderForce: 0
     multiplyColliderForceByParticleSize: 0
@@ -1748,7 +1750,7 @@ ParticleSystem:
     radiusScale: 0.1
     collidesWith:
       serializedVersion: 2
-      m_Bits: 16384
+      m_Bits: 16512
     maxCollisionShapes: 64
     quality: 0
     voxelSize: 0.5
@@ -2390,6 +2392,48 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &2671619420128632003
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.1
+  m_Height: 0.2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8476041817224265718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ad3afdc39155274f8d06d0af88f8150, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 8
+  lifetime: 4
+  hitEffectPrefab: {fileID: 4809171458859421548, guid: 3d5d7a2ec935c7e489e03fc825ffeccb, type: 3}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  groundStayDuration: 2
 --- !u!114 &6143802870125797208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2414,7 +2458,7 @@ GameObject:
   - component: {fileID: 4884547391421755}
   - component: {fileID: 198099118695303065}
   - component: {fileID: 199243736805655561}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Splatter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2453,7 +2497,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 1
   prewarm: 0
-  playOnAwake: 0
+  playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -4048,7 +4092,7 @@ ParticleSystem:
   CollisionModule:
     enabled: 1
     serializedVersion: 4
-    type: 0
+    type: 1
     collisionMode: 0
     colliderForce: 0
     multiplyColliderForceByParticleSize: 0
@@ -4112,7 +4156,7 @@ ParticleSystem:
     radiusScale: 1
     collidesWith:
       serializedVersion: 2
-      m_Bits: 4294967295
+      m_Bits: 128
     maxCollisionShapes: 256
     quality: 0
     voxelSize: 0.5
