@@ -6,6 +6,11 @@ Shader "SimpleSurvival/InfectedThing"
         [MainTexture] _MainTex ("Main Texture", 2D) = "white" {}
         _AlphaR  ("Alpha Texture (R)", 2D) = "white" {}
         _Cutoff  ("Alpha Cutoff", Range(0,1)) = 0.5
+
+        _Settings    ("Breathing (Speed, Amplitude, Frequency)", Vector) = (1.0, 0.02, 2.0, 0)
+        _BulgeHeight ("Bulge Height (m)", Float) = 0.7344
+
+        [Toggle(USE_UV_SHAKE)] _UseUVShake ("Use UV to shake?", Float) = 0
     }
 
     SubShader
@@ -17,6 +22,40 @@ Shader "SimpleSurvival/InfectedThing"
             "RenderPipeline" = "UniversalPipeline"
         }
         LOD 200
+
+        HLSLINCLUDE
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+        CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
+            float4 _AlphaR_ST;
+            half4  _Color;
+            half4  _Settings;
+            half   _Cutoff;
+            half   _BulgeHeight;
+        CBUFFER_END
+
+        TEXTURE2D(_MainTex);  SAMPLER(sampler_MainTex);
+        TEXTURE2D(_AlphaR);   SAMPLER(sampler_AlphaR);
+
+        float3 ApplyBreathing(float3 positionOS, float3 normalOS, float2 uv)
+        {
+            half heightMask = saturate(positionOS.y / max(_BulgeHeight, 0.001h));
+
+            half speed     = _Settings.x;
+            half amplitude = _Settings.y;
+            half frequency = _Settings.z;
+
+            #ifdef USE_UV_SHAKE
+                half phase = frequency * (uv.x + uv.y) + speed * _Time.y;
+            #else
+                half phase = frequency * (positionOS.x + positionOS.z) + speed * _Time.y;
+            #endif
+
+            half wave = sin(phase);
+            return positionOS + normalOS * (wave * amplitude * heightMask);
+        }
+        ENDHLSL
 
         Pass
         {
@@ -34,18 +73,7 @@ Shader "SimpleSurvival/InfectedThing"
             #pragma multi_compile_fog
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
-
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-
-            CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
-                float4 _AlphaR_ST;
-                half4  _Color;
-                half   _Cutoff;
-            CBUFFER_END
-
-            TEXTURE2D(_MainTex);  SAMPLER(sampler_MainTex);
-            TEXTURE2D(_AlphaR);   SAMPLER(sampler_AlphaR);
+            #pragma shader_feature_local USE_UV_SHAKE
 
             struct Attributes
             {
@@ -67,7 +95,10 @@ Shader "SimpleSurvival/InfectedThing"
             Varyings vert(Attributes IN)
             {
                 Varyings OUT;
-                VertexPositionInputs posIn = GetVertexPositionInputs(IN.positionOS.xyz);
+
+                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv);
+
+                VertexPositionInputs posIn = GetVertexPositionInputs(posOS);
                 VertexNormalInputs   nrmIn = GetVertexNormalInputs(IN.normalOS);
 
                 OUT.positionCS  = posIn.positionCS;
@@ -113,17 +144,9 @@ Shader "SimpleSurvival/InfectedThing"
             #pragma vertex shadowVert
             #pragma fragment shadowFrag
             #pragma target 3.0
+            #pragma shader_feature_local USE_UV_SHAKE
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-
-            CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
-                float4 _AlphaR_ST;
-                half4  _Color;
-                half   _Cutoff;
-            CBUFFER_END
-
-            TEXTURE2D(_AlphaR);  SAMPLER(sampler_AlphaR);
 
             float3 _LightDirection;
 
@@ -143,7 +166,9 @@ Shader "SimpleSurvival/InfectedThing"
             VaryingsS shadowVert(AttributesS IN)
             {
                 VaryingsS OUT;
-                float3 positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+
+                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv);
+                float3 positionWS = TransformObjectToWorld(posOS);
                 float3 normalWS   = TransformObjectToWorldNormal(IN.normalOS);
 
                 float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, _LightDirection));
