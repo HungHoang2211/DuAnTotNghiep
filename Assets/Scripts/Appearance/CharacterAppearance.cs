@@ -76,6 +76,8 @@ namespace SimpleSurvival.Characters.Appearance
                 hideBeard |= resource.DisableBeard;
             }
 
+            Debug.Log("CharacterAppearance Rebuild: atlasViews.Count = " + atlasViews.Count);
+
             Color haircutTint = ResolveHaircutColor();
 
             ApplyBodyMeshAndAtlas(atlasViews, haircutTint);
@@ -115,6 +117,7 @@ namespace SimpleSurvival.Characters.Appearance
             _generatedAtlas = newAtlas;
 
             bodyRenderer.sharedMesh = _generatedMesh;
+            bodyRenderer.localBounds = _generatedMesh.bounds;
             bodyRenderer.material.mainTexture = _generatedAtlas;
         }
 

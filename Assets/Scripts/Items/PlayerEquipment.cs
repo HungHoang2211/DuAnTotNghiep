@@ -4,13 +4,8 @@ namespace SimpleSurvival.Items
 {
     public sealed class PlayerEquipment : MonoBehaviour
     {
-        private EquipmentSystem _system;
+        private readonly EquipmentSystem _system = new EquipmentSystem();
 
         public EquipmentSystem System => _system;
-
-        private void Awake()
-        {
-            _system = new EquipmentSystem();
-        }
     }
 }
