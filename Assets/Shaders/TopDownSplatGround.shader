@@ -43,6 +43,10 @@
             #pragma multi_compile_fog
             #pragma target 3.0
 
+            // --- KÍCH HOẠT ĐA BIÊN DỊCH CHO BÓNG ĐỔ TRONG URP ---
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _SHADOWS_SOFT
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
@@ -76,6 +80,8 @@
                 float3 positionWS  : TEXCOORD0;
                 float3 normalWS    : TEXCOORD1;
                 float  fogCoord    : TEXCOORD2;
+                // Lưu tọa độ bóng đổ truyền sang Fragment Shader
+                float4 shadowCoord : TEXCOORD3; 
             };
 
             Varyings vert(Attributes IN)
@@ -86,6 +92,10 @@
                 OUT.positionWS  = p.positionWS;
                 OUT.normalWS    = TransformObjectToWorldNormal(IN.normalOS);
                 OUT.fogCoord    = ComputeFogFactor(p.positionCS.z);
+                
+                // Tính toán tọa độ không gian shadow map dựa trên vị trí Vertex
+                OUT.shadowCoord = GetShadowCoord(p); 
+                
                 return OUT;
             }
 
@@ -113,10 +123,19 @@
                 half3 albedo = (c0 * ctrl1.r + c1 * ctrl1.g + c2 * ctrl1.b + c3 * ctrl1.a +
                                 c4 * ctrl2.r + c5 * ctrl2.g + c6 * ctrl2.b + c7 * ctrl2.a) / total;
 
-                Light ml = GetMainLight();
+                // --- TÍNH TOÁN ÁNH SÁNG VÀ BÓNG ĐỔ ---
+                // Truyền shadowCoord vào để URP tự động lấy hệ số che khuất (attenuation)
+                Light ml = GetMainLight(IN.shadowCoord); 
+                
                 half3 n = normalize(IN.normalWS);
                 half ndotl = saturate(dot(n, ml.direction));
-                half3 lighting = ml.color * ndotl + SampleSH(n);
+                
+                // ml.shadowAttenuation sẽ bằng 0 nếu ở trong bóng và bằng 1 nếu ở vùng sáng
+                half3 mainLightColor = ml.color * (ndotl * ml.shadowAttenuation);
+                
+                // Kết hợp ánh sáng chính cùng với Giả lập Global Illumination (LightProbes/Ambient)
+                half3 lighting = mainLightColor + SampleSH(n);
+                // ------------------------------------
 
                 half3 col = albedo * lighting;
                 col = MixFog(col, IN.fogCoord);
