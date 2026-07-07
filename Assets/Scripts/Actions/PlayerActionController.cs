@@ -56,6 +56,7 @@ namespace SimpleSurvival.Player
         private IdleAction _idleAction;
         private MoveAction _moveAction;
         private SimpleSurvival.Input.PlayerInputReader _inputReader;
+        private bool _isDead;
 
         private void Awake()
         {
@@ -77,7 +78,10 @@ namespace SimpleSurvival.Player
             CurrentAction.Init();
 
             if (playerStats != null)
+            {
                 playerStats.OnDamagedBy += HandlePlayerDamaged;
+                playerStats.OnDeath += HandleDeath;
+            }
 
             _inputReader = GetComponent<SimpleSurvival.Input.PlayerInputReader>();
             if (_inputReader != null)
@@ -87,7 +91,10 @@ namespace SimpleSurvival.Player
         private void OnDestroy()
         {
             if (playerStats != null)
+            {
                 playerStats.OnDamagedBy -= HandlePlayerDamaged;
+                playerStats.OnDeath -= HandleDeath;
+            }
 
             if (_inputReader != null)
                 _inputReader.OnSneakChanged -= HandleSneakChanged;
@@ -95,6 +102,8 @@ namespace SimpleSurvival.Player
 
         private void Update()
         {
+            if (_isDead) return;
+
             CurrentAction.Update(Time.deltaTime);
 
             if (CurrentAction.IsCompleted)
@@ -170,6 +179,7 @@ namespace SimpleSurvival.Player
 
         public bool TryRequestAction(IAction newAction)
         {
+            if (_isDead) return false;
             if (newAction == null) return false;
             if (!CurrentAction.CanBeInterruptedBy(newAction)) return false;
 
@@ -179,6 +189,8 @@ namespace SimpleSurvival.Player
 
         public void RequestMove(Vector3 worldDirection, float magnitude, bool sneakHeld)
         {
+            if (_isDead) return;
+
             _moveAction.UpdateInput(worldDirection, magnitude, sneakHeld);
 
             if (CurrentAction == _moveAction) return;
@@ -353,6 +365,11 @@ namespace SimpleSurvival.Player
 
             CurrentAction.Cancel();
             SwitchToIdle();
+        }
+
+        private void HandleDeath()
+        {
+            _isDead = true;
         }
 
         private bool CanPickupAtLeastOneItem(PickupTarget target)
