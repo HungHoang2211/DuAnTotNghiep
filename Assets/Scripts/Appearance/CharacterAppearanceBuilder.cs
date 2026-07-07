@@ -17,22 +17,21 @@ namespace SimpleSurvival.Characters.Appearance
 
     public static class CharacterAppearanceBuilder
     {
-        public static Mesh CombineMesh(IReadOnlyList<BodypartView> views)
+        public static Mesh CombineMesh(IReadOnlyList<Mesh> meshes)
         {
-            CombineInstance[] combineInstances = new CombineInstance[views.Count];
+            CombineInstance[] combineInstances = new CombineInstance[meshes.Count];
             List<BoneWeight> boneWeights = new List<BoneWeight>();
 
-            for (int i = 0; i < views.Count; i++)
+            for (int i = 0; i < meshes.Count; i++)
             {
-                Mesh partMesh = views[i].Resource.Mesh;
-                combineInstances[i] = new CombineInstance { mesh = partMesh };
-                boneWeights.AddRange(partMesh.boneWeights);
+                combineInstances[i] = new CombineInstance { mesh = meshes[i] };
+                boneWeights.AddRange(meshes[i].boneWeights);
             }
 
             Mesh combinedMesh = new Mesh { name = "CharacterAppearanceMesh" };
             combinedMesh.CombineMeshes(combineInstances, mergeSubMeshes: true, useMatrices: false);
             combinedMesh.boneWeights = boneWeights.ToArray();
-            combinedMesh.bindposes = views[0].Resource.Mesh.bindposes;
+            combinedMesh.bindposes = meshes[0].bindposes;
             combinedMesh.RecalculateBounds();
 
             return combinedMesh;
@@ -135,7 +134,11 @@ namespace SimpleSurvival.Characters.Appearance
                 return baseColor;
 
             Color mask = regionMask.GetPixelBilinear(u, v);
-            Color tintedColor = baseColor * haircutTint;
+            Color tintedColor = new Color(
+                baseColor.r * haircutTint.r,
+                baseColor.g * haircutTint.g,
+                baseColor.b * haircutTint.b,
+                baseColor.a);
             Color result = Color.Lerp(baseColor, tintedColor, mask.g);
 
             if (detailTexture != null && mask.b > 0f)
