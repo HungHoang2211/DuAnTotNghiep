@@ -1,0 +1,99 @@
+using UnityEngine;
+using SimpleSurvival.Items;
+
+namespace SimpleSurvival.Player
+{
+    public sealed class WeaponVisualController : MonoBehaviour
+    {
+        [SerializeField] private PlayerEquipment playerEquipment;
+        [SerializeField] private PlayerToolSwapper toolSwapper;
+        [SerializeField] private Transform rightHandAnchor;
+        [SerializeField] private AudioSource weaponAudioSource;
+
+        private GameObject _currentVisual;
+        private WeaponVisualAnchors _currentAnchors;
+        private GameObject _currentSourcePrefab;
+
+        private void Awake()
+        {
+            if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
+            if (toolSwapper == null) toolSwapper = GetComponent<PlayerToolSwapper>();
+        }
+
+        private void Start()
+        {
+            if (playerEquipment != null && playerEquipment.System != null)
+                playerEquipment.System.OnSlotChanged += HandleSlotChanged;
+
+            if (toolSwapper != null)
+                toolSwapper.OnToolVisualStateChanged += Rebuild;
+
+            Rebuild();
+        }
+
+        private void OnDestroy()
+        {
+            if (playerEquipment != null && playerEquipment.System != null)
+                playerEquipment.System.OnSlotChanged -= HandleSlotChanged;
+
+            if (toolSwapper != null)
+                toolSwapper.OnToolVisualStateChanged -= Rebuild;
+        }
+
+        private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
+        {
+            if (slot != EquipSlot.Weapon) return;
+            Rebuild();
+        }
+
+        private void Rebuild()
+        {
+            GameObject targetPrefab = ResolveTargetPrefab();
+            if (targetPrefab == _currentSourcePrefab) return;
+
+            DespawnCurrent();
+            if (targetPrefab == null) return;
+
+            _currentVisual = Instantiate(targetPrefab, rightHandAnchor, false);
+            _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
+            _currentSourcePrefab = targetPrefab;
+        }
+
+        private GameObject ResolveTargetPrefab()
+        {
+            if (toolSwapper != null && toolSwapper.IsSwapped)
+                return toolSwapper.CurrentTool != null ? toolSwapper.CurrentTool.ToolVisualPrefab : null;
+
+            ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
+            WeaponAbility weapon = stack?.ItemData.GetAbility<WeaponAbility>();
+            return weapon != null ? weapon.WeaponVisualPrefab : null;
+        }
+
+        private void DespawnCurrent()
+        {
+            if (_currentVisual != null) Destroy(_currentVisual);
+            _currentVisual = null;
+            _currentAnchors = null;
+            _currentSourcePrefab = null;
+        }
+
+        public bool IsCurrentWeaponRanged()
+        {
+            return _currentAnchors != null && _currentAnchors.IsRanged;
+        }
+
+        public void PlayMuzzleFlash()
+        {
+            if (_currentAnchors == null || !_currentAnchors.IsRanged) return;
+
+            if (_currentAnchors.MuzzleFlashPrefab != null)
+            {
+                GameObject flash = Instantiate(_currentAnchors.MuzzleFlashPrefab, _currentAnchors.MuzzlePoint.position, _currentAnchors.MuzzlePoint.rotation);
+                Destroy(flash, 2f);
+            }
+
+            if (weaponAudioSource != null && _currentAnchors.FireSfx != null)
+                weaponAudioSource.PlayOneShot(_currentAnchors.FireSfx);
+        }
+    }
+}

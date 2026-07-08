@@ -11,6 +11,9 @@ namespace SimpleSurvival.Items
         [SerializeField] private float damage = 25f;
         [SerializeField] private AnimatorOverrideController overrideController;
 
+        [Header("Visuals")]
+        [SerializeField] private GameObject toolVisualPrefab;
+
         [Header("Safety")]
         [Tooltip("Max time (seconds) a single gather swing can run before force-completing. Catches missing animation events. Default 3s.")]
         [SerializeField] private float safetyTimeout = 3f;
@@ -19,6 +22,7 @@ namespace SimpleSurvival.Items
         public ToolType ToolType => toolType;
         public float Damage => damage;
         public AnimatorOverrideController OverrideController => overrideController;
+        public GameObject ToolVisualPrefab => toolVisualPrefab;
         public float SafetyTimeout => safetyTimeout;
     }
 }
