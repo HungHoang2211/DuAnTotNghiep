@@ -4,6 +4,7 @@ using UnityEngine;
 using SimpleSurvival.Items;
 using SimpleSurvival.Player;
 using SimpleSurvival.Stats;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Quests
 {
@@ -84,7 +85,11 @@ namespace SimpleSurvival.Quests
             foreach (var reward in quest.Rewards)
             {
                 if (reward.itemData == null || reward.quantity <= 0) continue;
+
                 inventoryQueries.AddItem(reward.itemData, reward.quantity);
+
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify($"+{reward.quantity} {reward.itemData.ItemName}", SpeechHudType.Good);
             }
         }
 

@@ -46,7 +46,7 @@ namespace SimpleSurvival.AI
             _animator.SetTrigger(AttackClawHash);
         }
 
-        public void TriggerHowl()
+        public override void TriggerHowl()
         {
             _animator.SetTrigger(HowlHash);
         }
@@ -73,5 +73,11 @@ namespace SimpleSurvival.AI
         {
             _animator.ResetTrigger(AttackClawHash);
         }
+
+        // Animation Event đặt trên clip Howl, tại frame minion xuất hiện
+        public void AnimEvent_HowlSpawn() => RaiseHowlSpawn();
+
+        // Animation Event đặt ở frame cuối clip Howl
+        public void AnimEvent_HowlFinished() => RaiseHowlFinished();
     }
 }

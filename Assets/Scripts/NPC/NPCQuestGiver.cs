@@ -1,12 +1,13 @@
 using UnityEngine;
 using SimpleSurvival.UI.Hud;
+using SimpleSurvival.Quests;
 
 namespace SimpleSurvival.AI
 {
     public sealed class NPCQuestGiver : BaseNPCController
     {
         [Header("Quest")]
-        [SerializeField] private SimpleSurvival.Quests.QuestData questData;
+        [SerializeField] private QuestData questData;
 
         [Header("Refs")]
         [SerializeField] private NPCQuestIndicator indicator;
@@ -15,7 +16,7 @@ namespace SimpleSurvival.AI
         {
             base.Start();
 
-            var manager = SimpleSurvival.Quests.QuestManager.Instance;
+            var manager = QuestManager.Instance;
             if (manager != null)
             {
                 manager.OnObjectiveProgress += HandleProgressChanged;
@@ -27,7 +28,7 @@ namespace SimpleSurvival.AI
 
         private void OnDestroy()
         {
-            var manager = SimpleSurvival.Quests.QuestManager.Instance;
+            var manager = QuestManager.Instance;
             if (manager != null)
             {
                 manager.OnObjectiveProgress -= HandleProgressChanged;
@@ -39,7 +40,7 @@ namespace SimpleSurvival.AI
         {
             if (questData == null) return;
 
-            var manager = SimpleSurvival.Quests.QuestManager.Instance;
+            var manager = QuestManager.Instance;
             if (manager == null) return;
 
             if (manager.IsQuestCompleted(questData)) return;
@@ -49,8 +50,8 @@ namespace SimpleSurvival.AI
                 if (manager.IsReadyToTurnIn(questData))
                 {
                     ShowDialogue(questData.TurnInDialogue);
-                    var popup = SimpleSurvival.Quests.QuestRewardPopupUI.Instance;
-                    if (popup != null) popup.Show(questData);
+                    manager.CompleteQuest(questData);
+                    RefreshIndicator();
                 }
                 return;
             }
@@ -72,7 +73,7 @@ namespace SimpleSurvival.AI
         {
             if (indicator == null || questData == null) return;
 
-            var manager = SimpleSurvival.Quests.QuestManager.Instance;
+            var manager = QuestManager.Instance;
             if (manager == null)
             {
                 indicator.Hide();
@@ -83,19 +84,19 @@ namespace SimpleSurvival.AI
                 indicator.Hide();
             else if (manager.IsQuestActive(questData))
                 indicator.SetState(manager.IsReadyToTurnIn(questData)
-                    ? SimpleSurvival.Quests.NPCQuestState.ReadyToTurnIn
-                    : SimpleSurvival.Quests.NPCQuestState.InProgress);
+                    ? NPCQuestState.ReadyToTurnIn
+                    : NPCQuestState.InProgress);
             else
-                indicator.SetState(SimpleSurvival.Quests.NPCQuestState.Available);
+                indicator.SetState(NPCQuestState.Available);
         }
 
-        private void HandleProgressChanged(SimpleSurvival.Quests.QuestData quest, int objectiveIndex)
+        private void HandleProgressChanged(QuestData quest, int objectiveIndex)
         {
             if (quest != questData) return;
             RefreshIndicator();
         }
 
-        private void HandleQuestCompleted(SimpleSurvival.Quests.QuestData quest)
+        private void HandleQuestCompleted(QuestData quest)
         {
             if (quest != questData) return;
             RefreshIndicator();

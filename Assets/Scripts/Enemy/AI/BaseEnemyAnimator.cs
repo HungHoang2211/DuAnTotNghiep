@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SimpleSurvival.AI
 {
@@ -9,6 +10,9 @@ namespace SimpleSurvival.AI
         [Header("Ragdoll")]
         [SerializeField] protected Rigidbody[] _ragdollBodies;
         [SerializeField] protected Collider[] _ragdollColliders;
+
+        public event Action OnHowlSpawn;
+        public event Action OnHowlFinished;
 
         protected virtual void Awake()
         {
@@ -23,23 +27,24 @@ namespace SimpleSurvival.AI
         public abstract void ResetForSpawn();
 
         public virtual void CancelAttack() { }
+        public virtual void TriggerHowl() { }
+        public virtual void SetSummoning(bool value) { }
+
+        protected void RaiseHowlSpawn() => OnHowlSpawn?.Invoke();
+        protected void RaiseHowlFinished() => OnHowlFinished?.Invoke();
 
         public void SetRagdollActive(bool active)
         {
             if (_ragdollBodies != null)
             {
                 foreach (var rb in _ragdollBodies)
-                {
                     if (rb != null) rb.isKinematic = !active;
-                }
             }
 
             if (_ragdollColliders != null)
             {
                 foreach (var col in _ragdollColliders)
-                {
                     if (col != null) col.enabled = active;
-                }
             }
         }
 
@@ -47,9 +52,7 @@ namespace SimpleSurvival.AI
         {
             if (layer < 0 || _ragdollColliders == null) return;
             foreach (var col in _ragdollColliders)
-            {
                 if (col != null) col.gameObject.layer = layer;
-            }
         }
     }
 }
