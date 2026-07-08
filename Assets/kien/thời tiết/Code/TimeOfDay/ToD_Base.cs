@@ -118,16 +118,19 @@ public class ToD_Base : MonoBehaviour
 
     void UpdateSunAndMoon()
     {
-        // Điều hướng góc quay của ánh sáng mặt trời theo dòng chảy thời gian thực
+        // Tạo góc xoay trục X dựa trên thời gian trong ngày
+        float sunX = (_fCurrentTimeOfDay * 360f) - 90f;
+        float moonX = (_fCurrentTimeOfDay * 360f) - 270f;
+
+        // Cách quay mới: Tạo góc quay X trước, sau đó ép cứng góc quay Y = 170 toàn cục theo không gian thế giới (World Space)
         if (lSun != null)
         {
-            lSun.transform.localRotation = Quaternion.Euler((_fCurrentTimeOfDay * 360) - 90, 170, 0);
+            lSun.transform.rotation = Quaternion.AngleAxis(170f, Vector3.up) * Quaternion.AngleAxis(sunX, Vector3.right);
         }
 
-        // Điều hướng góc quay của mặt trăng nếu tính năng được kích hoạt
         if (_bUseMoon && lMoon != null)
         {
-            lMoon.transform.localRotation = Quaternion.Euler((_fCurrentTimeOfDay * 360) - 270, 170, 0);
+            lMoon.transform.rotation = Quaternion.AngleAxis(170f, Vector3.up) * Quaternion.AngleAxis(moonX, Vector3.right);
         }
     }
 
