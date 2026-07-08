@@ -8,6 +8,7 @@ namespace SimpleSurvival.Player
     public class PlayerAnimationRelay : MonoBehaviour
     {
         [SerializeField] private PlayerSoundEmitter soundEmitter;
+        [SerializeField] private WeaponVisualController weaponVisual;
 
         private PlayerActionController _actionController;
 
@@ -15,6 +16,7 @@ namespace SimpleSurvival.Player
         {
             _actionController = GetComponent<PlayerActionController>();
             if (soundEmitter == null) soundEmitter = GetComponentInParent<PlayerSoundEmitter>();
+            if (weaponVisual == null) weaponVisual = GetComponent<WeaponVisualController>();
         }
 
         public void OnAttackHit()
@@ -22,8 +24,12 @@ namespace SimpleSurvival.Player
             if (_actionController.CurrentAction is AttackAction attack)
                 attack.HandleHit();
 
-            if (soundEmitter != null)
+            bool isRangedWeapon = weaponVisual != null && weaponVisual.IsCurrentWeaponRanged();
+            if (!isRangedWeapon && soundEmitter != null)
                 soundEmitter.EmitAttackHit();
+
+            if (weaponVisual != null)
+                weaponVisual.PlayMuzzleFlash();
         }
 
         public void OnAttackEnd()

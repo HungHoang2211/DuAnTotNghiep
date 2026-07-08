@@ -46,9 +46,9 @@ namespace SimpleSurvival.Items
         [Tooltip("Max time (seconds) a single attack swing can run before force-completing. Catches missing animation events. Default 3s.")]
         [SerializeField] private float safetyTimeout = 3f;
 
-        [Header("Visuals - Body")]
-        [SerializeField] private Mesh weaponMesh;
-        [SerializeField] private Material weaponMaterial;
+        [Header("Visuals - Held Model")]
+        [Tooltip("Prefab visual gắn lên tay Player khi equip (chứa mesh + WeaponVisualAnchors). Null = tay không.")]
+        [SerializeField] private GameObject weaponVisualPrefab;
 
         [Header("Visuals - Mod Slots")]
         [Tooltip("Define only the slots this weapon physically has. Leave list empty for melee weapons.")]
@@ -66,8 +66,7 @@ namespace SimpleSurvival.Items
         public int MaxComboIndex => maxComboIndex;
         public WeaponCategory Category => category;
         public float SafetyTimeout => safetyTimeout;
-        public Mesh WeaponMesh => weaponMesh;
-        public Material WeaponMaterial => weaponMaterial;
+        public GameObject WeaponVisualPrefab => weaponVisualPrefab;
 
         public WeaponModSlotVisual GetModSlotVisual(WeaponModSlot slot)
         {

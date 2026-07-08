@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using SimpleSurvival.Items;
 
@@ -11,6 +12,8 @@ namespace SimpleSurvival.Player
 
         public bool IsSwapped { get; private set; }
         public ToolAbility CurrentTool { get; private set; }
+
+        public event Action OnToolVisualStateChanged;
 
         private void Awake()
         {
@@ -27,6 +30,7 @@ namespace SimpleSurvival.Player
             animator.runtimeAnimatorController = tool.OverrideController;
             CurrentTool = tool;
             IsSwapped = true;
+            OnToolVisualStateChanged?.Invoke();
             return true;
         }
 
@@ -39,6 +43,7 @@ namespace SimpleSurvival.Player
             _savedController = null;
             CurrentTool = null;
             IsSwapped = false;
+            OnToolVisualStateChanged?.Invoke();
         }
     }
 }
