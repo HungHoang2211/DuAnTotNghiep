@@ -110777,6 +110777,7 @@ GameObject:
   - component: {fileID: 8905305806091854576}
   - component: {fileID: 8905305806091854577}
   - component: {fileID: 8905305806091854578}
+  - component: {fileID: 8905305806091854579}
   m_Layer: 9
   m_Name: MainPlayer
   m_TagString: Player
@@ -110935,6 +110936,46 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   inputReader: {fileID: 8905305806091854569}
+--- !u!114 &8905305806091854579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905305806091854566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 156a091aa6af62f45a6dfe3250c0b66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStats: {fileID: 812480218}
+  animator: {fileID: 3095127015566962817}
+  characterController: {fileID: 8905305806091854568}
+  mainCollider: {fileID: 0}
+  ragdollBodies:
+  - {fileID: 4372823715463238722}
+  - {fileID: 5057178064319260812}
+  - {fileID: 6016780047807796021}
+  - {fileID: 6773943541800893244}
+  - {fileID: 5369193888991780753}
+  - {fileID: 7094724331306105081}
+  - {fileID: 5668227732523960747}
+  - {fileID: 6779064910393294036}
+  - {fileID: 6663264377140625492}
+  - {fileID: 7886509942794455063}
+  - {fileID: 7511933554334266730}
+  ragdollColliders:
+  - {fileID: 4372823715463238723}
+  - {fileID: 5057178064319260814}
+  - {fileID: 6016780047807796022}
+  - {fileID: 6773943541800893246}
+  - {fileID: 5369193888991780755}
+  - {fileID: 7094724331306105082}
+  - {fileID: 5668227732523960748}
+  - {fileID: 6779064910393294038}
+  - {fileID: 6663264377140625493}
+  - {fileID: 7886509942794455065}
+  - {fileID: 7511933554334266731}
 --- !u!137 &8941299661710436805
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

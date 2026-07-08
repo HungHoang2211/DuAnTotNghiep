@@ -8,17 +8,21 @@ namespace SimpleSurvival.Characters.Appearance
     {
         [SerializeField] private CharacterAppearanceConfig config;
         [SerializeField] private PlayerEquipment playerEquipment;
-        [SerializeField] private SkinnedMeshRenderer bodyRenderer;
+        [SerializeField] private Material baseMaterial;
+        [SerializeField] private SkinnedMeshRenderer headRenderer;
+        [SerializeField] private SkinnedMeshRenderer torsoRenderer;
+        [SerializeField] private SkinnedMeshRenderer legsRenderer;
+        [SerializeField] private SkinnedMeshRenderer feetRenderer;
         [SerializeField] private SkinnedMeshRenderer backpackRenderer;
+        [SerializeField] private SkinnedMeshRenderer beardRenderer;
         [SerializeField] private int haircutColorIndex;
 
-        private Mesh _generatedMesh;
+        private Material _instanceMaterial;
         private Texture2D _generatedAtlas;
-        private readonly HashSet<Texture2D> _runtimeTextures = new HashSet<Texture2D>();
-        private Texture2D _activeBackpackTexture;
 
         private void OnEnable()
         {
+            EnsureMaterialInstance();
             playerEquipment.System.OnSlotChanged += HandleSlotChanged;
             Rebuild();
         }
@@ -30,9 +34,7 @@ namespace SimpleSurvival.Characters.Appearance
 
         private void OnDestroy()
         {
-            DestroyGeneratedMesh();
             DestroyGeneratedAtlas();
-            DestroyIfOwned(_activeBackpackTexture);
         }
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
@@ -43,44 +45,95 @@ namespace SimpleSurvival.Characters.Appearance
             Rebuild();
         }
 
+        private void EnsureMaterialInstance()
+        {
+            if (_instanceMaterial != null)
+                return;
+
+            _instanceMaterial = new Material(baseMaterial);
+            AssignSharedMaterial(headRenderer);
+            AssignSharedMaterial(torsoRenderer);
+            AssignSharedMaterial(legsRenderer);
+            AssignSharedMaterial(feetRenderer);
+            AssignSharedMaterial(backpackRenderer);
+            AssignSharedMaterial(beardRenderer);
+        }
+
+        private void AssignSharedMaterial(SkinnedMeshRenderer renderer)
+        {
+            if (renderer != null)
+                renderer.sharedMaterial = _instanceMaterial;
+        }
+
         private void Rebuild()
         {
+            BodypartSlotEntry headSlot = FindSlotEntry(BodypartSlotKind.Head);
             BodypartSlotEntry torsoSlot = FindSlotEntry(BodypartSlotKind.Torso);
             BodypartSlotEntry legsSlot = FindSlotEntry(BodypartSlotKind.Legs);
             BodypartSlotEntry feetSlot = FindSlotEntry(BodypartSlotKind.Feet);
-            BodypartSlotEntry headSlot = FindSlotEntry(BodypartSlotKind.Head);
+            BodypartSlotEntry backpackSlot = FindSlotEntry(BodypartSlotKind.Backpack);
             BodypartSlotEntry haircutSlot = FindSlotEntry(BodypartSlotKind.Haircut);
             BodypartSlotEntry beardSlot = FindSlotEntry(BodypartSlotKind.Beard);
-            BodypartSlotEntry backpackSlot = FindSlotEntry(BodypartSlotKind.Backpack);
 
-            List<BodypartView> atlasViews = new List<BodypartView>();
-
-            AddIfPresent(atlasViews, torsoSlot, ResolveEquipmentResource(torsoSlot));
-            AddIfPresent(atlasViews, legsSlot, ResolveEquipmentResource(legsSlot));
-            AddIfPresent(atlasViews, feetSlot, ResolveEquipmentResource(feetSlot));
+            BodypartResource torsoResource = torsoSlot != null ? ResolveEquipmentResource(torsoSlot) : null;
+            BodypartResource legsResource = legsSlot != null ? ResolveEquipmentResource(legsSlot) : null;
+            BodypartResource feetResource = feetSlot != null ? ResolveEquipmentResource(feetSlot) : null;
 
             BodypartResource helmetResource = headSlot != null ? ResolveEquipmentResource(headSlot) : null;
             BodypartResource haircutResource = haircutSlot?.DefaultResource;
-            BodypartResource headFillerResource = helmetResource != null ? helmetResource : haircutResource;
+            BodypartResource headResource = helmetResource != null ? helmetResource : haircutResource;
 
-            AddIfPresent(atlasViews, headSlot, headFillerResource);
+            BodypartResource backpackResource = backpackSlot != null ? ResolveBackpackResource(backpackSlot) : null;
 
-            bool hideBeard = headFillerResource != null && headFillerResource.DisableBeard;
+            bool hideBeard = headResource != null && headResource.DisableBeard;
             BodypartResource beardResource = beardSlot?.DefaultResource;
-            Mesh beardMesh = beardResource != null && !hideBeard ? beardResource.Mesh : null;
+            bool beardVisible = beardResource != null && !hideBeard;
 
-            Color haircutTint = ResolveHaircutColor();
+            List<BodypartView> atlasViews = new List<BodypartView>();
+            AddView(atlasViews, headSlot, headResource);
+            AddView(atlasViews, torsoSlot, torsoResource);
+            AddView(atlasViews, legsSlot, legsResource);
+            AddView(atlasViews, feetSlot, feetResource);
+            AddView(atlasViews, backpackSlot, backpackResource);
 
-            ApplyBodyMeshAndAtlas(atlasViews, beardMesh, haircutTint);
-            ApplyBackpack(backpackSlot, haircutTint);
+            if (atlasViews.Count > 0)
+            {
+                Color haircutTint = ResolveHaircutColor();
+                Texture2D newAtlas = CharacterAppearanceBuilder.BakeAtlas(atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint);
+
+                DestroyGeneratedAtlas();
+                _generatedAtlas = newAtlas;
+                _instanceMaterial.mainTexture = _generatedAtlas;
+            }
+
+            ApplyRenderer(headRenderer, headResource);
+            ApplyRenderer(torsoRenderer, torsoResource);
+            ApplyRenderer(legsRenderer, legsResource);
+            ApplyRenderer(feetRenderer, feetResource);
+            ApplyRenderer(backpackRenderer, backpackResource);
+            ApplyRenderer(beardRenderer, beardVisible ? beardResource : null);
         }
 
-        private static void AddIfPresent(List<BodypartView> list, BodypartSlotEntry slot, BodypartResource resource)
+        private static void AddView(List<BodypartView> views, BodypartSlotEntry slot, BodypartResource resource)
         {
             if (slot == null || resource == null)
                 return;
 
-            list.Add(new BodypartView(resource, slot));
+            views.Add(new BodypartView(resource, slot));
+        }
+
+        private static void ApplyRenderer(SkinnedMeshRenderer renderer, BodypartResource resource)
+        {
+            if (renderer == null)
+                return;
+
+            bool visible = resource != null;
+            renderer.gameObject.SetActive(visible);
+            if (!visible)
+                return;
+
+            renderer.sharedMesh = resource.Mesh;
+            renderer.localBounds = resource.Mesh.bounds;
         }
 
         private BodypartResource ResolveEquipmentResource(BodypartSlotEntry slot)
@@ -97,64 +150,6 @@ namespace SimpleSurvival.Characters.Appearance
             ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Backpack);
             ContainerAbility container = stack?.ItemData.GetAbility<ContainerAbility>();
             return container != null ? container.BackpackResource : slot.DefaultResource;
-        }
-
-        private void ApplyBodyMeshAndAtlas(List<BodypartView> atlasViews, Mesh beardMesh, Color haircutTint)
-        {
-            if (atlasViews.Count == 0)
-                return;
-
-            List<Mesh> combineMeshes = new List<Mesh>();
-            foreach (BodypartView view in atlasViews)
-                combineMeshes.Add(view.Resource.Mesh);
-
-            if (beardMesh != null)
-                combineMeshes.Add(beardMesh);
-
-            Mesh newMesh = CharacterAppearanceBuilder.CombineMesh(combineMeshes);
-            Texture2D newAtlas = CharacterAppearanceBuilder.BakeAtlas(atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint);
-
-            DestroyGeneratedMesh();
-            DestroyGeneratedAtlas();
-
-            _generatedMesh = newMesh;
-            _generatedAtlas = newAtlas;
-
-            bodyRenderer.sharedMesh = _generatedMesh;
-            bodyRenderer.localBounds = _generatedMesh.bounds;
-            bodyRenderer.material.mainTexture = _generatedAtlas;
-        }
-
-        private void ApplyBackpack(BodypartSlotEntry slot, Color haircutTint)
-        {
-            if (backpackRenderer == null)
-                return;
-
-            BodypartResource resource = slot != null ? ResolveBackpackResource(slot) : null;
-
-            if (resource == null)
-            {
-                backpackRenderer.gameObject.SetActive(false);
-                DestroyIfOwned(_activeBackpackTexture);
-                _activeBackpackTexture = null;
-                return;
-            }
-
-            Texture2D texture = CharacterAppearanceBuilder.BuildStandaloneTexture(
-                resource.Texture, resource.RegionMask, resource.DetailTexture, resource.DetailTiling, resource.DetailOffset, haircutTint);
-
-            if (texture != _activeBackpackTexture)
-            {
-                DestroyIfOwned(_activeBackpackTexture);
-                if (texture != resource.Texture)
-                    _runtimeTextures.Add(texture);
-                _activeBackpackTexture = texture;
-            }
-
-            backpackRenderer.gameObject.SetActive(true);
-            backpackRenderer.sharedMesh = resource.Mesh;
-            backpackRenderer.localBounds = resource.Mesh.bounds;
-            backpackRenderer.material.mainTexture = texture;
         }
 
         private Color ResolveHaircutColor()
@@ -175,24 +170,6 @@ namespace SimpleSurvival.Characters.Appearance
                     return slot;
             }
             return null;
-        }
-
-        private void DestroyIfOwned(Texture2D texture)
-        {
-            if (texture == null || !_runtimeTextures.Contains(texture))
-                return;
-
-            _runtimeTextures.Remove(texture);
-            Destroy(texture);
-        }
-
-        private void DestroyGeneratedMesh()
-        {
-            if (_generatedMesh == null)
-                return;
-
-            Destroy(_generatedMesh);
-            _generatedMesh = null;
         }
 
         private void DestroyGeneratedAtlas()

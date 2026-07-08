@@ -17,26 +17,6 @@ namespace SimpleSurvival.Characters.Appearance
 
     public static class CharacterAppearanceBuilder
     {
-        public static Mesh CombineMesh(IReadOnlyList<Mesh> meshes)
-        {
-            CombineInstance[] combineInstances = new CombineInstance[meshes.Count];
-            List<BoneWeight> boneWeights = new List<BoneWeight>();
-
-            for (int i = 0; i < meshes.Count; i++)
-            {
-                combineInstances[i] = new CombineInstance { mesh = meshes[i] };
-                boneWeights.AddRange(meshes[i].boneWeights);
-            }
-
-            Mesh combinedMesh = new Mesh { name = "CharacterAppearanceMesh" };
-            combinedMesh.CombineMeshes(combineInstances, mergeSubMeshes: true, useMatrices: false);
-            combinedMesh.boneWeights = boneWeights.ToArray();
-            combinedMesh.bindposes = meshes[0].bindposes;
-            combinedMesh.RecalculateBounds();
-
-            return combinedMesh;
-        }
-
         public static Texture2D BakeAtlas(IReadOnlyList<BodypartView> views, int atlasSize, TextureFormat format, Color haircutTint)
         {
             Texture2D atlas = new Texture2D(atlasSize, atlasSize, format, mipChain: false)
@@ -65,32 +45,6 @@ namespace SimpleSurvival.Characters.Appearance
 
             atlas.Apply();
             return atlas;
-        }
-
-        public static Texture2D BuildStandaloneTexture(
-            Texture2D baseTexture,
-            Texture2D regionMask,
-            Texture2D detailTexture,
-            Vector2 detailTiling,
-            Vector2 detailOffset,
-            Color haircutTint)
-        {
-            if (regionMask == null)
-                return baseTexture;
-
-            int width = baseTexture.width;
-            int height = baseTexture.height;
-            Color[] pixels = ExtractRegionPixels(
-                baseTexture, regionMask, detailTexture, detailTiling, detailOffset, haircutTint, width, height);
-
-            Texture2D result = new Texture2D(width, height, TextureFormat.RGBA32, false)
-            {
-                name = "GeneratedTintedTexture"
-            };
-            result.SetPixels(pixels);
-            result.Apply();
-
-            return result;
         }
 
         private static Color[] ExtractRegionPixels(

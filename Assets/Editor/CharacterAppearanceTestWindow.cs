@@ -9,13 +9,14 @@ namespace SimpleSurvival.Characters.Appearance.Editor
         private CharacterAppearanceConfig _config;
         private SkinnedMeshRenderer _bodyTargetRenderer;
         private SkinnedMeshRenderer _backpackTargetRenderer;
+        private SkinnedMeshRenderer _haircutTargetRenderer;
+        private SkinnedMeshRenderer _beardTargetRenderer;
         private Color _haircutTint = Color.white;
         private readonly Dictionary<BodypartSlotKind, int> _selectedIndices = new Dictionary<BodypartSlotKind, int>();
-        private Vector2 _scrollPosition;
 
-        private bool _useHelmet;
-        private bool _includeBeard;
         private bool _includeBackpack;
+        private bool _includeHaircut;
+        private bool _includeBeard;
 
         [MenuItem("Simple Survival/Character/Test Appearance Generation")]
         private static void ShowWindow()
@@ -35,44 +36,42 @@ namespace SimpleSurvival.Characters.Appearance.Editor
             }
 
             _bodyTargetRenderer = (SkinnedMeshRenderer)EditorGUILayout.ObjectField(
-                "Body Target Renderer (optional)", _bodyTargetRenderer, typeof(SkinnedMeshRenderer), true);
+                "Body Target Renderer", _bodyTargetRenderer, typeof(SkinnedMeshRenderer), true);
 
             _haircutTint = EditorGUILayout.ColorField("Haircut Tint", _haircutTint);
 
             EditorGUILayout.Space();
-
+            EditorGUILayout.LabelField("Slot bắt buộc (luôn bake vào atlas):", EditorStyles.boldLabel);
+            DrawFixedSlot(BodypartSlotKind.Head);
             DrawFixedSlot(BodypartSlotKind.Torso);
             DrawFixedSlot(BodypartSlotKind.Legs);
             DrawFixedSlot(BodypartSlotKind.Feet);
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Head (Helmet thay thế Haircut nếu tick):", EditorStyles.boldLabel);
-            _useHelmet = EditorGUILayout.ToggleLeft("Dùng Helmet (Head slot) thay vì Haircut", _useHelmet);
-
-            using (new EditorGUI.DisabledScope(!_useHelmet))
-            {
-                DrawFixedSlot(BodypartSlotKind.Head);
-            }
-
-            using (new EditorGUI.DisabledScope(_useHelmet))
-            {
-                DrawFixedSlot(BodypartSlotKind.Haircut);
-            }
-
-            EditorGUILayout.Space();
-            _includeBeard = EditorGUILayout.ToggleLeft("Bao gồm Beard (mesh-only, mượn atlas)", _includeBeard);
-            using (new EditorGUI.DisabledScope(!_includeBeard))
-            {
-                DrawFixedSlot(BodypartSlotKind.Beard);
-            }
-
-            EditorGUILayout.Space();
-            _includeBackpack = EditorGUILayout.ToggleLeft("Bao gồm Backpack (texture riêng, renderer riêng)", _includeBackpack);
+            _includeBackpack = EditorGUILayout.ToggleLeft("Bao gồm Backpack (bake vào atlas, renderer riêng)", _includeBackpack);
             using (new EditorGUI.DisabledScope(!_includeBackpack))
             {
                 DrawFixedSlot(BodypartSlotKind.Backpack);
                 _backpackTargetRenderer = (SkinnedMeshRenderer)EditorGUILayout.ObjectField(
                     "Backpack Target Renderer", _backpackTargetRenderer, typeof(SkinnedMeshRenderer), true);
+            }
+
+            EditorGUILayout.Space();
+            _includeHaircut = EditorGUILayout.ToggleLeft("Bao gồm Haircut (mượn atlas, renderer riêng)", _includeHaircut);
+            using (new EditorGUI.DisabledScope(!_includeHaircut))
+            {
+                DrawFixedSlot(BodypartSlotKind.Haircut);
+                _haircutTargetRenderer = (SkinnedMeshRenderer)EditorGUILayout.ObjectField(
+                    "Haircut Target Renderer", _haircutTargetRenderer, typeof(SkinnedMeshRenderer), true);
+            }
+
+            EditorGUILayout.Space();
+            _includeBeard = EditorGUILayout.ToggleLeft("Bao gồm Beard (mượn atlas, renderer riêng)", _includeBeard);
+            using (new EditorGUI.DisabledScope(!_includeBeard))
+            {
+                DrawFixedSlot(BodypartSlotKind.Beard);
+                _beardTargetRenderer = (SkinnedMeshRenderer)EditorGUILayout.ObjectField(
+                    "Beard Target Renderer", _beardTargetRenderer, typeof(SkinnedMeshRenderer), true);
             }
 
             EditorGUILayout.Space();
@@ -114,43 +113,28 @@ namespace SimpleSurvival.Characters.Appearance.Editor
 
         private void Generate()
         {
+            BodypartSlotEntry headSlot = FindSlot(BodypartSlotKind.Head);
             BodypartSlotEntry torsoSlot = FindSlot(BodypartSlotKind.Torso);
             BodypartSlotEntry legsSlot = FindSlot(BodypartSlotKind.Legs);
             BodypartSlotEntry feetSlot = FindSlot(BodypartSlotKind.Feet);
-            BodypartSlotEntry headSlot = FindSlot(BodypartSlotKind.Head);
-            BodypartSlotEntry haircutSlot = FindSlot(BodypartSlotKind.Haircut);
-            BodypartSlotEntry beardSlot = FindSlot(BodypartSlotKind.Beard);
+            BodypartSlotEntry backpackSlot = FindSlot(BodypartSlotKind.Backpack);
 
             List<BodypartView> atlasViews = new List<BodypartView>();
+            List<Mesh> combineMeshes = new List<Mesh>();
 
-            AddIfPresent(atlasViews, torsoSlot, ResolveSelected(torsoSlot));
-            AddIfPresent(atlasViews, legsSlot, ResolveSelected(legsSlot));
-            AddIfPresent(atlasViews, feetSlot, ResolveSelected(feetSlot));
+            AddView(atlasViews, combineMeshes, headSlot, ResolveSelected(headSlot), combineIntoBody: true);
+            AddView(atlasViews, combineMeshes, torsoSlot, ResolveSelected(torsoSlot), combineIntoBody: true);
+            AddView(atlasViews, combineMeshes, legsSlot, ResolveSelected(legsSlot), combineIntoBody: true);
+            AddView(atlasViews, combineMeshes, feetSlot, ResolveSelected(feetSlot), combineIntoBody: true);
 
-            BodypartResource headFillerResource = _useHelmet
-                ? ResolveSelected(headSlot)
-                : ResolveSelected(haircutSlot);
+            BodypartResource backpackResource = _includeBackpack ? ResolveSelected(backpackSlot) : null;
+            AddView(atlasViews, combineMeshes, backpackSlot, backpackResource, combineIntoBody: false);
 
-            AddIfPresent(atlasViews, headSlot, headFillerResource);
-
-            if (atlasViews.Count == 0)
+            if (combineMeshes.Count == 0)
             {
-                Debug.LogWarning("Không có bodypart nào được chọn hợp lệ để generate.");
+                Debug.LogWarning("Không có bodypart nào hợp lệ để combine mesh Body.");
                 return;
             }
-
-            bool hideBeard = headFillerResource != null && headFillerResource.DisableBeard;
-            BodypartResource beardResource = _includeBeard ? ResolveSelected(beardSlot) : null;
-            Mesh beardMesh = beardResource != null && !hideBeard ? beardResource.Mesh : null;
-
-            if (_includeBeard && hideBeard)
-                Debug.LogWarning("Resource đang lấp Head có Disable Beard = true, Beard sẽ không hiển thị.");
-
-            List<Mesh> combineMeshes = new List<Mesh>();
-            foreach (BodypartView view in atlasViews)
-                combineMeshes.Add(view.Resource.Mesh);
-            if (beardMesh != null)
-                combineMeshes.Add(beardMesh);
 
             Mesh generatedMesh = CharacterAppearanceBuilder.CombineMesh(combineMeshes);
             Texture2D generatedAtlas = CharacterAppearanceBuilder.BakeAtlas(
@@ -161,28 +145,53 @@ namespace SimpleSurvival.Characters.Appearance.Editor
             if (_bodyTargetRenderer != null)
                 ApplyToSkinnedRenderer(_bodyTargetRenderer, generatedMesh, generatedAtlas);
 
-            ApplyBackpackPreview();
+            ApplyBackpackPreview(backpackResource, generatedAtlas);
+            ApplyHaircutPreview(generatedAtlas);
+            ApplyBeardPreview(generatedAtlas);
         }
 
-        private void ApplyBackpackPreview()
-        {
-            if (!_includeBackpack || _backpackTargetRenderer == null)
-                return;
-
-            BodypartSlotEntry backpackSlot = FindSlot(BodypartSlotKind.Backpack);
-            BodypartResource resource = backpackSlot != null ? ResolveSelected(backpackSlot) : null;
-            if (resource == null)
-                return;
-
-            ApplyToSkinnedRenderer(_backpackTargetRenderer, resource.Mesh, resource.Texture);
-        }
-
-        private static void AddIfPresent(List<BodypartView> list, BodypartSlotEntry slot, BodypartResource resource)
+        private static void AddView(List<BodypartView> views, List<Mesh> combineMeshes, BodypartSlotEntry slot, BodypartResource resource, bool combineIntoBody)
         {
             if (slot == null || resource == null)
                 return;
 
-            list.Add(new BodypartView(resource, slot));
+            views.Add(new BodypartView(resource, slot));
+            if (combineIntoBody)
+                combineMeshes.Add(resource.Mesh);
+        }
+
+        private void ApplyBackpackPreview(BodypartResource resource, Texture2D atlas)
+        {
+            if (!_includeBackpack || resource == null || _backpackTargetRenderer == null)
+                return;
+
+            ApplyToSkinnedRenderer(_backpackTargetRenderer, resource.Mesh, atlas);
+        }
+
+        private void ApplyHaircutPreview(Texture2D atlas)
+        {
+            if (!_includeHaircut || _haircutTargetRenderer == null)
+                return;
+
+            BodypartSlotEntry haircutSlot = FindSlot(BodypartSlotKind.Haircut);
+            BodypartResource resource = ResolveSelected(haircutSlot);
+            if (resource == null)
+                return;
+
+            ApplyToSkinnedRenderer(_haircutTargetRenderer, resource.Mesh, atlas);
+        }
+
+        private void ApplyBeardPreview(Texture2D atlas)
+        {
+            if (!_includeBeard || _beardTargetRenderer == null)
+                return;
+
+            BodypartSlotEntry beardSlot = FindSlot(BodypartSlotKind.Beard);
+            BodypartResource resource = ResolveSelected(beardSlot);
+            if (resource == null)
+                return;
+
+            ApplyToSkinnedRenderer(_beardTargetRenderer, resource.Mesh, atlas);
         }
 
         private BodypartResource ResolveSelected(BodypartSlotEntry slot)
