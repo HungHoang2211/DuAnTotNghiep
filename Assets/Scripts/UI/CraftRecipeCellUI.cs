@@ -20,14 +20,7 @@ namespace SimpleSurvival.UI
             Recipe = recipe;
             iconImage.sprite = recipe.ResultItem.Icon;
             nameText.text = recipe.ResultItem.ItemName;
-
-            Debug.Log($"[CraftRecipeCellUI] Init for {recipe.ResultItem.ItemName}, button={backgroundButton != null}");
-
-            backgroundButton.onClick.AddListener(() =>
-            {
-                Debug.Log($"[CraftRecipeCellUI] Clicked {Recipe.ResultItem.ItemName}");
-                onClicked(Recipe);
-            });
+            backgroundButton.onClick.AddListener(() => onClicked(Recipe));
         }
 
         public void SetCraftable(bool canCraft)

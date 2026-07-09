@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using SimpleSurvival.Items;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,7 +19,7 @@ namespace SimpleSurvival.UI
         [SerializeField] private CraftDescriptionPanelUI descriptionPanel;
 
         [Header("Data")]
-        [SerializeField] private List<CraftingRecipeData> recipes;
+        [SerializeField] private CraftingRecipeDatabase recipeDatabase;
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
 
         public bool IsOpen => root != null && root.activeSelf;
@@ -43,7 +42,7 @@ namespace SimpleSurvival.UI
             InventoryPanelController.Instance?.Close();
 
             root.SetActive(true);
-            recipeList.Populate(recipes, OnRecipeSelected);
+            recipeList.Populate(recipeDatabase.Recipes, OnRecipeSelected);
 
             CraftingRecipeData firstRecipe = recipeList.FirstRecipe;
             if (firstRecipe != null)
@@ -95,7 +94,6 @@ namespace SimpleSurvival.UI
 
         private void OnRecipeSelected(CraftingRecipeData recipe)
         {
-            Debug.Log($"[CraftDialog] OnRecipeSelected: {recipe.ResultItem.ItemName}");
             descriptionPanel.Show(recipe);
         }
     }
