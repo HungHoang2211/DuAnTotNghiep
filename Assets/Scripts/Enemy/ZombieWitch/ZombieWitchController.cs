@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.AI
@@ -93,6 +93,25 @@ namespace SimpleSurvival.AI
             }
 
             CheckStuck();
+        }
+
+        protected override void UpdateRetreat()
+        {
+            base.UpdateRetreat();
+
+            if (_witchAnimator != null)
+            {
+                float speed = _agent.isStopped
+                    ? 0f
+                    : (_characterController != null ? _characterController.velocity.magnitude : 0f);
+                _witchAnimator.SetMoveSpeed(speed);
+            }
+        }
+
+        protected override void EnterHidden()
+        {
+            if (_witchAnimator != null) _witchAnimator.SetIdle();
+            base.EnterHidden();
         }
 
         private void CheckStuck()

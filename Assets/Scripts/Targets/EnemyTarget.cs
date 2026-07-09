@@ -29,6 +29,7 @@ namespace SimpleSurvival.Targets
         {
             if (!isActiveAndEnabled) return false;
             if (_stats != null && _stats.IsDead) return false;
+            if (_stats != null && _stats.IsInvulnerable) return false;
             return true;
         }
 

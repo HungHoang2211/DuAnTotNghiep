@@ -81,7 +81,42 @@ namespace SimpleSurvival.AI
 
         protected override void UpdateChase()
         {
-            base.UpdateChase();
+            if (Config == null || _player == null)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, _player.position);
+
+            if (dist > Config.ChaseRadius)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float engageRange = GetMaxEngageRange();
+
+            if (dist <= engageRange)
+            {
+                FaceTarget(_player, Config.RotationSpeed);
+                TryUseSkill();
+
+                if (_state == EnemyState.Attacking)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                    _agent.nextPosition = transform.position;
+                    if (_zombieAnimator != null) _zombieAnimator.SetLocomotion(false, false);
+
+                    CheckStuck();
+                    return;
+                }
+            }
+
+            _agent.isStopped = false;
+            _agent.SetDestination(GetChaseDestination());
+            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
 
             if (_zombieAnimator != null)
             {
@@ -91,7 +126,26 @@ namespace SimpleSurvival.AI
                 _zombieAnimator.SetLocomotion(isMoving, isRunner);
             }
 
+            if (!CanStillDetect())
+            {
+                _lostTargetTimer += Time.deltaTime;
+                if (_lostTargetTimer >= Config.LoseTargetTime)
+                    BeginIdle();
+            }
+            else _lostTargetTimer = 0f;
+
             CheckStuck();
+        }
+
+        private float GetMaxEngageRange()
+        {
+            float max = Config.AttackRange;
+            foreach (var skill in _skills)
+            {
+                if (skill != null && skill.MaxRange > max)
+                    max = skill.MaxRange;
+            }
+            return max;
         }
 
         private void CheckStuck()

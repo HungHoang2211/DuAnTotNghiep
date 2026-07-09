@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60caacb96bf0ecf4e836ad4b3c9e3e0c, type: 3}
-  m_Name: ZombieBossStatsConfig
+  m_Script: {fileID: 11500000, guid: c12401a0c724c0e4a8b0e3d292591300, type: 3}
+  m_Name: ZombieFatInfected
   m_EditorClassIdentifier: 
   maxHP: 100
   startHP: 100
@@ -19,28 +19,28 @@ MonoBehaviour:
   armor: 0
   moveSpeed: 3
   kind: 0
-  displayName: Zombie Tank
+  displayName: Zombie Infected
   hpBarColor: {r: 1, g: 0, b: 0, a: 1}
-  visionRange: 12
-  visionAngle: 100
-  hearingRadius: 8
+  visionRange: 2
+  visionAngle: 1
+  hearingRadius: 15
   hearingNoiseThreshold: 0.3
   chaseRadius: 15
   loseTargetTime: 3
   rotationSpeed: 360
-  attackRange: 2
+  attackRange: 1.5
   attackCooldown: 1.5
   howlChance: 0.5
   howlDuration: 2
-  despawnDelay: 120
+  despawnDelay: 50
   isRunner: 0
-  wanderSpeed: 0
-  wanderRadius: 0
-  wanderIntervalMin: 0
-  wanderIntervalMax: 0
-  corpseLootTable: {fileID: 0}
-  stunDuration: 3
-  summonHpThresholds:
-  - 0.5
-  - 0.2
-  chaseOrbInterval: 10
+  wanderSpeed: 1.5
+  wanderRadius: 5
+  wanderIntervalMin: 2
+  wanderIntervalMax: 5
+  corpseLootTable: {fileID: 11400000, guid: 2c9ab1cdac5d1e848bc998c528a6d3de, type: 2}
+  specialCooldown: 10
+  specialRange: 2
+  specialDamage: 25
+  acidSpeed: 7
+  acidLifetime: 3

@@ -26,6 +26,7 @@ namespace SimpleSurvival.Stats
         public float MoveSpeed => _moveSpeed;
         public bool IsAlive { get; private set; }
         public bool IsDead => !IsAlive;
+        public bool IsInvulnerable { get; private set; }
 
         protected virtual HpHudType HudDamageType => HpHudType.Damage;
 
@@ -67,6 +68,9 @@ namespace SimpleSurvival.Stats
         public virtual bool TakeDamage(float rawDamage, GameObject source)
         {
             if (!IsAlive || rawDamage <= 0f)
+                return IsAlive;
+
+            if (IsInvulnerable)
                 return IsAlive;
 
             if (source != null)
@@ -115,6 +119,11 @@ namespace SimpleSurvival.Stats
         public void SetMoveSpeed(float value)
         {
             _moveSpeed = Mathf.Max(0f, value);
+        }
+
+        public void SetInvulnerable(bool value)
+        {
+            IsInvulnerable = value;
         }
 
         public static float ArmorReduction(float armorValue)

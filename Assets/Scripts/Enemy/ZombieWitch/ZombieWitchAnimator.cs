@@ -12,6 +12,15 @@ namespace SimpleSurvival.AI
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
         private static readonly int HasDroppedArmHash = Animator.StringToHash("HasDroppedArm");
 
+        public bool IsInAttackState
+        {
+            get
+            {
+                if (_animator == null) return false;
+                var info = _animator.GetCurrentAnimatorStateInfo(0);
+                return info.IsTag("Attack");
+            }
+        }
         public override void SetMoving(bool moving)
         {
             _animator.SetFloat(MoveSpeedHash, moving ? 1f : 0f);
@@ -41,6 +50,7 @@ namespace SimpleSurvival.AI
                 default: TriggerAttackBoth(); break;
             }
         }
+
 
         public void TriggerAttackLeft() => _animator.SetTrigger(AttackLeftHash);
         public void TriggerAttackRight() => _animator.SetTrigger(AttackRightHash);

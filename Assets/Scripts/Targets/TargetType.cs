@@ -8,6 +8,7 @@ namespace SimpleSurvival.Targets
         Container,
         Workbench,
         Trader,
-        Character
+        Character,
+        WitchEvent
     }
 }

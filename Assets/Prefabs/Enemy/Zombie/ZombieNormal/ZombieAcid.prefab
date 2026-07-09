@@ -87,8 +87,8 @@ GameObject:
   - component: {fileID: 7532650277301846238}
   - component: {fileID: 533971995228702636}
   - component: {fileID: 8501161820999653939}
-  - component: {fileID: 6417507208028773415}
   - component: {fileID: 4810713457326850447}
+  - component: {fileID: 6417507208028773415}
   m_Layer: 8
   m_Name: ZombieAcid
   m_TagString: Enemy
@@ -265,6 +265,8 @@ MonoBehaviour:
     m_Bits: 64
   _skills:
   - {fileID: 8501161820999653939}
+  - {fileID: 4810713457326850447}
+  retreatArrivalThreshold: 0.3
   _zombieAnimator: {fileID: 8488215344003127229}
   _corpseHandler: {fileID: 6417507208028773415}
   stuckCheckInterval: 0.5
@@ -331,12 +333,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cooldown: 1.5
   minRange: 0
-  maxRange: 1.2
-  priority: 1
+  maxRange: 1.5
+  priority: 1.5
   damage: 10
   damageRangeBonus: 0.5
   animator: {fileID: 8488215344003127229}
   controller: {fileID: 8827652772848708950}
+--- !u!114 &4810713457326850447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 328903479995416683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ae1e83130c95844a6be9bc3de8765a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 3
+  minRange: 2
+  maxRange: 8
+  priority: 2
+  damage: 25
+  animator: {fileID: 8488215344003127229}
+  controller: {fileID: 8827652772848708950}
+  requiredTimeInRange: 3
+  acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
+  spawnPoint: {fileID: 9154715320843203761}
+  failsafeDuration: 3
 --- !u!114 &6417507208028773415
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,34 +377,6 @@ MonoBehaviour:
   lootContainer: {fileID: 1278109773234783961}
   enemyTarget: {fileID: 6983622342013676403}
   useTargetRoot: {fileID: 5159799911315951942}
---- !u!114 &4810713457326850447
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 328903479995416683}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ae1e83130c95844a6be9bc3de8765a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cooldown: 1.5
-  minRange: 0
-  maxRange: 2
-  priority: 1
-  damage: 25
-  coneRange: 4
-  coneAngle: 60
-  animator: {fileID: 0}
-  controller: {fileID: 0}
-  requiredTimeInRange: 3
-  acidEffectPrefab: {fileID: 1709254077376921, guid: 7964ea333f761664b8a232811ae97453, type: 3}
-  spawnPoint: {fileID: 608668352479928956}
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  failsafeDuration: 3
 --- !u!1 &481813467720776778
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,10 +462,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.09378183
-  m_Height: 0.46890914
+  m_Radius: 0.042157408
+  m_Height: 0.40235144
   m_Direction: 0
-  m_Center: {x: 0.23445457, y: 0, z: 0}
+  m_Center: {x: 0.212292, y: 0.0040048603, z: 0.000000451707}
 --- !u!54 &2513150024931550883
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -692,8 +689,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.4226564, y: 0.26924872, z: 0.34451973}
-  m_Center: {x: -0.21132816, y: -0.014996052, z: 0.00000017881393}
+  m_Size: {x: 0.34340233, y: 0.2487612, z: 0.3216983}
+  m_Center: {x: -0.250955, y: -0.025239818, z: -0.011410534}
 --- !u!54 &8614938918187318457
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1101,10 +1098,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.112279296
-  m_Height: 0.44911718
+  m_Radius: 0.056141593
+  m_Height: 0.4234458
   m_Direction: 0
-  m_Center: {x: 0.22455859, y: 0, z: 0}
+  m_Center: {x: 0.23739429, y: 0.0038829234, z: -0.032309398}
 --- !u!54 &4311052032138455617
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1452,10 +1449,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.11227922
+  m_Radius: 0.058280304
   m_Height: 0.4491169
   m_Direction: 0
-  m_Center: {x: -0.22455844, y: 0, z: 0}
+  m_Center: {x: -0.22455843, y: 0.0039804145, z: 0.017583098}
 --- !u!54 &7475665243212177164
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2885,10 +2882,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.12390793
-  m_Height: 0.41302642
+  m_Radius: 0.06493934
+  m_Height: 0.37235028
   m_Direction: 0
-  m_Center: {x: 0.20651321, y: 0, z: 0}
+  m_Center: {x: 0.18617539, y: 0.004108801, z: -0.014313931}
 --- !u!54 &6138889956341104548
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3017,10 +3014,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.07763751
-  m_Height: 0.31055003
+  m_Radius: 0.043739863
+  m_Height: 0.3016903
   m_Direction: 0
-  m_Center: {x: -0.15527502, y: 0, z: 0}
+  m_Center: {x: -0.12914157, y: 0.0022364974, z: 0.00000004278216}
 --- !u!54 &5040820772499958384
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3181,8 +3178,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.12212041
-  m_Center: {x: -0.08612992, y: -1.8468671e-10, z: -0.0019324173}
+  m_Radius: 0.10127297
+  m_Center: {x: -0.08612992, y: -1.8468671e-10, z: -0.003927385}
 --- !u!54 &7193980778364081993
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3406,10 +3403,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.123908006
-  m_Height: 0.41302666
+  m_Radius: 0.059604134
+  m_Height: 0.4130267
   m_Direction: 0
-  m_Center: {x: -0.20651333, y: 0, z: 0}
+  m_Center: {x: -0.20651343, y: -0.0053959806, z: 0.021368867}
 --- !u!54 &967461961832423559
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3569,10 +3566,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.0776383
-  m_Height: 0.3105532
+  m_Radius: 0.056815725
+  m_Height: 0.31055322
   m_Direction: 0
-  m_Center: {x: 0.1552766, y: 0, z: 0}
+  m_Center: {x: 0.15527661, y: -0.0012979091, z: 0.0000000114919985}
 --- !u!54 &823264603452002095
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3763,10 +3760,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.09378219
-  m_Height: 0.46891093
+  m_Radius: 0.045374602
+  m_Height: 0.4168278
   m_Direction: 0
-  m_Center: {x: -0.23445547, y: 0, z: 0}
+  m_Center: {x: -0.23774564, y: -0.0056200577, z: -0.0020692206}
 --- !u!54 &6849381619488586906
 Rigidbody:
   m_ObjectHideFlags: 0

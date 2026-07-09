@@ -38,6 +38,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float gatherRange = 1f;
         [SerializeField] private float lootRange = 1.5f;
         [SerializeField] private float npcInteractRange = 1.5f;
+        [SerializeField] private float witchEventRange = 1.5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -350,6 +351,22 @@ namespace SimpleSurvival.Player
 
             giver.OnPlayerInteract(gameObject);
             return true;
+        }
+
+        public bool RequestWitchEvent(SimpleSurvival.Targets.WitchEventTrap target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > witchEventRange)
+            {
+                Debug.Log($"[WitchEvent] Too far: {dist:F1}m > {witchEventRange:F1}m");
+                return false;
+            }
+
+            WitchEventAction action = new WitchEventAction(this, animator, target);
+            return TryRequestAction(action);
         }
 
         private void HandlePlayerDamaged(GameObject attacker)

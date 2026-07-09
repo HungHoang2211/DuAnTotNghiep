@@ -7,11 +7,15 @@ namespace SimpleSurvival.AI
 {
     public abstract class BaseEnemyController : BaseAIController
     {
-        protected enum EnemyState { Idle, Detected, Chasing, Attacking, Dead }
+        protected enum EnemyState { Idle, Detected, Chasing, Attacking, Retreating, Hidden, Dead }
         protected EnemyState _state = EnemyState.Idle;
 
         [Header("Skills (compose qua Inspector)")]
         [SerializeField] protected List<BaseEnemySkill> _skills = new List<BaseEnemySkill>();
+
+        [Header("Retreat & Hide (dùng khi enemy cần lui về spawn point và biến mất, vd Witch triệu hồi)")]
+        [Tooltip("Khoảng cách tới spawn point được coi là đã 'tới nơi' để bắt đầu ẩn")]
+        [SerializeField] protected float retreatArrivalThreshold = 0.3f;
 
         protected float _lostTargetTimer;
 
@@ -55,6 +59,7 @@ namespace SimpleSurvival.AI
             {
                 yield return new WaitForSeconds(0.2f);
                 if (_state == EnemyState.Dead) yield break;
+                if (_playerDead) continue;
                 if (_state != EnemyState.Idle) continue;
 
                 if (DetectByVision() || DetectByHearing())
@@ -87,9 +92,10 @@ namespace SimpleSurvival.AI
 
         protected virtual void Update()
         {
-            if (_isDead) return;
+            if (_isDead || _playerDead) return;
             if (_state == EnemyState.Chasing) UpdateChase();
             else if (_state == EnemyState.Attacking) UpdateAttacking();
+            else if (_state == EnemyState.Retreating) UpdateRetreat();
         }
 
         protected virtual Vector3 GetChaseDestination()
@@ -143,6 +149,83 @@ namespace SimpleSurvival.AI
             _agent.nextPosition = transform.position;
             if (_player != null)
                 FaceTarget(_player, Config != null ? Config.RotationSpeed : 360f);
+        }
+
+        /// <summary>
+        /// Di chuyển enemy quay về spawn point (dùng khi cần "lui vào ẩn nấp",
+        /// vd Witch sau khi triệu hồi minion). Khi tới nơi sẽ tự chuyển sang Hidden.
+        /// </summary>
+        protected virtual void UpdateRetreat()
+        {
+            Vector3 destination = _spawnPoint != null ? _spawnPoint.Position : transform.position;
+            float dist = Vector3.Distance(transform.position, destination);
+
+            if (dist <= retreatArrivalThreshold)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+                EnterHidden();
+                return;
+            }
+
+            _agent.isStopped = false;
+            _agent.SetDestination(destination);
+            MoveAlongAgentPath(
+                Config != null ? Config.MoveSpeed : 3.5f,
+                Config != null ? Config.RotationSpeed : 360f);
+        }
+
+        /// <summary>
+        /// Bắt đầu lui về spawn point. Gọi từ skill (vd sau khi triệu hồi xong minion).
+        /// Trong lúc Retreating/Hidden, DetectionRoutine tự động không chạy vì state != Idle.
+        /// </summary>
+        public virtual void BeginRetreat()
+        {
+            if (_isDead) return;
+            _state = EnemyState.Retreating;
+            _agent.isStopped = false;
+            _stats?.SetInvulnerable(true);
+        }
+
+        /// <summary>
+        /// Enemy đã về tới spawn point — ẩn model, chờ tín hiệu ReappearAndResume().
+        /// </summary>
+        protected virtual void EnterHidden()
+        {
+            _state = EnemyState.Hidden;
+            SetModelVisible(false);
+        }
+
+        /// <summary>
+        /// Hiện lại và tiếp tục chiến đấu. Gọi từ skill khi điều kiện chờ đã xong
+        /// (vd tất cả minion triệu hồi đã bị tiêu diệt).
+        /// </summary>
+        public virtual void ReappearAndResume()
+        {
+            if (_isDead) return;
+            SetModelVisible(true);
+            _stats?.SetInvulnerable(false);
+
+            if (_player != null && !_playerDead)
+                BeginChase();
+            else
+                BeginIdle();
+        }
+
+        /// <summary>
+        /// Bật/tắt renderer + collider chính (không đụng ragdoll collider vì chúng
+        /// nằm trên object con — theo đúng convention OnDying() đang dùng).
+        /// </summary>
+        protected void SetModelVisible(bool visible)
+        {
+            foreach (var r in GetComponentsInChildren<Renderer>(true))
+                if (r != null) r.enabled = visible;
+
+            foreach (var col in GetComponents<Collider>())
+            {
+                if (col is CharacterController) continue;
+                col.enabled = visible;
+            }
         }
 
         protected virtual void TryUseSkill()
@@ -216,7 +299,7 @@ namespace SimpleSurvival.AI
 
         protected override void HandleDamagedBy(GameObject source)
         {
-            if (source == null || _isDead) return;
+            if (source == null || _isDead || _playerDead) return;
             if (!source.CompareTag("Player")) return; // bỏ qua damage từ Dog / nguồn không phải Player thật
 
             _player = source.transform;
@@ -231,6 +314,9 @@ namespace SimpleSurvival.AI
             _isDead = true;
             _state = EnemyState.Dead;
 
+            // Đảm bảo xác hiện ra đầy đủ dù enemy đang Hidden lúc chết
+            SetModelVisible(true);
+
             StopAllCoroutines();
             _agent.isStopped = true;
             _agent.ResetPath();
@@ -243,5 +329,25 @@ namespace SimpleSurvival.AI
         }
 
         protected abstract void OnDying();
+
+        /// <summary>
+        /// Player chết (ragdoll) -> enemy này (còn sống) dừng hẳn chase/attack
+        /// và về Idle, không tìm target mới cho tới khi player được reset (respawn).
+        /// </summary>
+        protected override void HandlePlayerDeath()
+        {
+            base.HandlePlayerDeath();
+            if (_isDead) return;
+
+            _state = EnemyState.Idle;
+            _player = null;
+            _lostTargetTimer = 0f;
+
+            _agent.isStopped = true;
+            _agent.ResetPath();
+
+            foreach (var skill in _skills)
+                skill?.Cancel();
+        }
     }
 }

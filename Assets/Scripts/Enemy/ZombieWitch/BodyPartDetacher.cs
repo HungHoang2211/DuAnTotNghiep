@@ -8,10 +8,11 @@ namespace SimpleSurvival.AI
         private class DetachablePart
         {
             public string id;
-            public GameObject attachedMesh;    // WitchLeftHand / WitchRightHand
-            public GameObject severedRagdoll;  // Zombie_Witch_Left_Hand / Zombie_Witch_Right_Hand
-            public Transform socket;           // Bone vai trên mainRig, dùng làm điểm neo khi rớt
-            public Rigidbody rootRigidbody;    // Rigidbody trên joint gốc (vd R_armCut_1_jnt)
+            public GameObject attachedMesh;
+            public GameObject severedRagdoll;
+            public Transform socket;
+            public Rigidbody rootRigidbody;
+            public Transform bloodEffectPoint;
         }
 
         [SerializeField] private DetachablePart[] parts;
@@ -19,6 +20,12 @@ namespace SimpleSurvival.AI
         [Header("Fling Force")]
         [SerializeField] private float flingForce = 2f;
         [SerializeField] private float flingTorque = 3f;
+
+        [Header("Despawn")]
+        [SerializeField] private float despawnDelay = 10f;
+
+        [Header("Blood Effect")]
+        [SerializeField] private GameObject bloodEffectPrefab;
 
         private bool[] _detached;
 
@@ -67,8 +74,11 @@ namespace SimpleSurvival.AI
 
             if (part.severedRagdoll != null && part.socket != null)
             {
+                part.severedRagdoll.transform.SetParent(null, true);
                 part.severedRagdoll.transform.SetPositionAndRotation(part.socket.position, part.socket.rotation);
                 part.severedRagdoll.SetActive(true);
+
+                Destroy(part.severedRagdoll, despawnDelay);
             }
 
             if (part.rootRigidbody != null)
@@ -81,7 +91,19 @@ namespace SimpleSurvival.AI
                 part.rootRigidbody.AddTorque(Random.insideUnitSphere * flingTorque, ForceMode.Impulse);
             }
 
+            SpawnBloodEffect(part);
+
             _detached[index] = true;
+        }
+
+        private void SpawnBloodEffect(DetachablePart part)
+        {
+            if (bloodEffectPrefab == null) return;
+
+            Transform point = part.bloodEffectPoint != null ? part.bloodEffectPoint : part.socket;
+            if (point == null) return;
+
+            Instantiate(bloodEffectPrefab, point.position, point.rotation);
         }
 
         public bool IsDetached(int index)

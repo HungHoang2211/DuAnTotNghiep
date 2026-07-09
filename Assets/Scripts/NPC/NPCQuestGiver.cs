@@ -1,3 +1,4 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.UI.Hud;
 using SimpleSurvival.Quests;
@@ -6,8 +7,14 @@ namespace SimpleSurvival.AI
 {
     public sealed class NPCQuestGiver : BaseNPCController
     {
-        [Header("Quest")]
-        [SerializeField] private QuestData questData;
+        [Header("Quest Chain")]
+        [SerializeField] private List<QuestData> questChain = new List<QuestData>();
+
+        [Header("Quest In Progress")]
+        [SerializeField] private string questInProgressDialogue = "Nhiệm vụ vẫn chưa xong đâu, cố lên nhé!";
+
+        [Header("No Quest Left")]
+        [SerializeField] private string noQuestsAvailableDialogue = "Tôi không còn việc gì để nhờ bạn nữa.";
 
         [Header("Refs")]
         [SerializeField] private NPCQuestIndicator indicator;
@@ -38,27 +45,45 @@ namespace SimpleSurvival.AI
 
         public override void OnPlayerInteract(GameObject player)
         {
-            if (questData == null) return;
-
             var manager = QuestManager.Instance;
             if (manager == null) return;
 
-            if (manager.IsQuestCompleted(questData)) return;
+            QuestData currentQuest = GetCurrentQuest(manager);
 
-            if (manager.IsQuestActive(questData))
+            if (currentQuest == null)
             {
-                if (manager.IsReadyToTurnIn(questData))
+                ShowDialogue(noQuestsAvailableDialogue);
+                return;
+            }
+
+            if (manager.IsQuestActive(currentQuest))
+            {
+                if (manager.IsReadyToTurnIn(currentQuest))
                 {
-                    ShowDialogue(questData.TurnInDialogue);
-                    manager.CompleteQuest(questData);
+                    ShowDialogue(currentQuest.TurnInDialogue);
+                    manager.CompleteQuest(currentQuest);
                     RefreshIndicator();
+                }
+                else
+                {
+                    ShowDialogue(questInProgressDialogue);
                 }
                 return;
             }
 
-            ShowDialogue(questData.OfferDialogue);
-            manager.StartQuest(questData);
+            ShowDialogue(currentQuest.OfferDialogue);
+            manager.StartQuest(currentQuest);
             RefreshIndicator();
+        }
+
+        private QuestData GetCurrentQuest(QuestManager manager)
+        {
+            foreach (var quest in questChain)
+            {
+                if (quest == null) continue;
+                if (!manager.IsQuestCompleted(quest)) return quest;
+            }
+            return null;
         }
 
         private void ShowDialogue(string text)
@@ -71,7 +96,7 @@ namespace SimpleSurvival.AI
 
         private void RefreshIndicator()
         {
-            if (indicator == null || questData == null) return;
+            if (indicator == null) return;
 
             var manager = QuestManager.Instance;
             if (manager == null)
@@ -80,10 +105,16 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            if (manager.IsQuestCompleted(questData))
+            QuestData currentQuest = GetCurrentQuest(manager);
+
+            if (currentQuest == null)
+            {
                 indicator.Hide();
-            else if (manager.IsQuestActive(questData))
-                indicator.SetState(manager.IsReadyToTurnIn(questData)
+                return;
+            }
+
+            if (manager.IsQuestActive(currentQuest))
+                indicator.SetState(manager.IsReadyToTurnIn(currentQuest)
                     ? NPCQuestState.ReadyToTurnIn
                     : NPCQuestState.InProgress);
             else
@@ -92,13 +123,13 @@ namespace SimpleSurvival.AI
 
         private void HandleProgressChanged(QuestData quest, int objectiveIndex)
         {
-            if (quest != questData) return;
+            if (!questChain.Contains(quest)) return;
             RefreshIndicator();
         }
 
         private void HandleQuestCompleted(QuestData quest)
         {
-            if (quest != questData) return;
+            if (!questChain.Contains(quest)) return;
             RefreshIndicator();
         }
     }

@@ -394,10 +394,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.12808882
-  m_Height: 0.56435007
+  m_Radius: 0.08764888
+  m_Height: 0.51276255
   m_Direction: 0
-  m_Center: {x: 0.19115368, y: 0.00000025284498, z: 0.033422917}
+  m_Center: {x: 0.20115978, y: -0.010920359, z: 0.033422776}
 --- !u!54 &4192445703493064561
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -525,10 +525,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.20206591
-  m_Height: 0.45105162
+  m_Radius: 0.12203756
+  m_Height: 0.35113394
   m_Direction: 0
-  m_Center: {x: -0.14898548, y: 0.020945005, z: -0.030217884}
+  m_Center: {x: -0.15772654, y: 0.016575808, z: -0.020052075}
 --- !u!54 &3347168141152706933
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -909,8 +909,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.37571952, y: 0.7918212, z: 0.85312825}
-  m_Center: {x: -0.1878598, y: -0.15994531, z: -0.0076952577}
+  m_Size: {x: 0.27467573, y: 0.5901818, z: 0.5881206}
+  m_Center: {x: -0.17631806, y: -0.108396836, z: -0.011129931}
 --- !u!54 &8141442409719585961
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1250,10 +1250,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.19493894
-  m_Height: 0.45601192
+  m_Radius: 0.11921775
+  m_Height: 0.38737994
   m_Direction: 0
-  m_Center: {x: 0.14573312, y: 0.0000000018992263, z: -0.014258169}
+  m_Center: {x: 0.14327912, y: -0.029649133, z: 0.012651231}
 --- !u!54 &8089178728605453794
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1654,7 +1654,7 @@ GameObject:
   - component: {fileID: 7593884753353444785}
   - component: {fileID: 366072428889638499}
   m_Layer: 8
-  m_Name: ZombieFat_Acid
+  m_Name: ZombieFatAcid
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1831,6 +1831,7 @@ MonoBehaviour:
   - {fileID: 4001661418591986963}
   - {fileID: 7593884753353444785}
   - {fileID: 366072428889638499}
+  retreatArrivalThreshold: 0.3
   _fatAnimator: {fileID: 7298251298067616527}
   _corpseHandler: {fileID: 1267704654831311110}
   stuckCheckInterval: 0.8
@@ -1850,7 +1851,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e5e174f916a46d41b5dcf81b37000eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseConfig: {fileID: 11400000, guid: 6b931b4c69e76d042bc302fb6f20bf1a, type: 2}
+  baseConfig: {fileID: 11400000, guid: f99d51a09df84734eaaa95a6c2cb6ce1, type: 2}
 --- !u!114 &306078222155185394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2308,8 +2309,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.18214422
-  m_Center: {x: -0.058697842, y: -0.0000000010651635, z: -0.02611889}
+  m_Radius: 0.14439464
+  m_Center: {x: -0.077165216, y: 0.0000000027670117, z: -0.006836847}
 --- !u!54 &4497132893567632430
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2500,10 +2501,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.15255927
-  m_Height: 0.5298898
+  m_Radius: 0.093671516
+  m_Height: 0.45828977
   m_Direction: 0
-  m_Center: {x: 0.22650073, y: 0.004982102, z: 0.0062274104}
+  m_Center: {x: 0.22629665, y: 0.0049818708, z: -0.003494992}
 --- !u!54 &3119639055626903377
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2953,10 +2954,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.15779701
+  m_Radius: 0.09804103
   m_Height: 0.4629981
   m_Direction: 0
-  m_Center: {x: 0.23150265, y: -0.014084686, z: 0.02796434}
+  m_Center: {x: 0.23150474, y: -0.00041965305, z: 0.032798577}
 --- !u!54 &1100242037755003483
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3084,10 +3085,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.12562387
-  m_Height: 0.5411742
+  m_Radius: 0.08625117
+  m_Height: 0.5031302
   m_Direction: 0
-  m_Center: {x: -0.20274, y: 0.012549542, z: 0.000000015650558}
+  m_Center: {x: -0.18371738, y: 0.034523383, z: -0.0000000016554702}
 --- !u!54 &6964063571490513729
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3218,8 +3219,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.3352603, y: 0.58124745, z: 0.67710036}
-  m_Center: {x: -0.16763027, y: -0.08004601, z: -0.015792534}
+  m_Size: {x: 0.2844782, y: 0.58124745, z: 0.5909467}
+  m_Center: {x: -0.1731125, y: -0.08004579, z: 0.0035637023}
 --- !u!54 &6171627451446748695
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3347,10 +3348,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.17221391
-  m_Height: 0.5678398
+  m_Radius: 0.08374212
+  m_Height: 0.50551534
   m_Direction: 0
-  m_Center: {x: -0.23503573, y: 0.00000015015057, z: 0.009892337}
+  m_Center: {x: -0.20387347, y: -0.010119744, z: 0.009426256}
 --- !u!54 &8742476539592515809
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3511,10 +3512,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.17157014
-  m_Height: 0.46299815
+  m_Radius: 0.11109565
+  m_Height: 0.40840814
   m_Direction: 0
-  m_Center: {x: -0.23149906, y: -0.0061935186, z: -0.00000001108593}
+  m_Center: {x: -0.20420375, y: 0.005834307, z: -0.008900234}
 --- !u!54 &674728361745093503
 Rigidbody:
   m_ObjectHideFlags: 0

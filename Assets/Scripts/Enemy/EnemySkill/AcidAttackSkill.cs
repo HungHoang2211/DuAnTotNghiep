@@ -9,7 +9,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private float damage = 25f;
 
         [Header("Refs")]
-        [SerializeField] private ZombieFatAnimator animator;
+        [SerializeField] private BaseEnemyAnimator animator;
         [SerializeField] private BaseEnemyController controller;
 
         [Header("Range Timing")]
