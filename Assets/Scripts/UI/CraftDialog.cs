@@ -95,6 +95,7 @@ namespace SimpleSurvival.UI
 
         private void OnRecipeSelected(CraftingRecipeData recipe)
         {
+            Debug.Log($"[CraftDialog] OnRecipeSelected: {recipe.ResultItem.ItemName}");
             descriptionPanel.Show(recipe);
         }
     }

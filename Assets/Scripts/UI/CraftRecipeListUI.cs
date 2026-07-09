@@ -19,6 +19,8 @@ namespace SimpleSurvival.UI
 
         public void Populate(List<CraftingRecipeData> recipes, Action<CraftingRecipeData> onRecipeSelected)
         {
+            Debug.Log($"[CraftRecipeListUI] Populate called, isPopulated={isPopulated}, recipes count={recipes.Count}");
+
             if (isPopulated) return;
             isPopulated = true;
 
@@ -28,6 +30,8 @@ namespace SimpleSurvival.UI
                 cell.Init(recipe, onRecipeSelected);
                 spawnedCells.Add(cell);
             }
+
+            Debug.Log($"[CraftRecipeListUI] Spawned {spawnedCells.Count} cells");
 
             RefreshCraftableIcons();
         }
