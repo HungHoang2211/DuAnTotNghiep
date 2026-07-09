@@ -2,6 +2,7 @@ using SimpleSurvival.Items;
 using SimpleSurvival.Loot;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
+using SimpleSurvival.UI.Hud;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -143,6 +144,10 @@ namespace SimpleSurvival.UI
                 if (!equippedHasTool)
                 {
                     Debug.Log($"[UseButton] Missing tool: {harvest.RequiredTool}");
+
+                    if (FollowNotifyManager.Instance != null)
+                        FollowNotifyManager.Instance.Notify($"Need {harvest.RequiredTool}", SpeechHudType.Bad);
+
                     return;
                 }
             }
