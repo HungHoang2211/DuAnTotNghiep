@@ -7,6 +7,7 @@ namespace SimpleSurvival.UI
     public sealed class InventoryPanelController : MonoBehaviour
     {
         public static InventoryPanelController Instance { get; private set; }
+        [SerializeField] private CraftDialog craftDialog;
 
         [Header("Root")]
         [SerializeField] private GameObject panelRoot;
@@ -51,6 +52,7 @@ namespace SimpleSurvival.UI
 
         public void OpenDefault()
         {
+            craftDialog?.Close();
             if (panelRoot == null) return;
 
             panelRoot.SetActive(true);
@@ -61,6 +63,7 @@ namespace SimpleSurvival.UI
 
         public void OpenLoot(LootContainer container)
         {
+            craftDialog?.Close();
             if (panelRoot == null || lootPanel == null || container == null) return;
 
             panelRoot.SetActive(true);

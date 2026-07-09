@@ -82,6 +82,22 @@ namespace SimpleSurvival.Items
             return remaining;
         }
 
+        public int CountItem(ItemData itemData)
+        {
+            int total = _playerInventory.Pockets.CountItem(itemData);
+            if (_playerInventory.Backpack != null)
+                total += _playerInventory.Backpack.CountItem(itemData);
+            return total;
+        }
+
+        public int RemoveItemAmount(ItemData itemData, int amount)
+        {
+            int removed = _playerInventory.Pockets.RemoveItem(itemData, amount);
+            if (removed < amount && _playerInventory.Backpack != null)
+                removed += _playerInventory.Backpack.RemoveItem(itemData, amount - removed);
+            return removed;
+        }
+
         public bool RemoveItemStack(ItemStack stack)
         {
             if (stack == null) return false;
