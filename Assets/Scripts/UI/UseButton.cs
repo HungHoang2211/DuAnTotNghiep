@@ -83,6 +83,8 @@ namespace SimpleSurvival.UI
                 actionController.RequestLoot(container);
             else if (_currentTarget is SimpleSurvival.Targets.NPCTargetable npc)
                 actionController.RequestNPCInteract(npc);
+            else if (_currentTarget is WitchEventTrap witchTrap)
+                actionController.RequestWitchEvent(witchTrap);
         }
 
         private void HandleTargetChanged(ITargetable target)

@@ -18,11 +18,30 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
     [Tooltip("Danh sách prefab enemy có thể spawn tại điểm này. Mỗi lần spawn sẽ random chọn 1 theo Weight.")]
     [SerializeField] private EnemyEntry[] _enemyEntries;
 
+    [Header("Encounter")]
+    [Tooltip("Nếu false: enemy từ spawn point này chết sẽ KHÔNG tự spawn lại. " +
+             "Dùng cho các spawn point cố định phục vụ 1 sự kiện (vd Witch Event) " +
+             "để có thể đếm được khi nào đã giết hết enemy trên map.")]
+    [SerializeField] private bool autoRespawn = true;
+
+    [Tooltip("Nếu false: spawn point này KHÔNG tự Spawn() lúc scene Start — " +
+             "phải gọi Spawn() thủ công từ nơi khác (vd WitchEventTrap khi trigger).")]
+    [SerializeField] private bool spawnOnStart = true;
+
     public Vector3 Position => transform.position;
+
+    /// <summary>
+    /// Bắn ra mỗi khi enemy được spawn từ điểm này chết (dù sau đó có tự respawn lại hay không).
+    /// Dùng cho các hệ thống cần đếm số enemy đã bị tiêu diệt (vd WitchEventEncounter).
+    /// </summary>
+    public event System.Action OnEnemyDefeated;
 
     private GameObject _currentEnemy;
 
-    private void Start() => Spawn();
+    private void Start()
+    {
+        if (spawnOnStart) Spawn();
+    }
 
     public void Spawn()
     {
@@ -30,6 +49,12 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
         if (prefab == null)
         {
             Debug.LogError($"[{name}] Chưa gán prefab nào trong _enemyEntries.", this);
+            return;
+        }
+
+        if (ObjectPool.Instance == null)
+        {
+            Debug.LogError($"[{name}] ObjectPool.Instance đang null.", this);
             return;
         }
 
@@ -74,6 +99,10 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
 
     public void NotifyDespawned(float despawnDelay)
     {
+        OnEnemyDefeated?.Invoke();
+
+        if (!autoRespawn) return;
+
         StartCoroutine(RespawnAfter(despawnDelay));
     }
 

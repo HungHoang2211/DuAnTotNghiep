@@ -9,6 +9,7 @@ namespace SimpleSurvival.AI
         private static readonly int IsAttackingHash = Animator.StringToHash("IsAttacking");
         private static readonly int IsHowlingHash = Animator.StringToHash("IsHowling");
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+        private static readonly int AcidAttackHash = Animator.StringToHash("AcidAttack");
 
         public override void SetMoving(bool moving)
         {
@@ -66,6 +67,12 @@ namespace SimpleSurvival.AI
         public override void CancelAttack()
         {
             _animator.ResetTrigger(IsAttackingHash);
+            _animator.ResetTrigger(AcidAttackHash);
+        }
+
+        public override void TriggerAcidAttack()
+        {
+            _animator.SetTrigger(AcidAttackHash);
         }
     }
 }

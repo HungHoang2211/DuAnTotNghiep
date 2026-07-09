@@ -120,11 +120,19 @@ namespace SimpleSurvival.Pets
 
             if (_state == DogState.Combat)
             {
-                // Mục tiêu hiện tại còn sống -> tiếp tục đánh, không xét gì thêm.
-                if (_combatTarget != null && IsAttackerAlive(_combatTarget))
+                // Player đang chủ động nhắm/tấn công 1 mục tiêu khác -> Dog chuyển theo ngay lập tức.
+                if (desiredTarget != null && desiredTarget != _combatTarget)
+                {
+                    _combatTarget = desiredTarget;
+                    attackSkill?.Cancel();
+                    return;
+                }
+
+                // Mục tiêu hiện tại vẫn còn hợp lệ (còn sống + CanBeTargeted) -> tiếp tục đánh, không xét gì thêm.
+                if (_combatTarget != null && IsTargetStillValid(_combatTarget))
                     return;
 
-                // Mục tiêu cũ đã chết -> ưu tiên tín hiệu từ Player, nếu không có thì tự dò enemy gần đó.
+                // Mục tiêu cũ không còn hợp lệ (chết, hoặc bị ẩn/bất tử) -> ưu tiên tín hiệu từ Player, nếu không có thì tự dò enemy gần đó.
                 if (desiredTarget == null)
                     desiredTarget = ScanNearbyEnemy();
 
@@ -175,7 +183,7 @@ namespace SimpleSurvival.Pets
 
             bool enemyStillAttackingPlayer = _enemyAttacker != null &&
                                               (Time.time - _lastPlayerDamagedTime) <= playerAttackedGraceTime &&
-                                              IsAttackerAlive(_enemyAttacker);
+                                              IsTargetStillValid(_enemyAttacker);
 
             if (playerAttacking && targetValid) return target.Transform;
             if (enemyStillAttackingPlayer) return _enemyAttacker;
@@ -192,9 +200,7 @@ namespace SimpleSurvival.Pets
 
             foreach (var hit in hits)
             {
-                IDamageable damageable = hit.GetComponent<IDamageable>();
-                if (damageable == null) damageable = hit.GetComponentInParent<IDamageable>();
-                if (damageable == null || damageable.IsDead) continue;
+                if (!IsTargetStillValid(hit.transform)) continue;
 
                 float dist = Vector3.Distance(transform.position, hit.transform.position);
                 if (dist < bestDist)
@@ -207,11 +213,24 @@ namespace SimpleSurvival.Pets
             return best;
         }
 
-        private bool IsAttackerAlive(Transform attacker)
+        /// <summary>
+        /// Mục tiêu được coi là hợp lệ để Dog tấn công nếu: còn sống (IDamageable.IsDead == false)
+        /// VÀ (nếu có ITargetable) đang CanBeTargeted() == true. Điều kiện thứ 2 giúp Dog tự động
+        /// bỏ qua các enemy đang ẩn/bất tử tạm thời (vd ZombieWitch lúc retreat/hidden).
+        /// </summary>
+        private bool IsTargetStillValid(Transform target)
         {
-            IDamageable damageable = attacker.GetComponent<IDamageable>();
-            if (damageable == null) damageable = attacker.GetComponentInParent<IDamageable>();
-            return damageable == null || !damageable.IsDead;
+            if (target == null) return false;
+
+            IDamageable damageable = target.GetComponent<IDamageable>();
+            if (damageable == null) damageable = target.GetComponentInParent<IDamageable>();
+            if (damageable != null && damageable.IsDead) return false;
+
+            ITargetable targetable = target.GetComponent<ITargetable>();
+            if (targetable == null) targetable = target.GetComponentInParent<ITargetable>();
+            if (targetable != null && !targetable.CanBeTargeted()) return false;
+
+            return true;
         }
 
         private void UpdateCombat()

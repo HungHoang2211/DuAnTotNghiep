@@ -52,7 +52,7 @@ namespace SimpleSurvival.AI
             _animator.SetTrigger(JumpAttackHash);
         }
 
-        public void TriggerAcidAttack()
+        public override void TriggerAcidAttack()
         {
             _animator.SetTrigger(AcidAttackHash);
         }

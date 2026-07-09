@@ -21,6 +21,9 @@ namespace SimpleSurvival.AI
         protected Transform _player;
         protected bool _isDead;
 
+        protected PlayerStats _playerStats;
+        protected bool _playerDead;
+
         protected virtual void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
@@ -40,6 +43,16 @@ namespace SimpleSurvival.AI
 
             _stats.OnDeath += HandleDeath;
             _stats.OnDamagedBy += HandleDamagedBy;
+
+            // Player là unique trong scene nên tìm 1 lần và lắng nghe OnDeath của player
+            if (_playerStats == null)
+                _playerStats = FindAnyObjectByType<PlayerStats>();
+
+            if (_playerStats != null)
+            {
+                _playerDead = _playerStats.IsDead;
+                _playerStats.OnDeath += HandlePlayerDeath;
+            }
         }
 
         protected virtual void OnDestroy()
@@ -49,6 +62,9 @@ namespace SimpleSurvival.AI
                 _stats.OnDeath -= HandleDeath;
                 _stats.OnDamagedBy -= HandleDamagedBy;
             }
+
+            if (_playerStats != null)
+                _playerStats.OnDeath -= HandlePlayerDeath;
         }
 
         public void Initialize(IEnemySpawnPoint spawnPoint)
@@ -63,6 +79,16 @@ namespace SimpleSurvival.AI
             _isDead = false;
             _player = null;
 
+            // Awake() có thể chạy trước khi Player được spawn (enemy pool khởi tạo trước),
+            // nên thử tìm + đăng ký lại mỗi lần enemy được Initialize() từ pool.
+            if (_playerStats == null)
+            {
+                _playerStats = FindAnyObjectByType<PlayerStats>();
+                if (_playerStats != null)
+                    _playerStats.OnDeath += HandlePlayerDeath;
+            }
+            _playerDead = _playerStats != null && _playerStats.IsDead;
+
             _agent.isStopped = false;
             _agent.nextPosition = transform.position;
 
@@ -73,6 +99,15 @@ namespace SimpleSurvival.AI
         protected abstract void OnInitialized();
         protected abstract void HandleDeath();
         protected abstract void HandleDamagedBy(GameObject source);
+
+        /// <summary>
+        /// Gọi khi player chết (ragdoll kích hoạt). Enemy con phải override để
+        /// dừng hẳn chase/attack, không cần biết chi tiết implement của player.
+        /// </summary>
+        protected virtual void HandlePlayerDeath()
+        {
+            _playerDead = true;
+        }
 
         /// <summary>
         /// Di chuyển GameObject theo path của NavMeshAgent nhưng thực thi
