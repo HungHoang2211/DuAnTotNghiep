@@ -129,7 +129,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 183888, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 401652, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
       propertyPath: m_RootOrder
@@ -176,6 +176,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
+--- !u!1 &80068783 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 183888, guid: 48d6c5aab89b56243bcf7124726cc232, type: 3}
+  m_PrefabInstance: {fileID: 80068782}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &293777205
 GameObject:
   m_ObjectHideFlags: 0
@@ -351,7 +356,7 @@ Light:
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.1
+    m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -622,6 +627,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 11439030, guid: a7404eeab8d5e49489a17e15938e8ec1, type: 3}
+      propertyPath: matClouds
+      value: 
+      objectReference: {fileID: 2100000, guid: a46bb5ebf1f910f469f4f759299304f3, type: 2}
+    - target: {fileID: 11439030, guid: a7404eeab8d5e49489a17e15938e8ec1, type: 3}
       propertyPath: matSkybox
       value: 
       objectReference: {fileID: 2100000, guid: b77663ae83fe4f14d897b166b823f83f, type: 2}
@@ -636,7 +645,7 @@ PrefabInstance:
     - target: {fileID: 11465078, guid: a7404eeab8d5e49489a17e15938e8ec1, type: 3}
       propertyPath: _gPartRain
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 80068783}
     - target: {fileID: 11495374, guid: a7404eeab8d5e49489a17e15938e8ec1, type: 3}
       propertyPath: _gPartSnow
       value: 
@@ -1050,7 +1059,7 @@ Light:
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.1
+    m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
