@@ -86,11 +86,10 @@ namespace SimpleSurvival.Player
         {
             if (_currentAnchors == null || !_currentAnchors.IsRanged) return;
 
-            if (_currentAnchors.MuzzleFlashPrefab != null)
-            {
-                GameObject flash = Instantiate(_currentAnchors.MuzzleFlashPrefab, _currentAnchors.MuzzlePoint.position, _currentAnchors.MuzzlePoint.rotation);
-                Destroy(flash, 2f);
-            }
+            _currentAnchors.MuzzleFlashParticles.Play(true);
+
+            if (_currentAnchors.ShellCasingParticles != null)
+                _currentAnchors.ShellCasingParticles.Emit(1);
 
             if (weaponAudioSource != null && _currentAnchors.FireSfx != null)
                 weaponAudioSource.PlayOneShot(_currentAnchors.FireSfx);

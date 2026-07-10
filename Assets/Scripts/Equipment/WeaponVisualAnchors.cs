@@ -4,21 +4,20 @@ namespace SimpleSurvival.Items
 {
     public sealed class WeaponVisualAnchors : MonoBehaviour
     {
-        [SerializeField] private Transform muzzlePoint;
-        [SerializeField] private Transform leftHandGripPoint;
-        [SerializeField] private GameObject muzzleFlashPrefab;
+        [SerializeField] private Transform leftHand0TargetIK;
+        [SerializeField] private Transform leftHand1TargetIK;
+        [SerializeField] private ParticleSystem muzzleFlashParticles;
+        [SerializeField] private ParticleSystem shellCasingParticles;
         [SerializeField] private AudioClip fireSfx;
         [SerializeField] private AudioClip hitSfx;
-        [SerializeField] private AudioClip breakSfx;
 
-        public Transform MuzzlePoint => muzzlePoint;
-        public Transform LeftHandGripPoint => leftHandGripPoint;
-        public GameObject MuzzleFlashPrefab => muzzleFlashPrefab;
+        public Transform LeftHand0TargetIK => leftHand0TargetIK;
+        public Transform LeftHand1TargetIK => leftHand1TargetIK;
+        public ParticleSystem MuzzleFlashParticles => muzzleFlashParticles;
+        public ParticleSystem ShellCasingParticles => shellCasingParticles;
         public AudioClip FireSfx => fireSfx;
         public AudioClip HitSfx => hitSfx;
-        public AudioClip BreakSfx => breakSfx;
 
-        public bool HasLeftHandGrip => leftHandGripPoint != null;
-        public bool IsRanged => muzzlePoint != null;
+        public bool IsRanged => muzzleFlashParticles != null;
     }
 }
