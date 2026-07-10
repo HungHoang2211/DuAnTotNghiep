@@ -43,6 +43,7 @@ namespace SimpleSurvival.UI
 
             root.SetActive(true);
             recipeList.Populate(recipeDatabase.Recipes, OnRecipeSelected);
+            recipeList.RefreshCraftableIcons();
 
             CraftingRecipeData firstRecipe = recipeList.FirstRecipe;
             if (firstRecipe != null)
