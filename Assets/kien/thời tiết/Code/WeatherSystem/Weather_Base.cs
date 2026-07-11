@@ -4,6 +4,7 @@ using System.Collections;
 public class Weather_Base : MonoBehaviour
 {
     protected Weather_Controller clWeatherController;
+    protected ToD_Base cachedToD;
 
     [SerializeField] protected bool _bUseDifferentFadeTimes;
     [SerializeField] protected float _fFadeTime = 5.0f;
@@ -16,11 +17,11 @@ public class Weather_Base : MonoBehaviour
     [SerializeField] protected float _fSoundVolume = 1.0f;
     [SerializeField] protected float _fTimeToFadeSound = 2.0f;
     [SerializeField] protected AudioClip _adAmbientSound;
+    [SerializeField] protected AudioSource _asAmbientSource;
 
     protected float _fSoundVolumeIn;
     protected float _fSoundVolumeOut = 0.0f;
     protected bool _bGotAudioSource = false;
-    protected bool _bTurnOffSoundAtExit = false;
 
     [SerializeField] protected bool _bUseMorningFog;
     [SerializeField] protected float _fFogMorningAmount = 0.002f;
@@ -61,31 +62,58 @@ public class Weather_Base : MonoBehaviour
     [SerializeField] protected GameObject _pNightParticle;
 
     public virtual void RunWeather() { }
-    public virtual void ForceWeatherChange() { }
+
+    public virtual float GetCurrentFadeTime()
+    {
+        if (_bUseDifferentFadeTimes && cachedToD != null)
+        {
+            switch (cachedToD.enCurrTimeset)
+            {
+                case ToD_Base.Timeset.SUNRISE: return _fSunriseFadeTime;
+                case ToD_Base.Timeset.DAY: return _fDayFadeTime;
+                case ToD_Base.Timeset.SUNSET: return _fSunsetFadeTime;
+                case ToD_Base.Timeset.NIGHT: return _fNightFadeTime;
+            }
+        }
+        return _fFadeTime;
+    }
 
     public virtual void TurnOnSound(GameObject gameobject)
     {
         if (!_bUsingSound) return;
 
-        AudioSource audio = gameobject.GetComponent<AudioSource>();
+        GameObject soundHost = _asAmbientSource != null ? _asAmbientSource.gameObject : gameobject;
+        AudioSource audio = _asAmbientSource != null ? _asAmbientSource : soundHost.GetComponent<AudioSource>();
+
         if (audio != null && _adAmbientSound != null)
         {
             _bGotAudioSource = true;
             audio.clip = _adAmbientSound;
-            if (gameobject.GetComponent<Weather_SoundFade>() == null)
+            audio.volume = _fSoundVolumeOut;
+
+            if (soundHost.GetComponent<Weather_SoundFade>() == null)
             {
-                gameobject.AddComponent<Weather_SoundFade>();
+                soundHost.AddComponent<Weather_SoundFade>();
             }
-            gameobject.GetComponent<Weather_SoundFade>().FadeAudioIn(_fTimeToFadeSound, _fSoundVolumeIn);
+            soundHost.GetComponent<Weather_SoundFade>().FadeAudioIn(_fTimeToFadeSound, _fSoundVolumeIn);
             audio.Play();
         }
     }
 
-    public virtual void ExitWeatherEffect(GameObject gameobject)
+    public virtual void ExitWeatherEffect(GameObject gameobject, float progress)
     {
-        if (gameobject.GetComponent<Weather_SoundFade>() != null && _bGotAudioSource)
+        if (!_bUsingSound || !_bGotAudioSource) return;
+
+        AudioSource audio = _asAmbientSource != null ? _asAmbientSource : gameobject.GetComponent<AudioSource>();
+        if (audio == null) return;
+
+        float p = Mathf.Clamp01(progress);
+        audio.volume = Mathf.Lerp(_fSoundVolumeIn, _fSoundVolumeOut, p);
+
+        if (p >= 1.0f)
         {
-            gameobject.GetComponent<Weather_SoundFade>().FadeAudioOut(_fTimeToFadeSound, _fSoundVolumeOut);
+            audio.Stop();
+            _bGotAudioSource = false;
         }
     }
 }

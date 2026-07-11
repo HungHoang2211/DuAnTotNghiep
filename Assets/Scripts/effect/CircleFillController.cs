@@ -17,7 +17,7 @@ public class CircleFillController : MonoBehaviour
 
     private Material targetMaterial;
     private float currentProgress = 0f;
-    private bool isFilling = true; // Dùng riêng cho kiểu PingPong
+   
 
     void Start()
     {
