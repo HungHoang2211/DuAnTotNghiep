@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using SimpleSurvival.Audio;
 using SimpleSurvival.Items;
 using SimpleSurvival.Player;
 using SimpleSurvival.Stats;
@@ -27,10 +28,13 @@ namespace SimpleSurvival.Actions
         private readonly bool _isEphemeral;
 
         private ItemStack _toolStack;
+        private HarvestableAudioController _targetAudio;
         private bool _hitAppliedThisChop;
         private bool _targetDepleted;
         private float _chopTimer;
         private float _currentSafetyTimeout;
+
+        public ItemStack ToolStack => _toolStack;
 
         public GatherAction(
             PlayerActionController controller,
@@ -65,6 +69,9 @@ namespace SimpleSurvival.Actions
         {
             _controller.CancelSneak();
             _target.Stats.OnDepleted += HandleTargetDepleted;
+
+            if (_target.Transform != null)
+                _targetAudio = _target.Transform.GetComponent<HarvestableAudioController>();
 
             if (_isEphemeral && _toolSwapper != null && _toolStack != null)
             {
@@ -102,11 +109,16 @@ namespace SimpleSurvival.Actions
             FacingTarget();
             _target.Stats.TakeDamage(_damage);
 
+            if (_targetAudio != null && !_target.Stats.IsDepleted)
+                _targetAudio.PlayImpact();
+
             ConsumeToolDurability();
         }
-
         public void HandleEnd()
         {
+            if (_targetAudio != null)
+                _targetAudio.StopImpact();
+
             if (_targetDepleted)
             {
                 DropItems();
@@ -231,6 +243,9 @@ namespace SimpleSurvival.Actions
         private void HandleTargetDepleted()
         {
             _targetDepleted = true;
+
+            if (_targetAudio != null)
+                _targetAudio.PlayDepleted();
         }
 
         private void FacingTarget()

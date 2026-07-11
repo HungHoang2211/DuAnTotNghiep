@@ -63,25 +63,49 @@ namespace SimpleSurvival.Audio
             return source;
         }
 
-        public void PlaySfx(AudioCue cue)
+        public AudioSource PlaySfx(AudioCue cue)
         {
-            PlayOneShot(cue, Vector3.zero, false);
+            return PlayOneShot(cue, Vector3.zero, false);
         }
 
-        public void PlaySfxAt(AudioCue cue, Vector3 position)
+        public AudioSource PlaySfxAt(AudioCue cue, Vector3 position)
         {
-            PlayOneShot(cue, position, true);
+            return PlayOneShot(cue, position, true);
         }
-
-        private void PlayOneShot(AudioCue cue, Vector3 position, bool positional)
+        public void PlayImportantSfxAt(AudioCue cue, Vector3 position)
         {
             if (!IsPlayable(cue))
                 return;
+
+            GameObject holder = new GameObject("ImportantSfx_" + cue.name);
+            holder.transform.SetParent(transform);
+
+            AudioSource source = holder.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            ConfigureSource(source, cue, position, true);
+            source.loop = false;
+            source.Play();
+
+            StartCoroutine(DestroyAfterPlay(holder, source));
+        }
+
+        private IEnumerator DestroyAfterPlay(GameObject holder, AudioSource source)
+        {
+            float duration = source.clip != null ? source.clip.length / Mathf.Max(source.pitch, 0.01f) : 0f;
+            yield return new WaitForSeconds(duration);
+            Destroy(holder);
+        }
+
+        private AudioSource PlayOneShot(AudioCue cue, Vector3 position, bool positional)
+        {
+            if (!IsPlayable(cue))
+                return null;
 
             AudioSource source = _sfxPool.GetAvailable();
             ConfigureSource(source, cue, position, positional);
             source.loop = false;
             source.Play();
+            return source;
         }
 
         public void StartLoop(AudioCue cue)

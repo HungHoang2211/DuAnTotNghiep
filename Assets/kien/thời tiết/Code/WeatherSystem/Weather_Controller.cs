@@ -35,6 +35,8 @@ public class Weather_Controller : MonoBehaviour
     private float _fEnvBlendElapsed;
     private float _fLightIntensityFrom, _fLightIntensityTarget;
     private Color _cLightColorFrom, _cLightColorTarget;
+    private float _fMoonIntensityFrom, _fMoonIntensityTarget;
+    private Color _cMoonColorFrom, _cMoonColorTarget;
     private Color _cSkyTintFrom, _cSkyTintTarget;
     private Color _cSkyGroundFrom, _cSkyGroundTarget;
     private Color _cCloudFrom, _cCloudTarget;
@@ -177,6 +179,8 @@ public class Weather_Controller : MonoBehaviour
         bool targetChanged = !_bEnvBlendInitialized
             || !Mathf.Approximately(_fLightIntensityTarget, lightInt)
             || _cLightColorTarget != lightCol
+            || !Mathf.Approximately(_fMoonIntensityTarget, moonInt)
+            || _cMoonColorTarget != moonCol
             || _cSkyTintTarget != skyTint
             || _cSkyGroundTarget != skyGround
             || _cCloudTarget != cloudCol
@@ -187,6 +191,8 @@ public class Weather_Controller : MonoBehaviour
         {
             _fLightIntensityFrom = _cachedToD.lSun != null ? _cachedToD.lSun.intensity : lightInt;
             _cLightColorFrom = _cachedToD.lSun != null ? _cachedToD.lSun.color : lightCol;
+            _fMoonIntensityFrom = _cachedToD.lMoon != null ? _cachedToD.lMoon.intensity : moonInt;
+            _cMoonColorFrom = _cachedToD.lMoon != null ? _cachedToD.lMoon.color : moonCol;
             _cSkyTintFrom = (_bUsingProceduralSkybox && matSkybox != null) ? matSkybox.GetColor("_SkyTint") : skyTint;
             _cSkyGroundFrom = (_bUsingProceduralSkybox && matSkybox != null) ? matSkybox.GetColor("_GroundColor") : skyGround;
             _cCloudFrom = matClouds != null ? matClouds.color : cloudCol;
@@ -195,6 +201,8 @@ public class Weather_Controller : MonoBehaviour
 
             _fLightIntensityTarget = lightInt;
             _cLightColorTarget = lightCol;
+            _fMoonIntensityTarget = moonInt;
+            _cMoonColorTarget = moonCol;
             _cSkyTintTarget = skyTint;
             _cSkyGroundTarget = skyGround;
             _cCloudTarget = cloudCol;
@@ -212,6 +220,12 @@ public class Weather_Controller : MonoBehaviour
         {
             _cachedToD.lSun.intensity = Mathf.Lerp(_fLightIntensityFrom, _fLightIntensityTarget, t);
             _cachedToD.lSun.color = Color.Lerp(_cLightColorFrom, _cLightColorTarget, t);
+        }
+
+        if (_cachedToD.lMoon != null)
+        {
+            _cachedToD.lMoon.intensity = Mathf.Lerp(_fMoonIntensityFrom, _fMoonIntensityTarget, t);
+            _cachedToD.lMoon.color = Color.Lerp(_cMoonColorFrom, _cMoonColorTarget, t);
         }
 
         if (_bUsingProceduralSkybox && matSkybox != null)
