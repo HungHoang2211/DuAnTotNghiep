@@ -1,4 +1,6 @@
+using SimpleSurvival.Items;
 using UnityEngine;
+
 
 namespace SimpleSurvival.Audio
 {
@@ -31,6 +33,18 @@ namespace SimpleSurvival.Audio
         [SerializeField] private string moveSpeedParam = "MoveSpeed";
         [SerializeField] private int sneakMoveMode = 1;
         [SerializeField] private float runSpeedThreshold = 3f;
+        [SerializeField] private float minMoveSpeedForFootstep = 0.05f;
+
+        [Header("Combat Impact Cues")]
+        [SerializeField] private AudioCue fistsImpactCue;
+        [SerializeField] private AudioCue melee1HImpactCue;
+        [SerializeField] private AudioCue melee2HImpactCue;
+        [SerializeField] private AudioCue pistolImpactCue;
+        [SerializeField] private AudioCue rifleImpactCue;
+
+        [Header("Gather Impact Cues")]
+        [SerializeField] private AudioCue gatherAxeCue;
+        [SerializeField] private AudioCue gatherPickaxeCue;
 
         private Animator _animator;
 
@@ -39,9 +53,39 @@ namespace SimpleSurvival.Audio
             _animator = GetComponent<Animator>();
         }
 
+        public void PlayAttackImpact(WeaponCategory category)
+        {
+            AudioManager.Instance.PlaySfx(ResolveAttackImpactCue(category));
+        }
+
+        private AudioCue ResolveAttackImpactCue(WeaponCategory category)
+        {
+            switch (category)
+            {
+                case WeaponCategory.Fists: return fistsImpactCue;
+                case WeaponCategory.Melee1H: return melee1HImpactCue;
+                case WeaponCategory.Melee2H: return melee2HImpactCue;
+                case WeaponCategory.Pistol: return pistolImpactCue;
+                case WeaponCategory.Rifle: return rifleImpactCue;
+                default: return fistsImpactCue;
+            }
+        }
+
         public void PlayFootstep()
         {
+            if (_animator.GetFloat(moveSpeedParam) < minMoveSpeedForFootstep) return;
+
             AudioManager.Instance.PlaySfx(ResolveFootstepCue());
+        }
+
+        public void PlayGatherImpactAxe()
+        {
+            AudioManager.Instance.PlaySfx(gatherAxeCue);
+        }
+
+        public void PlayGatherImpactPickaxe()
+        {
+            AudioManager.Instance.PlaySfx(gatherPickaxeCue);
         }
 
         private AudioCue ResolveFootstepCue()
