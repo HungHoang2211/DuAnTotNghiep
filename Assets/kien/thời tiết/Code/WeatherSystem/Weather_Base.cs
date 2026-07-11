@@ -23,34 +23,17 @@ public class Weather_Base : MonoBehaviour
     protected float _fSoundVolumeOut = 0.0f;
     protected bool _bGotAudioSource = false;
 
+    [Header("Weather Modifiers (nhan len Environment baseline cua ToD_Base)")]
+    [SerializeField] protected float _fLightIntensityMultiplier = 1.0f;
+    [SerializeField] protected Color _cLightColorTint = Color.white;
+    [SerializeField] protected Color _cSkyTintMultiply = Color.white;
+    [SerializeField] protected Color _cSkyGroundMultiply = Color.white;
+    [SerializeField] protected float _fFogAmountMultiplier = 1.0f;
+    [SerializeField] protected Color _cFogColorTint = Color.white;
+
+    [Header("Morning Fog Override")]
     [SerializeField] protected bool _bUseMorningFog;
-    [SerializeField] protected float _fFogMorningAmount = 0.002f;
-    [SerializeField] protected float _fFogAmount = 0.005f;
-    [SerializeField] protected Color _cFogColor = Color.grey;
-
-    [Header("Sunrise Settings")]
-    [SerializeField] protected float _fSunrise_LightIntensity = 0.5f;
-    [SerializeField] protected Color _cSunrise_LightColor = Color.white;
-    [SerializeField] protected Color _cSunrise_SkyTintColor = Color.white;
-    [SerializeField] protected Color _cSunrise_SkyGroundColor = Color.white;
-
-    [Header("Day Settings")]
-    [SerializeField] protected float _fDay_LightIntensity = 1.0f;
-    [SerializeField] protected Color _cDay_LightColor = Color.white;
-    [SerializeField] protected Color _cDay_SkyTintColor = Color.white;
-    [SerializeField] protected Color _cDay_SkyGroundColor = Color.white;
-
-    [Header("Sunset Settings")]
-    [SerializeField] protected float _fSunset_LightIntensity = 0.5f;
-    [SerializeField] protected Color _cSunset_LightColor = Color.white;
-    [SerializeField] protected Color _cSunset_SkyTintColor = Color.white;
-    [SerializeField] protected Color _cSunset_SkyGroundColor = Color.white;
-
-    [Header("Night Settings")]
-    [SerializeField] protected float _fNight_LightIntensity = 0.05f;
-    [SerializeField] protected Color _cNight_LightColor = Color.blue;
-    [SerializeField] protected Color _cNight_SkyTintColor = Color.black;
-    [SerializeField] protected Color _cNight_SkyGroundColor = Color.black;
+    [SerializeField] protected float _fFogMorningMultiplier = 1.0f;
 
     [Header("Shared Material Settings")]
     [SerializeField] protected Color _cCloudColor = Color.white;
@@ -76,6 +59,22 @@ public class Weather_Base : MonoBehaviour
             }
         }
         return _fFadeTime;
+    }
+
+    protected void GetEnvironmentTarget(ToD_Base.Timeset timeset, out float lightIntensity, out Color lightColor, out float moonIntensity, out Color moonColor, out Color skyTint, out Color skyGround, out float fogAmount, out Color fogColor)
+    {
+        ToD_EnvironmentSettings baseEnv = cachedToD.GetEnvironmentSettings(timeset);
+
+        lightIntensity = baseEnv.LightIntensity * _fLightIntensityMultiplier;
+        lightColor = baseEnv.LightColor * _cLightColorTint;
+        moonIntensity = baseEnv.MoonIntensity;
+        moonColor = baseEnv.MoonColor;
+        skyTint = baseEnv.SkyTintColor * _cSkyTintMultiply;
+        skyGround = baseEnv.SkyGroundColor * _cSkyGroundMultiply;
+
+        float morningMultiplier = (_bUseMorningFog && timeset == ToD_Base.Timeset.SUNRISE) ? _fFogMorningMultiplier : 1.0f;
+        fogAmount = baseEnv.FogAmount * _fFogAmountMultiplier * morningMultiplier;
+        fogColor = baseEnv.FogColor * _cFogColorTint;
     }
 
     public virtual void TurnOnSound(GameObject gameobject)

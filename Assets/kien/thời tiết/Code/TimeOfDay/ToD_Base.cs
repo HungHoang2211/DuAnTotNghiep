@@ -1,13 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/// <summary>
-/// Base: Time of Day
-/// </summary>
 public class ToD_Base : MonoBehaviour
 {
-    /********** ----- VARIABLES ----- **********/
-
     [SerializeField] private bool _bUseMoon = true;
     [SerializeField] private bool _bUseWeather = true;
     [SerializeField] private float _fSecondInAFullDay = 60.0f;
@@ -38,8 +33,13 @@ public class ToD_Base : MonoBehaviour
     public Light lSun;
     public Light lMoon;
 
-    // TỐI ƯU HIỆU SUẤT: Cache script Weather_Controller để tránh gọi GetComponent trong Update liên tục
     private Weather_Controller _cachedWeatherController;
+
+    [Header("Environment Settings (Baseline dung chung cho moi loai thoi tiet)")]
+    [SerializeField] private ToD_EnvironmentSettings _envSunrise = new ToD_EnvironmentSettings { LightIntensity = 0.5f };
+    [SerializeField] private ToD_EnvironmentSettings _envDay = new ToD_EnvironmentSettings { LightIntensity = 1.0f };
+    [SerializeField] private ToD_EnvironmentSettings _envSunset = new ToD_EnvironmentSettings { LightIntensity = 0.5f };
+    [SerializeField] private ToD_EnvironmentSettings _envNight = new ToD_EnvironmentSettings { LightIntensity = 0.05f, LightColor = Color.blue, SkyTintColor = Color.black, SkyGroundColor = Color.black };
 
     public enum Timeset
     {
@@ -51,8 +51,6 @@ public class ToD_Base : MonoBehaviour
 
     [HideInInspector]
     public Timeset enCurrTimeset;
-
-    /********** ----- GETTERS AND SETTERS ----- **********/
 
     public float Get_fCurrentTimeOfDay { get { return _fCurrentTimeOfDay; } }
     public float Get_fCurrentHour { get { return _fCurrentHour; } }
@@ -69,6 +67,18 @@ public class ToD_Base : MonoBehaviour
     public int GetSet_iSunsetStart { get { return _iSunsetStart; } set { _iSunsetStart = value; } }
     public int GetSet_iNightStart { get { return _iNightStart; } set { _iNightStart = value; } }
 
+    public ToD_EnvironmentSettings GetEnvironmentSettings(Timeset timeset)
+    {
+        switch (timeset)
+        {
+            case Timeset.SUNRISE: return _envSunrise;
+            case Timeset.DAY: return _envDay;
+            case Timeset.SUNSET: return _envSunset;
+            case Timeset.NIGHT: return _envNight;
+        }
+        return _envDay;
+    }
+
     void Start()
     {
         _fStartingHour = ONEHOURLENGTH * (float)_iStartHour;
@@ -83,7 +93,6 @@ public class ToD_Base : MonoBehaviour
         _fCurrentHour = 0.0f;
         _fCurrentMinute = 0.0f;
 
-        // Lưu cache sẵn bộ điều khiển thời tiết để tối ưu bộ nhớ
         if (gWeatherMaster != null)
         {
             _cachedWeatherController = gWeatherMaster.GetComponent<Weather_Controller>();
@@ -95,20 +104,16 @@ public class ToD_Base : MonoBehaviour
         UpdateSunAndMoon();
         UpdateTimeset();
 
-        // Xử lý vận tốc trôi của thời gian toàn cục
         _fCurrentTimeOfDay += (Time.deltaTime / _fSecondInAFullDay) * _fTimeMultiplier;
 
-        // Tính toán định dạng thời gian dạng Số (Digital Hours/Minutes)
         _fCurrentHour = 24 * _fCurrentTimeOfDay;
         _fCurrentMinute = 60 * (_fCurrentHour - Mathf.Floor(_fCurrentHour));
 
-        // Khi kết thúc chu kỳ một ngày (Vượt ngưỡng 1.0f)
         if (_fCurrentTimeOfDay >= 1.0f)
         {
             _fCurrentTimeOfDay = 0.0f;
             _iAmountOfDaysPlayed += 1;
 
-            // ĐÃ SỬA: Thay vì chỉ tăng biến đếm, ta gọi hàm chuyên dụng bên Controller để nó tự động tính toán kiểm tra đổi sang trời mưa
             if (_bUseWeather && _cachedWeatherController != null)
             {
                 _cachedWeatherController.OnNewDayArrived();
@@ -118,11 +123,9 @@ public class ToD_Base : MonoBehaviour
 
     void UpdateSunAndMoon()
     {
-        // Tạo góc xoay trục X dựa trên thời gian trong ngày
         float sunX = (_fCurrentTimeOfDay * 360f) - 90f;
         float moonX = (_fCurrentTimeOfDay * 360f) - 270f;
 
-        // Cách quay mới: Tạo góc quay X trước, sau đó ép cứng góc quay Y = 170 toàn cục theo không gian thế giới (World Space)
         if (lSun != null)
         {
             lSun.transform.rotation = Quaternion.AngleAxis(170f, Vector3.up) * Quaternion.AngleAxis(sunX, Vector3.right);
@@ -136,7 +139,6 @@ public class ToD_Base : MonoBehaviour
 
     void UpdateTimeset()
     {
-        // Điều kiện rẽ nhánh chính xác tuyệt đối để thiết lập 4 khoảng mốc thời gian trong ngày
         if (_fCurrentTimeOfDay >= _fStartingSunrise && _fCurrentTimeOfDay <= _fStartingDay)
         {
             if (enCurrTimeset != Timeset.SUNRISE) SetCurrentTimeset(Timeset.SUNRISE);
@@ -149,7 +151,7 @@ public class ToD_Base : MonoBehaviour
         {
             if (enCurrTimeset != Timeset.SUNSET) SetCurrentTimeset(Timeset.SUNSET);
         }
-        else // Khoảng thời gian từ Đêm muộn cho đến trước Bình minh ngày hôm sau
+        else
         {
             if (enCurrTimeset != Timeset.NIGHT) SetCurrentTimeset(Timeset.NIGHT);
         }
