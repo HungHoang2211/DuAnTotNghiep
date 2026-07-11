@@ -8,7 +8,8 @@ public class Weather_Sun : Weather_Base
     private void Start()
     {
         clWeatherController = GetComponent<Weather_Controller>();
-        if (!_bUseMorningFog) _fFogMorningAmount = _fFogAmount;
+        if (clWeatherController != null && clWeatherController.gTimeOfDay != null)
+            cachedToD = clWeatherController.gTimeOfDay.GetComponent<ToD_Base>();
 
         _fSoundVolumeIn = _fSoundVolume;
         _fSoundVolumeOut = 0f;
@@ -16,60 +17,41 @@ public class Weather_Sun : Weather_Base
 
     public override void RunWeather()
     {
-        if (clWeatherController == null || clWeatherController.gTimeOfDay == null) return;
-        ToD_Base tod = clWeatherController.gTimeOfDay.GetComponent<ToD_Base>();
+        if (clWeatherController == null || cachedToD == null) return;
 
-        float currentFade = _bUseDifferentFadeTimes ? _fFadeTime : _fFadeTime;
+        GetEnvironmentTarget(cachedToD.enCurrTimeset, out float lightIntensity, out Color lightColor, out float moonIntensity, out Color moonColor, out Color skyTint, out Color skyGround, out float fogAmount, out Color fogColor);
 
-        if (tod.enCurrTimeset == ToD_Base.Timeset.SUNRISE)
+        float currentFade = GetCurrentFadeTime();
+        clWeatherController.UpdateAllWeather(lightIntensity, lightColor, moonIntensity, moonColor, skyTint, skyGround, _cCloudColor, fogAmount, fogColor, currentFade);
+
+        switch (cachedToD.enCurrTimeset)
         {
-            float fog = _bUseMorningFog ? _fFogMorningAmount : _fFogAmount;
-            clWeatherController.UpdateAllWeather(_fSunrise_LightIntensity, _cSunrise_LightColor, 0f, Color.black, _cSunrise_SkyTintColor, _cSunrise_SkyGroundColor, _cCloudColor, fog, _cFogColor, _bUseDifferentFadeTimes ? _fSunriseFadeTime : currentFade);
-            clWeatherController.DeactivateTimesetParticle(_pNightParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunriseParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.DAY)
-        {
-            clWeatherController.UpdateAllWeather(_fDay_LightIntensity, _cDay_LightColor, 0f, Color.black, _cDay_SkyTintColor, _cDay_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _bUseDifferentFadeTimes ? _fDayFadeTime : currentFade);
-            clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
-            clWeatherController.ActivateTimesetParticle(_pDayParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.SUNSET)
-        {
-            clWeatherController.UpdateAllWeather(_fSunset_LightIntensity, _cSunset_LightColor, 0f, Color.black, _cSunset_SkyTintColor, _cSunset_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _bUseDifferentFadeTimes ? _fSunsetFadeTime : currentFade);
-            clWeatherController.DeactivateTimesetParticle(_pDayParticle);
-            clWeatherController.ActivateTimesetParticle(_pSunsetParticle);
-        }
-        else if (tod.enCurrTimeset == ToD_Base.Timeset.NIGHT)
-        {
-            clWeatherController.UpdateAllWeather(_fNight_LightIntensity, _cNight_LightColor, 0f, Color.black, _cNight_SkyTintColor, _cNight_SkyGroundColor, _cCloudColor, _fFogAmount, _cFogColor, _bUseDifferentFadeTimes ? _fNightFadeTime : currentFade);
-            clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
-            clWeatherController.ActivateTimesetParticle(_pNightParticle);
+            case ToD_Base.Timeset.SUNRISE:
+                clWeatherController.DeactivateTimesetParticle(_pNightParticle);
+                clWeatherController.ActivateTimesetParticle(_pSunriseParticle);
+                break;
+            case ToD_Base.Timeset.DAY:
+                clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
+                clWeatherController.ActivateTimesetParticle(_pDayParticle);
+                break;
+            case ToD_Base.Timeset.SUNSET:
+                clWeatherController.DeactivateTimesetParticle(_pDayParticle);
+                clWeatherController.ActivateTimesetParticle(_pSunsetParticle);
+                break;
+            case ToD_Base.Timeset.NIGHT:
+                clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
+                clWeatherController.ActivateTimesetParticle(_pNightParticle);
+                break;
         }
     }
 
-    public override void ForceWeatherChange()
-    {
-        RunWeather();
-    }
-
-    public override void TurnOnSound(GameObject gameobject)
-    {
-        base.TurnOnSound(gameobject);
-        _bTurnOffSoundAtExit = true;
-    }
-
-    public override void ExitWeatherEffect(GameObject gameobject)
+    public override void ExitWeatherEffect(GameObject gameobject, float progress)
     {
         clWeatherController.DeactivateTimesetParticle(_pSunriseParticle);
         clWeatherController.DeactivateTimesetParticle(_pDayParticle);
         clWeatherController.DeactivateTimesetParticle(_pSunsetParticle);
         clWeatherController.DeactivateTimesetParticle(_pNightParticle);
 
-        if (_bTurnOffSoundAtExit)
-        {
-            base.ExitWeatherEffect(gameobject);
-            _bTurnOffSoundAtExit = false;
-        }
+        base.ExitWeatherEffect(gameobject, progress);
     }
 }

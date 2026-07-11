@@ -4,10 +4,9 @@ using System.Collections;
 public class Weather_Controller : MonoBehaviour
 {
     private bool _bChangeWeather;
-    private int _iNewWeather;
     private bool _bStartWeatherChange;
     private float _fTimeChangeWeatherStart;
-    private float _fTimeChangeWeatherEnd = 5.0f; // Thời gian chuyển giao thời tiết (5 giây)
+    private float _fTimeChangeWeatherEnd = 5.0f;
 
     [SerializeField] private bool _bUsingProceduralSkybox;
     [SerializeField] private bool _bUseSun = true;
@@ -31,6 +30,16 @@ public class Weather_Controller : MonoBehaviour
     private ToD_Base _cachedToD;
     private Weather_Sun _weatherSun;
     private Weather_Rain _weatherRain;
+
+    private bool _bEnvBlendInitialized;
+    private float _fEnvBlendElapsed;
+    private float _fLightIntensityFrom, _fLightIntensityTarget;
+    private Color _cLightColorFrom, _cLightColorTarget;
+    private Color _cSkyTintFrom, _cSkyTintTarget;
+    private Color _cSkyGroundFrom, _cSkyGroundTarget;
+    private Color _cCloudFrom, _cCloudTarget;
+    private float _fFogAmountFrom, _fFogAmountTarget;
+    private Color _cFogColorFrom, _cFogColorTarget;
 
     public enum WeatherType
     {
@@ -78,7 +87,6 @@ public class Weather_Controller : MonoBehaviour
             ChooseNewWeather();
         }
 
-        // ĐÃ SỬA: Luôn cập nhật thời tiết mỗi khung hình để hạt mưa (Rain Particle) được Active kịp thời lúc chuyển giao
         UpdateCurrentWeather();
 
         if (_bStartWeatherChange)
@@ -102,7 +110,7 @@ public class Weather_Controller : MonoBehaviour
         while (!targetFound && attempts < 10)
         {
             attempts++;
-            int checkWeather = Random.Range(1, 3); // Bốc ngẫu nhiên 1 (SUN) hoặc 2 (RAIN)
+            int checkWeather = Random.Range(1, 3);
             if (checkWeather == (int)_enCurrWeather) continue;
 
             if (checkWeather == 1 && _bUseSun) { _enNewWeather = WeatherType.SUN; targetFound = true; }
@@ -121,6 +129,12 @@ public class Weather_Controller : MonoBehaviour
         _bStartWeatherChange = true;
         _fTimeChangeWeatherStart = 0.0f;
 
+        Weather_Base targetWeather = (_enNewWeather == WeatherType.SUN) ? (Weather_Base)_weatherSun : (Weather_Base)_weatherRain;
+        if (targetWeather != null)
+        {
+            _fTimeChangeWeatherEnd = Mathf.Max(targetWeather.GetCurrentFadeTime(), 0.01f);
+        }
+
         if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.TurnOnSound(this.gameObject);
         else if (_enNewWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.TurnOnSound(this.gameObject);
     }
@@ -130,13 +144,10 @@ public class Weather_Controller : MonoBehaviour
         _fTimeChangeWeatherStart += Time.deltaTime;
         float progress = _fTimeChangeWeatherStart / _fTimeChangeWeatherEnd;
 
-        if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.ForceWeatherChange();
-        else if (_enNewWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.ForceWeatherChange();
-
         if (_enNewWeather != _enCurrWeather)
         {
-            if (_enCurrWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.ExitWeatherEffect(this.gameObject);
-            else if (_enCurrWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.ExitWeatherEffect(this.gameObject);
+            if (_enCurrWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.ExitWeatherEffect(this.gameObject, progress);
+            else if (_enCurrWeather == WeatherType.RAIN && _weatherRain != null) _weatherRain.ExitWeatherEffect(this.gameObject, progress);
         }
 
         if (progress >= 1.0f)
@@ -148,7 +159,6 @@ public class Weather_Controller : MonoBehaviour
 
     private void UpdateCurrentWeather()
     {
-        // ĐÃ SỬA: Khi đang đổi thời tiết, cập nhật song song hiệu ứng ánh sáng/hạt của thời tiết MỚI đang chuyển tới
         if (_bStartWeatherChange)
         {
             if (_enNewWeather == WeatherType.SUN && _weatherSun != null) _weatherSun.RunWeather();
@@ -164,25 +174,59 @@ public class Weather_Controller : MonoBehaviour
     {
         if (_cachedToD == null) return;
 
+        bool targetChanged = !_bEnvBlendInitialized
+            || !Mathf.Approximately(_fLightIntensityTarget, lightInt)
+            || _cLightColorTarget != lightCol
+            || _cSkyTintTarget != skyTint
+            || _cSkyGroundTarget != skyGround
+            || _cCloudTarget != cloudCol
+            || !Mathf.Approximately(_fFogAmountTarget, fogAmount)
+            || _cFogColorTarget != fogCol;
+
+        if (targetChanged)
+        {
+            _fLightIntensityFrom = _cachedToD.lSun != null ? _cachedToD.lSun.intensity : lightInt;
+            _cLightColorFrom = _cachedToD.lSun != null ? _cachedToD.lSun.color : lightCol;
+            _cSkyTintFrom = (_bUsingProceduralSkybox && matSkybox != null) ? matSkybox.GetColor("_SkyTint") : skyTint;
+            _cSkyGroundFrom = (_bUsingProceduralSkybox && matSkybox != null) ? matSkybox.GetColor("_GroundColor") : skyGround;
+            _cCloudFrom = matClouds != null ? matClouds.color : cloudCol;
+            _fFogAmountFrom = RenderSettings.fogDensity;
+            _cFogColorFrom = RenderSettings.fogColor;
+
+            _fLightIntensityTarget = lightInt;
+            _cLightColorTarget = lightCol;
+            _cSkyTintTarget = skyTint;
+            _cSkyGroundTarget = skyGround;
+            _cCloudTarget = cloudCol;
+            _fFogAmountTarget = fogAmount;
+            _cFogColorTarget = fogCol;
+
+            _fEnvBlendElapsed = 0.0f;
+            _bEnvBlendInitialized = true;
+        }
+
+        _fEnvBlendElapsed += Time.deltaTime;
+        float t = Mathf.Clamp01(_fEnvBlendElapsed / Mathf.Max(fadeTime, 0.001f));
+
         if (_cachedToD.lSun != null)
         {
-            _cachedToD.lSun.intensity = Mathf.Lerp(_cachedToD.lSun.intensity, lightInt, Time.deltaTime / fadeTime);
-            _cachedToD.lSun.color = Color.Lerp(_cachedToD.lSun.color, lightCol, Time.deltaTime / fadeTime);
+            _cachedToD.lSun.intensity = Mathf.Lerp(_fLightIntensityFrom, _fLightIntensityTarget, t);
+            _cachedToD.lSun.color = Color.Lerp(_cLightColorFrom, _cLightColorTarget, t);
         }
 
         if (_bUsingProceduralSkybox && matSkybox != null)
         {
-            matSkybox.SetColor("_SkyTint", Color.Lerp(matSkybox.GetColor("_SkyTint"), skyTint, Time.deltaTime / fadeTime));
-            matSkybox.SetColor("_GroundColor", Color.Lerp(matSkybox.GetColor("_GroundColor"), skyGround, Time.deltaTime / fadeTime));
+            matSkybox.SetColor("_SkyTint", Color.Lerp(_cSkyTintFrom, _cSkyTintTarget, t));
+            matSkybox.SetColor("_GroundColor", Color.Lerp(_cSkyGroundFrom, _cSkyGroundTarget, t));
         }
 
         if (matClouds != null)
         {
-            matClouds.color = Color.Lerp(matClouds.color, cloudCol, Time.deltaTime / fadeTime);
+            matClouds.color = Color.Lerp(_cCloudFrom, _cCloudTarget, t);
         }
 
-        RenderSettings.fogDensity = Mathf.Lerp(RenderSettings.fogDensity, fogAmount, Time.deltaTime / fadeTime);
-        RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, fogCol, Time.deltaTime / fadeTime);
+        RenderSettings.fogDensity = Mathf.Lerp(_fFogAmountFrom, _fFogAmountTarget, t);
+        RenderSettings.fogColor = Color.Lerp(_cFogColorFrom, _cFogColorTarget, t);
     }
 
     public void ActivateTimesetParticle(GameObject particle)
@@ -208,12 +252,10 @@ public class Weather_Controller : MonoBehaviour
         }
         else
         {
-            _iNewWeather = weatherTypeIndex;
             StartWeatherTransition((WeatherType)weatherTypeIndex);
         }
     }
 
-    // ĐÃ THÊM: Logic xử lý qua ngày mới chuẩn xác, tự động đếm tích lũy để kích hoạt đổi thời tiết tự động
     public void OnNewDayArrived()
     {
         _iAmountOfDaysSinceLastWeather += 1;
@@ -227,7 +269,7 @@ public class Weather_Controller : MonoBehaviour
             else
                 _iAmountOfDaysToNewWeather = _iChangeWeatherAfterDays;
 
-            _bChangeWeather = true; // Bật cờ cho Update() tự chọn thời tiết ngẫu nhiên mới
+            _bChangeWeather = true;
         }
     }
 }
