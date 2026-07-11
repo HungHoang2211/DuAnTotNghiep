@@ -12,7 +12,7 @@ namespace SimpleSurvival.AI
     {
         [Header("Detection Layers")]
         [SerializeField] protected LayerMask playerLayer;
-        [SerializeField] protected LayerMask obstacleLayer;
+        [HideInInspector] protected LayerMask obstacleLayer;
 
         protected NavMeshAgent _agent;
         protected CharacterController _characterController;

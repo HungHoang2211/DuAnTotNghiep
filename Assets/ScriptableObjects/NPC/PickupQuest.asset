@@ -10,20 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 544c56a4b5192d34b9709f157e479fa2, type: 3}
-  m_Name: NewQuest
+  m_Name: PickupQuest
   m_EditorClassIdentifier: 
-  questId: first_aid
-  questName: First Aid
-  offerDialogue: "Xin ch\xE0o, b\u1EA1n c\xF3 th\u1EC3 gi\xFAp t\xF4i ti\xEAu di\u1EC7t
-    Zombie kh\xF4ng ?"
-  turnInDialogue: "\u01A0n tr\u1EDDi, may l\xE0 c\xF3 b\u1EA1n gi\xFAp t\xF4i c\xF4ng
-    vi\u1EC7c nguy hi\u1EC3m n\xE0y"
+  questId: 1
+  questName: Collect wood
+  offerDialogue: Hello, I need 5 pieces of wood. Can you get them for me?
+  turnInDialogue: Thanks, I can't believe you completed it so fast!!!
   objectives:
-  - type: 1
-    description: "Gi\u1EBFt ZombieFat"
-    targetItem: {fileID: 0}
-    targetEnemyConfig: {fileID: 11400000, guid: 6b931b4c69e76d042bc302fb6f20bf1a, type: 2}
-    requiredAmount: 1
+  - type: 0
+    description: Help MrBeast get some wood
+    targetItem: {fileID: 11400000, guid: 9f57e12ff09c41b4bbeb5edc592f74a8, type: 2}
+    targetEnemyConfig: {fileID: 0}
+    requiredAmount: 5
   rewards:
   - itemData: {fileID: 11400000, guid: 07ce2c84e80992741af15d8b11688b97, type: 2}
     quantity: 1
