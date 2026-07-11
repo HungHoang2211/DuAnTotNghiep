@@ -32,8 +32,6 @@ namespace SimpleSurvival.AI
 
         public override bool IsAvailable(Transform target, float distanceToTarget)
         {
-            // Chỉ tính giờ khi player thực sự đứng trong khoảng [minRange, maxRange]
-            // (minRange/maxRange chỉnh trong Inspector = "khoảng cách nhất định" bạn muốn).
             bool inRange = target != null && distanceToTarget >= minRange && distanceToTarget <= maxRange;
 
             if (inRange) _timeInRange += Time.deltaTime;
@@ -48,14 +46,13 @@ namespace SimpleSurvival.AI
         protected override void OnExecute(Transform target)
         {
             _target = target;
-            _timeInRange = 0f; // dùng xong reset, lần sau player phải đứng đủ giờ lại từ đầu
+            _timeInRange = 0f;
             if (animator != null) animator.TriggerAcidAttack();
 
             if (_failsafeRoutine != null) StopCoroutine(_failsafeRoutine);
             _failsafeRoutine = StartCoroutine(FailsafeEndRoutine());
         }
 
-        /// <summary>Gắn Animation Event tại frame acid rời khỏi miệng zombie (giữa clip AcidAttack).</summary>
         public void OnAcidSpit()
         {
             if (!_isExecuting) return;
@@ -64,8 +61,6 @@ namespace SimpleSurvival.AI
             {
                 Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : transform.position + transform.forward;
 
-                // Bắn thẳng theo hướng tới player TẠI THỜI ĐIỂM PHUN - không tự bám đuổi,
-                // nên player có thể né bằng cách di chuyển ra khỏi đường bay sau đó.
                 Vector3 dir = (_target.position - spawnPos).normalized;
                 Quaternion spawnRot = dir != Vector3.zero ? Quaternion.LookRotation(dir) : transform.rotation;
 
@@ -76,7 +71,6 @@ namespace SimpleSurvival.AI
             }
         }
 
-        /// <summary>Gắn Animation Event ở FRAME CUỐI clip AcidAttack (khi animation kết thúc hẳn).</summary>
         public void OnAcidEnd()
         {
             if (!_isExecuting) return;
