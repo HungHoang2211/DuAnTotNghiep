@@ -238,7 +238,7 @@ namespace SimpleSurvival.Characters.Appearance.Editor
 
             Undo.RecordObject(renderer, "Apply Generated Appearance");
             renderer.sharedMesh = resource.Mesh;
-            renderer.localBounds = resource.Mesh.bounds;
+            renderer.updateWhenOffscreen = true;
 
             if (_previewMaterialInstance != null)
                 renderer.sharedMaterial = _previewMaterialInstance;

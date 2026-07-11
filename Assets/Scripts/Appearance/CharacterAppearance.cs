@@ -79,7 +79,7 @@ namespace SimpleSurvival.Characters.Appearance
             BodypartResource legsResource = legsSlot != null ? ResolveEquipmentResource(legsSlot) : null;
             BodypartResource feetResource = feetSlot != null ? ResolveEquipmentResource(feetSlot) : null;
 
-            BodypartResource helmetResource = headSlot != null ? ResolveEquipmentResource(headSlot) : null;
+            BodypartResource helmetResource = ResolveHelmetResource();
             BodypartResource haircutResource = haircutSlot?.DefaultResource;
             BodypartResource headResource = helmetResource != null ? helmetResource : haircutResource;
 
@@ -133,7 +133,7 @@ namespace SimpleSurvival.Characters.Appearance
                 return;
 
             renderer.sharedMesh = resource.Mesh;
-            renderer.localBounds = resource.Mesh.bounds;
+            renderer.updateWhenOffscreen = true;
         }
 
         private BodypartResource ResolveEquipmentResource(BodypartSlotEntry slot)
@@ -145,11 +145,18 @@ namespace SimpleSurvival.Characters.Appearance
             return resource != null ? resource : slot.DefaultResource;
         }
 
+        private BodypartResource ResolveHelmetResource()
+        {
+            ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Helmet);
+            EquipmentAbility equipment = stack?.ItemData.GetAbility<EquipmentAbility>();
+            return equipment != null ? equipment.AppearanceResource : null;
+        }
+
         private BodypartResource ResolveBackpackResource(BodypartSlotEntry slot)
         {
             ItemStack stack = playerEquipment.System.GetSlot(EquipSlot.Backpack);
             ContainerAbility container = stack?.ItemData.GetAbility<ContainerAbility>();
-            return container != null ? container.BackpackResource : slot.DefaultResource;
+            return container != null ? container.BackpackResource : null;
         }
 
         private Color ResolveHaircutColor()
