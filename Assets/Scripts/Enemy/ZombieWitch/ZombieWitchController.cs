@@ -10,12 +10,11 @@ namespace SimpleSurvival.AI
         [SerializeField] private BodyPartDetacher _armDetacher;
         [SerializeField] private EnemyCorpseHandler _corpseHandler;
 
-        [Header("Stuck Detection")]
-        [SerializeField] private float stuckCheckInterval = 0.8f;
-        [SerializeField] private float stuckDistanceThreshold = 0.15f;
-        [SerializeField] private float unstuckRadius = 4f;
-        [SerializeField] private float unstuckDuration = 1.2f;
-        [SerializeField] private float unstuckMoveSpeedRatio = 0.5f;
+        [HideInInspector] private float stuckCheckInterval = 0.8f;
+        [HideInInspector] private float stuckDistanceThreshold = 0.15f;
+        [HideInInspector] private float unstuckRadius = 4f;
+        [HideInInspector] private float unstuckDuration = 1.2f;
+        [HideInInspector] private float unstuckMoveSpeedRatio = 0.5f;
 
         private ZombieWitchStatsConfig WitchConfig => Config as ZombieWitchStatsConfig;
 
@@ -41,6 +40,14 @@ namespace SimpleSurvival.AI
             _unstuckUntil = 0f;
 
             if (_stats != null) _stats.OnHPChanged += HandleHPChanged;
+
+            // Witch luôn aggro thẳng vào Player ngay khi vừa được spawn/triệu hồi,
+            // không cần chờ DetectionRoutine phát hiện qua tầm nhìn/nghe như enemy thường.
+            if (_playerStats != null && !_playerDead)
+            {
+                _player = _playerStats.transform;
+                BeginChase();
+            }
         }
 
         protected override void OnDestroy()
@@ -78,9 +85,35 @@ namespace SimpleSurvival.AI
             return base.GetChaseDestination();
         }
 
+        /// <summary>
+        /// Override toàn bộ (không gọi base.UpdateChase()) để Witch đuổi theo Player
+        /// bất kể khoảng cách (bỏ qua Config.ChaseRadius) và không bao giờ "mất dấu"
+        /// rồi về Idle (bỏ qua LoseTargetTime) — đúng yêu cầu đuổi theo tấn công bất cứ đâu.
+        /// </summary>
         protected override void UpdateChase()
         {
-            base.UpdateChase();
+            if (Config == null || _player == null)
+            {
+                BeginIdle();
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, _player.position);
+
+            if (dist <= Config.AttackRange)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+                _agent.nextPosition = transform.position;
+                FaceTarget(_player, Config.RotationSpeed);
+                TryUseSkill();
+            }
+            else
+            {
+                _agent.isStopped = false;
+                _agent.SetDestination(GetChaseDestination());
+                MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
+            }
 
             if (_witchAnimator != null)
             {

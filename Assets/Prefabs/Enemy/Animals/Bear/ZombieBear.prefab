@@ -752,12 +752,10 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 64
   _skills:
   - {fileID: 4609056662524802698}
   - {fileID: 4266558753971501906}
+  retreatArrivalThreshold: 0.3
   _bearAnimator: {fileID: 3566210274771536032}
   _corpseHandler: {fileID: 4802174967028173836}
   stuckCheckInterval: 0.5
@@ -842,7 +840,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 2
   priority: 1
-  damage: 35
+  damage: 30
   damageRangeBonus: 0.5
   animator: {fileID: 3566210274771536032}
   controller: {fileID: 6765675200034682873}

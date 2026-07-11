@@ -34,9 +34,7 @@ namespace SimpleSurvival.Stats
         [SerializeField] private float despawnDelay = 120f;
         [SerializeField] private bool isRunner = false;
 
-        // LƯU Ý: các field wander dưới đây là TẠM cho code Zombie cũ (chưa refactor).
-        // Sau Phase 3 (refactor Zombie xong), xoá nhóm này và move sang DeerStatsConfig.
-        [Header("Wander (TEMP - sẽ bỏ sau Phase 3)")]
+        [Header("Wander")]
         [SerializeField] private float wanderSpeed = 1.5f;
         [SerializeField] private float wanderRadius = 5f;
         [SerializeField] private float wanderIntervalMin = 2f;

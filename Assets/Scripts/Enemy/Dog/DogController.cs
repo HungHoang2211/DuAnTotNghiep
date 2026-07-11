@@ -120,7 +120,6 @@ namespace SimpleSurvival.Pets
 
             if (_state == DogState.Combat)
             {
-                // Player đang chủ động nhắm/tấn công 1 mục tiêu khác -> Dog chuyển theo ngay lập tức.
                 if (desiredTarget != null && desiredTarget != _combatTarget)
                 {
                     _combatTarget = desiredTarget;
@@ -128,11 +127,9 @@ namespace SimpleSurvival.Pets
                     return;
                 }
 
-                // Mục tiêu hiện tại vẫn còn hợp lệ (còn sống + CanBeTargeted) -> tiếp tục đánh, không xét gì thêm.
                 if (_combatTarget != null && IsTargetStillValid(_combatTarget))
                     return;
 
-                // Mục tiêu cũ không còn hợp lệ (chết, hoặc bị ẩn/bất tử) -> ưu tiên tín hiệu từ Player, nếu không có thì tự dò enemy gần đó.
                 if (desiredTarget == null)
                     desiredTarget = ScanNearbyEnemy();
 
@@ -213,11 +210,6 @@ namespace SimpleSurvival.Pets
             return best;
         }
 
-        /// <summary>
-        /// Mục tiêu được coi là hợp lệ để Dog tấn công nếu: còn sống (IDamageable.IsDead == false)
-        /// VÀ (nếu có ITargetable) đang CanBeTargeted() == true. Điều kiện thứ 2 giúp Dog tự động
-        /// bỏ qua các enemy đang ẩn/bất tử tạm thời (vd ZombieWitch lúc retreat/hidden).
-        /// </summary>
         private bool IsTargetStillValid(Transform target)
         {
             if (target == null) return false;
@@ -228,6 +220,7 @@ namespace SimpleSurvival.Pets
 
             ITargetable targetable = target.GetComponent<ITargetable>();
             if (targetable == null) targetable = target.GetComponentInParent<ITargetable>();
+            if (targetable == null) targetable = target.GetComponentInChildren<ITargetable>();
             if (targetable != null && !targetable.CanBeTargeted()) return false;
 
             return true;
