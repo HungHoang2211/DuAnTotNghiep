@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleSurvival.Audio;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace SimpleSurvival.Items
         [Tooltip("Mesh shown when this slot has no mod installed. Null = slot does not exist on this weapon.")]
         [SerializeField] private Mesh defaultMesh;
         [SerializeField] private Material defaultMaterial;
+       
+      
 
         public WeaponModSlot Slot => slot;
         public Mesh DefaultMesh => defaultMesh;
