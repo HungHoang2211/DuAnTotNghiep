@@ -230,6 +230,37 @@ Transform:
   - {fileID: 3948439619918051194}
   m_Father: {fileID: 3052826037546489077}
   m_LocalEulerAnglesHint: {x: -0.25906664, y: 0.6281859, z: -60.482}
+--- !u!1 &1083666784049263588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6001567948211261504}
+  m_Layer: 18
+  m_Name: HitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6001567948211261504
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1083666784049263588}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4649051936337671485}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1128248164570123228
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,6 +292,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3784729493052854878}
   m_LocalEulerAnglesHint: {x: 5.472518, y: -48.495014, z: -7.290133}
+--- !u!1 &1298358561829581580
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4975147824532117429}
+  m_Layer: 18
+  m_Name: HitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4975147824532117429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1298358561829581580}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4711928697780862737}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1392424820815388447
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,6 +422,7 @@ Transform:
   - {fileID: 5644519928563430470}
   - {fileID: 3784729493052854878}
   - {fileID: 8518801886933779987}
+  - {fileID: 6001567948211261504}
   m_Father: {fileID: 7902834399614370182}
   m_LocalEulerAnglesHint: {x: -90, y: -67.56701, z: 90}
 --- !u!65 &3494410261881962227
@@ -410,6 +473,37 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &1893887452808693467
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8261936218155203578}
+  m_Layer: 18
+  m_Name: HitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8261936218155203578
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1893887452808693467}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5644519928563430470}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1909409079835122861
 GameObject:
   m_ObjectHideFlags: 0
@@ -971,6 +1065,7 @@ GameObject:
   - component: {fileID: 4912425664023697420}
   - component: {fileID: 2985611419752432733}
   - component: {fileID: 10935286724116100}
+  - component: {fileID: 3763914991763445093}
   m_Layer: 8
   m_Name: Turkey
   m_TagString: Enemy
@@ -1119,9 +1214,6 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 64
   _turkeyAnimator: {fileID: 1066533168093457867}
   _corpseHandler: {fileID: 10935286724116100}
 --- !u!114 &4912425664023697420
@@ -1165,6 +1257,55 @@ MonoBehaviour:
   lootContainer: {fileID: 6142293839608679425}
   enemyTarget: {fileID: 7996414977459367715}
   useTargetRoot: {fileID: 5851926426956034567}
+--- !u!114 &3763914991763445093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3894489257785025939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dc208eafcfa9de428765a2ee5775930, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bloodEffectPrefab: {fileID: 198099118695303065, guid: fd7ff1981c213774382291fcc8970d64, type: 3}
+  bloodSpawnPoints:
+  - {fileID: 6725574940473304390}
+  - {fileID: 4975147824532117429}
+  - {fileID: 8261936218155203578}
+  - {fileID: 6001567948211261504}
+--- !u!1 &4711185712953767583
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6725574940473304390}
+  m_Layer: 18
+  m_Name: HitPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6725574940473304390
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4711185712953767583}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8921355642033372058}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4733402019673885527
 GameObject:
   m_ObjectHideFlags: 0
@@ -1329,6 +1470,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8816437425149338399}
+  - {fileID: 6725574940473304390}
   m_Father: {fileID: 5644519928563430470}
   m_LocalEulerAnglesHint: {x: -68.74487, y: 76.0199, z: 110.43619}
 --- !u!65 &6220673216019084720
@@ -1932,6 +2074,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2510711199511201224}
+  - {fileID: 4975147824532117429}
   m_Father: {fileID: 5644519928563430470}
   m_LocalEulerAnglesHint: {x: -68.74364, y: 76.02004, z: -69.56358}
 --- !u!65 &4050798966595957986
@@ -2194,6 +2337,7 @@ Transform:
   - {fileID: 8921355642033372058}
   - {fileID: 6491921102885985102}
   - {fileID: 4711928697780862737}
+  - {fileID: 8261936218155203578}
   m_Father: {fileID: 4649051936337671485}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: 22.872818}
 --- !u!65 &4006329782829854145

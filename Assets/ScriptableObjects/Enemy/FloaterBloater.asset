@@ -9,21 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e7cb06044826854c826dd89aff6afb4, type: 3}
-  m_Name: ZombieRun_Infected
+  m_Script: {fileID: 11500000, guid: c12401a0c724c0e4a8b0e3d292591300, type: 3}
+  m_Name: FloaterBloater
   m_EditorClassIdentifier: 
-  maxHP: 150
-  startHP: 150
-  baseDamage: 12
+  maxHP: 240
+  startHP: 240
+  baseDamage: 10
   baseAttackSpeed: 1
   armor: 0
-  moveSpeed: 3
+  moveSpeed: 2
   kind: 0
-  displayName: Zombie Elite
+  displayName: Floater Bloater
   hpBarColor: {r: 1, g: 0, b: 0, a: 1}
-  visionRange: 60
-  visionAngle: 5
-  hearingRadius: 8
+  visionRange: 5
+  visionAngle: 60
+  hearingRadius: 15
   hearingNoiseThreshold: 0.3
   chaseRadius: 20
   loseTargetTime: 3
@@ -32,10 +32,15 @@ MonoBehaviour:
   attackCooldown: 1.5
   howlChance: 0.5
   howlDuration: 2
-  despawnDelay: 120
-  isRunner: 1
+  despawnDelay: 50
+  isRunner: 0
   wanderSpeed: 0
   wanderRadius: 0
   wanderIntervalMin: 0
   wanderIntervalMax: 0
-  corpseLootTable: {fileID: 11400000, guid: 776a48f314afd434b8b90a716e8571ba, type: 2}
+  corpseLootTable: {fileID: 11400000, guid: 3e9b6febaea19c54a9eddcffefb08988, type: 2}
+  specialCooldown: 10
+  specialRange: 2
+  specialDamage: 25
+  acidSpeed: 7
+  acidLifetime: 3
