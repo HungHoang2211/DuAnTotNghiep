@@ -9,17 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e7cb06044826854c826dd89aff6afb4, type: 3}
-  m_Name: ZombieWalk
+  m_Script: {fileID: 11500000, guid: 6680fd6bb12ae7c4391feef863635a2f, type: 3}
+  m_Name: SporeBear
   m_EditorClassIdentifier: 
-  maxHP: 80
-  startHP: 80
-  baseDamage: 6
+  maxHP: 550
+  startHP: 550
+  baseDamage: 60
   baseAttackSpeed: 1
   armor: 0
-  moveSpeed: 2
-  kind: 0
-  displayName: Zombie
+  moveSpeed: 3
+  kind: 1
+  displayName: Spore Bear
   hpBarColor: {r: 1, g: 0, b: 0, a: 1}
   visionRange: 5
   visionAngle: 60
@@ -28,14 +28,15 @@ MonoBehaviour:
   chaseRadius: 20
   loseTargetTime: 3
   rotationSpeed: 360
-  attackRange: 1.2
+  attackRange: 1.5
   attackCooldown: 1.5
-  howlChance: 0.5
+  howlChance: 0.8
   howlDuration: 2
   despawnDelay: 120
   isRunner: 0
-  wanderSpeed: 1.5
-  wanderRadius: 5
-  wanderIntervalMin: 2
-  wanderIntervalMax: 5
-  corpseLootTable: {fileID: 11400000, guid: 2c9ab1cdac5d1e848bc998c528a6d3de, type: 2}
+  wanderSpeed: 0
+  wanderRadius: 0
+  wanderIntervalMin: 0
+  wanderIntervalMax: 0
+  corpseLootTable: {fileID: 11400000, guid: 1dbaf0b3f6df7a64b92553b84bf246c9, type: 2}
+  footstepMinSpeed: 2

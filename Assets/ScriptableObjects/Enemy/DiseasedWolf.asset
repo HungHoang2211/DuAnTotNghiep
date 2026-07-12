@@ -9,21 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c12401a0c724c0e4a8b0e3d292591300, type: 3}
-  m_Name: ZombieFatInfected
+  m_Script: {fileID: 11500000, guid: 0d71e7eeb0648984daa39d5817f35ce8, type: 3}
+  m_Name: DiseasedWolf
   m_EditorClassIdentifier: 
-  maxHP: 300
-  startHP: 300
-  baseDamage: 15
+  maxHP: 100
+  startHP: 100
+  baseDamage: 30
   baseAttackSpeed: 1
   armor: 0
-  moveSpeed: 3
+  moveSpeed: 4
   kind: 0
-  displayName: Zombie Infected
+  displayName: Diseased Wolf
   hpBarColor: {r: 1, g: 0, b: 0, a: 1}
   visionRange: 5
   visionAngle: 60
-  hearingRadius: 15
+  hearingRadius: 8
   hearingNoiseThreshold: 0.3
   chaseRadius: 20
   loseTargetTime: 3
@@ -32,15 +32,12 @@ MonoBehaviour:
   attackCooldown: 1.5
   howlChance: 0.5
   howlDuration: 2
-  despawnDelay: 50
+  despawnDelay: 120
   isRunner: 0
   wanderSpeed: 0
   wanderRadius: 0
   wanderIntervalMin: 0
   wanderIntervalMax: 0
-  corpseLootTable: {fileID: 11400000, guid: 776a48f314afd434b8b90a716e8571ba, type: 2}
-  specialCooldown: 10
-  specialRange: 2
-  specialDamage: 25
-  acidSpeed: 7
-  acidLifetime: 3
+  corpseLootTable: {fileID: 11400000, guid: a1e73db386f022c439c9aa3e99a4c79e, type: 2}
+  walkSpeed: 0
+  footstepMinSpeed: 2
