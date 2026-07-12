@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleSurvival.Audio;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -241,7 +242,10 @@ namespace SimpleSurvival.Items
             if (_activeContext == Context.Equipment)
             {
                 if (_selectedEquipCell != null && _selectedEquipCell.HasItem)
+                {
                     equipmentPanel.UnequipSelected();
+                    PlayEquipSound();
+                }
                 return;
             }
 
@@ -263,7 +267,6 @@ namespace SimpleSurvival.Items
                 EquipFromActiveCell(cell, stack);
             }
         }
-
         private void EquipFromActiveCell(CellUI cell, ItemStack stack)
         {
             if (WouldReplaceOccupiedBackpack(stack)) return;
@@ -281,6 +284,8 @@ namespace SimpleSurvival.Items
             {
                 InventorySelection sel = GetActiveSelection();
                 if (sel != null) sel.Deselect();
+
+                PlayEquipSound();
             }
         }
 
@@ -288,6 +293,16 @@ namespace SimpleSurvival.Items
         {
             return playerEquipment.System.GetAutoEquipSlot(stack) == EquipSlot.Backpack
                 && playerInventory.IsBackpackOccupied();
+        }
+        private void PlayEquipSound()
+        {
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayClick();
+        }
+        private void PlaydeleteSound()
+        {
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayClick();
         }
 
         private void HandleSplit()
@@ -314,6 +329,8 @@ namespace SimpleSurvival.Items
             stack.RemoveQuantity(splitAmount);
             inventory.SetSlot(emptyIndex, new ItemStack(stack.ItemData, splitAmount));
 
+            PlayEquipSound();
+
             InventorySelection sel = GetActiveSelection();
             if (stack.Quantity < 2 && sel != null)
                 sel.Deselect();
@@ -329,6 +346,12 @@ namespace SimpleSurvival.Items
                 playerInventory.Pockets.Sort();
 
             inventorySelection.Deselect();
+        }
+
+        private void PlayDeleteSound()
+        {
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayDelete();
         }
 
         private void HandleDelete()
@@ -347,6 +370,7 @@ namespace SimpleSurvival.Items
 
             InventorySystem inventory = grid.BoundInventory;
             InventorySelection sel = GetActiveSelection();
+            PlayEquipSound();
 
             confirmDeleteDialog.Show(
                 $"Delete {stack.ItemData.ItemName}?",
@@ -355,9 +379,10 @@ namespace SimpleSurvival.Items
                     if (!confirmed) return;
                     inventory.SetSlot(index, null);
                     if (sel != null) sel.Deselect();
+
+                    PlayDeleteSound();
                 });
         }
-
         private void ConsumeOne(CellUI cell)
         {
             InventoryGridUI grid = cell.GetComponentInParent<InventoryGridUI>();

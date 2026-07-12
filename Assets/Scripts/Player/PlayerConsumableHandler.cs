@@ -1,6 +1,7 @@
 using UnityEngine;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Items;
+using SimpleSurvival.Audio;
 
 namespace SimpleSurvival.Player
 {
@@ -25,6 +26,10 @@ namespace SimpleSurvival.Player
                 return false;
 
             ApplyEffects(ability);
+
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayUseItem();
+
             return true;
         }
 

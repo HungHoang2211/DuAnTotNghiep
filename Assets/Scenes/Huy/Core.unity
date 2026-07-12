@@ -9580,6 +9580,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -22013,6 +22014,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -35829,6 +35831,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -48882,6 +48885,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1071657600}
   - component: {fileID: 1071657599}
+  - component: {fileID: 1071657601}
   m_Layer: 0
   m_Name: Audiomanager
   m_TagString: Untagged
@@ -48908,6 +48912,8 @@ MonoBehaviour:
   musicVolume: 0.8
   ambienceVolume: 0.6
   musicFadeDuration: 1.5
+  defaultMusicCue: {fileID: 11400000, guid: a5a80a902b1d15343ad2d46ccf677323, type: 2}
+  defaultAmbienceCue: {fileID: 11400000, guid: 3bdf243d4c2703e48a9abd3706dbaeaf, type: 2}
 --- !u!4 &1071657600
 Transform:
   m_ObjectHideFlags: 0
@@ -48923,6 +48929,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1967195713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1071657601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071657598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db8d59a208d6368428acf5e680a778fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickCue: {fileID: 11400000, guid: b17d87799e874d94481eb05989a2580a, type: 2}
+  confirmCue: {fileID: 0}
+  cancelCue: {fileID: 11400000, guid: 08f7be1810dff0a49b2d8b9d89e53500, type: 2}
+  errorCue: {fileID: 0}
+  itemMoveCue: {fileID: 11400000, guid: 03f20e5814b5a684db22bf3171a01ae4, type: 2}
+  useItemCue: {fileID: 11400000, guid: 7bbf73125c9baf04a8a0667dc74c3095, type: 2}
+  deleteCue: {fileID: 11400000, guid: d948453d66071d24db0ec5fdd5fc08ae, type: 2}
 --- !u!1 &1072386800
 GameObject:
   m_ObjectHideFlags: 0
@@ -66197,6 +66222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -104049,12 +104075,9 @@ MonoBehaviour:
   walkCue: {fileID: 11400000, guid: 19ec864bf231342479c806fdccc9c212, type: 2}
   runCue: {fileID: 11400000, guid: 6c3a285cec633e542aa8cef7ad54a4c1, type: 2}
   sneakCue: {fileID: 11400000, guid: aafebcd7651963b44b2b9cd16d900494, type: 2}
-  eatCue: {fileID: 0}
-  drinkCue: {fileID: 0}
-  healCue: {fileID: 0}
   hurtCue: {fileID: 0}
   deathCue: {fileID: 0}
-  pickupCue: {fileID: 0}
+  pickupCue: {fileID: 11400000, guid: 8423c91049ca4f9458164addd23c4910, type: 2}
   healthWarningCue: {fileID: 0}
   hungerAlertCue: {fileID: 0}
   thirstAlertCue: {fileID: 0}
@@ -104063,13 +104086,14 @@ MonoBehaviour:
   sneakMoveMode: 1
   runSpeedThreshold: 3
   minMoveSpeedForFootstep: 0.05
-  fistsImpactCue: {fileID: 0}
-  melee1HImpactCue: {fileID: 0}
+  fistsImpactCue: {fileID: 11400000, guid: 29c3bec3b3e3cd24d8d581a8aa06bbb8, type: 2}
+  melee1HImpactCue: {fileID: 11400000, guid: 8a7de5f1d31510d45b64c63d582295b9, type: 2}
   melee2HImpactCue: {fileID: 0}
-  pistolImpactCue: {fileID: 0}
+  pistolImpactCue: {fileID: 11400000, guid: 119818e9901ceee41b4ac82d1cab8234, type: 2}
   rifleImpactCue: {fileID: 0}
   gatherAxeCue: {fileID: 0}
   gatherPickaxeCue: {fileID: 0}
+  playerStats: {fileID: 812480218}
 --- !u!137 &8941299661710436805
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
