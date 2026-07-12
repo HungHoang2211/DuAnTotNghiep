@@ -8,7 +8,7 @@ namespace SimpleSurvival.AI
     {
         private enum AttackMode { Left, Right, Both }
 
-        [Header("Damage (fallback nếu không có ZombieWitchStatsConfig)")]
+        [Header("Damage")]
         [SerializeField] private float damagePerArm = 20f;
         [SerializeField] private float bothArmsMultiplier = 1.3f;
         [SerializeField] private float damageRangeBonus = 0.5f;
@@ -45,17 +45,11 @@ namespace SimpleSurvival.AI
 
             return controller.DroppedArmIndex == 0 ? AttackMode.Right : AttackMode.Left;
         }
-
-        // Animation Event ở frame tay trái trúng
         public void OnHitLeft() => TryDealDamage(1);
 
-        // Animation Event ở frame tay phải trúng
         public void OnHitRight() => TryDealDamage(1);
-
-        // Animation Event ở frame combo cả 2 tay trúng
         public void OnHitBoth() => TryDealDamage(2);
 
-        // Animation Event cuối đòn đánh
         public void OnAttackEnd()
         {
             MarkComplete();
