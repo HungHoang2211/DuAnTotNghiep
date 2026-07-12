@@ -61,6 +61,9 @@ namespace SimpleSurvival.Player
         {
             if (_actionController.CurrentAction is PickupAction pickup)
                 pickup.HandleHit();
+
+            if (audioController != null)
+                audioController.PlayPickup();
         }
 
         public void OnPickupEnd()
@@ -102,6 +105,7 @@ namespace SimpleSurvival.Player
             if (_actionController.CurrentAction is GatherAction gather)
                 gather.HandleEnd();
         }
+
         public void OnFootStep()
         {
             if (soundEmitter != null)

@@ -1,4 +1,5 @@
 using SimpleSurvival.Items;
+using SimpleSurvival.Stats;
 using UnityEngine;
 
 
@@ -10,11 +11,6 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue walkCue;
         [SerializeField] private AudioCue runCue;
         [SerializeField] private AudioCue sneakCue;
-
-        [Header("Consumable Cues")]
-        [SerializeField] private AudioCue eatCue;
-        [SerializeField] private AudioCue drinkCue;
-        [SerializeField] private AudioCue healCue;
 
         [Header("Combat Cues")]
         [SerializeField] private AudioCue hurtCue;
@@ -46,11 +42,43 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue gatherAxeCue;
         [SerializeField] private AudioCue gatherPickaxeCue;
 
+        [Header("References")]
+        [SerializeField] private PlayerStats playerStats;
+
         private Animator _animator;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
+            if (playerStats == null) playerStats = GetComponentInParent<PlayerStats>();
+        }
+
+        private void OnEnable()
+        {
+            if (playerStats != null)
+            {
+                playerStats.OnDamagedBy += HandleDamaged;
+                playerStats.OnDeath += HandleDeath;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (playerStats != null)
+            {
+                playerStats.OnDamagedBy -= HandleDamaged;
+                playerStats.OnDeath -= HandleDeath;
+            }
+        }
+
+        private void HandleDamaged(GameObject attacker)
+        {
+            PlayHurt();
+        }
+
+        private void HandleDeath()
+        {
+            PlayDeath();
         }
 
         public void PlayAttackImpact(WeaponCategory category)
@@ -107,21 +135,6 @@ namespace SimpleSurvival.Audio
         private bool IsRunning()
         {
             return _animator.GetFloat(moveSpeedParam) >= runSpeedThreshold;
-        }
-
-        public void PlayEat()
-        {
-            AudioManager.Instance.PlaySfx(eatCue);
-        }
-
-        public void PlayDrink()
-        {
-            AudioManager.Instance.PlaySfx(drinkCue);
-        }
-
-        public void PlayHeal()
-        {
-            AudioManager.Instance.PlaySfx(healCue);
         }
 
         public void PlayHurt()

@@ -21,6 +21,10 @@ namespace SimpleSurvival.Audio
         [Header("Music")]
         [SerializeField] private float musicFadeDuration = 1.5f;
 
+        [Header("Startup")]
+        [SerializeField] private AudioCue defaultMusicCue;
+        [SerializeField] private AudioCue defaultAmbienceCue;
+
         private AudioSourcePool _sfxPool;
         private AudioSource _musicSource;
         private AudioSource _ambienceSource;
@@ -43,6 +47,15 @@ namespace SimpleSurvival.Audio
             Instance = this;
             DontDestroyOnLoad(gameObject);
             BuildAudioSources();
+        }
+
+        private void Start()
+        {
+            if (defaultMusicCue != null)
+                PlayMusic(defaultMusicCue);
+
+            if (defaultAmbienceCue != null)
+                PlayAmbience(defaultAmbienceCue);
         }
 
         private void BuildAudioSources()
@@ -72,6 +85,7 @@ namespace SimpleSurvival.Audio
         {
             return PlayOneShot(cue, position, true);
         }
+
         public void PlayImportantSfxAt(AudioCue cue, Vector3 position)
         {
             if (!IsPlayable(cue))

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using SimpleSurvival.Audio;
 
 namespace SimpleSurvival.Items
 {
@@ -137,14 +138,21 @@ namespace SimpleSurvival.Items
 
             if (_sourceInventoryCell != null)
             {
+                if (_sourceGrid == targetGrid && _sourceIndex == targetIndex)
+                    return;
+
                 InventorySystem.TransferOrSwap(
                     _sourceGrid.BoundInventory, _sourceIndex,
                     targetGrid.BoundInventory, targetIndex);
+
+                PlayMoveSound();
             }
             else if (_sourceEquipCell != null)
             {
                 equipmentPanel.HandleEquipDropToInventory(
                     _sourceEquipCell, targetGrid.BoundInventory, targetIndex);
+
+                PlayEquipSound();
             }
         }
 
@@ -154,12 +162,30 @@ namespace SimpleSurvival.Items
             {
                 equipmentPanel.HandleInventoryDropToEquip(
                     _sourceInventoryCell, _sourceGrid, _sourceIndex, targetCell);
+
+                PlayEquipSound();
             }
             else if (_sourceEquipCell != null && _sourceEquipCell != targetCell)
             {
                 equipmentPanel.HandleEquipSwap(_sourceEquipCell, targetCell);
+
+                PlayEquipSound();
             }
         }
+
+        private void PlayMoveSound()
+        {
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayItemMove();
+        }
+
+        private void PlayEquipSound()
+        {
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.PlayClick();
+        }
+
+       
 
 
         private void ShowGhost(Sprite sprite, Vector2 screenPos)
