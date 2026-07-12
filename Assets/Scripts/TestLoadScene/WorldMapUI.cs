@@ -57,6 +57,10 @@ namespace SimpleSurvival.World
                 WorldMapEntryButton entry = Instantiate(entryPrefab, entryContainer);
                 bool isCurrent = destination.SceneName == currentScene;
                 entry.Bind(destination, isCurrent, HandleDestinationSelected);
+
+                RectTransform entryRect = (RectTransform)entry.transform;
+                entryRect.anchoredPosition = destination.MapPosition;
+
                 spawnedEntries.Add(entry);
             }
         }

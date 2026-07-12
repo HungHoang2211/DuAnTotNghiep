@@ -6,6 +6,7 @@ using SimpleSurvival.Input;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Combat;
+using SimpleSurvival.World;
 
 namespace SimpleSurvival.Pets
 {
@@ -43,6 +44,10 @@ namespace SimpleSurvival.Pets
         [Header("Reaction Delay")]
         [Tooltip("Dog phản ứng chậm hơn Player bao nhiêu giây trước khi bắt đầu đuổi theo hoặc vào combat.")]
         [SerializeField] private float actionDelay = 2f;
+
+        [Header("Map Transition")]
+        [SerializeField] private float mapTransitionSideOffset = 1.5f;
+        [SerializeField] private float navMeshSampleRadius = 3f;
 
         private NavMeshAgent _agent;
         private CharacterController _characterController;
@@ -85,11 +90,13 @@ namespace SimpleSurvival.Pets
         private void OnEnable()
         {
             if (playerStats != null) playerStats.OnDamagedBy += HandlePlayerDamaged;
+            if (MapLoader.Instance != null) MapLoader.Instance.PlayerRepositioned += HandlePlayerRepositioned;
         }
 
         private void OnDisable()
         {
             if (playerStats != null) playerStats.OnDamagedBy -= HandlePlayerDamaged;
+            if (MapLoader.Instance != null) MapLoader.Instance.PlayerRepositioned -= HandlePlayerRepositioned;
         }
 
         private void HandlePlayerDamaged(GameObject attacker)
@@ -97,6 +104,42 @@ namespace SimpleSurvival.Pets
             if (attacker == null) return;
             _enemyAttacker = attacker.transform;
             _lastPlayerDamagedTime = Time.time;
+        }
+
+        private void HandlePlayerRepositioned()
+        {
+            Transform followTarget = GetFollowTarget();
+            if (followTarget == null) return;
+
+            Vector3 desired = followTarget.position - followTarget.right * mapTransitionSideOffset;
+
+            if (NavMesh.SamplePosition(desired, out NavMeshHit hit, navMeshSampleRadius, NavMesh.AllAreas))
+                desired = hit.position;
+            else
+                desired = followTarget.position;
+
+            WarpTo(desired, followTarget.rotation);
+        }
+
+        private void WarpTo(Vector3 position, Quaternion rotation)
+        {
+            _characterController.enabled = false;
+            _agent.Warp(position);
+            transform.rotation = rotation;
+            _characterController.enabled = true;
+
+            _agent.isStopped = true;
+            _agent.ResetPath();
+            _agent.nextPosition = transform.position;
+
+            _combatTarget = null;
+            _enemyAttacker = null;
+            _pendingCombatTarget = null;
+            _pendingCombatTimer = 0f;
+            _isFollowing = false;
+            _state = DogState.Follow;
+
+            ResetStuckState();
         }
 
         private void Update()
@@ -147,7 +190,6 @@ namespace SimpleSurvival.Pets
                 return;
             }
 
-            // Đang Follow: cần chờ actionDelay trước khi nhập trận lần đầu.
             if (desiredTarget == null)
             {
                 _pendingCombatTarget = null;

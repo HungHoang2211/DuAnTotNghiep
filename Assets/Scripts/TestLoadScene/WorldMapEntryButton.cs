@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +8,6 @@ namespace SimpleSurvival.World
     {
         [SerializeField] private Button button;
         [SerializeField] private Image iconImage;
-        [SerializeField] private TMP_Text label;
 
         private MapDestination destination;
         private Action<MapDestination> onClicked;
@@ -18,9 +16,6 @@ namespace SimpleSurvival.World
         {
             destination = target;
             onClicked = clickCallback;
-
-            if (label != null)
-                label.text = target.DisplayName;
 
             if (iconImage != null && target.Icon != null)
                 iconImage.sprite = target.Icon;
