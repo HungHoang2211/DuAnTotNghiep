@@ -8,6 +8,7 @@ namespace SimpleSurvival.Characters.Appearance.Editor
     {
         private CharacterAppearanceConfig _config;
         private Material _baseMaterial;
+        private Material _atlasBlitMaterial;
         private Material _previewMaterialInstance;
         private Color _haircutTint = Color.white;
         private readonly Dictionary<BodypartSlotKind, int> _selectedIndices = new Dictionary<BodypartSlotKind, int>();
@@ -42,6 +43,8 @@ namespace SimpleSurvival.Characters.Appearance.Editor
 
             _baseMaterial = (Material)EditorGUILayout.ObjectField(
                 "Base Material", _baseMaterial, typeof(Material), false);
+            _atlasBlitMaterial = (Material)EditorGUILayout.ObjectField(
+                "Atlas Blit Material", _atlasBlitMaterial, typeof(Material), false);
 
             _haircutTint = EditorGUILayout.ColorField("Haircut Tint", _haircutTint);
 
@@ -158,8 +161,14 @@ namespace SimpleSurvival.Characters.Appearance.Editor
                 return;
             }
 
+            if (_atlasBlitMaterial == null)
+            {
+                Debug.LogWarning("Chưa gán Atlas Blit Material.");
+                return;
+            }
+
             Texture2D generatedAtlas = CharacterAppearanceBuilder.BakeAtlas(
-                atlasViews, _config.AtlasSize, _config.AtlasFormat, _haircutTint);
+                atlasViews, _config.AtlasSize, _config.AtlasFormat, _haircutTint, _atlasBlitMaterial);
 
             SaveGeneratedAtlas(generatedAtlas);
             EnsurePreviewMaterial(generatedAtlas);

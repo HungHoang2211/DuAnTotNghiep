@@ -9,6 +9,7 @@ namespace SimpleSurvival.Characters.Appearance
         [SerializeField] private CharacterAppearanceConfig config;
         [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private Material baseMaterial;
+        [SerializeField] private Material atlasBlitMaterial;
         [SerializeField] private SkinnedMeshRenderer headRenderer;
         [SerializeField] private SkinnedMeshRenderer torsoRenderer;
         [SerializeField] private SkinnedMeshRenderer legsRenderer;
@@ -99,7 +100,7 @@ namespace SimpleSurvival.Characters.Appearance
             if (atlasViews.Count > 0)
             {
                 Color haircutTint = ResolveHaircutColor();
-                Texture2D newAtlas = CharacterAppearanceBuilder.BakeAtlas(atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint);
+                Texture2D newAtlas = CharacterAppearanceBuilder.BakeAtlas(atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint, atlasBlitMaterial);
 
                 DestroyGeneratedAtlas();
                 _generatedAtlas = newAtlas;

@@ -17,98 +17,74 @@ namespace SimpleSurvival.Characters.Appearance
 
     public static class CharacterAppearanceBuilder
     {
-        public static Texture2D BakeAtlas(IReadOnlyList<BodypartView> views, int atlasSize, TextureFormat format, Color haircutTint)
+        private static Texture2D _cachedDefaultMask;
+
+        public static Texture2D BakeAtlas(
+            IReadOnlyList<BodypartView> views,
+            int atlasSize,
+            TextureFormat format,
+            Color haircutTint,
+            Material blitMaterial)
         {
-            Texture2D atlas = new Texture2D(atlasSize, atlasSize, format, mipChain: false)
+            Texture2D defaultMask = GetOrCreateDefaultMask();
+
+            RenderTexture rt = RenderTexture.GetTemporary(atlasSize, atlasSize, 0, RenderTextureFormat.ARGB32);
+            RenderTexture previousActive = RenderTexture.active;
+            RenderTexture.active = rt;
+
+            GL.Clear(true, true, new Color(0f, 0f, 0f, 0f));
+            GL.PushMatrix();
+            GL.LoadPixelMatrix(0, atlasSize, 0, atlasSize);
+
+            foreach (BodypartView view in views)
+                DrawView(view, blitMaterial, defaultMask, haircutTint);
+
+            GL.PopMatrix();
+
+            Texture2D atlas = new Texture2D(atlasSize, atlasSize, format, false)
             {
                 name = "CharacterAppearanceAtlas"
             };
-
-            Color32[] clearPixels = new Color32[atlasSize * atlasSize];
-            atlas.SetPixels32(clearPixels);
-
-            foreach (BodypartView view in views)
-            {
-                RectInt rect = view.SlotEntry.AtlasRect;
-                Color[] regionPixels = ExtractRegionPixels(
-                    view.Resource.Texture,
-                    view.Resource.RegionMask,
-                    view.Resource.DetailTexture,
-                    view.Resource.DetailTiling,
-                    view.Resource.DetailOffset,
-                    haircutTint,
-                    rect.width,
-                    rect.height);
-
-                atlas.SetPixels(rect.x, rect.y, rect.width, rect.height, regionPixels);
-            }
-
+            atlas.ReadPixels(new Rect(0, 0, atlasSize, atlasSize), 0, 0);
             atlas.Apply();
+
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(rt);
+
             return atlas;
         }
 
-        private static Color[] ExtractRegionPixels(
-            Texture2D baseTexture,
-            Texture2D regionMask,
-            Texture2D detailTexture,
-            Vector2 detailTiling,
-            Vector2 detailOffset,
-            Color haircutTint,
-            int targetWidth,
-            int targetHeight)
+        private static void DrawView(BodypartView view, Material blitMaterial, Texture2D defaultMask, Color haircutTint)
         {
-            Color[] pixels = new Color[targetWidth * targetHeight];
+            RectInt rect = view.SlotEntry.AtlasRect;
+            Rect pixelRect = new Rect(rect.x, rect.y, rect.width, rect.height);
 
-            for (int y = 0; y < targetHeight; y++)
-            {
-                float v = (y + 0.5f) / targetHeight;
-                for (int x = 0; x < targetWidth; x++)
-                {
-                    float u = (x + 0.5f) / targetWidth;
-                    pixels[y * targetWidth + x] = SamplePixel(
-                        baseTexture, regionMask, detailTexture, detailTiling, detailOffset, haircutTint, u, v);
-                }
-            }
+            Texture2D maskTexture = view.Resource.RegionMask != null ? view.Resource.RegionMask : defaultMask;
+            Texture2D detailTexture = view.Resource.DetailTexture != null ? view.Resource.DetailTexture : defaultMask;
 
-            return pixels;
+            blitMaterial.SetTexture("_MaskTex", maskTexture);
+            blitMaterial.SetTexture("_DetailTex", detailTexture);
+            blitMaterial.SetVector("_DetailTiling", new Vector4(
+                view.Resource.DetailTiling.x, view.Resource.DetailTiling.y,
+                view.Resource.DetailOffset.x, view.Resource.DetailOffset.y));
+            blitMaterial.SetColor("_TintColor", haircutTint);
+
+            Graphics.DrawTexture(pixelRect, view.Resource.Texture, blitMaterial);
         }
 
-        private static Color SamplePixel(
-            Texture2D baseTexture,
-            Texture2D regionMask,
-            Texture2D detailTexture,
-            Vector2 detailTiling,
-            Vector2 detailOffset,
-            Color haircutTint,
-            float u,
-            float v)
+        private static Texture2D GetOrCreateDefaultMask()
         {
-            Color baseColor = baseTexture.GetPixelBilinear(u, v);
-            if (regionMask == null)
-                return baseColor;
+            if (_cachedDefaultMask != null)
+                return _cachedDefaultMask;
 
-            Color mask = regionMask.GetPixelBilinear(u, v);
-            Color tintedColor = new Color(
-                baseColor.r * haircutTint.r,
-                baseColor.g * haircutTint.g,
-                baseColor.b * haircutTint.b,
-                baseColor.a);
-            Color result = Color.Lerp(baseColor, tintedColor, mask.g);
-
-            if (detailTexture != null && mask.b > 0f)
+            _cachedDefaultMask = new Texture2D(1, 1, TextureFormat.RGBA32, false)
             {
-                float du = Wrap(u * detailTiling.x + detailOffset.x);
-                float dv = Wrap(v * detailTiling.y + detailOffset.y);
-                Color detailColor = detailTexture.GetPixelBilinear(du, dv);
-                result = Color.Lerp(result, detailColor, mask.b);
-            }
+                name = "CharacterAppearanceDefaultMask"
+            };
+            _cachedDefaultMask.SetPixel(0, 0, Color.black);
+            _cachedDefaultMask.Apply();
 
-            return result;
-        }
-
-        private static float Wrap(float value)
-        {
-            return value - Mathf.Floor(value);
+            return _cachedDefaultMask;
         }
     }
 }
