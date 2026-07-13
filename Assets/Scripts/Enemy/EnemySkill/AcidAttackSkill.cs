@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using SimpleSurvival.Core;
 
 namespace SimpleSurvival.AI
 {
@@ -64,7 +65,9 @@ namespace SimpleSurvival.AI
                 Vector3 dir = (_target.position - spawnPos).normalized;
                 Quaternion spawnRot = dir != Vector3.zero ? Quaternion.LookRotation(dir) : transform.rotation;
 
-                var go = Instantiate(acidEffectPrefab, spawnPos, spawnRot);
+                // ĐÃ SỬA: dùng ObjectPool.Instance.Get thay vì Instantiate để tránh
+                // GC spike/leak trên Android khi zombie phun acid liên tục.
+                var go = ObjectPool.Instance.Get(acidEffectPrefab, spawnPos, spawnRot);
                 var projectile = go.GetComponent<AcidProjectile>();
                 if (projectile != null)
                     projectile.Init(damage, gameObject, controller);

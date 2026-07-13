@@ -26,7 +26,7 @@ namespace SimpleSurvival.AI
         {
             if (player == null)
             {
-                CameraShake.Shake(intensity, duration);
+                CameraShake.Shake(intensity, duration, transform);
                 return;
             }
 
@@ -34,7 +34,7 @@ namespace SimpleSurvival.AI
             if (dist > maxDistanceToPlayer) return;
 
             float falloff = 1f - Mathf.Clamp01(dist / maxDistanceToPlayer);
-            CameraShake.Shake(intensity * falloff, duration);
+            CameraShake.Shake(intensity * falloff, duration, transform);
         }
     }
 }
