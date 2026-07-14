@@ -9,6 +9,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerToolSwapper toolSwapper;
         [SerializeField] private Transform rightHandAnchor;
         [SerializeField] private AudioSource weaponAudioSource;
+        [SerializeField] private PlayerLeftHandIK leftHandIK;
 
         private GameObject _currentVisual;
         private WeaponVisualAnchors _currentAnchors;
@@ -18,6 +19,7 @@ namespace SimpleSurvival.Player
         {
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (toolSwapper == null) toolSwapper = GetComponent<PlayerToolSwapper>();
+            if (leftHandIK == null) leftHandIK = GetComponent<PlayerLeftHandIK>();
         }
 
         private void Start()
@@ -57,6 +59,8 @@ namespace SimpleSurvival.Player
             _currentVisual = Instantiate(targetPrefab, rightHandAnchor, false);
             _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
             _currentSourcePrefab = targetPrefab;
+
+            UpdateLeftHandIK();
         }
 
         private GameObject ResolveTargetPrefab()
@@ -75,6 +79,17 @@ namespace SimpleSurvival.Player
             _currentVisual = null;
             _currentAnchors = null;
             _currentSourcePrefab = null;
+
+            UpdateLeftHandIK();
+        }
+
+        private void UpdateLeftHandIK()
+        {
+            if (leftHandIK == null) return;
+
+            Transform target0 = _currentAnchors != null ? _currentAnchors.LeftHand0TargetIK : null;
+            Transform target1 = _currentAnchors != null ? _currentAnchors.LeftHand1TargetIK : null;
+            leftHandIK.SetTargets(target0, target1);
         }
 
         public bool IsCurrentWeaponRanged()
