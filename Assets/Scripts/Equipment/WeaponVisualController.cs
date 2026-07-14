@@ -1,4 +1,5 @@
 using UnityEngine;
+using SimpleSurvival.Actions;
 using SimpleSurvival.Items;
 
 namespace SimpleSurvival.Player
@@ -7,6 +8,7 @@ namespace SimpleSurvival.Player
     {
         [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private PlayerToolSwapper toolSwapper;
+        [SerializeField] private PlayerActionController actionController;
         [SerializeField] private Transform rightHandAnchor;
         [SerializeField] private AudioSource weaponAudioSource;
         [SerializeField] private PlayerLeftHandIK leftHandIK;
@@ -15,10 +17,16 @@ namespace SimpleSurvival.Player
         private WeaponVisualAnchors _currentAnchors;
         private GameObject _currentSourcePrefab;
 
+        private Transform _moveTarget0;
+        private Transform _moveTarget1;
+        private Transform _attackTarget0;
+        private Transform _attackTarget1;
+
         private void Awake()
         {
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (toolSwapper == null) toolSwapper = GetComponent<PlayerToolSwapper>();
+            if (actionController == null) actionController = GetComponent<PlayerActionController>();
             if (leftHandIK == null) leftHandIK = GetComponent<PlayerLeftHandIK>();
         }
 
@@ -30,6 +38,9 @@ namespace SimpleSurvival.Player
             if (toolSwapper != null)
                 toolSwapper.OnToolVisualStateChanged += Rebuild;
 
+            if (actionController != null)
+                actionController.OnActionChanged += HandleActionChanged;
+
             Rebuild();
         }
 
@@ -40,12 +51,25 @@ namespace SimpleSurvival.Player
 
             if (toolSwapper != null)
                 toolSwapper.OnToolVisualStateChanged -= Rebuild;
+
+            if (actionController != null)
+                actionController.OnActionChanged -= HandleActionChanged;
         }
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
         {
             if (slot != EquipSlot.Weapon) return;
             Rebuild();
+        }
+
+        private void HandleActionChanged(IAction oldAction, IAction newAction)
+        {
+            if (leftHandIK == null) return;
+
+            if (newAction is AttackAction)
+                leftHandIK.SetTargets(_attackTarget0, _attackTarget1);
+            else
+                leftHandIK.SetTargets(_moveTarget0, _moveTarget1);
         }
 
         private void Rebuild()
@@ -85,11 +109,22 @@ namespace SimpleSurvival.Player
 
         private void UpdateLeftHandIK()
         {
-            if (leftHandIK == null) return;
+            if (_currentAnchors != null)
+            {
+                _moveTarget0 = _currentAnchors.UseLeftHandIKOnMove ? _currentAnchors.LeftHand0TargetIK : null;
+                _moveTarget1 = _currentAnchors.UseLeftHandIKOnMove ? _currentAnchors.LeftHand1TargetIK : null;
+                _attackTarget0 = _currentAnchors.UseLeftHandIKOnAttack ? _currentAnchors.LeftHand0TargetIK : null;
+                _attackTarget1 = _currentAnchors.UseLeftHandIKOnAttack ? _currentAnchors.LeftHand1TargetIK : null;
+            }
+            else
+            {
+                _moveTarget0 = null;
+                _moveTarget1 = null;
+                _attackTarget0 = null;
+                _attackTarget1 = null;
+            }
 
-            Transform target0 = _currentAnchors != null ? _currentAnchors.LeftHand0TargetIK : null;
-            Transform target1 = _currentAnchors != null ? _currentAnchors.LeftHand1TargetIK : null;
-            leftHandIK.SetTargets(target0, target1);
+            leftHandIK?.SetTargets(_moveTarget0, _moveTarget1);
         }
 
         public bool IsCurrentWeaponRanged()

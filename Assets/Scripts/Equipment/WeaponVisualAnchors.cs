@@ -6,6 +6,8 @@ namespace SimpleSurvival.Items
     {
         [SerializeField] private Transform leftHand0TargetIK;
         [SerializeField] private Transform leftHand1TargetIK;
+        [SerializeField] private bool useLeftHandIKOnMove;
+        [SerializeField] private bool useLeftHandIKOnAttack;
         [SerializeField] private ParticleSystem muzzleFlashParticles;
         [SerializeField] private ParticleSystem shellCasingParticles;
         [SerializeField] private AudioClip fireSfx;
@@ -13,6 +15,8 @@ namespace SimpleSurvival.Items
 
         public Transform LeftHand0TargetIK => leftHand0TargetIK;
         public Transform LeftHand1TargetIK => leftHand1TargetIK;
+        public bool UseLeftHandIKOnMove => useLeftHandIKOnMove;
+        public bool UseLeftHandIKOnAttack => useLeftHandIKOnAttack;
         public ParticleSystem MuzzleFlashParticles => muzzleFlashParticles;
         public ParticleSystem ShellCasingParticles => shellCasingParticles;
         public AudioClip FireSfx => fireSfx;
