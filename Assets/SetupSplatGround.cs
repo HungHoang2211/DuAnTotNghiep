@@ -37,6 +37,7 @@ public class SetupSplatGround : MonoBehaviour
         ApplyControlMaps(data, mat);
         ApplyLayers(data.terrainLayers, mat);
         ApplyTerrainBounds(data.size, mat);
+        ApplyGroundUV();
 
         targetRenderer.sharedMaterial = mat;
 
@@ -141,4 +142,85 @@ public class SetupSplatGround : MonoBehaviour
         mat.SetVector("_TerrainOrigin", new Vector4(origin.x, 0, origin.z, 0));
         mat.SetVector("_TerrainSize", new Vector4(size.x, 0, size.z, 0));
     }
+
+    private void ApplyGroundUV()
+    {
+        MeshFilter meshFilter = targetRenderer.GetComponent<MeshFilter>();
+        if (meshFilter == null || meshFilter.sharedMesh == null)
+        {
+            Debug.LogError("Setup: Target Renderer thiếu MeshFilter hoặc Mesh.");
+            return;
+        }
+
+        WarnIfSourceRotated(targetRenderer.transform);
+
+        Mesh mesh = GetOrCreateUniqueMesh(meshFilter, $"{splatmapAssetName}_SourceMesh");
+        WriteGroundUV(mesh, targetRenderer.transform);
+    }
+
+    private void WarnIfSourceRotated(Transform planeTransform)
+    {
+        if (planeTransform.localRotation != Quaternion.identity)
+        {
+            Debug.LogWarning("Setup: Source Plane nên ở Rotation (0,0,0) lúc Setup để toạ độ ground UV chính xác.");
+        }
+    }
+
+    private Mesh GetOrCreateUniqueMesh(MeshFilter meshFilter, string assetName)
+    {
+#if UNITY_EDITOR
+        Mesh instance = Instantiate(meshFilter.sharedMesh);
+        instance.name = assetName;
+
+        string path = $"Assets/{assetName}.asset";
+        if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+        {
+            AssetDatabase.DeleteAsset(path);
+        }
+
+        AssetDatabase.CreateAsset(instance, path);
+        AssetDatabase.SaveAssets();
+
+        Mesh saved = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+        meshFilter.sharedMesh = saved;
+        return saved;
+#else
+        return meshFilter.sharedMesh;
+#endif
+    }
+
+    private void WriteGroundUV(Mesh mesh, Transform planeTransform)
+    {
+        Vector3 scale = planeTransform.localScale;
+        Vector3[] vertices = mesh.vertices;
+        Vector2[] uv = new Vector2[vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            uv[i] = new Vector2(vertices[i].x * scale.x, vertices[i].z * scale.z);
+        }
+
+        mesh.uv = uv;
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(mesh);
+#endif
+    }
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(SetupSplatGround))]
+public class SetupSplatGroundEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+        GUILayout.Space(8);
+
+        SetupSplatGround setup = (SetupSplatGround)target;
+        if (GUILayout.Button("Setup Splat Ground", GUILayout.Height(30)))
+        {
+            setup.Setup();
+        }
+    }
+}
+#endif

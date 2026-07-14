@@ -43,10 +43,6 @@
             #pragma multi_compile_fog
             #pragma target 3.0
 
-            // --- KÍCH HOẠT ĐA BIÊN DỊCH CHO BÓNG ĐỔ TRONG URP ---
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _SHADOWS_SOFT
-
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
@@ -72,16 +68,15 @@
             {
                 float4 positionOS : POSITION;
                 float3 normalOS   : NORMAL;
+                float2 uv         : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
-                float3 positionWS  : TEXCOORD0;
-                float3 normalWS    : TEXCOORD1;
+                float3 normalWS    : TEXCOORD0;
+                float2 groundXZ    : TEXCOORD1;
                 float  fogCoord    : TEXCOORD2;
-                // Lưu tọa độ bóng đổ truyền sang Fragment Shader
-                float4 shadowCoord : TEXCOORD3; 
             };
 
             Varyings vert(Attributes IN)
@@ -89,33 +84,26 @@
                 Varyings OUT;
                 VertexPositionInputs p = GetVertexPositionInputs(IN.positionOS.xyz);
                 OUT.positionHCS = p.positionCS;
-                OUT.positionWS  = p.positionWS;
                 OUT.normalWS    = TransformObjectToWorldNormal(IN.normalOS);
                 OUT.fogCoord    = ComputeFogFactor(p.positionCS.z);
-                
-                // Tính toán tọa độ không gian shadow map dựa trên vị trí Vertex
-                OUT.shadowCoord = GetShadowCoord(p); 
-                
+                OUT.groundXZ    = IN.uv;
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                float3 planeWS = mul(UNITY_MATRIX_M, float4(0,0,0,1)).xyz;
-                float2 localXZ = IN.positionWS.xz - planeWS.xz;
-
-                float2 cuv = (localXZ - _TerrainOrigin.xz) / _TerrainSize.xz;
+                float2 cuv = (IN.groundXZ - _TerrainOrigin.xz) / _TerrainSize.xz;
                 half4 ctrl1 = SAMPLE_TEXTURE2D(_Control,  sampler_Control, cuv);
                 half4 ctrl2 = SAMPLE_TEXTURE2D(_Control2, sampler_Control, cuv);
 
-                half3 c0 = SAMPLE_TEXTURE2D(_Splat0, sampler_Splat0, localXZ / _Tile0).rgb;
-                half3 c1 = SAMPLE_TEXTURE2D(_Splat1, sampler_Splat0, localXZ / _Tile1).rgb;
-                half3 c2 = SAMPLE_TEXTURE2D(_Splat2, sampler_Splat0, localXZ / _Tile2).rgb;
-                half3 c3 = SAMPLE_TEXTURE2D(_Splat3, sampler_Splat0, localXZ / _Tile3).rgb;
-                half3 c4 = SAMPLE_TEXTURE2D(_Splat4, sampler_Splat0, localXZ / _Tile4).rgb;
-                half3 c5 = SAMPLE_TEXTURE2D(_Splat5, sampler_Splat0, localXZ / _Tile5).rgb;
-                half3 c6 = SAMPLE_TEXTURE2D(_Splat6, sampler_Splat0, localXZ / _Tile6).rgb;
-                half3 c7 = SAMPLE_TEXTURE2D(_Splat7, sampler_Splat0, localXZ / _Tile7).rgb;
+                half3 c0 = SAMPLE_TEXTURE2D(_Splat0, sampler_Splat0, IN.groundXZ / _Tile0).rgb;
+                half3 c1 = SAMPLE_TEXTURE2D(_Splat1, sampler_Splat0, IN.groundXZ / _Tile1).rgb;
+                half3 c2 = SAMPLE_TEXTURE2D(_Splat2, sampler_Splat0, IN.groundXZ / _Tile2).rgb;
+                half3 c3 = SAMPLE_TEXTURE2D(_Splat3, sampler_Splat0, IN.groundXZ / _Tile3).rgb;
+                half3 c4 = SAMPLE_TEXTURE2D(_Splat4, sampler_Splat0, IN.groundXZ / _Tile4).rgb;
+                half3 c5 = SAMPLE_TEXTURE2D(_Splat5, sampler_Splat0, IN.groundXZ / _Tile5).rgb;
+                half3 c6 = SAMPLE_TEXTURE2D(_Splat6, sampler_Splat0, IN.groundXZ / _Tile6).rgb;
+                half3 c7 = SAMPLE_TEXTURE2D(_Splat7, sampler_Splat0, IN.groundXZ / _Tile7).rgb;
 
                 half total = ctrl1.r + ctrl1.g + ctrl1.b + ctrl1.a +
                              ctrl2.r + ctrl2.g + ctrl2.b + ctrl2.a + 1e-4h;
@@ -123,19 +111,10 @@
                 half3 albedo = (c0 * ctrl1.r + c1 * ctrl1.g + c2 * ctrl1.b + c3 * ctrl1.a +
                                 c4 * ctrl2.r + c5 * ctrl2.g + c6 * ctrl2.b + c7 * ctrl2.a) / total;
 
-                // --- TÍNH TOÁN ÁNH SÁNG VÀ BÓNG ĐỔ ---
-                // Truyền shadowCoord vào để URP tự động lấy hệ số che khuất (attenuation)
-                Light ml = GetMainLight(IN.shadowCoord); 
-                
+                Light ml = GetMainLight();
                 half3 n = normalize(IN.normalWS);
                 half ndotl = saturate(dot(n, ml.direction));
-                
-                // ml.shadowAttenuation sẽ bằng 0 nếu ở trong bóng và bằng 1 nếu ở vùng sáng
-                half3 mainLightColor = ml.color * (ndotl * ml.shadowAttenuation);
-                
-                // Kết hợp ánh sáng chính cùng với Giả lập Global Illumination (LightProbes/Ambient)
-                half3 lighting = mainLightColor + SampleSH(n);
-                // ------------------------------------
+                half3 lighting = ml.color * ndotl + SampleSH(n);
 
                 half3 col = albedo * lighting;
                 col = MixFog(col, IN.fogCoord);
