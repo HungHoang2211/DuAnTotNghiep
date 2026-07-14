@@ -1,4 +1,4 @@
-Shader "SimpleSurvival/InfectedThing"
+﻿Shader "SimpleSurvival/InfectedThing"
 {
     Properties
     {
@@ -11,6 +11,12 @@ Shader "SimpleSurvival/InfectedThing"
         _BulgeHeight ("Bulge Height (m)", Float) = 0.7344
 
         [Toggle(USE_UV_SHAKE)] _UseUVShake ("Use UV to shake?", Float) = 0
+
+        [Header(Trigger Death Transition)]
+        _DeadColor     ("Dead/Triggered Color", Color) = (0.05,0.01,0.01,1)
+        _DeadAmount    ("Dead Amount (0 = Infected/Red, 1 = Triggered)", Range(0,1)) = 0
+        _VeinThreshold ("Vein Threshold (luminance trên mức này = mạch máu)", Range(0,1)) = 0.15
+        _BaseDarken    ("Base Darken (mức đen tối đa ở vùng KHÔNG phải mạch máu)", Range(0,1)) = 0.55
     }
 
     SubShader
@@ -33,17 +39,23 @@ Shader "SimpleSurvival/InfectedThing"
             half4  _Settings;
             half   _Cutoff;
             half   _BulgeHeight;
+            half4  _DeadColor;
+            half   _DeadAmount;
+            half   _VeinThreshold;
+            half   _BaseDarken;
         CBUFFER_END
 
         TEXTURE2D(_MainTex);  SAMPLER(sampler_MainTex);
         TEXTURE2D(_AlphaR);   SAMPLER(sampler_AlphaR);
 
-        float3 ApplyBreathing(float3 positionOS, float3 normalOS, float2 uv)
+        // deadAmount làm giảm dần biên độ "thở" - trap đã bị kích hoạt (chết) thì
+        // không còn phập phồng nữa.
+        float3 ApplyBreathing(float3 positionOS, float3 normalOS, float2 uv, half deadAmount)
         {
             half heightMask = saturate(positionOS.y / max(_BulgeHeight, 0.001h));
 
             half speed     = _Settings.x;
-            half amplitude = _Settings.y;
+            half amplitude = _Settings.y * (1.0h - deadAmount);
             half frequency = _Settings.z;
 
             #ifdef USE_UV_SHAKE
@@ -96,7 +108,7 @@ Shader "SimpleSurvival/InfectedThing"
             {
                 Varyings OUT;
 
-                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv);
+                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv, _DeadAmount);
 
                 VertexPositionInputs posIn = GetVertexPositionInputs(posOS);
                 VertexNormalInputs   nrmIn = GetVertexNormalInputs(IN.normalOS);
@@ -115,7 +127,18 @@ Shader "SimpleSurvival/InfectedThing"
                 half mask = SAMPLE_TEXTURE2D(_AlphaR, sampler_AlphaR, IN.uvAlpha).r;
                 clip(mask - _Cutoff);
 
-                half3 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvMain).rgb * _Color.rgb;
+                half3 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uvMain).rgb;
+                half3 albedo = texColor * _Color.rgb;
+
+                // "Mạch máu" = vùng texture gốc sáng/đỏ nổi hơn nền. Dùng luminance
+                // của texture gốc (chưa tint) làm mask để phân biệt mạch máu vs nền.
+                half luminance = dot(texColor, half3(0.299h, 0.587h, 0.114h));
+                half veinMask = saturate((luminance - _VeinThreshold) / max(0.0001h, 1.0h - _VeinThreshold));
+
+                // Vùng nền chỉ tối nhẹ đi tối đa theo _BaseDarken, vùng mạch máu
+                // đen hoá gần như hoàn toàn khi _DeadAmount = 1.
+                half localDead = _DeadAmount * lerp(_BaseDarken, 1.0h, veinMask);
+                albedo = lerp(albedo, _DeadColor.rgb, localDead);
 
                 half3 N = normalize(IN.normalWS);
                 Light mainLight = GetMainLight(IN.shadowCoord);
@@ -167,7 +190,7 @@ Shader "SimpleSurvival/InfectedThing"
             {
                 VaryingsS OUT;
 
-                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv);
+                float3 posOS = ApplyBreathing(IN.positionOS.xyz, IN.normalOS, IN.uv, _DeadAmount);
                 float3 positionWS = TransformObjectToWorld(posOS);
                 float3 normalWS   = TransformObjectToWorldNormal(IN.normalOS);
 

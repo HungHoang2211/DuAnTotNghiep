@@ -39,6 +39,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float lootRange = 1.5f;
         [SerializeField] private float npcInteractRange = 1.5f;
         [SerializeField] private float witchEventRange = 1.5f;
+        [SerializeField] private float dogHouseInteractRange = 1.5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -353,6 +354,23 @@ namespace SimpleSurvival.Player
             return true;
         }
 
+        public bool RequestDogHouseInteract(SimpleSurvival.Targets.DogHouseTargetable target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > dogHouseInteractRange)
+            {
+                Debug.Log($"[DogHouse] Too far: {dist:F1}m > {dogHouseInteractRange:F1}m");
+                return false;
+            }
+
+            var interactable = target.GetComponentInParent<SimpleSurvival.Targets.DogHouseInteractable>();
+            if (interactable == null) return false;
+
+            interactable.OnPlayerInteract(gameObject);
+            return true;
+        }
         public bool RequestWitchEvent(SimpleSurvival.Targets.WitchEventTrap target)
         {
             if (target == null || !target.CanBeTargeted()) return false;
