@@ -24,11 +24,9 @@ namespace SimpleSurvival.Pets
         [SerializeField] private DogAnimator dogAnimator;
         [SerializeField] private DogAttackSkill attackSkill;
 
-        [Tooltip("Điểm neo trên Player để Dog bám theo (vd: DogFollowPoint đặt sau lưng Player). Để trống sẽ dùng thẳng gốc Transform của Player.")]
         [SerializeField] private Transform followPoint;
 
         [Header("Quest Unlock")]
-        [Tooltip("Quest cần hoàn thành để Dog đứng dậy và bắt đầu theo Player. Để trống nếu Dog không cần gate theo quest.")]
         [SerializeField] private QuestData unlockQuest;
 
         [Header("Follow Settings")]
@@ -39,15 +37,15 @@ namespace SimpleSurvival.Pets
         [SerializeField] private float rotationSpeed = 360f;
 
         [Header("Combat Settings")]
-        [Tooltip("Sau khi player bị 1 enemy đánh trúng, Dog vẫn coi enemy đó là mối đe doạ trong khoảng thời gian này dù player không tấn công.")]
         [SerializeField] private float playerAttackedGraceTime = 3f;
-        [Tooltip("Sau khi hạ gục mục tiêu, Dog tự dò tìm enemy còn sống trong bán kính này để đánh tiếp, không cần chờ tín hiệu mới từ Player.")]
         [SerializeField] private float nearbyEnemyScanRadius = 6f;
         [SerializeField] private LayerMask enemyLayer;
 
         [Header("Reaction Delay")]
-        [Tooltip("Dog phản ứng chậm hơn Player bao nhiêu giây trước khi bắt đầu đuổi theo hoặc vào combat.")]
         [SerializeField] private float actionDelay = 2f;
+
+        [Header("Map Transition")]
+        [SerializeField] private SimpleSurvival.World.MapLoader mapLoader;
 
         private NavMeshAgent _agent;
         private CharacterController _characterController;
@@ -78,6 +76,8 @@ namespace SimpleSurvival.Pets
         {
             _agent = GetComponent<NavMeshAgent>();
             _characterController = GetComponent<CharacterController>();
+
+            if (mapLoader == null) mapLoader = SimpleSurvival.World.MapLoader.Instance;
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
@@ -118,12 +118,14 @@ namespace SimpleSurvival.Pets
         {
             if (playerStats != null) playerStats.OnDamagedBy += HandlePlayerDamaged;
             if (dogAnimator != null) dogAnimator.OnStandUpFinished += HandleStandUpFinished;
+            if (mapLoader != null) mapLoader.PlayerRepositioned += HandlePlayerRepositioned;
         }
 
         private void OnDisable()
         {
             if (playerStats != null) playerStats.OnDamagedBy -= HandlePlayerDamaged;
             if (dogAnimator != null) dogAnimator.OnStandUpFinished -= HandleStandUpFinished;
+            if (mapLoader != null) mapLoader.PlayerRepositioned -= HandlePlayerRepositioned;
 
             var manager = QuestManager.Instance;
             if (manager != null) manager.OnQuestCompleted -= HandleQuestCompleted;
@@ -151,10 +153,25 @@ namespace SimpleSurvival.Pets
             _state = DogState.Follow;
         }
 
-        /// <summary>
-        /// Gọi từ DogHouseInteractable khi player bấm Use vào ngôi nhà chó.
-        /// Toggle giữa "đi theo" và "về nhà nằm".
-        /// </summary>
+        private void HandlePlayerRepositioned()
+        {
+            if (playerActionController == null) return;
+
+            Vector3 targetPos = playerActionController.PlayerTransform.position;
+
+            if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+            {
+                _agent.Warp(hit.position);
+                transform.position = hit.position;
+            }
+            else
+            {
+                transform.position = targetPos;
+            }
+
+            ResetStuckState();
+        }
+
         public void RequestToggleHome(Transform houseAnchor)
         {
             if (_state == DogState.Waiting || _state == DogState.StandingUp) return;
@@ -422,6 +439,8 @@ namespace SimpleSurvival.Pets
 
         private void UpdateAgentDestination(Vector3 destination)
         {
+            if (!_agent.isOnNavMesh) return;
+
             UpdateStuckTimer();
 
             if (_stuckTimer >= CurrentStuckThreshold())
@@ -510,8 +529,11 @@ namespace SimpleSurvival.Pets
 
         private void StopMoving()
         {
-            _agent.isStopped = true;
-            _agent.ResetPath();
+            if (_agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+            }
             _agent.nextPosition = transform.position;
             ResetStuckState();
         }
