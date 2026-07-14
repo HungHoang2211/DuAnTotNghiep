@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SimpleSurvival.Pets
@@ -8,11 +9,15 @@ namespace SimpleSurvival.Pets
         private static readonly int MoveModeHash = Animator.StringToHash("MoveMode");
         private static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
         private static readonly int AttackTriggerHash = Animator.StringToHash("Attack");
+        private static readonly int IsLyingHash = Animator.StringToHash("IsLying");
+        private static readonly int StandUpHash = Animator.StringToHash("StandUp");
 
         [SerializeField] private Animator _animator;
         [SerializeField] private int moveModeNormal = 0;
         [SerializeField] private int moveModeSneak = 1;
         [SerializeField] private float speedDampTime = 0.1f;
+
+        public event Action OnStandUpFinished;
 
         private void Awake()
         {
@@ -32,6 +37,22 @@ namespace SimpleSurvival.Pets
         public void SetSneaking(bool sneaking)
         {
             _animator.SetInteger(MoveModeHash, sneaking ? moveModeSneak : moveModeNormal);
+        }
+
+        public void SetLying(bool lying)
+        {
+            _animator.SetBool(IsLyingHash, lying);
+        }
+
+        public void TriggerStandUp()
+        {
+            _animator.SetBool(IsLyingHash, false);
+            _animator.SetTrigger(StandUpHash);
+        }
+
+        public void NotifyStandUpFinished()
+        {
+            OnStandUpFinished?.Invoke();
         }
 
         public void TriggerAttack(int attackIndex)
