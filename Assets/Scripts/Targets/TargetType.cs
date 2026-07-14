@@ -9,6 +9,7 @@ namespace SimpleSurvival.Targets
         Workbench,
         Trader,
         Character,
-        WitchEvent
+        WitchEvent,
+        DogHouse
     }
 }

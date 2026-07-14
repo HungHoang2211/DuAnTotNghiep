@@ -36,7 +36,6 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            // Hybrid setup: NavMeshAgent chỉ pathfinding, không drive transform
             _agent.updatePosition = false;
             _agent.updateRotation = false;
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
@@ -44,7 +43,6 @@ namespace SimpleSurvival.AI
             _stats.OnDeath += HandleDeath;
             _stats.OnDamagedBy += HandleDamagedBy;
 
-            // Player là unique trong scene nên tìm 1 lần và lắng nghe OnDeath của player
             if (_playerStats == null)
                 _playerStats = FindAnyObjectByType<PlayerStats>();
 
@@ -109,13 +107,10 @@ namespace SimpleSurvival.AI
             _playerDead = true;
         }
 
-        /// <summary>
-        /// Di chuyển GameObject theo path của NavMeshAgent nhưng thực thi
-        /// bằng CharacterController (hybrid: NavMeshAgent chỉ pathfinding).
-        /// Dùng chung cho cả enemy chủ động (chase) và creature bị động (wander/flee).
-        /// </summary>
         protected void MoveAlongAgentPath(float moveSpeed, float rotationSpeed)
         {
+            if (!_agent.isOnNavMesh) return;
+
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * moveSpeed;
             move.y += Physics.gravity.y * Time.deltaTime;

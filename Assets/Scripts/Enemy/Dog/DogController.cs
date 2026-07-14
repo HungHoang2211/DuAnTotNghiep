@@ -6,7 +6,7 @@ using SimpleSurvival.Input;
 using SimpleSurvival.Targets;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Combat;
-using SimpleSurvival.World;
+using SimpleSurvival.Quests;
 
 namespace SimpleSurvival.Pets
 {
@@ -14,7 +14,7 @@ namespace SimpleSurvival.Pets
     [RequireComponent(typeof(CharacterController))]
     public sealed class DogController : MonoBehaviour
     {
-        private enum DogState { Follow, Combat }
+        private enum DogState { Waiting, StandingUp, Follow, Combat, MovingToHouse, SentHome }
 
         [Header("References")]
         [SerializeField] private PlayerActionController playerActionController;
@@ -24,8 +24,10 @@ namespace SimpleSurvival.Pets
         [SerializeField] private DogAnimator dogAnimator;
         [SerializeField] private DogAttackSkill attackSkill;
 
-        [Tooltip("Điểm neo trên Player để Dog bám theo (vd: DogFollowPoint đặt sau lưng Player). Để trống sẽ dùng thẳng gốc Transform của Player.")]
         [SerializeField] private Transform followPoint;
+
+        [Header("Quest Unlock")]
+        [SerializeField] private QuestData unlockQuest;
 
         [Header("Follow Settings")]
         [SerializeField] private float followDistance = 4f;
@@ -35,25 +37,22 @@ namespace SimpleSurvival.Pets
         [SerializeField] private float rotationSpeed = 360f;
 
         [Header("Combat Settings")]
-        [Tooltip("Sau khi player bị 1 enemy đánh trúng, Dog vẫn coi enemy đó là mối đe doạ trong khoảng thời gian này dù player không tấn công.")]
         [SerializeField] private float playerAttackedGraceTime = 3f;
-        [Tooltip("Sau khi hạ gục mục tiêu, Dog tự dò tìm enemy còn sống trong bán kính này để đánh tiếp, không cần chờ tín hiệu mới từ Player.")]
         [SerializeField] private float nearbyEnemyScanRadius = 6f;
         [SerializeField] private LayerMask enemyLayer;
 
         [Header("Reaction Delay")]
-        [Tooltip("Dog phản ứng chậm hơn Player bao nhiêu giây trước khi bắt đầu đuổi theo hoặc vào combat.")]
         [SerializeField] private float actionDelay = 2f;
 
         [Header("Map Transition")]
-        [SerializeField] private float mapTransitionSideOffset = 1.5f;
-        [SerializeField] private float navMeshSampleRadius = 3f;
+        [SerializeField] private SimpleSurvival.World.MapLoader mapLoader;
 
         private NavMeshAgent _agent;
         private CharacterController _characterController;
         private DogState _state = DogState.Follow;
         private Transform _combatTarget;
         private Transform _enemyAttacker;
+        private Transform _houseAnchor;
         private float _lastPlayerDamagedTime = -999f;
         private bool _isFollowing;
         private float _nextPathUpdateTime;
@@ -78,6 +77,8 @@ namespace SimpleSurvival.Pets
             _agent = GetComponent<NavMeshAgent>();
             _characterController = GetComponent<CharacterController>();
 
+            if (mapLoader == null) mapLoader = SimpleSurvival.World.MapLoader.Instance;
+
             _agent.updatePosition = false;
             _agent.updateRotation = false;
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.GoodQualityObstacleAvoidance;
@@ -87,16 +88,47 @@ namespace SimpleSurvival.Pets
             _scratchPath = new NavMeshPath();
         }
 
+        private void Start()
+        {
+            if (unlockQuest == null) return;
+
+            var manager = QuestManager.Instance;
+            bool alreadyDone = manager != null && manager.IsQuestCompleted(unlockQuest);
+
+            if (alreadyDone)
+            {
+                _state = DogState.Follow;
+            }
+            else
+            {
+                _state = DogState.Waiting;
+                if (dogAnimator != null) dogAnimator.SetLying(true);
+            }
+
+            if (manager != null) manager.OnQuestCompleted += HandleQuestCompleted;
+        }
+
+        private void OnDestroy()
+        {
+            var manager = QuestManager.Instance;
+            if (manager != null) manager.OnQuestCompleted -= HandleQuestCompleted;
+        }
+
         private void OnEnable()
         {
             if (playerStats != null) playerStats.OnDamagedBy += HandlePlayerDamaged;
-            if (MapLoader.Instance != null) MapLoader.Instance.PlayerRepositioned += HandlePlayerRepositioned;
+            if (dogAnimator != null) dogAnimator.OnStandUpFinished += HandleStandUpFinished;
+            if (mapLoader != null) mapLoader.PlayerRepositioned += HandlePlayerRepositioned;
         }
 
         private void OnDisable()
         {
             if (playerStats != null) playerStats.OnDamagedBy -= HandlePlayerDamaged;
-            if (MapLoader.Instance != null) MapLoader.Instance.PlayerRepositioned -= HandlePlayerRepositioned;
+            if (dogAnimator != null) dogAnimator.OnStandUpFinished -= HandleStandUpFinished;
+            if (mapLoader != null) mapLoader.PlayerRepositioned -= HandlePlayerRepositioned;
+
+            var manager = QuestManager.Instance;
+            if (manager != null) manager.OnQuestCompleted -= HandleQuestCompleted;
         }
 
         private void HandlePlayerDamaged(GameObject attacker)
@@ -106,44 +138,80 @@ namespace SimpleSurvival.Pets
             _lastPlayerDamagedTime = Time.time;
         }
 
-        private void HandlePlayerRepositioned()
+        private void HandleQuestCompleted(QuestData quest)
         {
-            Transform followTarget = GetFollowTarget();
-            if (followTarget == null) return;
+            if (unlockQuest == null || quest != unlockQuest) return;
+            if (_state != DogState.Waiting) return;
 
-            Vector3 desired = followTarget.position - followTarget.right * mapTransitionSideOffset;
-
-            if (NavMesh.SamplePosition(desired, out NavMeshHit hit, navMeshSampleRadius, NavMesh.AllAreas))
-                desired = hit.position;
-            else
-                desired = followTarget.position;
-
-            WarpTo(desired, followTarget.rotation);
+            _state = DogState.StandingUp;
+            if (dogAnimator != null) dogAnimator.TriggerStandUp();
         }
 
-        private void WarpTo(Vector3 position, Quaternion rotation)
+        private void HandleStandUpFinished()
         {
-            _characterController.enabled = false;
-            _agent.Warp(position);
-            transform.rotation = rotation;
-            _characterController.enabled = true;
-
-            _agent.isStopped = true;
-            _agent.ResetPath();
-            _agent.nextPosition = transform.position;
-
-            _combatTarget = null;
-            _enemyAttacker = null;
-            _pendingCombatTarget = null;
-            _pendingCombatTimer = 0f;
-            _isFollowing = false;
+            if (_state != DogState.StandingUp) return;
             _state = DogState.Follow;
+        }
+
+        private void HandlePlayerRepositioned()
+        {
+            if (playerActionController == null) return;
+
+            Vector3 targetPos = playerActionController.PlayerTransform.position;
+
+            if (NavMesh.SamplePosition(targetPos, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+            {
+                _agent.Warp(hit.position);
+                transform.position = hit.position;
+            }
+            else
+            {
+                transform.position = targetPos;
+            }
 
             ResetStuckState();
         }
 
+        public void RequestToggleHome(Transform houseAnchor)
+        {
+            if (_state == DogState.Waiting || _state == DogState.StandingUp) return;
+
+            if (_state == DogState.SentHome)
+            {
+                _houseAnchor = null;
+                _state = DogState.StandingUp;
+                if (dogAnimator != null) dogAnimator.TriggerStandUp();
+                return;
+            }
+
+            if (_state == DogState.MovingToHouse)
+            {
+                _houseAnchor = null;
+                _state = DogState.Follow;
+                return;
+            }
+
+            if (houseAnchor == null) return;
+
+            _combatTarget = null;
+            _enemyAttacker = null;
+            attackSkill?.Cancel();
+            _isFollowing = false;
+
+            _houseAnchor = houseAnchor;
+            _state = DogState.MovingToHouse;
+        }
+
         private void Update()
         {
+            if (_state == DogState.Waiting || _state == DogState.StandingUp || _state == DogState.SentHome) return;
+
+            if (_state == DogState.MovingToHouse)
+            {
+                UpdateMovingToHouse();
+                return;
+            }
+
             UpdateSneakState();
             UpdateCombatTarget();
 
@@ -345,8 +413,34 @@ namespace SimpleSurvival.Pets
                 dogAnimator.SetSpeed(1f);
         }
 
+        private void UpdateMovingToHouse()
+        {
+            if (_houseAnchor == null)
+            {
+                _state = DogState.Follow;
+                return;
+            }
+
+            float dist = Vector3.Distance(transform.position, _houseAnchor.position);
+
+            if (dist <= stopDistance)
+            {
+                StopMoving();
+                if (dogAnimator != null) dogAnimator.SetLying(true);
+                _state = DogState.SentHome;
+                return;
+            }
+
+            _agent.isStopped = false;
+            UpdateAgentDestination(_houseAnchor.position);
+            MoveAlongAgentPath(runSpeed, rotationSpeed);
+            if (dogAnimator != null) dogAnimator.SetSpeed(1f);
+        }
+
         private void UpdateAgentDestination(Vector3 destination)
         {
+            if (!_agent.isOnNavMesh) return;
+
             UpdateStuckTimer();
 
             if (_stuckTimer >= CurrentStuckThreshold())
@@ -435,8 +529,11 @@ namespace SimpleSurvival.Pets
 
         private void StopMoving()
         {
-            _agent.isStopped = true;
-            _agent.ResetPath();
+            if (_agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+            }
             _agent.nextPosition = transform.position;
             ResetStuckState();
         }
@@ -452,8 +549,8 @@ namespace SimpleSurvival.Pets
             Vector3 lookDir = new Vector3(desiredVel.x, 0f, desiredVel.z);
             if (lookDir.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(lookDir);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotSpeed * Time.deltaTime);
+                Quaternion targetRot = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(lookDir), rotSpeed * Time.deltaTime);
+                transform.rotation = targetRot;
             }
         }
 
