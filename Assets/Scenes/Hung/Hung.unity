@@ -20117,7 +20117,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &164225270
 RectTransform:
   m_ObjectHideFlags: 0
@@ -88138,7 +88138,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &834141419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121441,10 +121441,10 @@ RectTransform:
   - {fileID: 1830812904}
   m_Father: {fileID: 1752701567}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 56}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 400, y: -30}
+  m_SizeDelta: {x: 270, y: 56}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1159069631
 MonoBehaviour:
@@ -169366,6 +169366,33 @@ MonoBehaviour:
   selectionHighlight: {fileID: 297823776}
   dragHighlight: {fileID: 0}
   holdThreshold: 0.5
+--- !u!1 &1591637659 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3369929249380305476, guid: d74f4084b553bbf419fb28ad4deae350, type: 3}
+  m_PrefabInstance: {fileID: 179570859239082809}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &1591637663
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591637659}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: 490cfa6e6bd6a90488bbb5a419c997d9, type: 2}
 --- !u!1 &1591949219
 GameObject:
   m_ObjectHideFlags: 0
@@ -227898,7 +227925,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3369929249380305476, guid: d74f4084b553bbf419fb28ad4deae350, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1591637663}
   m_SourcePrefab: {fileID: 100100000, guid: d74f4084b553bbf419fb28ad4deae350, type: 3}
 --- !u!1 &181467598441747903
 GameObject:
