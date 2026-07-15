@@ -22,14 +22,21 @@ namespace SimpleSurvival.Items
         [SerializeField] private Button buttonSort;
         [SerializeField] private Button buttonDelete;
 
+
         [Header("Use Button Text")]
         [SerializeField] private TMP_Text useButtonText;
+
+        [Header("Notify")]
+        [SerializeField] private GameObject notifyRoot;
+        [SerializeField] private TMP_Text notifyText;
+        [SerializeField] private float notifyDuration = 2f;
 
         [Header("Dialogs")]
         [SerializeField] private SimpleSurvival.UI.ConfirmDeleteDialog confirmDeleteDialog;
 
         public event Action<ItemStack> OnEquipRequested;
 
+        private InventorySystem _subscribedBackpack;
         private enum Context
         {
             None,
@@ -45,6 +52,9 @@ namespace SimpleSurvival.Items
         {
             playerInventory.Pockets.OnInventoryChanged += RefreshAllButtons;
             playerInventory.Pockets.OnInventoryChanged += RefreshSortButton;
+
+            playerInventory.OnBackpackReplaced += HandleBackpackReplaced;
+            HandleBackpackReplaced();
 
             RefreshAllButtons();
             RefreshSortButton();
@@ -78,10 +88,29 @@ namespace SimpleSurvival.Items
                 playerInventory.Pockets.OnInventoryChanged -= RefreshSortButton;
             }
 
+            if (playerInventory != null)
+                playerInventory.OnBackpackReplaced -= HandleBackpackReplaced;
+
+            if (_subscribedBackpack != null)
+                _subscribedBackpack.OnInventoryChanged -= RefreshSortButton;
+
             buttonUse.onClick.RemoveListener(HandleUse);
             buttonSplit.onClick.RemoveListener(HandleSplit);
             buttonSort.onClick.RemoveListener(HandleSort);
             buttonDelete.onClick.RemoveListener(HandleDelete);
+        }
+
+        private void HandleBackpackReplaced()
+        {
+            if (_subscribedBackpack != null)
+                _subscribedBackpack.OnInventoryChanged -= RefreshSortButton;
+
+            _subscribedBackpack = playerInventory.Backpack;
+
+            if (_subscribedBackpack != null)
+                _subscribedBackpack.OnInventoryChanged += RefreshSortButton;
+
+            RefreshSortButton();
         }
 
         private void HandleInventorySelectionChanged(CellUI cell)
@@ -340,12 +369,29 @@ namespace SimpleSurvival.Items
 
         private void HandleSort()
         {
-            if (playerInventory.Backpack != null)
-                InventorySystem.SortTogether(playerInventory.Pockets, playerInventory.Backpack);
-            else
-                playerInventory.Pockets.Sort();
+            bool changed = playerInventory.Backpack != null
+                ? InventorySystem.SortTogether(playerInventory.Pockets, playerInventory.Backpack)
+                : playerInventory.Pockets.Sort();
 
             inventorySelection.Deselect();
+
+            if (!changed)
+                ShowNotify("Nothing to sort");
+        }
+
+        private void ShowNotify(string message)
+        {
+            if (notifyRoot == null) return;
+
+            CancelInvoke(nameof(HideNotify));
+            if (notifyText != null) notifyText.text = message;
+            notifyRoot.SetActive(true);
+            Invoke(nameof(HideNotify), notifyDuration);
+        }
+
+        private void HideNotify()
+        {
+            if (notifyRoot != null) notifyRoot.SetActive(false);
         }
 
         private void PlayDeleteSound()

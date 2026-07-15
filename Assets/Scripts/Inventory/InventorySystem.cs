@@ -196,15 +196,20 @@ namespace SimpleSurvival.Items
             return IndexOfFirstEmptySlot() >= 0;
         }
 
-        public void Sort()
+        public bool Sort()
         {
+            ItemStack[] before = (ItemStack[])slots.Clone();
             List<ItemStack> sorted = BuildSortedList(this);
             WriteBack(sorted, this);
             OnInventoryChanged?.Invoke();
+            return !SlotsEqual(before, slots);
         }
 
-        public static void SortTogether(InventorySystem first, InventorySystem second)
+        public static bool SortTogether(InventorySystem first, InventorySystem second)
         {
+            ItemStack[] beforeFirst = (ItemStack[])first.slots.Clone();
+            ItemStack[] beforeSecond = (ItemStack[])second.slots.Clone();
+
             List<InventorySystem> sources = new List<InventorySystem> { first, second };
             List<ItemStack> sorted = BuildSortedList(sources.ToArray());
 
@@ -214,6 +219,22 @@ namespace SimpleSurvival.Items
 
             first.OnInventoryChanged?.Invoke();
             second.OnInventoryChanged?.Invoke();
+
+            return !SlotsEqual(beforeFirst, first.slots) || !SlotsEqual(beforeSecond, second.slots);
+        }
+
+        private static bool SlotsEqual(ItemStack[] a, ItemStack[] b)
+        {
+            for (int i = 0; i < a.Length; i++)
+            {
+                ItemStack x = a[i];
+                ItemStack y = b[i];
+
+                if (x == null && y == null) continue;
+                if (x == null || y == null) return false;
+                if (x.ItemData != y.ItemData || x.Quantity != y.Quantity) return false;
+            }
+            return true;
         }
 
         private static List<ItemStack> BuildSortedList(params InventorySystem[] inventories)

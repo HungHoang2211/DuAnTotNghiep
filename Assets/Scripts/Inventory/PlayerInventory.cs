@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SimpleSurvival.Items
@@ -22,6 +23,8 @@ namespace SimpleSurvival.Items
         public InventorySystem Pockets => pockets;
         public InventorySystem Backpack => backpack;
         public int MaxBackpackSlotCount => maxBackpackSlotCount;
+
+        public event Action OnBackpackReplaced;
 
         private void Awake()
         {
@@ -54,6 +57,7 @@ namespace SimpleSurvival.Items
         {
             backpack = slotCount > 0 ? new InventorySystem(slotCount) : null;
             backpackGridUI.Bind(backpack);
+            OnBackpackReplaced?.Invoke();
         }
 
         private int MoveAllItemsToPockets()
