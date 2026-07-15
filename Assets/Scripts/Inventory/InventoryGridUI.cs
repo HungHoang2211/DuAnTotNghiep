@@ -26,6 +26,9 @@ namespace SimpleSurvival.Items
         {
             Unbind();
 
+            if (cells.Count == 0 && autoCollectFromChildren)
+                CollectCellsFromChildren();
+
             _boundInventory = inventory;
 
             if (_boundInventory != null)
