@@ -58,6 +58,7 @@ namespace SimpleSurvival.AI
                 if (_playerDead) continue;
                 if (_state != EnemyState.Idle) continue;
 
+                Debug.Log($"[{name}] DetectionRoutine tick — checking vision/hearing");
                 if (DetectByVision() || DetectByHearing())
                     OnPlayerDetected();
             }
@@ -256,6 +257,10 @@ namespace SimpleSurvival.AI
             Collider[] hits = playerLayer == 0
                 ? Physics.OverlapSphere(transform.position, Config.VisionRange)
                 : Physics.OverlapSphere(transform.position, Config.VisionRange, playerLayer);
+
+            Debug.Log($"[{name}] DetectByVision — found {hits.Length} colliders trong range {Config.VisionRange}");
+            foreach (var h in hits)
+                Debug.Log($"[{name}]   hit: {h.name}, tag={h.tag}, enabled={h.enabled}");
 
             foreach (var hit in hits)
             {

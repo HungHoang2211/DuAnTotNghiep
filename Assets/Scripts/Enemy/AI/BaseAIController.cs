@@ -50,6 +50,7 @@ namespace SimpleSurvival.AI
             {
                 _playerDead = _playerStats.IsDead;
                 _playerStats.OnDeath += HandlePlayerDeath;
+                _playerStats.OnRevived += HandlePlayerRevived;
             }
         }
 
@@ -62,7 +63,10 @@ namespace SimpleSurvival.AI
             }
 
             if (_playerStats != null)
+            {
                 _playerStats.OnDeath -= HandlePlayerDeath;
+                _playerStats.OnRevived -= HandlePlayerRevived;
+            }
         }
 
         public void Initialize(IEnemySpawnPoint spawnPoint)
@@ -83,7 +87,10 @@ namespace SimpleSurvival.AI
             {
                 _playerStats = FindAnyObjectByType<PlayerStats>();
                 if (_playerStats != null)
+                {
                     _playerStats.OnDeath += HandlePlayerDeath;
+                    _playerStats.OnRevived += HandlePlayerRevived;
+                }
             }
             _playerDead = _playerStats != null && _playerStats.IsDead;
 
@@ -126,7 +133,11 @@ namespace SimpleSurvival.AI
                     rotationSpeed * Time.deltaTime);
             }
         }
-
+        protected virtual void HandlePlayerRevived()
+        {
+            Debug.Log($"[{name}] HandlePlayerRevived called, _playerDead now false");
+            _playerDead = false;
+        }
         protected Vector3 GetRandomNavMeshPoint(Vector3 origin, float radius)
         {
             for (int i = 0; i < 10; i++)

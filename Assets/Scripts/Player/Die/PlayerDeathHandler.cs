@@ -57,8 +57,8 @@ namespace SimpleSurvival.Player
 
        public void Revive()
         {
+            Debug.Log("[PlayerDeathHandler] Revive() called");
             if (playerStats == null) return;
-
             playerStats.Revive();
 
             if (ragdollController != null)

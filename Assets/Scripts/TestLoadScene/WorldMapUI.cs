@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +16,9 @@ namespace SimpleSurvival.World
 
         private readonly List<WorldMapEntryButton> spawnedEntries = new List<WorldMapEntryButton>();
 
+        private bool isPaused;
+        private bool waitingForTransition;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -32,6 +35,12 @@ namespace SimpleSurvival.World
             panelRoot.SetActive(false);
         }
 
+        private void OnDisable()
+        {
+            // Lưới an toàn: nếu object bị disable lúc đang pause (đổi scene, tắt UI...) thì trả timeScale lại
+            Resume();
+        }
+
         public void Open()
         {
             if (MapTransitionController.Instance != null && MapTransitionController.Instance.IsTransitioning)
@@ -39,11 +48,31 @@ namespace SimpleSurvival.World
 
             BuildEntries();
             panelRoot.SetActive(true);
+            Pause();
         }
 
         public void Close()
         {
             panelRoot.SetActive(false);
+
+            // Nếu vừa chọn 1 điểm đến, giữ pause tới khi MapTransitionController báo xong,
+            // tránh player/enemy chạy trong lúc fade + load map.
+            if (!waitingForTransition)
+                Resume();
+        }
+
+        private void Pause()
+        {
+            if (isPaused) return;
+            Time.timeScale = 0f;
+            isPaused = true;
+        }
+
+        private void Resume()
+        {
+            if (!isPaused) return;
+            Time.timeScale = 1f;
+            isPaused = false;
         }
 
         private void BuildEntries()
@@ -78,10 +107,24 @@ namespace SimpleSurvival.World
 
         private void HandleDestinationSelected(MapDestination destination)
         {
-            Close();
+            if (MapTransitionController.Instance == null)
+            {
+                Close();
+                return;
+            }
 
-            if (MapTransitionController.Instance != null)
-                MapTransitionController.Instance.GoToMap(destination.SceneName);
+            waitingForTransition = true;
+            MapTransitionController.Instance.TransitionFinished += HandleTransitionFinished;
+
+            Close();
+            MapTransitionController.Instance.GoToMap(destination.SceneName);
+        }
+
+        private void HandleTransitionFinished()
+        {
+            MapTransitionController.Instance.TransitionFinished -= HandleTransitionFinished;
+            waitingForTransition = false;
+            Resume();
         }
     }
 }

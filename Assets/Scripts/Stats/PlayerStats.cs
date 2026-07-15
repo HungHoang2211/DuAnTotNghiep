@@ -120,6 +120,7 @@ namespace SimpleSurvival.Stats
         public void Revive()
         {
             ResetStats();
+            Debug.Log("[PlayerStats] Revive() called, invoking OnRevived");
             OnRevived?.Invoke();
         }
         protected override void Awake()
