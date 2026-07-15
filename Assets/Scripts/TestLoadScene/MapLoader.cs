@@ -27,7 +27,10 @@ namespace SimpleSurvival.World
 
             Instance = this;
         }
-
+        public void RepositionToSpawn()
+        {
+            RepositionPlayerToSpawn();
+        }
         public IEnumerator SwapRoutine(string mapScene)
         {
             if (!string.IsNullOrEmpty(currentMapScene))

@@ -33,7 +33,7 @@ namespace SimpleSurvival.Targets
             return true;
         }
 
-        private void HandleDeath()
+        private void HandleDeath(GameObject source)
         {
             FireOnDestroyed();
         }

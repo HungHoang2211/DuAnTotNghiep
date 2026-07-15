@@ -304,11 +304,11 @@ namespace SimpleSurvival.AI
                 BeginChase();
         }
 
-        protected override void HandleDeath()
+        protected override void HandleDeath(GameObject source)
         {
             if (_isDead) return;
             _isDead = true;
-            _state = EnemyState.Dead;
+            _state = EnemyState.Dead;            
 
             // Đảm bảo xác hiện ra đầy đủ dù enemy đang Hidden lúc chết
             SetModelVisible(true);
@@ -330,10 +330,11 @@ namespace SimpleSurvival.AI
         /// Player chết (ragdoll) -> enemy này (còn sống) dừng hẳn chase/attack
         /// và về Idle, không tìm target mới cho tới khi player được reset (respawn).
         /// </summary>
-        protected override void HandlePlayerDeath()
+        protected override void HandlePlayerDeath(GameObject source)
         {
-            base.HandlePlayerDeath();
             if (_isDead) return;
+            _isDead = true;
+            _state = EnemyState.Dead;            
 
             _state = EnemyState.Idle;
             _player = null;

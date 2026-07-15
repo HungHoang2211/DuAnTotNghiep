@@ -116,10 +116,24 @@ namespace SimpleSurvival.Items
             if (stack == null)
                 throw new ArgumentNullException(nameof(stack));
 
-            int remaining = stack.Quantity;
+            int originalQuantity = stack.Quantity;
+            int remaining = originalQuantity;
 
             if (stack.ItemData.IsStackable)
-                remaining = FillExistingStacks(stack.ItemData, remaining);
+            {
+                for (int i = 0; i < slots.Length && remaining > 0; i++)
+                {
+                    ItemStack existing = slots[i];
+                    if (existing == null || existing.ItemData != stack.ItemData || existing.IsFull)
+                        continue;
+
+                    int before = remaining;
+                    remaining = existing.AddQuantity(remaining);
+                    int consumed = before - remaining;
+                    if (consumed > 0)
+                        stack.RemoveQuantity(consumed);
+                }
+            }
 
             if (remaining > 0)
             {
@@ -131,12 +145,11 @@ namespace SimpleSurvival.Items
                 }
             }
 
-            if (remaining < stack.Quantity)
+            if (remaining < originalQuantity)
                 OnInventoryChanged?.Invoke();
 
             return remaining;
         }
-
         public int RemoveItem(ItemData itemData, int amount)
         {
             if (itemData == null)

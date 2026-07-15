@@ -133,7 +133,7 @@ namespace SimpleSurvival.AI
             if (minionStats == null) return;
 
             _aliveMinions.Add(minionStats);
-            minionStats.OnDeath += () => HandleMinionDeath(minionStats);
+            minionStats.OnDeath += (_) => HandleMinionDeath(minionStats);
         }
 
         private void HandleMinionDeath(EnemyStats minionStats)

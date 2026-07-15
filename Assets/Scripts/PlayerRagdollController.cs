@@ -33,7 +33,7 @@ namespace SimpleSurvival.Player
                 playerStats.OnDeath -= HandleDeath;
         }
 
-        private void HandleDeath()
+        private void HandleDeath(GameObject source)
         {
             if (characterController != null)
                 characterController.enabled = false;
@@ -45,6 +45,20 @@ namespace SimpleSurvival.Player
                 animator.enabled = false;
 
             SetRagdollActive(true);
+        }
+
+        public void ResetRagdoll()
+        {
+            SetRagdollActive(false);
+
+            if (animator != null)
+                animator.enabled = true;
+
+            if (mainCollider != null)
+                mainCollider.enabled = true;
+
+            if (characterController != null)
+                characterController.enabled = true;
         }
 
         private void SetRagdollActive(bool active)

@@ -10,7 +10,7 @@ namespace SimpleSurvival.Stats
         public event Action<float, float> OnThirstChanged;
         public event Action OnCombatStatsChanged;
         public event Action<ItemStack, EquipSlot> OnArmorBroken;
-
+        public event Action OnRevived;
         public float Hunger { get; private set; }
         public float Thirst { get; private set; }
         public float MaxHunger => Config != null ? Config.MaxHunger : 0f;
@@ -116,6 +116,12 @@ namespace SimpleSurvival.Stats
             }
         }
 
+
+        public void Revive()
+        {
+            ResetStats();
+            OnRevived?.Invoke();
+        }
         protected override void Awake()
         {
             base.Awake();
