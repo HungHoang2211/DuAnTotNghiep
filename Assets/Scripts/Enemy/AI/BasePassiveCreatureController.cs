@@ -75,7 +75,7 @@ namespace SimpleSurvival.AI
             StartCoroutine(FleeFrom(source.transform.position));
         }
 
-        protected override void HandleDeath()
+        protected override void HandleDeath(GameObject source)
         {
             if (_isDead) return;
             _isDead = true;

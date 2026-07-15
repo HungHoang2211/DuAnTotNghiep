@@ -173,7 +173,23 @@ namespace SimpleSurvival.Loot
             for (int i = 0; i < rolled.Count; i++)
                 _inventory.SetSlot(i, rolled[i]);
         }
+        public void InitializeRuntimeWithStacks(List<ItemStack> stacks, float runtimeUnlockDuration = 0f)
+        {
+            if (_isInitialized) return;
+            _isInitialized = true;
 
+            unlockDuration = runtimeUnlockDuration;
+            int count = stacks != null ? stacks.Count : 0;
+            _inventory = new InventorySystem(Mathf.Max(1, count));
+
+            if (stacks != null)
+            {
+                for (int i = 0; i < stacks.Count; i++)
+                    _inventory.SetSlot(i, stacks[i]);
+            }
+
+            _inventory.OnInventoryChanged += HandleInventoryChanged;
+        }
         private void HandleInventoryChanged()
         {
             OnLooted?.Invoke(this);

@@ -66,7 +66,12 @@ namespace SimpleSurvival.Player
             PlayerTransform = transform;
 
             if (animator == null) animator = GetComponentInChildren<Animator>();
-            if (playerStats == null) playerStats = GetComponentInChildren<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.OnDamagedBy += HandlePlayerDamaged;
+                playerStats.OnDeath += HandleDeath;
+                playerStats.OnRevived += HandleRevived;
+            }
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (inventoryQueries == null) inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
             if (toolSwapper == null) toolSwapper = GetComponentInChildren<PlayerToolSwapper>();
@@ -96,12 +101,17 @@ namespace SimpleSurvival.Player
             {
                 playerStats.OnDamagedBy -= HandlePlayerDamaged;
                 playerStats.OnDeath -= HandleDeath;
+                playerStats.OnRevived -= HandleRevived;
             }
 
             if (_inputReader != null)
                 _inputReader.OnSneakChanged -= HandleSneakChanged;
         }
-
+        private void HandleRevived()
+        {
+            _isDead = false;
+            SwitchToIdle();
+        }
         private void Update()
         {
             if (_isDead) return;
@@ -402,7 +412,7 @@ namespace SimpleSurvival.Player
             SwitchToIdle();
         }
 
-        private void HandleDeath()
+        private void HandleDeath(GameObject source)
         {
             _isDead = true;
         }

@@ -24,7 +24,7 @@ namespace SimpleSurvival.AI
             if (_stats != null) _stats.OnDeath -= HandleDeath;
         }
 
-        private void HandleDeath()
+        private void HandleDeath(GameObject source)
         {
             QuestManager manager = QuestManager.Instance;
             if (manager != null && _stats != null)

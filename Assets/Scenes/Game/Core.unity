@@ -77380,6 +77380,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1491351296}
+  - component: {fileID: 1491351297}
   m_Layer: 5
   m_Name: Root
   m_TagString: Untagged
@@ -77413,6 +77414,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 4, y: 4}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1491351297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491351295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cc06f0ce74b9e94aa84448e9c819e2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  root: {fileID: 1491351295}
+  textReason: {fileID: 1556480568}
+  reviveButton: {fileID: 1159069633}
+  deathHandler: {fileID: 8905305806091854584}
 --- !u!1 &1491944678
 GameObject:
   m_ObjectHideFlags: 0
@@ -86674,7 +86691,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2028943410}
   m_HandleRect: {fileID: 2028943409}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -117922,6 +117939,7 @@ GameObject:
   - component: {fileID: 8905305806091854582}
   - component: {fileID: 8905305806091854581}
   - component: {fileID: 8905305806091854583}
+  - component: {fileID: 8905305806091854584}
   m_Layer: 9
   m_Name: MainPlayer
   m_TagString: Player
@@ -118286,6 +118304,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 3095127015566962817}
+--- !u!114 &8905305806091854584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905305806091854566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83adc874240a24c4ab1c79949da41bee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStats: {fileID: 812480218}
+  playerInventory: {fileID: 719937944}
+  playerEquipment: {fileID: 140930709}
+  deathDialog: {fileID: 1491351297}
+  ragdollController: {fileID: 8905305806091854579}
+  corpsePrefab: {fileID: 8676040182342621872, guid: fe5caaef43a991d4786198ff9856ec70, type: 3}
+  spawnPoint: {fileID: 0}
 --- !u!33 &8946764692933764480
 MeshFilter:
   m_ObjectHideFlags: 0

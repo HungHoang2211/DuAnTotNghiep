@@ -139,16 +139,17 @@ namespace SimpleSurvival.UI
                 ItemStack stack = source.GetSlot(i);
                 if (stack == null) continue;
 
+                int before = stack.Quantity;
                 int overflow = playerInventory.Pockets.AddStack(stack);
                 if (overflow > 0 && playerInventory.Backpack != null)
                     overflow = playerInventory.Backpack.AddStack(stack);
 
                 if (overflow == 0)
                     source.SetSlot(i, null);
-                else if (overflow < stack.Quantity)
+                else if (overflow < before)
                     source.NotifyChanged();
                 else
-                    break;
+                    continue;
             }
         }
 

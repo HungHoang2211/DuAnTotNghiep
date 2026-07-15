@@ -76,7 +76,7 @@ namespace SimpleSurvival.Audio
             PlayHurt();
         }
 
-        private void HandleDeath()
+        private void HandleDeath(GameObject source)
         {
             PlayDeath();
         }

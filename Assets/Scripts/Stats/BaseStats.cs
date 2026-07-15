@@ -8,7 +8,7 @@ namespace SimpleSurvival.Stats
     public abstract class BaseStats : MonoBehaviour, IDamageable
     {
         public event Action<float, float> OnHPChanged;
-        public event Action OnDeath;
+        public event Action<GameObject> OnDeath;
         public event Action<GameObject> OnDamagedBy;
 
         [SerializeField] protected BaseStatsConfig baseConfig;
@@ -82,7 +82,7 @@ namespace SimpleSurvival.Stats
 
             float reduction = ArmorReduction(Armor);
             float finalDamage = rawDamage * (1f - reduction);
-            SetHP(HP - finalDamage);
+            SetHP(HP - finalDamage, source);
 
             Debug.Log($"[{name}] Take damage: {rawDamage} (reduced to {finalDamage:F1}) from {(source != null ? source.name : "unknown")}, HP after: {HP}");
 
@@ -139,7 +139,7 @@ namespace SimpleSurvival.Stats
             hud.HpHud.Spawn(transform, amount, type);
         }
 
-        private void SetHP(float value)
+        private void SetHP(float value, GameObject source = null)
         {
             float prev = HP;
             HP = Mathf.Clamp(value, 0f, MaxHP);
@@ -147,13 +147,13 @@ namespace SimpleSurvival.Stats
                 OnHPChanged?.Invoke(HP, MaxHP);
 
             if (HP <= 0f && IsAlive)
-                Die();
+                Die(source);
         }
 
-        private void Die()
+        private void Die(GameObject source)
         {
             IsAlive = false;
-            OnDeath?.Invoke();
+            OnDeath?.Invoke(source);
         }
     }
 }

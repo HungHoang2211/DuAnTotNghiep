@@ -10,7 +10,8 @@ namespace SimpleSurvival.World
 
         [SerializeField] private MapLoader mapLoader;
         [SerializeField] private FadeScreen fadeScreen;
-        [SerializeField] private string startMapScene = "Base";
+        [SerializeField] private string startMapScene = "BaseMap";
+        public string StartMapScene => startMapScene;
         [SerializeField] private float fadeDuration = 0.3f;
         [SerializeField] private float minBlackDuration = 0.2f;
 
