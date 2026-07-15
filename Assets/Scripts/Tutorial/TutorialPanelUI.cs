@@ -30,11 +30,13 @@ namespace SimpleSurvival.UI.Tutorial
             currentIndex = 0;
             panelRoot.SetActive(true);
             UpdatePage();
+            Time.timeScale = 0f;
         }
 
         public void ClosePanel()
         {
             panelRoot.SetActive(false);
+            Time.timeScale = 1f;
             OnPanelClosed?.Invoke();
         }
         private void Next()
