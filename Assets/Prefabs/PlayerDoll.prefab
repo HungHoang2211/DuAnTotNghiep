@@ -3508,6 +3508,8 @@ GameObject:
   - component: {fileID: 4814936979098105958}
   - component: {fileID: 1141410833983200305}
   - component: {fileID: 7369206656545621603}
+  - component: {fileID: 4661000395761744341}
+  - component: {fileID: 5855313037209356478}
   m_Layer: 25
   m_Name: PlayerDoll
   m_TagString: Player
@@ -3566,6 +3568,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 1141410833983200305}
+--- !u!114 &4661000395761744341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8786852519774976289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54af633c29905bc45bd59b728b415050, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerEquipment: {fileID: 0}
+  toolSwapper: {fileID: 0}
+  actionController: {fileID: 0}
+  rightHandAnchor: {fileID: 5351194916135695522}
+  weaponAudioSource: {fileID: 0}
+  leftHandIK: {fileID: 7369206656545621603}
+--- !u!114 &5855313037209356478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8786852519774976289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51f7a4ba367856840b0d1d6e6399b1b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1141410833983200305}
+  playerEquipment: {fileID: 0}
+  defaultOverrideController: {fileID: 22100000, guid: 2133010a787b0344ebaab63b9ecda4b9, type: 2}
 --- !u!1 &8832899548704391677
 GameObject:
   m_ObjectHideFlags: 0

@@ -81,10 +81,19 @@ namespace SimpleSurvival.Player
             if (targetPrefab == null) return;
 
             _currentVisual = Instantiate(targetPrefab, rightHandAnchor, false);
+            ApplyLayerRecursively(_currentVisual, rightHandAnchor.gameObject.layer);
+
             _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
             _currentSourcePrefab = targetPrefab;
 
             UpdateLeftHandIK();
+        }
+
+        private static void ApplyLayerRecursively(GameObject target, int layer)
+        {
+            target.layer = layer;
+            foreach (Transform child in target.transform)
+                ApplyLayerRecursively(child.gameObject, layer);
         }
 
         private GameObject ResolveTargetPrefab()
