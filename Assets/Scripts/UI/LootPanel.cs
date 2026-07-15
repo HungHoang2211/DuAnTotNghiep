@@ -163,10 +163,13 @@ namespace SimpleSurvival.UI
 
         private void RefreshButtons()
         {
+
+            
             if (_container == null) return;
 
             bool hasItem = !_container.IsEmpty;
 
+            Debug.Log($"[LootPanel] RefreshButtons on {_container.name} — hasItem={hasItem}, slotCount={_container.SlotCount}");
             if (takeAllButton != null)
                 takeAllButton.interactable = hasItem;
 
