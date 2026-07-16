@@ -1,3 +1,4 @@
+using SimpleSurvival.World;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,11 +18,17 @@ namespace SimpleSurvival.UI.Tutorial
 
         private void Start()
         {
-            if (PlayerPrefs.GetInt(HasSeenTutorialKey, 0) == 0)
+            if (PlayerPrefs.GetInt(HasSeenTutorialKey, 0) == 0 && MapTransitionController.Instance != null)
             {
-                tutorialPanel.OnPanelClosed += MarkTutorialSeen;
-                tutorialPanel.OpenPanel();
+                MapTransitionController.Instance.TransitionFinished += HandleFirstTransitionFinished;
             }
+        }
+
+        private void HandleFirstTransitionFinished()
+        {
+            MapTransitionController.Instance.TransitionFinished -= HandleFirstTransitionFinished;
+            tutorialPanel.OnPanelClosed += MarkTutorialSeen;
+            tutorialPanel.OpenPanel();
         }
 
         private void MarkTutorialSeen()
