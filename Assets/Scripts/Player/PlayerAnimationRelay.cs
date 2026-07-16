@@ -40,7 +40,14 @@ namespace SimpleSurvival.Player
                 attack.HandleHit();
 
                 if (audioController != null)
-                    audioController.PlayAttackImpact(ResolveWeaponAudioCategory(attack.WeaponStack));
+                {
+                    WeaponCategory category = ResolveWeaponAudioCategory(attack.WeaponStack);
+
+                    if (attack.HitLandedThisSwing)
+                        audioController.PlayAttackHit(category);
+                    else
+                        audioController.PlayAttackSwing(category);
+                }
             }
 
             bool isRangedWeapon = weaponVisual != null && weaponVisual.IsCurrentWeaponRanged();
