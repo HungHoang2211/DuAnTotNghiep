@@ -7,53 +7,63 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: country_road
-  m_Shader: {fileID: 4800000, guid: 0c11826484e03484b85cccac6a59ebd0, type: 3}
+  m_Name: decoration_bunker_fence
+  m_Shader: {fileID: 4800000, guid: 6336f0965d5e7a340a9e4ab9a41dfbc4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - SPECULAR
+  - CLIP
+  - WALL
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap:
-    CustomShadow: Geometry
+    CustomShadow: GeometryClip
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 11625e7dd87f2154baecbc998e54a684, type: 3}
-        m_Scale: {x: 0.2, y: 0.2}
+    - _AlphaR:
+        m_Texture: {fileID: 2800000, guid: 12716e2255a63514f9f67b8ef289738c, type: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Mask:
-        m_Texture: {fileID: 2800000, guid: 8f02b532550936645abcb9adc0c246ef, type: 3}
-        m_Scale: {x: 0.2, y: 0.2}
+    - _EmitTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e56ec6a56e172e7418f862716056d0e2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Cutoff: 0.5
     - _Dissolve: 0
     - _DstBlend: 0
     - _EmitValue: 0
     - _Glow: 2.4
     - _Mode: 0
     - _Outline: 1
+    - _QueueShift: 0
     - _Shininess: 20
-    - _Smooth1: -0.15
-    - _Smooth2: 0.07
     - _SrcBlend: 1
-    - _Stencil: 0
+    - _Stencil: 1
     - _StencilComp: 0
     - _StencilOp: 0
-    - _UVMaskTileEnable: 0
-    - _UVTileEnable: 0
+    - _UseAlphaClip: 0
+    - _UseEmission: 0
+    - _UseSpecular: 0
     - _ZWrite: 1
     m_Colors:
-    - _BorderColor: {r: 0, g: 0.15, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 1, b: 0, a: 1}
+    - _SpecColor: {r: 0.39999998, g: 0.39999998, b: 0.39999998, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
