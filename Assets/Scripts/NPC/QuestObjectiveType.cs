@@ -3,6 +3,8 @@ namespace SimpleSurvival.Quests
     public enum QuestObjectiveType
     {
         CollectItem,
-        KillEnemy
+        KillEnemy,
+        FindNPC,
+        EscortNPC
     }
 }

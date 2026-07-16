@@ -357,10 +357,10 @@ namespace SimpleSurvival.Player
                 return false;
             }
 
-            var giver = target.GetComponentInParent<SimpleSurvival.AI.NPCQuestGiver>();
-            if (giver == null) return false;
+            var npc = target.GetComponentInParent<SimpleSurvival.AI.BaseNPCController>();
+            if (npc == null) return false;
 
-            giver.OnPlayerInteract(gameObject);
+            npc.OnPlayerInteract(gameObject);
             return true;
         }
 
