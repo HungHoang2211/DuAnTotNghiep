@@ -45389,6 +45389,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 848557551}
   m_CullTransparentMesh: 1
+--- !u!1 &849708084
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 849708085}
+  - component: {fileID: 849708086}
+  m_Layer: 0
+  m_Name: CorpseSaveRegistry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &849708085
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849708084}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1967195713}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &849708086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849708084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67a5bed9ba4c010489f7fc5d9c1b45ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemDatabase: {fileID: 11400000, guid: b214c74177e161e49b4132bb4e6fcf72, type: 2}
+  corpsePrefab: {fileID: 8676040182342621872, guid: fe5caaef43a991d4786198ff9856ec70, type: 3}
 --- !u!1 &850978998
 GameObject:
   m_ObjectHideFlags: 0
@@ -101277,6 +101323,7 @@ Transform:
   - {fileID: 581089688}
   - {fileID: 1071657600}
   - {fileID: 1954363182}
+  - {fileID: 849708085}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1967929607
@@ -117717,7 +117764,6 @@ MonoBehaviour:
   playerEquipment: {fileID: 140930709}
   deathDialog: {fileID: 1491351297}
   ragdollController: {fileID: 8905305806091854579}
-  corpsePrefab: {fileID: 8676040182342621872, guid: fe5caaef43a991d4786198ff9856ec70, type: 3}
   spawnPoint: {fileID: 0}
 --- !u!114 &8905305806091854585
 MonoBehaviour:
