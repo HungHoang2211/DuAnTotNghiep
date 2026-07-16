@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
@@ -21,6 +21,7 @@ namespace SimpleSurvival.Quests
         public event Action<QuestData, int> OnObjectiveProgress;
         public event Action<QuestData> OnQuestReadyToTurnIn;
         public event Action<QuestData> OnQuestCompleted;
+        public event Action<QuestData> OnQuestFailed;
 
         private void Awake()
         {
@@ -76,6 +77,19 @@ namespace SimpleSurvival.Quests
             _activeQuests.Remove(quest);
             _completedQuests.Add(quest);
             OnQuestCompleted?.Invoke(quest);
+        }
+
+        /// <summary>
+        /// Hủy quest đang active mà không đánh dấu hoàn thành (vd: NPC hộ tống bị giết).
+        /// Quest không bị thêm vào _completedQuests nên có thể StartQuest() lại nếu muốn cho thử lại.
+        /// </summary>
+        public void FailQuest(QuestData quest)
+        {
+            if (quest == null) return;
+            if (!_activeQuests.ContainsKey(quest)) return;
+
+            _activeQuests.Remove(quest);
+            OnQuestFailed?.Invoke(quest);
         }
 
         private void GrantRewards(QuestData quest)
@@ -143,6 +157,59 @@ namespace SimpleSurvival.Quests
                 if (changed && progress.IsAllComplete())
                     OnQuestReadyToTurnIn?.Invoke(quest);
             }
+        }
+
+        /// <summary>
+        /// Gọi khi player tương tác/tìm thấy 1 NPC có npcId trùng targetNpcId của objective FindNPC.
+        /// </summary>
+        public void NotifyNPCFound(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId)) return;
+
+            foreach (var kvp in _activeQuests)
+            {
+                QuestData quest = kvp.Key;
+                QuestProgress progress = kvp.Value;
+                bool changed = false;
+
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                {
+                    QuestObjectiveData objective = quest.Objectives[i];
+                    if (objective.type != QuestObjectiveType.FindNPC) continue;
+                    if (objective.targetNpcId != npcId) continue;
+                    if (progress.IsObjectiveComplete(i)) continue;
+
+                    progress.AddProgress(i, objective.requiredAmount);
+                    OnObjectiveProgress?.Invoke(quest, i);
+                    changed = true;
+                }
+
+                if (changed && progress.IsAllComplete())
+                    OnQuestReadyToTurnIn?.Invoke(quest);
+            }
+        }
+
+        /// <summary>
+        /// Gọi khi NPC hộ tống đã tới EscortPoint đích. Tự hoàn thành objective EscortNPC
+        /// và complete luôn quest (không cần bước turn-in riêng vì NPC đang đi cùng player).
+        /// </summary>
+        public void NotifyEscortArrived(QuestData quest)
+        {
+            if (quest == null) return;
+            if (!_activeQuests.TryGetValue(quest, out QuestProgress progress)) return;
+
+            for (int i = 0; i < quest.Objectives.Count; i++)
+            {
+                QuestObjectiveData objective = quest.Objectives[i];
+                if (objective.type != QuestObjectiveType.EscortNPC) continue;
+                if (progress.IsObjectiveComplete(i)) continue;
+
+                progress.AddProgress(i, objective.requiredAmount);
+                OnObjectiveProgress?.Invoke(quest, i);
+            }
+
+            if (progress.IsAllComplete())
+                CompleteQuest(quest);
         }
     }
 }

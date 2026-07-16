@@ -187,5 +187,16 @@ namespace SimpleSurvival.AI
             if (_spawnPoint != null)
                 _spawnPoint.NotifyDespawned(despawnDelay);
         }
+
+        protected override void StopAllActions()
+        {
+            if (_bearAnimator != null)
+            {
+                _bearAnimator.CancelAttack();
+                _bearAnimator.CancelSpecialAttack();
+                _bearAnimator.SetHowling(false);
+                _bearAnimator.SetIdle();
+            }
+        }
     }
 }

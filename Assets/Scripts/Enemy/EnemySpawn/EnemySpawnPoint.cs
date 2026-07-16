@@ -25,7 +25,7 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
     [SerializeField] private bool autoRespawn = true;
 
     [Tooltip("Nếu false: spawn point này KHÔNG tự Spawn() lúc scene Start — " +
-             "phải gọi Spawn() thủ công từ nơi khác (vd WitchEventTrap khi trigger).")]
+             "phải gọi Spawn() thủ công từ nơi khác (vd WitchEventTrap khi trigger, EscortEnemyDirector).")]
     [SerializeField] private bool spawnOnStart = true;
 
     public Vector3 Position => transform.position;
@@ -36,7 +36,15 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
     /// </summary>
     public event System.Action OnEnemyDefeated;
 
+    /// <summary>
+    /// Bắn ra ngay sau khi 1 enemy vừa được spawn + Initialize() xong tại điểm này.
+    /// Dùng cho các hệ thống cần thao tác trực tiếp lên instance vừa spawn (vd EscortEnemyDirector
+    /// gọi SetEscortTarget() để enemy chỉ bám/tấn công NPC hộ tống thay vì Player).
+    /// </summary>
+    public event System.Action<GameObject> OnEnemySpawned;
+
     private GameObject _currentEnemy;
+    public GameObject CurrentEnemy => _currentEnemy;
 
     private void Start()
     {
@@ -71,6 +79,8 @@ public class EnemySpawnPoint : MonoBehaviour, IEnemySpawnPoint
                 $"[{name}] Prefab '{prefab.name}' không có component implement ISpawnableEnemy — " +
                 "enemy sẽ không được Initialize.", this);
         }
+
+        OnEnemySpawned?.Invoke(_currentEnemy);
     }
 
     private GameObject PickRandomPrefab()
