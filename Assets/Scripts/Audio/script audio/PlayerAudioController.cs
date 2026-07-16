@@ -19,24 +19,26 @@ namespace SimpleSurvival.Audio
         [Header("Inventory Cues")]
         [SerializeField] private AudioCue pickupCue;
 
-        [Header("Survival Cues")]
-        [SerializeField] private AudioCue healthWarningCue;
-        [SerializeField] private AudioCue hungerAlertCue;
-        [SerializeField] private AudioCue thirstAlertCue;
+        [Header("Breathing Cue")]
+        [SerializeField] private AudioCue breathingCue;
 
         [Header("Locomotion Params")]
         [SerializeField] private string moveModeParam = "MoveMode";
         [SerializeField] private string moveSpeedParam = "MoveSpeed";
         [SerializeField] private int sneakMoveMode = 1;
-        [SerializeField] private float runSpeedThreshold = 3f;
+        [SerializeField] private float runSpeedThreshold = 0.5f;
         [SerializeField] private float minMoveSpeedForFootstep = 0.05f;
 
-        [Header("Combat Impact Cues")]
+        [Header("Combat Swing Cues")]
         [SerializeField] private AudioCue fistsImpactCue;
         [SerializeField] private AudioCue melee1HImpactCue;
         [SerializeField] private AudioCue melee2HImpactCue;
         [SerializeField] private AudioCue pistolImpactCue;
         [SerializeField] private AudioCue rifleImpactCue;
+
+        [Header("Combat Hit Cues")]
+        [SerializeField] private AudioCue fistsHitCue;
+        [SerializeField] private AudioCue melee1HHitCue;
 
         [Header("Gather Impact Cues")]
         [SerializeField] private AudioCue gatherAxeCue;
@@ -46,6 +48,7 @@ namespace SimpleSurvival.Audio
         [SerializeField] private PlayerStats playerStats;
 
         private Animator _animator;
+        private bool _wasRunning;
 
         private void Awake()
         {
@@ -69,6 +72,22 @@ namespace SimpleSurvival.Audio
                 playerStats.OnDamagedBy -= HandleDamaged;
                 playerStats.OnDeath -= HandleDeath;
             }
+
+            StopBreathingIfNeeded();
+        }
+
+        private void Update()
+        {
+            if (AudioManager.Instance == null) return;
+
+            bool isRunning = IsRunning();
+
+            if (isRunning && !_wasRunning)
+                AudioManager.Instance.StartLoop(breathingCue);
+            else if (!isRunning && _wasRunning)
+                AudioManager.Instance.StopLoop(breathingCue);
+
+            _wasRunning = isRunning;
         }
 
         private void HandleDamaged(GameObject attacker)
@@ -79,14 +98,29 @@ namespace SimpleSurvival.Audio
         private void HandleDeath(GameObject source)
         {
             PlayDeath();
+            StopBreathingIfNeeded();
         }
 
-        public void PlayAttackImpact(WeaponCategory category)
+        private void StopBreathingIfNeeded()
         {
-            AudioManager.Instance.PlaySfx(ResolveAttackImpactCue(category));
+            if (!_wasRunning) return;
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StopLoop(breathingCue);
+            _wasRunning = false;
         }
 
-        private AudioCue ResolveAttackImpactCue(WeaponCategory category)
+        public void PlayAttackSwing(WeaponCategory category)
+        {
+            AudioManager.Instance.PlaySfx(ResolveAttackSwingCue(category));
+        }
+
+        public void PlayAttackHit(WeaponCategory category)
+        {
+            AudioCue cue = ResolveAttackHitCue(category) ?? ResolveAttackSwingCue(category);
+            AudioManager.Instance.PlaySfx(cue);
+        }
+
+        private AudioCue ResolveAttackSwingCue(WeaponCategory category)
         {
             switch (category)
             {
@@ -96,6 +130,16 @@ namespace SimpleSurvival.Audio
                 case WeaponCategory.Pistol: return pistolImpactCue;
                 case WeaponCategory.Rifle: return rifleImpactCue;
                 default: return fistsImpactCue;
+            }
+        }
+
+        private AudioCue ResolveAttackHitCue(WeaponCategory category)
+        {
+            switch (category)
+            {
+                case WeaponCategory.Fists: return fistsHitCue;
+                case WeaponCategory.Melee1H: return melee1HHitCue;
+                default: return null;
             }
         }
 
@@ -150,26 +194,6 @@ namespace SimpleSurvival.Audio
         public void PlayPickup()
         {
             AudioManager.Instance.PlaySfx(pickupCue);
-        }
-
-        public void PlayHungerAlert()
-        {
-            AudioManager.Instance.PlaySfx(hungerAlertCue);
-        }
-
-        public void PlayThirstAlert()
-        {
-            AudioManager.Instance.PlaySfx(thirstAlertCue);
-        }
-
-        public void StartHealthWarning()
-        {
-            AudioManager.Instance.StartLoop(healthWarningCue);
-        }
-
-        public void StopHealthWarning()
-        {
-            AudioManager.Instance.StopLoop(healthWarningCue);
         }
     }
 }

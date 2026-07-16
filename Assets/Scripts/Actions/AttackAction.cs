@@ -38,12 +38,14 @@ namespace SimpleSurvival.Actions
         private Phase _phase;
         private int _comboIndex;
         private bool _hitAppliedThisSwing;
+        private bool _hitLandedThisSwing;
         private float _comboWindowRemaining;
         private float _swingTimer;
         private bool _weaponBrokeThisSwing;
 
         public bool WeaponBroke => _weaponBrokeThisSwing;
         public ItemStack WeaponStack => _weaponStack;
+        public bool HitLandedThisSwing => _hitLandedThisSwing;
 
         public AttackAction(
             PlayerActionController controller,
@@ -155,6 +157,7 @@ namespace SimpleSurvival.Actions
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(_damage, _controller.gameObject);
+            _hitLandedThisSwing = true;
 
             ConsumeWeaponDurability();
         }
@@ -209,6 +212,7 @@ namespace SimpleSurvival.Actions
         {
             FacingTarget();
             _hitAppliedThisSwing = false;
+            _hitLandedThisSwing = false;
             _swingTimer = 0f;
             _phase = Phase.Attacking;
             _animator.SetInteger(ParamActionIndex, _comboIndex);

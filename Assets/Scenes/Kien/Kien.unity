@@ -4371,19 +4371,19 @@ MonoBehaviour:
   hurtCue: {fileID: 11400000, guid: 39019763740ddf441aac9f80e862d957, type: 2}
   deathCue: {fileID: 11400000, guid: 9bd34963629ea5f49bf6156df9b311dd, type: 2}
   pickupCue: {fileID: 11400000, guid: 8423c91049ca4f9458164addd23c4910, type: 2}
-  healthWarningCue: {fileID: 11400000, guid: 0d230a03f770eaa478912528291ab93d, type: 2}
-  hungerAlertCue: {fileID: 11400000, guid: 3f0f964efe9ee934991c361ea5ee9a59, type: 2}
-  thirstAlertCue: {fileID: 11400000, guid: 499ace06ef0d2204f97cbf9cadc01b99, type: 2}
+  breathingCue: {fileID: 11400000, guid: d38d553c6a1abcd458de80cda8770b3f, type: 2}
   moveModeParam: MoveMode
   moveSpeedParam: MoveSpeed
   sneakMoveMode: 1
-  runSpeedThreshold: 3
+  runSpeedThreshold: 0.5
   minMoveSpeedForFootstep: 0.05
   fistsImpactCue: {fileID: 11400000, guid: 29c3bec3b3e3cd24d8d581a8aa06bbb8, type: 2}
   melee1HImpactCue: {fileID: 11400000, guid: 8a7de5f1d31510d45b64c63d582295b9, type: 2}
   melee2HImpactCue: {fileID: 0}
   pistolImpactCue: {fileID: 11400000, guid: 119818e9901ceee41b4ac82d1cab8234, type: 2}
   rifleImpactCue: {fileID: 11400000, guid: b2a40c5c37db6554ab6611f6748fd7da, type: 2}
+  fistsHitCue: {fileID: 11400000, guid: f8a52d27e7b1a364cb6f58a88ef2db63, type: 2}
+  melee1HHitCue: {fileID: 11400000, guid: 0af6ea613d1b6e449ae0a2ebdb9d4ac2, type: 2}
   gatherAxeCue: {fileID: 11400000, guid: 0af6ea613d1b6e449ae0a2ebdb9d4ac2, type: 2}
   gatherPickaxeCue: {fileID: 11400000, guid: a84deebc5199a704b833c9d1de62afec, type: 2}
   playerStats: {fileID: 1206470191}
@@ -60519,7 +60519,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -42.5, y: 0}
+  m_AnchoredPosition: {x: -42.50006, y: 0}
   m_SizeDelta: {x: -260.00012, y: 915}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1125152423
@@ -107456,8 +107456,13 @@ MonoBehaviour:
   titleIcon: {fileID: 2133959958}
   lootGrid: {fileID: 777677968}
   lootSelection: {fileID: 1966265309}
+  inventorySelection: {fileID: 0}
   takeAllButton: {fileID: 1472330142}
+  putAllButton: {fileID: 0}
   sortButton: {fileID: 1090613090}
+  notifyRoot: {fileID: 0}
+  notifyText: {fileID: 0}
+  notifyDuration: 2
   playerInventory: {fileID: 1418845872}
 --- !u!114 &1966265309
 MonoBehaviour:
@@ -117531,6 +117536,9 @@ MonoBehaviour:
   buttonSort: {fileID: 2119166116}
   buttonDelete: {fileID: 1730296774}
   useButtonText: {fileID: 874399847}
+  notifyRoot: {fileID: 0}
+  notifyText: {fileID: 0}
+  notifyDuration: 2
   confirmDeleteDialog: {fileID: 25941059}
 --- !u!224 &2132809779
 RectTransform:
