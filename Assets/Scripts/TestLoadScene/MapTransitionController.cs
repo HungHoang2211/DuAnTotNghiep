@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using SimpleSurvival.SaveLoad;
 using UnityEngine;
 
 namespace SimpleSurvival.World
@@ -51,8 +52,11 @@ namespace SimpleSurvival.World
             isTransitioning = true;
             TransitionStarted?.Invoke();
 
+            SaveService.Instance?.Read();
+
             fadeScreen.SetBlack();
             yield return mapLoader.SwapRoutine(startMapScene);
+            SaveService.Instance?.ApplyColdBoot();
             yield return fadeScreen.FadeIn(fadeDuration);
 
             TransitionFinished?.Invoke();

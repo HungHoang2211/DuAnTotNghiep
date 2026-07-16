@@ -1,13 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.SaveLoad
 {
     public sealed class SaveService : MonoBehaviour
     {
+        public static SaveService Instance { get; private set; }
+
         [SerializeField] private PlayerSaveAgent playerAgent;
 
         private SaveStorage storage;
         private float playtimeSeconds;
+        private GameSave lastLoaded;
 
         public GameMode Mode { get; set; } = GameMode.Normal;
         public string CurrentMapId { get; set; }
@@ -17,6 +21,13 @@ namespace SimpleSurvival.SaveLoad
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
             storage = new SaveStorage();
         }
 
@@ -28,6 +39,9 @@ namespace SimpleSurvival.SaveLoad
 
         public bool Save()
         {
+            if (!IsActive)
+                return false;
+
             GameSave save = new GameSave
             {
                 meta = new GameMeta
@@ -36,7 +50,10 @@ namespace SimpleSurvival.SaveLoad
                     totalPlaytimeSeconds = playtimeSeconds,
                     currentMapId = CurrentMapId
                 },
-                player = playerAgent.Capture()
+                player = playerAgent.Capture(),
+                corpses = CorpseSaveRegistry.Instance != null
+                    ? CorpseSaveRegistry.Instance.Capture()
+                    : new List<CorpseData>()
             };
 
             return storage.Write(save);
@@ -44,7 +61,8 @@ namespace SimpleSurvival.SaveLoad
 
         public GameSave Read()
         {
-            return storage.Read();
+            lastLoaded = storage.Read();
+            return lastLoaded;
         }
 
         public void Apply(GameSave save)
@@ -61,6 +79,33 @@ namespace SimpleSurvival.SaveLoad
             GameSave save = Read();
             Apply(save);
             return save;
+        }
+
+        public void ApplyColdBoot()
+        {
+            if (lastLoaded == null)
+            {
+                IsActive = true;
+                return;
+            }
+
+            ApplyMeta(lastLoaded.meta);
+            playerAgent.RestoreCrossScene(lastLoaded.player);
+            IsActive = true;
+        }
+
+        public void LoadColdBoot()
+        {
+            Read();
+            ApplyColdBoot();
+        }
+
+        public List<CorpseData> GetCorpsesForMap(string mapId)
+        {
+            if (lastLoaded?.corpses == null)
+                return new List<CorpseData>();
+
+            return lastLoaded.corpses.FindAll(c => c.mapId == mapId);
         }
 
         public void DeleteSave()

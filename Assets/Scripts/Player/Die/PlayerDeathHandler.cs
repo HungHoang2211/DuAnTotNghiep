@@ -3,6 +3,7 @@ using UnityEngine;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Items;
 using SimpleSurvival.Loot;
+using SimpleSurvival.SaveLoad;
 using SimpleSurvival.World;
 
 namespace SimpleSurvival.Player
@@ -17,7 +18,6 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerRagdollController ragdollController;
 
         [Header("Corpse")]
-        [SerializeField] private GameObject corpsePrefab;
         [SerializeField] private Transform spawnPoint;
         private readonly List<Transform> _activeCorpses = new List<Transform>();
         private const float CorpseMinSeparation = 2f;
@@ -55,7 +55,7 @@ namespace SimpleSurvival.Player
                 deathDialog.Show(killerName);
         }
 
-       public void Revive()
+        public void Revive()
         {
             Debug.Log("[PlayerDeathHandler] Revive() called");
             if (playerStats == null) return;
@@ -71,9 +71,14 @@ namespace SimpleSurvival.Player
             {
                 string startMap = MapTransitionController.Instance.StartMapScene;
                 if (MapLoader.Instance.CurrentMapScene == startMap)
+                {
                     MapLoader.Instance.RepositionToSpawn();
+                    SaveService.Instance?.Save();
+                }
                 else
+                {
                     MapTransitionController.Instance.GoToMap(startMap);
+                }
             }
         }
         private List<ItemStack> CollectAndClearAllItems()
@@ -116,25 +121,20 @@ namespace SimpleSurvival.Player
 
         private void SpawnCorpse(List<ItemStack> items)
         {
-            if (corpsePrefab == null || items.Count == 0)
+            if (items.Count == 0)
+                return;
+            if (CorpseSaveRegistry.Instance == null)
+                return;
+
+            string homeMap = MapLoader.Instance != null ? MapLoader.Instance.CurrentMapScene : null;
+            if (string.IsNullOrEmpty(homeMap))
                 return;
 
             Vector3 desired = spawnPoint != null ? spawnPoint.position : transform.position;
             Vector3 position = ResolveCorpseSpawnPosition(desired);
 
-            GameObject corpseObj = Instantiate(corpsePrefab, position, Quaternion.identity);
+            GameObject corpseObj = CorpseSaveRegistry.Instance.SpawnCorpseObject(homeMap, position, items);
             _activeCorpses.Add(corpseObj.transform);
-
-            LootContainer corpseContainer = corpseObj.GetComponent<LootContainer>();
-            if (corpseContainer != null)
-                corpseContainer.InitializeRuntimeWithStacks(items);
-
-            string homeMap = MapLoader.Instance != null ? MapLoader.Instance.CurrentMapScene : null;
-            if (!string.IsNullOrEmpty(homeMap))
-            {
-                PlayerCorpseMapBinding binding = corpseObj.AddComponent<PlayerCorpseMapBinding>();
-                binding.Initialize(homeMap);
-            }
         }
 
         private Vector3 ResolveCorpseSpawnPosition(Vector3 desired)

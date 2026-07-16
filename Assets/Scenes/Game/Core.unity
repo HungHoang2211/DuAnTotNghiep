@@ -101113,6 +101113,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954335002}
   m_CullTransparentMesh: 1
+--- !u!1 &1954363181
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1954363182}
+  - component: {fileID: 1954363183}
+  m_Layer: 0
+  m_Name: SaveService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1954363182
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954363181}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1967195713}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1954363183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954363181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0cf8add893e60c47ab93fc547e7350e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerAgent: {fileID: 8905305806091854585}
 --- !u!1 &1966839498
 GameObject:
   m_ObjectHideFlags: 0
@@ -101231,6 +101276,7 @@ Transform:
   - {fileID: 351134697}
   - {fileID: 581089688}
   - {fileID: 1071657600}
+  - {fileID: 1954363182}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1967929607
@@ -117289,6 +117335,7 @@ GameObject:
   - component: {fileID: 8905305806091854581}
   - component: {fileID: 8905305806091854583}
   - component: {fileID: 8905305806091854584}
+  - component: {fileID: 8905305806091854585}
   m_Layer: 9
   m_Name: MainPlayer
   m_TagString: Player
@@ -117672,6 +117719,22 @@ MonoBehaviour:
   ragdollController: {fileID: 8905305806091854579}
   corpsePrefab: {fileID: 8676040182342621872, guid: fe5caaef43a991d4786198ff9856ec70, type: 3}
   spawnPoint: {fileID: 0}
+--- !u!114 &8905305806091854585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905305806091854566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ff0affd973bd7048b6b4ef2516b6f38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemDatabase: {fileID: 11400000, guid: b214c74177e161e49b4132bb4e6fcf72, type: 2}
+  stats: {fileID: 812480218}
+  inventory: {fileID: 719937944}
+  equipment: {fileID: 140930709}
 --- !u!33 &8946764692933764480
 MeshFilter:
   m_ObjectHideFlags: 0

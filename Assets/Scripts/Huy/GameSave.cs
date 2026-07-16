@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SimpleSurvival.SaveLoad
 {
@@ -24,5 +25,6 @@ namespace SimpleSurvival.SaveLoad
         public int saveVersion = CurrentVersion;
         public GameMeta meta = new GameMeta();
         public PlayerData player = new PlayerData();
+        public List<CorpseData> corpses = new List<CorpseData>();
     }
 }

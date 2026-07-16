@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using SimpleSurvival.SaveLoad;
 
 namespace SimpleSurvival.Items
 {
@@ -61,10 +62,27 @@ namespace SimpleSurvival.Items
             DrawBackpackButtons();
             GUILayout.Space(8);
             DrawDurabilityButton();
+            GUILayout.Space(8);
+            DrawSaveDebugButtons();
 
             GUILayout.EndArea();
         }
+        // Save button 
+        private void DrawSaveDebugButtons()
+        {
+            GUILayout.Label("Save Debug");
 
+            if (GUILayout.Button("Xóa Save Data"))
+            {
+                SaveService.Instance?.DeleteSave();
+                if (SaveService.Instance != null)
+                    SaveService.Instance.IsActive = false;
+
+                Debug.Log($"Đã xóa save. IsActive tắt để tránh OnApplicationQuit ghi đè lúc Stop. HasSave: {SaveService.Instance.HasSave}");
+            }
+
+            GUILayout.Label(Application.persistentDataPath);
+        }
         // ── Stackable ────────────────────────────────────────────────────────
 
         private void DrawStackableItemButtons()
@@ -292,4 +310,5 @@ namespace SimpleSurvival.Items
             GUI.enabled = previous;
         }
     }
+
 }
