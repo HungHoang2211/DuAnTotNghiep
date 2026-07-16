@@ -402,10 +402,10 @@ namespace SimpleSurvival.AI
 
         protected override void HandlePlayerDeath(GameObject source)
         {
-            if (_isDead) return; // quái này đã chết thật thì thôi
-            if (_escortMode) return; // enemy hộ tống không quan tâm Player thật sống/chết, không dừng theo
+            if (_isDead) return;
+            if (_escortMode) return;
 
-            base.HandlePlayerDeath(source); // set đúng _playerDead, không đụng _isDead
+            base.HandlePlayerDeath(source); 
 
             _state = EnemyState.Idle;
             _player = null;
@@ -418,6 +418,20 @@ namespace SimpleSurvival.AI
                 skill?.Cancel();
 
             StopAllActions();
+        }
+        protected override void HandlePlayerRevived()
+        {
+            base.HandlePlayerRevived();
+
+            if (_isDead) return;
+            if (_escortMode) return; 
+
+            _stats?.SetInvulnerable(false);
+
+            BeginIdle();
+
+            StopAllCoroutines();
+            StartCoroutine(DetectionRoutine());
         }
         protected virtual void StopAllActions() { }
     }
