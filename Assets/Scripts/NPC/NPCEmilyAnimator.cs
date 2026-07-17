@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SimpleSurvival.AI
 {
@@ -12,6 +13,8 @@ namespace SimpleSurvival.AI
 
         [SerializeField] private Animator animator;
 
+        public event Action OnAttackHit;
+
         private void Awake()
         {
             if (animator == null) animator = GetComponent<Animator>();
@@ -21,17 +24,25 @@ namespace SimpleSurvival.AI
         {
             if (animator != null) animator.SetBool(IsMovingHash, moving);
         }
+
+        private static readonly float[] AttackIndexThresholds = { 0f, 0.5f, 1f };
+
         public void TriggerRandomAttack()
         {
             if (animator == null) return;
-            int index = Random.Range(0, 3);
-            animator.SetInteger(AttackIndexHash, index);
+            float value = AttackIndexThresholds[UnityEngine.Random.Range(0, AttackIndexThresholds.Length)];
+            animator.SetFloat(AttackIndexHash, value);
             animator.SetTrigger(AttackTriggerHash);
         }
 
         public void TriggerDeath()
         {
             if (animator != null) animator.SetTrigger(DeathTriggerHash);
+        }
+
+        public void AnimEvent_AttackHit()
+        {
+            OnAttackHit?.Invoke();
         }
     }
 }

@@ -1,47 +1,21 @@
-﻿using System;
-using UnityEngine;
+﻿using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.AI
 {
     /// <summary>
-    /// Hệ thống máu tối giản cho Emily trong lúc hộ tống.
-    /// LƯU Ý: TakeDamage() ở đây là placeholder - cần khớp với cách enemy skill hiện tại
-    /// đang gây damage lên Transform mục tiêu (xem phần "cần thêm file" trong câu trả lời).
+    /// Stats của Emily dùng chung BaseStats (y hệt EnemyStats/PlayerStats) thay vì hệ máu tự chế
+    /// riêng như trước - nhờ vậy enemy tấn công Emily sẽ áp damage đúng chuẩn (TakeDamage/IDamageable),
+    /// tự bắn OnDamagedBy để trigger animation phản đòn, và tự hiện số damage bay lên qua HpHud
+    /// giống hệt zombie/wolf.
+    ///
+    /// Cần gán 1 Base Config (BaseStatsConfig) ở Inspector - có thể tạo mới 1 asset
+    /// "Simple Survival/Stats/Enemy Config" riêng cho Emily, chỉ cần điền Start HP/Max HP/Armor/
+    /// MoveSpeed/BaseDamage/BaseAttackSpeed, các field AI khác (VisionRange, ChaseRadius...) bỏ qua
+    /// vì Emily không dùng AI của EnemyStats.
     /// </summary>
-    public sealed class NPCEmilyStats : MonoBehaviour
+    public sealed class NPCEmilyStats : BaseStats
     {
-        [SerializeField] private float maxHealth = 50f;
-
-        public float MaxHealth => maxHealth;
-        public float CurrentHealth { get; private set; }
-        public bool IsDead { get; private set; }
-
-        public event Action<GameObject> OnDamagedBy;
-        public event Action<GameObject> OnDeath;
-
-        private void Awake()
-        {
-            CurrentHealth = maxHealth;
-        }
-
-        public void ResetStats()
-        {
-            CurrentHealth = maxHealth;
-            IsDead = false;
-        }
-
-        public void TakeDamage(float amount, GameObject source)
-        {
-            if (IsDead || amount <= 0f) return;
-
-            CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
-            OnDamagedBy?.Invoke(source);
-
-            if (CurrentHealth <= 0f)
-            {
-                IsDead = true;
-                OnDeath?.Invoke(source);
-            }
-        }
+        // Không cần override gì thêm - mặc định HudDamageType = HpHudType.Damage
+        // (giống kiểu hiển thị khi Player bị đánh, phù hợp vì Emily là NPC phe mình, không phải enemy).
     }
 }

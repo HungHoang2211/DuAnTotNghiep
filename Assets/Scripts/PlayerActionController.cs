@@ -33,6 +33,9 @@ namespace SimpleSurvival.Player
         [SerializeField] private float unarmedAttackSpeed = 1.8f;
         [SerializeField] private float unarmedAttackClipLength = 0.5f;
 
+        [Header("Sneak Attack")]
+        [SerializeField] private float sneakAttackDamageMultiplier = 2f;
+
         [Header("Action Ranges")]
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
@@ -219,6 +222,11 @@ namespace SimpleSurvival.Player
 
             ItemStack weaponStack = GetEquippedWeaponStack();
             float damage = ResolveAttackDamage(weaponStack);
+
+            bool isSneakAttack = _inputReader != null && _inputReader.IsSneakHeld && IsMeleeWeapon(weaponStack);
+            if (isSneakAttack)
+                damage *= sneakAttackDamageMultiplier;
+
             float range = ResolveAttackRange(weaponStack);
             int maxComboIndex = ResolveMaxComboIndex(weaponStack);
             float safetyTimeout = ResolveAttackSafetyTimeout(weaponStack);
@@ -506,6 +514,22 @@ namespace SimpleSurvival.Player
         {
             if (stack == null || stack.IsBroken) return null;
             return stack.ItemData.GetAbility<WeaponAbility>();
+        }
+
+        private bool IsMeleeWeapon(ItemStack weaponStack)
+        {
+            WeaponAbility weapon = GetWeaponAbility(weaponStack);
+            if (weapon == null) return true; // Tay không (không có weapon nào equip) cũng tính là cận chiến
+
+            switch (weapon.Category)
+            {
+                case WeaponCategory.Fists:
+                case WeaponCategory.Melee1H:
+                case WeaponCategory.Melee2H:
+                    return true;
+                default:
+                    return false; // Pistol, Rifle... không được hưởng bonus sneak attack
+            }
         }
 
         private struct GatherToolResolution
