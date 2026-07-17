@@ -1,30 +1,18 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Input;
 using SimpleSurvival.SaveLoad;
 
 namespace SimpleSurvival.Items
 {
-    /// <summary>
-    /// Temporary test harness for the inventory. Draws on-screen buttons to add
-    /// items, resize the backpack, and wear down item durability — so the
-    /// inventory can be exercised before the real interaction and combat
-    /// systems exist.
-    ///
-    /// This is a development tool, not a game system. Remove it before release.
-    /// </summary>
     public sealed class InventoryTester : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private PlayerInventory playerInventory;
 
         [Header("Test Items")]
-        [Tooltip("Stackable items to test with, e.g. wood, stone.")]
         [SerializeField] private List<ItemData> stackableItems = new List<ItemData>();
-
-        [Tooltip("Durable items to test with, e.g. axe, helmet.")]
         [SerializeField] private List<ItemData> durableItems = new List<ItemData>();
-
-        [Tooltip("Single-slot items without stacking or durability, e.g. backpack, key.")]
         [SerializeField] private List<ItemData> miscItems = new List<ItemData>();
 
         [Header("Settings")]
@@ -32,24 +20,34 @@ namespace SimpleSurvival.Items
         [SerializeField] private int backpackStep = 5;
 
         [Header("Random Durability")]
-        [Tooltip("Minimum durability ratio when spawning loot items (0 = broken, 1 = full).")]
         [SerializeField, Range(0f, 1f)] private float minDurabilityRatio = 0.3f;
-
-        [Tooltip("Maximum durability ratio when spawning loot items.")]
         [SerializeField, Range(0f, 1f)] private float maxDurabilityRatio = 0.9f;
 
         private int currentBackpackSlots;
         private int selectedStackableIndex;
         private int selectedDurableIndex;
         private int selectedMiscIndex;
+        private bool isUIVisible = true;
 
         private void Awake()
         {
             currentBackpackSlots = 0;
         }
 
+        private void Update()
+        {
+            if (UnityEngine.Input.GetKeyDown("1"))
+            {
+                Debug.Log("Phím 1 được nhận!");
+                isUIVisible = !isUIVisible;
+            }
+        }
+
         private void OnGUI()
         {
+            if (!isUIVisible)
+                return;
+
             GUILayout.BeginArea(new Rect(10, 10, 280, 600), GUI.skin.box);
             GUILayout.Label("INVENTORY TESTER");
 
@@ -67,7 +65,7 @@ namespace SimpleSurvival.Items
 
             GUILayout.EndArea();
         }
-        // Save button 
+
         private void DrawSaveDebugButtons()
         {
             GUILayout.Label("Save Debug");
@@ -83,7 +81,6 @@ namespace SimpleSurvival.Items
 
             GUILayout.Label(Application.persistentDataPath);
         }
-        // ── Stackable ────────────────────────────────────────────────────────
 
         private void DrawStackableItemButtons()
         {
@@ -106,8 +103,6 @@ namespace SimpleSurvival.Items
                 AddToBackpack(selected, addAmount);
         }
 
-        // ── Durable ──────────────────────────────────────────────────────────
-
         private void DrawDurableItemButtons()
         {
             GUILayout.Label("Durable Items");
@@ -129,8 +124,6 @@ namespace SimpleSurvival.Items
                 AddToPocketsWithRandomDurability(selected);
         }
 
-        // ── Misc ─────────────────────────────────────────────────────────────
-
         private void DrawMiscItemButtons()
         {
             GUILayout.Label("Misc Items");
@@ -148,8 +141,6 @@ namespace SimpleSurvival.Items
             if (GUILayout.Button($"Add 1 '{selected.ItemName}' → Pockets"))
                 AddToPockets(selected, 1);
         }
-
-        // ── Backpack ─────────────────────────────────────────────────────────
 
         private void DrawBackpackButtons()
         {
@@ -169,8 +160,6 @@ namespace SimpleSurvival.Items
             }
         }
 
-        // ── Durability ───────────────────────────────────────────────────────
-
         private void DrawDurabilityButton()
         {
             GUILayout.Label("Durability");
@@ -179,9 +168,6 @@ namespace SimpleSurvival.Items
                 ReduceFirstDurableItem();
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-
-        /// <summary>Draws prev/next arrows to cycle through an item list.</summary>
         private void DrawItemSelector(ref int index, List<ItemData> items)
         {
             GUILayout.BeginHorizontal();
@@ -291,10 +277,6 @@ namespace SimpleSurvival.Items
         }
     }
 
-    /// <summary>
-    /// Small helper: sets GUI.enabled for the duration of a using-block, then
-    /// restores it. Lets a button be greyed out without leaking the state.
-    /// </summary>
     internal readonly struct GUIEnabledScope : System.IDisposable
     {
         private readonly bool previous;
@@ -310,5 +292,4 @@ namespace SimpleSurvival.Items
             GUI.enabled = previous;
         }
     }
-
 }
