@@ -53,9 +53,13 @@ namespace SimpleSurvival.SaveLoad
                 player = playerAgent.Capture(),
                 corpses = CorpseSaveRegistry.Instance != null
                     ? CorpseSaveRegistry.Instance.Capture()
-                    : new List<CorpseData>()
+                    : new List<CorpseData>(),
+                containers = ContainerSaveRegistry.Instance != null
+                    ? ContainerSaveRegistry.Instance.Capture()
+                    : new List<ContainerData>()
             };
 
+            lastLoaded = save;
             return storage.Write(save);
         }
 
@@ -106,6 +110,14 @@ namespace SimpleSurvival.SaveLoad
                 return new List<CorpseData>();
 
             return lastLoaded.corpses.FindAll(c => c.mapId == mapId);
+        }
+
+        public ContainerData GetContainerData(string containerId)
+        {
+            if (lastLoaded?.containers == null)
+                return null;
+
+            return lastLoaded.containers.Find(c => c.containerId == containerId);
         }
 
         public void DeleteSave()

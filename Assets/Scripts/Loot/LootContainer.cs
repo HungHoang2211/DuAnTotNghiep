@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
+using SimpleSurvival.SaveLoad;
 using SimpleSurvival.Targets;
 
 namespace SimpleSurvival.Loot
@@ -35,6 +36,10 @@ namespace SimpleSurvival.Loot
         [Header("Persistence")]
         [SerializeField] private bool persistWhenEmpty = true;
         [SerializeField] private float despawnDelayWhenEmpty = 2f;
+        [Tooltip("True = nhớ trạng thái loot xuyên suốt các lần chơi (không tự roll lại), kể cả ở map farm. Cần Container Id.")]
+        [SerializeField] private bool persistAcrossSessions = false;
+        [Tooltip("Bắt buộc điền tay, duy nhất, nếu Persist Across Sessions = true.")]
+        [SerializeField] private string containerId;
 
         [Header("Decay")]
         [SerializeField] private float decayTimer = 0f;
@@ -61,6 +66,7 @@ namespace SimpleSurvival.Loot
         public int SlotCount => _inventory != null ? _inventory.SlotCount : ResolveSlotCount();
         public float UnlockDuration => unlockDuration;
         public bool IsUnlocked => _isUnlocked || unlockDuration <= 0f;
+        public string ContainerId => containerId;
 
         public bool IsEmpty
         {
@@ -99,6 +105,11 @@ namespace SimpleSurvival.Loot
 
         private void Awake()
         {
+            if (persistAcrossSessions)
+            {
+                ContainerSaveRegistry.Instance?.InitializePersistentContainer(this);
+                return;
+            }
             if (deferInitialization) return;
             InitializeInternal();
         }
@@ -109,6 +120,21 @@ namespace SimpleSurvival.Loot
             lootTable = runtimeTable;
             unlockDuration = runtimeUnlockDuration;
             InitializeInternal();
+        }
+
+        public void InitializeDefault()
+        {
+            InitializeInternal();
+        }
+
+        public void InitializeEmpty()
+        {
+            if (_isInitialized) return;
+            _isInitialized = true;
+
+            int resolvedSlotCount = ResolveSlotCount();
+            _inventory = new InventorySystem(Mathf.Max(1, resolvedSlotCount));
+            _inventory.OnInventoryChanged += HandleInventoryChanged;
         }
 
         private void InitializeInternal()
