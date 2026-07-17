@@ -24,8 +24,7 @@ namespace SimpleSurvival.Audio
         [Header("Startup")]
         [SerializeField] private AudioCue defaultMusicCue;
         [SerializeField] private AudioCue defaultAmbienceCue;
-        [Header("UI")]
-        [SerializeField] private AudioCue mainClickCue;
+       
 
         private AudioSourcePool _sfxPool;
         private AudioSource _musicSource;
@@ -59,10 +58,7 @@ namespace SimpleSurvival.Audio
             if (defaultAmbienceCue != null)
                 PlayAmbience(defaultAmbienceCue);
         }
-        public void PlayMainClick()
-        {
-            PlaySfx(mainClickCue);
-        }
+
 
         private void BuildAudioSources()
         {

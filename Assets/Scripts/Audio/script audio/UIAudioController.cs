@@ -14,6 +14,12 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue itemMoveCue;
         [SerializeField] private AudioCue useItemCue;
         [SerializeField] private AudioCue deleteCue;
+        [SerializeField] private AudioCue craft ;
+        [SerializeField] private AudioCue mainClickCue ;
+        public void PlayMainClick()
+        {
+            AudioManager.Instance.PlaySfx(mainClickCue);
+        }
 
         private void Awake()
         {
@@ -23,6 +29,10 @@ namespace SimpleSurvival.Audio
         public void PlayClick()
         {
             AudioManager.Instance.PlaySfx(clickCue);
+        }
+        public void Playcraft()
+        {
+            AudioManager.Instance.PlaySfx(craft);
         }
 
         public void PlayConfirm()
