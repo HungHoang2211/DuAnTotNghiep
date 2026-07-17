@@ -14,14 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 2
   questName: Kill ZombieFat
-  offerDialogue: Hi, can you help me kill the zombies?
-  turnInDialogue: Thank goodness!!! you're here to help me with this dangerous job
+  offerDialogue: Hi, can you help me kill the giant ZombieFat? It's too dangerous
+    for me to handle alone.
+  turnInDialogue: Thank goodness you defeated it! Thank you so much for keeping me
+    safe.
   objectives:
   - type: 1
-    description: Help MrBeat kill the ZombieFat
+    description: Defeat the ZombieFat to help MrBeat.
     targetItem: {fileID: 0}
     targetEnemyConfig: {fileID: 11400000, guid: 6b931b4c69e76d042bc302fb6f20bf1a, type: 2}
-    requiredAmount: 1
+    targetNpcId: 
+    escortPointId: 
+    requiredAmount: 3
   rewards:
-  - itemData: {fileID: 11400000, guid: 379828d807b7f18499e9efb8c8fcaaef, type: 2}
+  - itemData: {fileID: 11400000, guid: 07ce2c84e80992741af15d8b11688b97, type: 2}
     quantity: 1

@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -8115870544305763168}
   - component: {fileID: 683306640263665128}
   - component: {fileID: 4542792842420249708}
+  - component: {fileID: -156048416995467922}
   m_Layer: 8
   m_Name: Wolf
   m_TagString: Enemy
@@ -169,11 +170,9 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 512
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 64
   _skills:
   - {fileID: 683306640263665128}
+  retreatArrivalThreshold: 0.3
   _wolfAnimator: {fileID: 3817186447025799035}
   _corpseHandler: {fileID: 9167439896006682292}
 --- !u!114 &9167439896006682292
@@ -255,6 +254,18 @@ MonoBehaviour:
   - {fileID: 6065431679542457985}
   - {fileID: 790942487131696202}
   - {fileID: 9057811615234873625}
+--- !u!114 &-156048416995467922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26420039585923096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &213402551378400243
 GameObject:
   m_ObjectHideFlags: 0
