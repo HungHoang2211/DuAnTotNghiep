@@ -1,5 +1,6 @@
 ﻿using SimpleSurvival.Core;
 using SimpleSurvival.Stats;
+using SimpleSurvival.World;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -121,7 +122,30 @@ namespace SimpleSurvival.AI
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * moveSpeed;
             move.y += Physics.gravity.y * Time.deltaTime;
-            _characterController.Move(move * Time.deltaTime);
+
+            Vector3 finalMove = move;
+            Vector3 nextPosition = transform.position + move * Time.deltaTime;
+
+            if (MapEdgeTrigger.IsInsideAnyZone(nextPosition))
+            {
+                // Bị chặn theo hướng full move -> thử trượt theo từng trục riêng
+                // để lách qua rìa vùng thay vì đứng khựng lại hoàn toàn.
+                Vector3 moveXOnly = new Vector3(move.x, move.y, 0f);
+                Vector3 moveZOnly = new Vector3(0f, move.y, move.z);
+
+                bool xBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveXOnly * Time.deltaTime);
+                bool zBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveZOnly * Time.deltaTime);
+
+                if (!xBlocked) finalMove = moveXOnly;
+                else if (!zBlocked) finalMove = moveZOnly;
+                else
+                {
+                    _agent.nextPosition = transform.position;
+                    return;
+                }
+            }
+
+            _characterController.Move(finalMove * Time.deltaTime);
             _agent.nextPosition = transform.position;
 
             Vector3 lookDir = new Vector3(desiredVel.x, 0, desiredVel.z);
@@ -144,8 +168,13 @@ namespace SimpleSurvival.AI
             {
                 Vector2 c = Random.insideUnitCircle * radius;
                 Vector3 candidate = origin + new Vector3(c.x, 0, c.y);
+                if (MapEdgeTrigger.IsInsideAnyZone(candidate)) continue;
+
                 if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, radius, NavMesh.AllAreas))
+                {
+                    if (MapEdgeTrigger.IsInsideAnyZone(hit.position)) continue;
                     return hit.position;
+                }
             }
             return origin;
         }

@@ -175,8 +175,6 @@ namespace SimpleSurvival.AI
         public override void NotifySkillComplete()
         {
             base.NotifySkillComplete();
-            if (_witchAnimator != null && _player != null)
-                _witchAnimator.SetMoveSpeed(Config != null ? Config.MoveSpeed : 1f);
         }
 
         protected override void OnDying()

@@ -1,3 +1,4 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,10 +14,16 @@ namespace SimpleSurvival.World
         [SerializeField] private float pulseAmount = 0.15f;
         [SerializeField] private float heightOffset = 0.02f;
 
+        [Header("Enemy Block")]
+        [Tooltip("Nới rộng vùng chặn enemy ra thêm bao nhiêu mét so với Box Collider gốc")]
+        [SerializeField] private float enemyBlockPadding = 1f;
+
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        private static readonly List<MapEdgeTrigger> _activeZones = new List<MapEdgeTrigger>();
 
         private MeshRenderer zoneRenderer;
         private MaterialPropertyBlock propertyBlock;
+        private Collider _collider;
 
         private void Reset()
         {
@@ -25,7 +32,37 @@ namespace SimpleSurvival.World
 
         private void Awake()
         {
+            _collider = GetComponent<Collider>();
             BuildZoneVisual();
+        }
+
+        private void OnEnable()
+        {
+            if (!_activeZones.Contains(this)) _activeZones.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            _activeZones.Remove(this);
+        }
+
+        /// <summary>
+        /// True nếu worldPosition nằm trong vùng (mở rộng thêm enemyBlockPadding) của bất kỳ
+        /// MapEdgeTrigger nào đang active trong scene. Dùng để chặn enemy di chuyển hoặc
+        /// được triệu hồi vào vùng chuyển scene.
+        /// </summary>
+        public static bool IsInsideAnyZone(Vector3 worldPosition)
+        {
+            for (int i = 0; i < _activeZones.Count; i++)
+            {
+                MapEdgeTrigger zone = _activeZones[i];
+                if (zone == null || zone._collider == null) continue;
+
+                Bounds bounds = zone._collider.bounds;
+                bounds.Expand(zone.enemyBlockPadding * 2f);
+                if (bounds.Contains(worldPosition)) return true;
+            }
+            return false;
         }
 
         private void Update()

@@ -80,11 +80,28 @@ namespace SimpleSurvival.AI
             _agent.SetDestination(target);
 
             float timeout = 8f, elapsed = 0f;
+            float stuckCheckTimer = 0f;
+            Vector3 lastCheckPos = transform.position;
+
             while (_agent.pathPending || _agent.remainingDistance > 0.3f)
             {
                 if (_state == PassiveState.Fleeing || _isDead) yield break;
                 elapsed += Time.deltaTime;
                 if (elapsed > timeout) break;
+
+                stuckCheckTimer += Time.deltaTime;
+                if (stuckCheckTimer >= 0.4f)
+                {
+                    float movedDist = Vector3.Distance(transform.position, lastCheckPos);
+                    if (!_agent.pathPending && movedDist < 0.15f)
+                    {
+                        target = GetRandomNavMeshPoint(origin, DeerConfig.WanderRadius);
+                        _agent.SetDestination(target);
+                    }
+                    lastCheckPos = transform.position;
+                    stuckCheckTimer = 0f;
+                }
+
                 yield return null;
             }
 
@@ -110,8 +127,6 @@ namespace SimpleSurvival.AI
 
             if (_deerAnimator != null) _deerAnimator.SetGrazing(false);
         }
-
-        // Vision detection - chỉ flee khi player KHÔNG sneak
         private IEnumerator VisionDetectionRoutine()
         {
             while (!_isDead)
@@ -181,12 +196,6 @@ namespace SimpleSurvival.AI
             _grazeBlockedUntil = Time.time + DeerConfig.GrazeCooldownAfterFlee;
         }
 
-        /// <summary>
-        /// Tìm 1 điểm đến để chạy trốn theo hướng ngược lại nguy hiểm.
-        /// Nếu hướng thẳng bị vật cản (obstacleLayer) chắn, thử xoay dần qua các góc
-        /// khác (trái/phải) để tìm hướng thoáng. Nếu không tìm được hướng nào sạch,
-        /// trả về điểm xa nhất có thể theo hướng gốc.
-        /// </summary>
         private Vector3 FindClearFleeDestination(Vector3 dangerPosition, Vector3 origin, float fleeDistance)
         {
             Vector3 baseDir = (origin - dangerPosition).normalized;
@@ -199,7 +208,6 @@ namespace SimpleSurvival.AI
             {
                 Vector3 dir = Quaternion.Euler(0f, angle, 0f) * baseDir;
 
-                // Có vật cản ngay phía trước theo hướng này thì bỏ qua, thử góc khác
                 if (obstacleLayer != 0 &&
                     Physics.Raycast(rayOrigin, dir, Mathf.Min(fleeDistance, 3f), obstacleLayer))
                 {
@@ -211,7 +219,6 @@ namespace SimpleSurvival.AI
                     return hit.position;
             }
 
-            // Không có hướng nào sạch hoàn toàn -> vẫn cố lấy điểm NavMesh hợp lệ gần nhất theo hướng gốc
             if (NavMesh.SamplePosition(origin + baseDir * fleeDistance, out NavMeshHit fallbackHit, fleeDistance, NavMesh.AllAreas))
                 return fallbackHit.position;
 

@@ -28,6 +28,12 @@ namespace SimpleSurvival.AI
 
         protected EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
 
+        /// <summary>
+        /// True khi enemy đã phát hiện player (mọi state trừ Idle/Dead). Dùng để chặn
+        /// bonus sneak-attack damage một khi enemy không còn bị bất ngờ nữa.
+        /// </summary>
+        public bool HasDetectedPlayer => _state != EnemyState.Idle && _state != EnemyState.Dead;
+
         public float LastDamageDealtTime { get; private set; } = -999f;
 
         public void NotifyDamageDealt()
@@ -35,10 +41,6 @@ namespace SimpleSurvival.AI
             LastDamageDealtTime = Time.time;
         }
 
-        /// <summary>
-        /// Gọi bởi EscortEnemyDirector ngay sau khi spawn enemy ẩn cho nhiệm vụ hộ tống.
-        /// Enemy sẽ khóa cứng mục tiêu vào target này, không detect/react với Player nữa.
-        /// </summary>
         public void SetEscortTarget(Transform target)
         {
             if (_isDead || target == null) return;
@@ -47,11 +49,6 @@ namespace SimpleSurvival.AI
             BeginChase();
         }
 
-        /// <summary>
-        /// Gỡ escort mode, trả enemy về hành vi bình thường: đứng Idle rồi tự phát hiện
-        /// và tấn công Player thật qua DetectionRoutine như mọi enemy khác trên map.
-        /// Gọi khi nhiệm vụ hộ tống đã kết thúc (thành công hoặc thất bại) nhưng enemy vẫn còn sống.
-        /// </summary>
         public void ReleaseEscortTarget()
         {
             if (_isDead || !_escortMode) return;
@@ -59,7 +56,6 @@ namespace SimpleSurvival.AI
             _escortMode = false;
             BeginIdle();
 
-            // DetectionRoutine đã yield break khi còn ở escort mode nên phải khởi động lại.
             StopAllCoroutines();
             StartCoroutine(DetectionRoutine());
         }
@@ -90,7 +86,7 @@ namespace SimpleSurvival.AI
         {
             while (!_isDead)
             {
-                if (_escortMode) yield break; // enemy hộ tống không tự phát hiện Player
+                if (_escortMode) yield break;
 
                 yield return new WaitForSeconds(0.2f);
                 if (_state == EnemyState.Dead) yield break;
@@ -130,8 +126,6 @@ namespace SimpleSurvival.AI
         {
             if (_isDead || _playerDead) return;
 
-            // Chỉ chạy khi enemy đang ở escort mode (_escortMode luôn false với enemy bình thường
-            // nên đoạn này không ảnh hưởng gì tới hành vi cũ - kể cả Zombie Acid đánh Player).
             if (_escortMode) UpdateEscortWatchdog();
 
             if (_state == EnemyState.Chasing) UpdateChase();
@@ -139,19 +133,13 @@ namespace SimpleSurvival.AI
             else if (_state == EnemyState.Retreating) UpdateRetreat();
         }
 
-        /// <summary>
-        /// Chỉ áp dụng cho enemy đang bám mục tiêu hộ tống (Emily). Đảm bảo enemy không bị kẹt
-        /// vĩnh viễn ở trạng thái Attacking khi target đã đi xa và không skill nào đang thực thi.
-        /// Không hủy skill đang chạy (kể cả skill tầm xa như acid) - chỉ tự thoát khi thực sự
-        /// không có gì đang diễn ra.
-        /// </summary>
         private void UpdateEscortWatchdog()
         {
             if (_state != EnemyState.Attacking || _player == null || Config == null) return;
 
             foreach (var skill in _skills)
             {
-                if (skill != null && skill.IsExecuting) return; // đang có skill chạy -> để yên, không can thiệp
+                if (skill != null && skill.IsExecuting) return;
             }
 
             float dist = Vector3.Distance(transform.position, _player.position);
@@ -174,7 +162,6 @@ namespace SimpleSurvival.AI
 
             float dist = Vector3.Distance(transform.position, _player.position);
 
-            // Enemy hộ tống bám mục tiêu không giới hạn ChaseRadius (không "mất dấu" Emily).
             if (!_escortMode && dist > Config.ChaseRadius)
             {
                 BeginIdle();
@@ -216,10 +203,6 @@ namespace SimpleSurvival.AI
                 FaceTarget(_player, Config != null ? Config.RotationSpeed : 360f);
         }
 
-        /// <summary>
-        /// Di chuyển enemy quay về spawn point (dùng khi cần "lui vào ẩn nấp",
-        /// vd Witch sau khi triệu hồi minion). Khi tới nơi sẽ tự chuyển sang Hidden.
-        /// </summary>
         protected virtual void UpdateRetreat()
         {
             Vector3 destination = _spawnPoint != null ? _spawnPoint.Position : transform.position;
@@ -240,10 +223,6 @@ namespace SimpleSurvival.AI
                 Config != null ? Config.RotationSpeed : 360f);
         }
 
-        /// <summary>
-        /// Bắt đầu lui về spawn point. Gọi từ skill (vd sau khi triệu hồi xong minion).
-        /// Trong lúc Retreating/Hidden, DetectionRoutine tự động không chạy vì state != Idle.
-        /// </summary>
         public virtual void BeginRetreat()
         {
             if (_isDead) return;
@@ -252,19 +231,12 @@ namespace SimpleSurvival.AI
             _stats?.SetInvulnerable(true);
         }
 
-        /// <summary>
-        /// Enemy đã về tới spawn point — ẩn model, chờ tín hiệu ReappearAndResume().
-        /// </summary>
         protected virtual void EnterHidden()
         {
             _state = EnemyState.Hidden;
             SetModelVisible(false);
         }
 
-        /// <summary>
-        /// Hiện lại và tiếp tục chiến đấu. Gọi từ skill khi điều kiện chờ đã xong
-        /// (vd tất cả minion triệu hồi đã bị tiêu diệt).
-        /// </summary>
         public virtual void ReappearAndResume()
         {
             if (_isDead) return;
@@ -276,11 +248,6 @@ namespace SimpleSurvival.AI
             else
                 BeginIdle();
         }
-
-        /// <summary>
-        /// Bật/tắt renderer + collider chính (không đụng ragdoll collider vì chúng
-        /// nằm trên object con — theo đúng convention OnDying() đang dùng).
-        /// </summary>
         protected void SetModelVisible(bool visible)
         {
             foreach (var r in GetComponentsInChildren<Renderer>(true))
@@ -369,8 +336,8 @@ namespace SimpleSurvival.AI
         protected override void HandleDamagedBy(GameObject source)
         {
             if (source == null || _isDead || _playerDead) return;
-            if (_escortMode) return; // enemy hộ tống không đổi mục tiêu dù bị player đánh trả
-            if (!source.CompareTag("Player")) return; // bỏ qua damage từ Dog / nguồn không phải Player thật
+            if (_escortMode) return;
+            if (!source.CompareTag("Player")) return; 
 
             _player = source.transform;
 
@@ -384,7 +351,6 @@ namespace SimpleSurvival.AI
             _isDead = true;
             _state = EnemyState.Dead;
 
-            // Đảm bảo xác hiện ra đầy đủ dù enemy đang Hidden lúc chết
             SetModelVisible(true);
 
             StopAllCoroutines();
@@ -405,7 +371,7 @@ namespace SimpleSurvival.AI
             if (_isDead) return;
             if (_escortMode) return;
 
-            base.HandlePlayerDeath(source); 
+            base.HandlePlayerDeath(source);
 
             _state = EnemyState.Idle;
             _player = null;
@@ -424,7 +390,7 @@ namespace SimpleSurvival.AI
             base.HandlePlayerRevived();
 
             if (_isDead) return;
-            if (_escortMode) return; 
+            if (_escortMode) return;
 
             _stats?.SetInvulnerable(false);
 

@@ -34,6 +34,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float unarmedAttackClipLength = 0.5f;
 
         [Header("Sneak Attack")]
+        [Tooltip("Hệ số nhân damage khi tấn công cận chiến (tay không hoặc vũ khí melee) lúc đang sneak. Không áp dụng cho vũ khí tầm xa.")]
         [SerializeField] private float sneakAttackDamageMultiplier = 2f;
 
         [Header("Action Ranges")]
@@ -223,7 +224,9 @@ namespace SimpleSurvival.Player
             ItemStack weaponStack = GetEquippedWeaponStack();
             float damage = ResolveAttackDamage(weaponStack);
 
-            bool isSneakAttack = _inputReader != null && _inputReader.IsSneakHeld && IsMeleeWeapon(weaponStack);
+            bool isSneakAttack = _inputReader != null && _inputReader.IsSneakHeld
+                && IsMeleeWeapon(weaponStack)
+                && IsTargetUnaware(target);
             if (isSneakAttack)
                 damage *= sneakAttackDamageMultiplier;
 
@@ -514,6 +517,19 @@ namespace SimpleSurvival.Player
         {
             if (stack == null || stack.IsBroken) return null;
             return stack.ItemData.GetAbility<WeaponAbility>();
+        }
+
+        private bool IsTargetUnaware(ITargetable target)
+        {
+            if (target == null) return true;
+
+            MonoBehaviour targetMb = target as MonoBehaviour;
+            if (targetMb == null) return true;
+
+            BaseEnemyController enemy = targetMb.GetComponentInParent<BaseEnemyController>();
+            if (enemy == null) return true; // Không phải enemy AI có detection (vd loot bag, resource...)
+
+            return !enemy.HasDetectedPlayer;
         }
 
         private bool IsMeleeWeapon(ItemStack weaponStack)

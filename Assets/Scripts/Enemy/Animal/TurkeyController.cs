@@ -80,7 +80,8 @@ namespace SimpleSurvival.AI
             _agent.SetDestination(target);
 
             float timeout = 8f, elapsed = 0f;
-            float stuckTimer = 0f;
+            float stuckCheckTimer = 0f;
+            Vector3 lastCheckPos = transform.position;
 
             while (_agent.pathPending || _agent.remainingDistance > 0.3f)
             {
@@ -89,19 +90,17 @@ namespace SimpleSurvival.AI
                 elapsed += Time.deltaTime;
                 if (elapsed > timeout) break;
 
-                if (!_agent.pathPending && _agent.velocity.magnitude < 0.15f)
+                stuckCheckTimer += Time.deltaTime;
+                if (stuckCheckTimer >= 0.4f)
                 {
-                    stuckTimer += Time.deltaTime;
-                    if (stuckTimer >= 0.4f)
+                    float movedDist = Vector3.Distance(transform.position, lastCheckPos);
+                    if (!_agent.pathPending && movedDist < 0.15f)
                     {
-                        stuckTimer = 0f;
                         target = GetRandomNavMeshPoint(origin, TurkeyConfig.WanderRadius);
                         _agent.SetDestination(target);
                     }
-                }
-                else
-                {
-                    stuckTimer = 0f;
+                    lastCheckPos = transform.position;
+                    stuckCheckTimer = 0f;
                 }
 
                 yield return null;

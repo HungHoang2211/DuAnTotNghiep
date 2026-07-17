@@ -3,28 +3,23 @@ using UnityEngine;
 using UnityEngine.AI;
 using SimpleSurvival.Core;
 using SimpleSurvival.Stats;
+using SimpleSurvival.World;
 
 namespace SimpleSurvival.AI
 {
     public sealed class SummonMinionSkill : BaseEnemySkill
     {
-        /// <summary>
-        /// Mỗi group = 1 minion sẽ được spawn trong 1 lần triệu hồi.
-        /// Nếu Prefabs có nhiều hơn 1 phần tử, sẽ random chọn 1 loại cho group đó.
-        /// </summary>
+
         [System.Serializable]
         public class MinionSpawnGroup
         {
-            [Tooltip("Danh sách enemy prefab có thể ra ở group này. 1 phần tử = luôn ra loại đó. Nhiều phần tử = random 1 trong số đó.")]
             public GameObject[] Prefabs;
         }
 
         [Header("Summon")]
-        [Tooltip("Số minion sẽ spawn mỗi lần triệu hồi, random vị trí trên toàn bộ NavMesh của map.")]
         [SerializeField] private MinionSpawnGroup[] _minionsToSummon;
         [SerializeField] private GameObject summonEffectPrefab;
 
-        [Header("HP Thresholds (fallback nếu không có ZombieWitchStatsConfig, giảm dần, vd 0.5 = 50% máu)")]
         [SerializeField] private float[] hpThresholds = { 0.5f };
 
         [Header("Refs")]
@@ -70,8 +65,6 @@ namespace SimpleSurvival.AI
         {
             if (_minionsToSummon != null && _minionsToSummon.Length > 0)
             {
-                // Tính tam giác NavMesh 1 lần cho cả đợt triệu hồi, tránh gọi
-                // CalculateTriangulation() (khá nặng) lặp lại cho từng minion.
                 var sampler = new NavMeshAreaSampler();
                 foreach (var group in _minionsToSummon)
                     SpawnMinion(group, sampler);
@@ -93,8 +86,6 @@ namespace SimpleSurvival.AI
 
             if (controller == null) return;
 
-            // Nếu vì lý do gì đó không có minion nào sống sót (spawn fail, config rỗng...)
-            // thì witch đánh tiếp bình thường thay vì lui về ẩn vô thời hạn.
             if (_aliveMinions.Count > 0)
                 controller.BeginRetreat();
             else
@@ -108,8 +99,21 @@ namespace SimpleSurvival.AI
             GameObject prefab = PickRandomPrefab(group.Prefabs);
             if (prefab == null) return;
 
-            if (!sampler.TryGetRandomPoint(out Vector3 spawnPos))
-                spawnPos = transform.position; // fallback nếu map chưa bake NavMesh
+            Vector3 spawnPos = transform.position; 
+            bool foundValidPoint = false;
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (!sampler.TryGetRandomPoint(out Vector3 candidate)) break;
+                if (MapEdgeTrigger.IsInsideAnyZone(candidate)) continue;
+
+                spawnPos = candidate;
+                foundValidPoint = true;
+                break;
+            }
+
+            if (!foundValidPoint && MapEdgeTrigger.IsInsideAnyZone(spawnPos))
+                return;
 
             Quaternion spawnRot = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
 
@@ -140,8 +144,6 @@ namespace SimpleSurvival.AI
         {
             _aliveMinions.Remove(minionStats);
 
-            // Chỉ khi tiêu diệt hết toàn bộ minion của đợt triệu hồi này,
-            // witch mới hiện lại và quay lại tấn công player.
             if (_aliveMinions.Count == 0 && controller != null)
                 controller.ReappearAndResume();
         }
@@ -150,7 +152,6 @@ namespace SimpleSurvival.AI
         {
             if (prefabs.Length == 1) return prefabs[0];
 
-            // Bỏ qua slot null trong lúc random để tránh instantiate lỗi
             int tries = prefabs.Length * 2;
             while (tries-- > 0)
             {
@@ -171,11 +172,6 @@ namespace SimpleSurvival.AI
 
             _aliveMinions.Clear();
         }
-
-        /// <summary>
-        /// Cache tam giác của NavMesh đã bake để random điểm đều trên toàn bộ map
-        /// (weighted theo diện tích tam giác, tránh dồn điểm ở vùng tam giác nhỏ).
-        /// </summary>
         private class NavMeshAreaSampler
         {
             private readonly Vector3[] _vertices;
