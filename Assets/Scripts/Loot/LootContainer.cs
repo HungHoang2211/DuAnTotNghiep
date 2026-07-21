@@ -52,6 +52,17 @@ namespace SimpleSurvival.Loot
         [Tooltip("Nếu true, container không tự init ở Awake. Phải gọi InitializeRuntime sau (vd từ EnemyCorpseHandler).")]
         [SerializeField] private bool deferInitialization = false;
 
+        [Header("Lock")]
+        [SerializeField] private bool startLocked = false;
+
+        private bool _isLocked;
+        public bool IsLocked => _isLocked;
+
+        public void SetLocked(bool locked)
+        {
+            _isLocked = locked;
+        }
+
         private InventorySystem _inventory;
         private float _decayElapsed;
         private bool _hasBeenOpened;
@@ -105,6 +116,8 @@ namespace SimpleSurvival.Loot
 
         private void Awake()
         {
+            _isLocked = startLocked;
+
             if (persistAcrossSessions)
             {
                 ContainerSaveRegistry.Instance?.InitializePersistentContainer(this);
@@ -224,6 +237,7 @@ namespace SimpleSurvival.Loot
 
         public override bool CanBeTargeted()
         {
+            if (_isLocked) return false;
             if (!isActiveAndEnabled) return false;
             if (_despawned) return false;
             if (!_isInitialized) return false;

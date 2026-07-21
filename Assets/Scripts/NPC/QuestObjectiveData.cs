@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
 using SimpleSurvival.Stats;
@@ -11,17 +12,17 @@ namespace SimpleSurvival.Quests
         public QuestObjectiveType type;
         public string description;
 
-        [Header("D�ng cho CollectItem")]
+        [Header("Dùng cho CollectItem")]
         public ItemData targetItem;
 
-        [Header("D�ng cho KillEnemy")]
+        [Header("Dùng cho KillEnemy")]
         public EnemyStatsConfig targetEnemyConfig;
 
-        [Header("D�ng cho FindNPC")]
+        [Header("Dùng cho FindNPC / EscortNPC - phải khớp npcId trên NPC")]
         public string targetNpcId;
 
-        [Header("D�ng cho EscortNPC")]
-        public string escortPointId;
+        [Header("Dùng cho EscortNPC - danh sách pointId theo đúng thứ tự đi qua, điểm cuối là đích")]
+        public List<string> escortWaypointIds = new List<string>();
 
         public int requiredAmount = 1;
     }

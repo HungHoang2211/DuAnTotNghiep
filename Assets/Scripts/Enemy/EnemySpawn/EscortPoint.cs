@@ -1,20 +1,25 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using SimpleSurvival.Loot;
 
 namespace SimpleSurvival.Quests
 {
     /// <summary>
     /// Gắn component này vào 1 GameObject trong scene để đánh dấu điểm đích hộ tống.
-    /// pointId phải khớp với escortPointId trong QuestObjectiveData (type = EscortNPC).
+    /// pointId phải khớp với escortWaypointIds trong QuestObjectiveData (type = EscortNPC).
     /// </summary>
     public sealed class EscortPoint : MonoBehaviour
     {
         [SerializeField] private string pointId;
 
+        [Tooltip("Để trống nếu đây chỉ là điểm đi qua. Gán rương nếu muốn Emily dừng lại chờ loot xong.")]
+        [SerializeField] private LootContainer lootContainer;
+
         private static readonly Dictionary<string, EscortPoint> _registry = new Dictionary<string, EscortPoint>();
 
         public string PointId => pointId;
         public Vector3 Position => transform.position;
+        public LootContainer LootContainer => lootContainer;
 
         private void OnEnable()
         {

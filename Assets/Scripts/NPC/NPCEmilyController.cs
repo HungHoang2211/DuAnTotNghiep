@@ -1,8 +1,10 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Stats;
 using SimpleSurvival.UI.Hud;
 using SimpleSurvival.Quests;
+using SimpleSurvival.Loot;
 
 namespace SimpleSurvival.AI
 {
@@ -36,6 +38,10 @@ namespace SimpleSurvival.AI
         [SerializeField] private EscortEnemyDirector enemyDirector;
 
         public bool IsEscorting { get; private set; }
+
+        private readonly List<EscortPoint> _route = new List<EscortPoint>();
+        private int _routeIndex;
+        private LootContainer _waitingLootContainer;
 
         private GameObject _currentThreat;
         private BaseStats _currentThreatStats;
@@ -75,6 +81,7 @@ namespace SimpleSurvival.AI
                 animatorController.OnAttackHit -= HandleAttackHit;
 
             ExitCombat();
+            ResetRouteState();
         }
 
         public override void OnPlayerInteract(GameObject player)
@@ -114,6 +121,7 @@ namespace SimpleSurvival.AI
             {
                 ShowDialogue(escortOfferDialogue);
                 manager.StartQuest(escortQuest);
+                UnlockRouteContainers();
                 return;
             }
 
@@ -133,37 +141,107 @@ namespace SimpleSurvival.AI
         {
             if (escortQuest == null) return;
 
-            string pointId = null;
+            List<string> waypointIds = null;
             foreach (var objective in escortQuest.Objectives)
             {
                 if (objective.type == QuestObjectiveType.EscortNPC)
                 {
-                    pointId = objective.escortPointId;
+                    waypointIds = objective.escortWaypointIds;
                     break;
                 }
             }
 
-            EscortPoint point = EscortPoint.Find(pointId);
-            if (point == null)
+            _route.Clear();
+            if (waypointIds != null)
             {
-                Debug.LogError($"[NPCEmilyController] Không tìm thấy EscortPoint id '{pointId}'", this);
-                return;
+                foreach (var pointId in waypointIds)
+                {
+                    EscortPoint point = EscortPoint.Find(pointId);
+                    if (point == null)
+                    {
+                        Debug.LogError($"[NPCEmilyController] Không tìm thấy EscortPoint id '{pointId}'", this);
+                        continue;
+                    }
+                    _route.Add(point);
+                }
             }
 
+            if (_route.Count == 0) return;
+
             IsEscorting = true;
-            movement?.BeginMoveTo(point.Position);
+            _routeIndex = 0;
+            movement?.BeginMoveTo(_route[_routeIndex].Position);
             enemyDirector?.BeginEncounter(transform);
+        }
+
+        private void UnlockRouteContainers()
+        {
+            if (escortQuest == null) return;
+
+            foreach (var objective in escortQuest.Objectives)
+            {
+                if (objective.type != QuestObjectiveType.EscortNPC) continue;
+
+                foreach (var pointId in objective.escortWaypointIds)
+                {
+                    EscortPoint point = EscortPoint.Find(pointId);
+                    point?.LootContainer?.SetLocked(false);
+                }
+            }
         }
 
         private void Update()
         {
-            if (!IsEscorting) return;
+            if (!IsEscorting || _waitingLootContainer != null) return;
             if (movement == null || !movement.HasArrived) return;
 
-            IsEscorting = false;
-            enemyDirector?.StopEncounter();
-            QuestManager.Instance?.NotifyEscortArrived(escortQuest);
-            ShowDialogue(escortDoneDialogue);
+            EscortPoint arrivedPoint = _route[_routeIndex];
+
+            if (arrivedPoint.LootContainer != null && !arrivedPoint.LootContainer.IsEmpty)
+            {
+                _waitingLootContainer = arrivedPoint.LootContainer;
+                _waitingLootContainer.OnLooted += HandleLootContainerLooted;
+                return;
+            }
+
+            AdvanceRoute();
+        }
+
+        private void HandleLootContainerLooted(LootContainer container)
+        {
+            if (!container.IsEmpty) return;
+
+            container.OnLooted -= HandleLootContainerLooted;
+            _waitingLootContainer = null;
+
+            AdvanceRoute();
+        }
+
+        private void AdvanceRoute()
+        {
+            _routeIndex++;
+
+            if (_routeIndex >= _route.Count)
+            {
+                IsEscorting = false;
+                enemyDirector?.StopEncounter();
+                QuestManager.Instance?.NotifyEscortArrived(escortQuest);
+                ShowDialogue(escortDoneDialogue);
+                return;
+            }
+
+            movement?.BeginMoveTo(_route[_routeIndex].Position);
+        }
+
+        private void ResetRouteState()
+        {
+            if (_waitingLootContainer != null)
+            {
+                _waitingLootContainer.OnLooted -= HandleLootContainerLooted;
+                _waitingLootContainer = null;
+            }
+            _route.Clear();
+            _routeIndex = 0;
         }
 
         private void HandleDamaged(GameObject attacker)
@@ -257,13 +335,13 @@ namespace SimpleSurvival.AI
 
         private void HandleDeath(GameObject source)
         {
-            // Luôn dừng hẳn di chuyển + phản đòn khi Emily chết, bất kể đang hộ tống hay không
             ExitCombat();
             movement?.Stop();
 
             if (!IsEscorting) return;
 
             IsEscorting = false;
+            ResetRouteState();
             enemyDirector?.StopEncounter();
             QuestManager.Instance?.FailQuest(escortQuest);
         }
@@ -273,6 +351,7 @@ namespace SimpleSurvival.AI
             if (quest != escortQuest) return;
             IsEscorting = false;
             ExitCombat();
+            ResetRouteState();
             movement?.Stop();
             enemyDirector?.StopEncounter();
         }
