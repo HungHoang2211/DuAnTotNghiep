@@ -4,7 +4,9 @@ namespace SimpleSurvival.Building
 {
     public sealed class PlacedStructureView : MonoBehaviour
     {
-        [SerializeField] private Renderer[] renderers;
+        [SerializeField] private Transform rotatorTransform;
+        [SerializeField] private GameObject selectorRoot;
+        [SerializeField] private Renderer[] previewRenderers;
 
         private Material[] originalMaterials;
 
@@ -18,12 +20,14 @@ namespace SimpleSurvival.Building
             Coords = coords;
             RotationIndex = rotationIndex;
 
-            if (renderers == null || renderers.Length == 0)
-                renderers = GetComponentsInChildren<Renderer>();
+            if (previewRenderers == null || previewRenderers.Length == 0)
+                previewRenderers = rotatorTransform.GetComponentsInChildren<Renderer>();
 
-            originalMaterials = new Material[renderers.Length];
-            for (int i = 0; i < renderers.Length; i++)
-                originalMaterials[i] = renderers[i].sharedMaterial;
+            originalMaterials = new Material[previewRenderers.Length];
+            for (int i = 0; i < previewRenderers.Length; i++)
+                originalMaterials[i] = previewRenderers[i].sharedMaterial;
+
+            SetSelected(false);
         }
 
         public void SetCoords(BuildCellCoords coords)
@@ -36,16 +40,28 @@ namespace SimpleSurvival.Building
             RotationIndex = rotationIndex;
         }
 
+        public void SetWorldTransform(Vector3 position, Quaternion rotation)
+        {
+            transform.position = position;
+            rotatorTransform.rotation = rotation;
+        }
+
+        public void SetSelected(bool selected)
+        {
+            if (selectorRoot != null)
+                selectorRoot.SetActive(selected);
+        }
+
         public void SetPreviewMaterial(Material material)
         {
-            foreach (Renderer renderer in renderers)
+            foreach (Renderer renderer in previewRenderers)
                 renderer.sharedMaterial = material;
         }
 
         public void ClearPreviewMaterial()
         {
-            for (int i = 0; i < renderers.Length; i++)
-                renderers[i].sharedMaterial = originalMaterials[i];
+            for (int i = 0; i < previewRenderers.Length; i++)
+                previewRenderers[i].sharedMaterial = originalMaterials[i];
         }
     }
 }
