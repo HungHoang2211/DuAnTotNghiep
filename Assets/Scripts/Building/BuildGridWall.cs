@@ -33,7 +33,27 @@ namespace SimpleSurvival.Building
             return Quaternion.Euler(0f, yaw, 0f);
         }
 
-        public bool CheckAvailable(BuildCellCoords coords, BuildCellCoords? ignoreCoords = null)
+        public override BuildCellCoords GetGridCellCoords(Vector3 worldPosition)
+        {
+            BuildCellCoords floorCoords = floorGrid.GetGridCellCoords(worldPosition);
+            BuildCellCoords best = GetWallCoords(floorCoords, 0);
+            float bestDistance = Vector3.Distance(worldPosition, GetGridCellPosition(best));
+
+            for (int side = 1; side < 4; side++)
+            {
+                BuildCellCoords candidate = GetWallCoords(floorCoords, side);
+                float distance = Vector3.Distance(worldPosition, GetGridCellPosition(candidate));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = candidate;
+                }
+            }
+
+            return best;
+        }
+
+        public override bool CheckAvailable(BuildCellCoords coords, BuildingData buildingData, BuildCellCoords? ignoreCoords = null)
         {
             if (!InBounds(coords)) return false;
             if (ignoreCoords.HasValue && Key(coords) == Key(ignoreCoords.Value)) return true;
@@ -41,7 +61,7 @@ namespace SimpleSurvival.Building
             return availableFromFloor.Contains(Key(coords));
         }
 
-        private BuildCellCoords GetWallCoords(BuildCellCoords floorCoords, int side)
+        public BuildCellCoords GetWallCoords(BuildCellCoords floorCoords, int side)
         {
             switch (side)
             {

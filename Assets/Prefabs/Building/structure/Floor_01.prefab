@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4220653531496868}
   - component: {fileID: 64841364053301648}
-  m_Layer: 14
+  m_Layer: 7
   m_Name: FloorCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -300,6 +300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4900271049623953}
   - component: {fileID: 65472185465350827}
+  - component: {fileID: 4613485842687765070}
   m_Layer: 25
   m_Name: SelectorCollider
   m_TagString: Untagged
@@ -343,6 +344,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.2, y: 0.2, z: 2.2}
   m_Center: {x: 0, y: 0.1, z: 0}
+--- !u!114 &4613485842687765070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1372920208702427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39515d9c80427a84680db26fe42da2d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  owner: {fileID: 5241640435511662135}
 --- !u!1 &1587765826080250
 GameObject:
   m_ObjectHideFlags: 0
@@ -591,6 +605,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4705390221481576}
+  - component: {fileID: 5241640435511662135}
   m_Layer: 0
   m_Name: Floor_01
   m_TagString: Untagged
@@ -615,6 +630,21 @@ Transform:
   - {fileID: 4967328832014496}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
+--- !u!114 &5241640435511662135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709254077376921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92afcbbdfd2208d43aa65c0f14b04948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotatorTransform: {fileID: 4256069497284392}
+  selectorRoot: {fileID: 1703437598541787}
+  previewRenderers: []
 --- !u!1 &1709867586078768
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,7 +742,7 @@ GameObject:
   - component: {fileID: 4002669891404536}
   - component: {fileID: 33470112387431263}
   - component: {fileID: 23313026266067498}
-  m_Layer: 31
+  m_Layer: 0
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

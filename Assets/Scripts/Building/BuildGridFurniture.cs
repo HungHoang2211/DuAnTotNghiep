@@ -28,14 +28,21 @@ namespace SimpleSurvival.Building
             return Quaternion.identity;
         }
 
-        public bool CheckAvailable(BuildCellCoords coords, FloorRequirement requirement, BuildCellCoords? ignoreCoords = null)
+        public override BuildCellCoords GetGridCellCoords(Vector3 worldPosition)
+        {
+            int x = Mathf.RoundToInt(worldPosition.x / CellSize + GridSizeX / 2f - 0.5f);
+            int z = Mathf.RoundToInt(worldPosition.z / CellSize + GridSizeZ / 2f - 0.5f);
+            return new BuildCellCoords(x, z);
+        }
+
+        public override bool CheckAvailable(BuildCellCoords coords, BuildingData buildingData, BuildCellCoords? ignoreCoords = null)
         {
             if (!InBounds(coords)) return false;
             if (ignoreCoords.HasValue && Key(coords) == Key(ignoreCoords.Value)) return true;
             if (ContainsElement(coords)) return false;
 
             bool hasFloor = floorGrid.ContainsElement(coords);
-            return requirement == FloorRequirement.RequiresFloor ? hasFloor : !hasFloor;
+            return buildingData.FloorRequirement == FloorRequirement.RequiresFloor ? hasFloor : !hasFloor;
         }
     }
 }

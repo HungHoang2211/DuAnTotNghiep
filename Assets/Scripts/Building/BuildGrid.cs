@@ -16,6 +16,8 @@ namespace SimpleSurvival.Building
 
         public abstract Vector3 GetGridCellPosition(BuildCellCoords coords);
         public abstract Quaternion GetGridCellRotation(BuildCellCoords coords);
+        public abstract BuildCellCoords GetGridCellCoords(Vector3 worldPosition);
+        public abstract bool CheckAvailable(BuildCellCoords coords, BuildingData buildingData, BuildCellCoords? ignoreCoords = null);
 
         public int Key(BuildCellCoords coords)
         {
