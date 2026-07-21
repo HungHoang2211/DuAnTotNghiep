@@ -14,6 +14,8 @@ namespace SimpleSurvival.Player
     [RequireComponent(typeof(CharacterController))]
     public class PlayerActionController : MonoBehaviour
     {
+        public static PlayerActionController Instance { get; private set; }
+
         [SerializeField] private MoveActionConfig moveConfig = new MoveActionConfig();
 
         [Header("Combat References")]
@@ -25,6 +27,9 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerAnimator playerAnimator;
         [SerializeField] private PlayerTargetChecker targetChecker;
 
+        [Header("Pet References")]
+        [SerializeField] private Transform dogFollowPoint;
+
         [Header("Combat Defaults (Unarmed)")]
         [SerializeField] private float unarmedAttackRange = 1.5f;
         [SerializeField] private int unarmedMaxComboIndex = 3;
@@ -34,7 +39,6 @@ namespace SimpleSurvival.Player
         [SerializeField] private float unarmedAttackClipLength = 0.5f;
 
         [Header("Sneak Attack")]
-        [Tooltip("Hệ số nhân damage khi tấn công cận chiến (tay không hoặc vũ khí melee) lúc đang sneak. Không áp dụng cho vũ khí tầm xa.")]
         [SerializeField] private float sneakAttackDamageMultiplier = 2f;
 
         [Header("Action Ranges")]
@@ -54,6 +58,11 @@ namespace SimpleSurvival.Player
         public bool IsAttackHeld { get; private set; }
         public bool AttackInputQueued { get; private set; }
 
+        public PlayerStats PlayerStats => playerStats;
+        public PlayerTargetChecker TargetChecker => targetChecker;
+        public SimpleSurvival.Input.PlayerInputReader InputReader => _inputReader;
+        public Transform DogFollowPoint => dogFollowPoint;
+
         public void ConsumeAttackQueue()
         {
             AttackInputQueued = false;
@@ -66,6 +75,13 @@ namespace SimpleSurvival.Player
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
             Controller = GetComponent<CharacterController>();
             PlayerTransform = transform;
 
@@ -101,6 +117,8 @@ namespace SimpleSurvival.Player
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
+
             if (playerStats != null)
             {
                 playerStats.OnDamagedBy -= HandlePlayerDamaged;

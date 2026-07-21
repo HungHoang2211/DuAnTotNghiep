@@ -78,6 +78,7 @@ namespace SimpleSurvival.Pets
             _characterController = GetComponent<CharacterController>();
 
             if (mapLoader == null) mapLoader = SimpleSurvival.World.MapLoader.Instance;
+            ResolvePlayerReferences();
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
@@ -86,9 +87,24 @@ namespace SimpleSurvival.Pets
             _agent.nextPosition = transform.position;
             _lastStuckCheckPos = transform.position;
             _scratchPath = new NavMeshPath();
+
+            InitializeQuestState();
         }
 
-        private void Start()
+        private void ResolvePlayerReferences()
+        {
+            if (playerActionController == null)
+                playerActionController = PlayerActionController.Instance;
+
+            if (playerActionController == null) return;
+
+            if (playerInputReader == null) playerInputReader = playerActionController.InputReader;
+            if (targetChecker == null) targetChecker = playerActionController.TargetChecker;
+            if (playerStats == null) playerStats = playerActionController.PlayerStats;
+            if (followPoint == null) followPoint = playerActionController.DogFollowPoint;
+        }
+
+        private void InitializeQuestState()
         {
             if (unlockQuest == null) return;
 
@@ -104,7 +120,13 @@ namespace SimpleSurvival.Pets
                 _state = DogState.Waiting;
                 if (dogAnimator != null) dogAnimator.SetLying(true);
             }
+        }
 
+        private void Start()
+        {
+            if (unlockQuest == null) return;
+
+            var manager = QuestManager.Instance;
             if (manager != null) manager.OnQuestCompleted += HandleQuestCompleted;
         }
 
@@ -156,6 +178,7 @@ namespace SimpleSurvival.Pets
         private void HandlePlayerRepositioned()
         {
             if (playerActionController == null) return;
+            if (_state == DogState.Waiting || _state == DogState.StandingUp || _state == DogState.SentHome) return;
 
             Vector3 targetPos = playerActionController.PlayerTransform.position;
 
