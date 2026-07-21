@@ -1036,6 +1036,7 @@ MonoBehaviour:
   pulseSpeed: 0
   pulseAmount: 0.15
   heightOffset: 0.02
+  enemyBlockPadding: 1
 --- !u!65 &1031662629
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1376,6 +1377,70 @@ Transform:
   m_Children: []
   m_Father: {fileID: 265472216}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1480631133
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1480631135}
+  - component: {fileID: 1480631134}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1480631134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480631133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 7abb92c1795ab8e419430a0c04c2dd04, type: 2}
+  m_BuildHeightMesh: 0
+--- !u!4 &1480631135
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480631133}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.646562, y: -2.02871, z: -5.1276608}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1492183585
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1507,6 +1572,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: StoneCliff
       objectReference: {fileID: 0}
+    - target: {fileID: 5350391880771916766, guid: bca8bba3344d8424f8c179a25f6f8f8a, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 6729842471133435700, guid: bca8bba3344d8424f8c179a25f6f8f8a, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -1514,48 +1583,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5350391880771916766, guid: bca8bba3344d8424f8c179a25f6f8f8a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1650176291}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bca8bba3344d8424f8c179a25f6f8f8a, type: 3}
---- !u!1 &1650176290 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5350391880771916766, guid: bca8bba3344d8424f8c179a25f6f8f8a, type: 3}
-  m_PrefabInstance: {fileID: 1650176289}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1650176291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1650176290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_AgentTypeID: 0
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: f235a7a068f0dd24ba1e8d0a953540c2, type: 2}
-  m_BuildHeightMesh: 0
 --- !u!1 &1763105041
 GameObject:
   m_ObjectHideFlags: 0
@@ -1607,6 +1636,7 @@ MonoBehaviour:
   pulseSpeed: 0
   pulseAmount: 0.15
   heightOffset: 0.02
+  enemyBlockPadding: 1
 --- !u!65 &1763105044
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1679,6 +1709,7 @@ MonoBehaviour:
   pulseSpeed: 0
   pulseAmount: 0.15
   heightOffset: 0.02
+  enemyBlockPadding: 1
 --- !u!65 &1782061261
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1751,6 +1782,7 @@ MonoBehaviour:
   pulseSpeed: 0
   pulseAmount: 0.15
   heightOffset: 0.02
+  enemyBlockPadding: 1
 --- !u!65 &1811550551
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2356,3 +2388,4 @@ SceneRoots:
   - {fileID: 2021524419}
   - {fileID: 620411477}
   - {fileID: 265472216}
+  - {fileID: 1480631135}
