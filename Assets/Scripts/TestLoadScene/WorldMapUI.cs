@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using SimpleSurvival.Quests;
 
 namespace SimpleSurvival.World
 {
@@ -37,7 +38,6 @@ namespace SimpleSurvival.World
 
         private void OnDisable()
         {
-            // Lưới an toàn: nếu object bị disable lúc đang pause (đổi scene, tắt UI...) thì trả timeScale lại
             Resume();
         }
 
@@ -55,8 +55,6 @@ namespace SimpleSurvival.World
         {
             panelRoot.SetActive(false);
 
-            // Nếu vừa chọn 1 điểm đến, giữ pause tới khi MapTransitionController báo xong,
-            // tránh player/enemy chạy trong lúc fade + load map.
             if (!waitingForTransition)
                 Resume();
         }
@@ -83,6 +81,9 @@ namespace SimpleSurvival.World
 
             foreach (MapDestination destination in destinations)
             {
+                if (!IsUnlocked(destination))
+                    continue;
+
                 WorldMapEntryButton entry = Instantiate(entryPrefab, entryContainer);
                 bool isCurrent = destination.SceneName == currentScene;
                 entry.Bind(destination, isCurrent, HandleDestinationSelected);
@@ -91,6 +92,27 @@ namespace SimpleSurvival.World
                 entryRect.anchoredPosition = destination.MapPosition;
 
                 spawnedEntries.Add(entry);
+            }
+        }
+
+        private bool IsUnlocked(MapDestination destination)
+        {
+            QuestManager manager = QuestManager.Instance;
+
+            if (manager != null && manager.IsMapPermanentlyLocked(destination.SceneName))
+                return false;
+
+            switch (destination.UnlockCondition)
+            {
+                case MapUnlockCondition.None:
+                    return true;
+                case MapUnlockCondition.OnQuestAccepted:
+                    return manager != null &&
+                        (manager.IsQuestActive(destination.UnlockQuest) || manager.IsQuestCompleted(destination.UnlockQuest));
+                case MapUnlockCondition.OnQuestCompleted:
+                    return manager != null && manager.IsQuestCompleted(destination.UnlockQuest);
+                default:
+                    return true;
             }
         }
 

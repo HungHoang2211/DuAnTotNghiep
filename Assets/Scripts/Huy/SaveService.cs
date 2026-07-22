@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SimpleSurvival.Quests;
 using UnityEngine;
 
 namespace SimpleSurvival.SaveLoad
@@ -56,7 +57,10 @@ namespace SimpleSurvival.SaveLoad
                     : new List<CorpseData>(),
                 containers = ContainerSaveRegistry.Instance != null
                     ? ContainerSaveRegistry.Instance.Capture()
-                    : new List<ContainerData>()
+                    : new List<ContainerData>(),
+                world = QuestManager.Instance != null
+                    ? QuestManager.Instance.Capture()
+                    : new WorldData()
             };
 
             lastLoaded = save;
@@ -95,6 +99,7 @@ namespace SimpleSurvival.SaveLoad
 
             ApplyMeta(lastLoaded.meta);
             playerAgent.RestoreCrossScene(lastLoaded.player);
+            QuestManager.Instance?.Restore(lastLoaded.world);
             IsActive = true;
         }
 

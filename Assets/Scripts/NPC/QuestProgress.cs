@@ -21,6 +21,12 @@ namespace SimpleSurvival.Quests
             _currentAmounts[index] = Mathf.Min(_currentAmounts[index] + amount, required);
         }
 
+        public void SetAmount(int index, int amount)
+        {
+            int required = Quest.Objectives[index].requiredAmount;
+            _currentAmounts[index] = Mathf.Clamp(amount, 0, required);
+        }
+
         public bool IsObjectiveComplete(int index)
         {
             return _currentAmounts[index] >= Quest.Objectives[index].requiredAmount;
