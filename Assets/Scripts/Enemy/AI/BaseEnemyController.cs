@@ -93,7 +93,7 @@ namespace SimpleSurvival.AI
                 if (_playerDead) continue;
                 if (_state != EnemyState.Idle) continue;
 
-                Debug.Log($"[{name}] DetectionRoutine tick — checking vision/hearing");
+                //Debug.Log($"[{name}] DetectionRoutine tick — checking vision/hearing");
                 if (DetectByVision() || DetectByHearing())
                     OnPlayerDetected();
             }

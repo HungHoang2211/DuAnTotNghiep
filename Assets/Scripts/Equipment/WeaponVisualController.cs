@@ -66,10 +66,22 @@ namespace SimpleSurvival.Player
         {
             if (leftHandIK == null) return;
 
-            if (newAction is AttackAction)
-                leftHandIK.SetTargets(_attackTarget0, _attackTarget1);
-            else
-                leftHandIK.SetTargets(_moveTarget0, _moveTarget1);
+            switch (newAction.Type)
+            {
+                case ActionType.Attack:
+                case ActionType.Gather:
+                    leftHandIK.SetTargets(_attackTarget0, _attackTarget1);
+                    break;
+
+                case ActionType.Move:
+                case ActionType.Idle:
+                    leftHandIK.SetTargets(_moveTarget0, _moveTarget1);
+                    break;
+
+                default:
+                    leftHandIK.SetTargets(null, null);
+                    break;
+            }
         }
 
         private void Rebuild()
