@@ -27,5 +27,6 @@ namespace SimpleSurvival.SaveLoad
         public PlayerData player = new PlayerData();
         public List<CorpseData> corpses = new List<CorpseData>();
         public List<ContainerData> containers = new List<ContainerData>();
+        public WorldData world = new WorldData();
     }
 }

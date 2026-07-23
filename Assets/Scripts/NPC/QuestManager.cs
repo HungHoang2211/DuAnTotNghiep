@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
 using SimpleSurvival.Player;
+using SimpleSurvival.SaveLoad;
 using SimpleSurvival.Stats;
 using SimpleSurvival.UI.Hud;
 
@@ -13,9 +14,13 @@ namespace SimpleSurvival.Quests
         public static QuestManager Instance { get; private set; }
 
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
+        [SerializeField] private QuestDatabase questDatabase;
 
         private readonly Dictionary<QuestData, QuestProgress> _activeQuests = new Dictionary<QuestData, QuestProgress>();
         private readonly HashSet<QuestData> _completedQuests = new HashSet<QuestData>();
+        private readonly HashSet<string> _permanentlyLockedMaps = new HashSet<string>();
+
+        public bool StoryCompleted { get; private set; }
 
         public event Action<QuestData> OnQuestStarted;
         public event Action<QuestData, int> OnObjectiveProgress;
@@ -56,6 +61,14 @@ namespace SimpleSurvival.Quests
             return _activeQuests.TryGetValue(quest, out QuestProgress progress) ? progress.GetAmount(objectiveIndex) : 0;
         }
 
+        public bool IsMapPermanentlyLocked(string mapId) => !string.IsNullOrEmpty(mapId) && _permanentlyLockedMaps.Contains(mapId);
+
+        public void LockMapPermanently(string mapId)
+        {
+            if (string.IsNullOrEmpty(mapId)) return;
+            _permanentlyLockedMaps.Add(mapId);
+        }
+
         public void StartQuest(QuestData quest)
         {
             if (quest == null) return;
@@ -76,6 +89,14 @@ namespace SimpleSurvival.Quests
 
             _activeQuests.Remove(quest);
             _completedQuests.Add(quest);
+
+            if (quest.MarksStoryComplete)
+            {
+                StoryCompleted = true;
+                foreach (string mapId in quest.MapsToLockOnComplete)
+                    _permanentlyLockedMaps.Add(mapId);
+            }
+
             OnQuestCompleted?.Invoke(quest);
         }
 
@@ -210,6 +231,77 @@ namespace SimpleSurvival.Quests
 
             if (progress.IsAllComplete())
                 CompleteQuest(quest);
+        }
+
+        public WorldData Capture()
+        {
+            WorldData data = new WorldData
+            {
+                storyCompleted = StoryCompleted,
+                permanentlyLockedMapIds = new List<string>(_permanentlyLockedMaps)
+            };
+
+            foreach (QuestData quest in _completedQuests)
+            {
+                if (string.IsNullOrWhiteSpace(quest.QuestId)) continue;
+                data.completedQuestIds.Add(quest.QuestId);
+            }
+
+            foreach (var kvp in _activeQuests)
+            {
+                QuestData quest = kvp.Key;
+                if (string.IsNullOrWhiteSpace(quest.QuestId)) continue;
+
+                QuestProgress progress = kvp.Value;
+                ActiveQuestData activeData = new ActiveQuestData { questId = quest.QuestId };
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                    activeData.objectiveProgress.Add(progress.GetAmount(i));
+
+                data.activeQuests.Add(activeData);
+            }
+
+            return data;
+        }
+
+        public void Restore(WorldData data)
+        {
+            _activeQuests.Clear();
+            _completedQuests.Clear();
+            _permanentlyLockedMaps.Clear();
+            StoryCompleted = false;
+
+            if (data == null || questDatabase == null)
+                return;
+
+            StoryCompleted = data.storyCompleted;
+
+            if (data.permanentlyLockedMapIds != null)
+                foreach (string mapId in data.permanentlyLockedMapIds)
+                    _permanentlyLockedMaps.Add(mapId);
+
+            if (data.completedQuestIds != null)
+            {
+                foreach (string questId in data.completedQuestIds)
+                {
+                    if (questDatabase.TryGet(questId, out QuestData quest))
+                        _completedQuests.Add(quest);
+                }
+            }
+
+            if (data.activeQuests != null)
+            {
+                foreach (ActiveQuestData activeData in data.activeQuests)
+                {
+                    if (!questDatabase.TryGet(activeData.questId, out QuestData quest))
+                        continue;
+
+                    QuestProgress progress = new QuestProgress(quest);
+                    for (int i = 0; i < activeData.objectiveProgress.Count && i < quest.Objectives.Count; i++)
+                        progress.SetAmount(i, activeData.objectiveProgress[i]);
+
+                    _activeQuests[quest] = progress;
+                }
+            }
         }
     }
 }
