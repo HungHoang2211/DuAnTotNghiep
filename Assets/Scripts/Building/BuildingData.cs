@@ -38,6 +38,8 @@ namespace SimpleSurvival.Building
         [SerializeField] private List<Ingredient> directCost = new List<Ingredient>();
 
         [Header("Upgrade")]
+        [Tooltip("0 = tier thấp nhất. Dùng để so sánh Wall có được nâng vượt Floor không.")]
+        [SerializeField] private int tierIndex;
         [SerializeField] private BuildingData nextTier;
 
         public string BuildingId => buildingId;
@@ -50,6 +52,7 @@ namespace SimpleSurvival.Building
         public int FootprintSizeZ => footprintSizeZ;
         public FloorRequirement FloorRequirement => floorRequirement;
         public IReadOnlyList<Ingredient> DirectCost => directCost;
+        public int TierIndex => tierIndex;
         public BuildingData NextTier => nextTier;
 
         private void OnValidate()
@@ -59,6 +62,7 @@ namespace SimpleSurvival.Building
 
             if (footprintSizeX < 1) footprintSizeX = 1;
             if (footprintSizeZ < 1) footprintSizeZ = 1;
+            if (tierIndex < 0) tierIndex = 0;
         }
     }
 }
