@@ -33,12 +33,14 @@ namespace SimpleSurvival.Building
         [Header("Build Mode Root")]
         [SerializeField] private GameObject buildModeRoot;
         [SerializeField] private CanvasGroup mainHudCanvasGroup;
+        [SerializeField] private BuildMenuController buildMenuController;
 
         [Header("Action Buttons")]
         [SerializeField] private RectTransform actionButtonsRoot;
         [SerializeField] private RectTransform canvasRect;
         [SerializeField] private Camera uiCamera;
         [SerializeField] private List<BuildActionButtonUi> actionButtons;
+        [SerializeField] private BuildUpgradeCostUi upgradeCostUi;
 
         private BuildGridFloor floorGrid;
         private BuildGridWall wallGrid;
@@ -90,6 +92,8 @@ namespace SimpleSurvival.Building
             mainHudCanvasGroup.alpha = 0f;
             mainHudCanvasGroup.interactable = false;
             mainHudCanvasGroup.blocksRaycasts = false;
+
+            buildMenuController.Populate(buildingDatabase.Buildings, StartPlacement);
         }
 
         public void ExitBuildMode()
@@ -98,6 +102,7 @@ namespace SimpleSurvival.Building
 
             CancelPlacement();
             DeselectStructure();
+            buildMenuController.ClearSelection();
 
             isBuildModeActive = false;
             buildModeRoot.SetActive(false);
@@ -196,6 +201,27 @@ namespace SimpleSurvival.Building
 
             BuildingData nextTier = selectedStructure.BuildingData.NextTier;
             if (nextTier == null) return;
+
+            if (selectedStructure.BuildingData.StructureType == StructureType.Wall)
+            {
+                bool hasQualifyingFloor = false;
+                foreach (BuildCellCoords floorCoords in wallGrid.GetAdjacentFloorCoords(selectedStructure.Coords))
+                {
+                    PlacedStructureView floor = floorGrid.GetElement(floorCoords);
+                    if (floor != null && floor.BuildingData.TierIndex >= nextTier.TierIndex)
+                    {
+                        hasQualifyingFloor = true;
+                        break;
+                    }
+                }
+
+                if (!hasQualifyingFloor)
+                {
+                    Debug.LogWarning("Cần nâng cấp Sàn trước khi nâng cấp Tường tại đây.");
+                    return;
+                }
+            }
+
             if (!HasEnoughCost(nextTier)) return;
 
             ConsumeCost(nextTier);
@@ -217,10 +243,7 @@ namespace SimpleSurvival.Building
             selectedStructure = upgraded;
             selectedStructure.SetSelected(true);
 
-            if (upgraded.BuildingData.NextTier != null)
-                ShowActionButtons(BuildAction.Destroy, BuildAction.Upgrade);
-            else
-                ShowActionButtons(BuildAction.Destroy);
+            RefreshSelectionButtons();
         }
 
         private void HandleTap(Vector2 screenPosition)
@@ -270,11 +293,7 @@ namespace SimpleSurvival.Building
             selectedGrid = GetGrid(structure.BuildingData.StructureType);
             selectedStructure.SetSelected(true);
 
-            if (structure.BuildingData.NextTier != null)
-                ShowActionButtons(BuildAction.Destroy, BuildAction.Upgrade);
-            else
-                ShowActionButtons(BuildAction.Destroy);
-
+            RefreshSelectionButtons();
             FollowWorldPosition(selectedStructure.transform.position);
         }
 
@@ -285,7 +304,22 @@ namespace SimpleSurvival.Building
             selectedStructure.SetSelected(false);
             selectedStructure = null;
             selectedGrid = null;
+            upgradeCostUi.Hide();
             HideActionButtons();
+        }
+
+        private void RefreshSelectionButtons()
+        {
+            if (selectedStructure.BuildingData.NextTier != null)
+            {
+                ShowActionButtons(BuildAction.Destroy, BuildAction.Upgrade);
+                upgradeCostUi.Show(selectedStructure.BuildingData.NextTier, inventoryQueries);
+            }
+            else
+            {
+                ShowActionButtons(BuildAction.Destroy);
+                upgradeCostUi.Hide();
+            }
         }
 
         private void HandleActionButtonClicked(BuildAction action)

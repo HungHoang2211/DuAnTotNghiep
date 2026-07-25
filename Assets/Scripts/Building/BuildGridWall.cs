@@ -72,6 +72,24 @@ namespace SimpleSurvival.Building
             }
         }
 
+        public IEnumerable<BuildCellCoords> GetAdjacentFloorCoords(BuildCellCoords wallCoords)
+        {
+            bool runsAlongX = wallCoords.X % 2 == 1;
+
+            if (runsAlongX)
+            {
+                int floorX = (wallCoords.X - 1) / 2;
+                yield return new BuildCellCoords(floorX, wallCoords.Z / 2);
+                yield return new BuildCellCoords(floorX, wallCoords.Z / 2 - 1);
+            }
+            else
+            {
+                int floorZ = (wallCoords.Z - 1) / 2;
+                yield return new BuildCellCoords(wallCoords.X / 2, floorZ);
+                yield return new BuildCellCoords(wallCoords.X / 2 - 1, floorZ);
+            }
+        }
+
         private void RebuildAvailableFromFloor()
         {
             availableFromFloor.Clear();
