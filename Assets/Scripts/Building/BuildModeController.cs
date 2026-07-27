@@ -1,15 +1,21 @@
 ﻿using System.Collections.Generic;
+using SimpleSurvival.Cameras;
 using SimpleSurvival.Items;
 using SimpleSurvival.SaveLoad;
 using SimpleSurvival.World;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace SimpleSurvival.Building
 {
     public sealed class BuildModeController : MonoBehaviour
     {
         public static BuildModeController Instance { get; private set; }
+
+        [Header("Entry Points")]
+        [SerializeField] private Button openBuildModeButton;
+        [SerializeField] private Button closeBuildModeButton;
 
         [Header("Grid Settings")]
         [SerializeField] private int cellSize = 2;
@@ -41,8 +47,13 @@ namespace SimpleSurvival.Building
         [SerializeField] private List<BuildActionButtonUi> actionButtons;
         [SerializeField] private BuildUpgradeCostUi upgradeCostUi;
 
+        [Header("Camera")]
+        [SerializeField] private CameraRigController cameraRig;
+        [SerializeField] private Transform playerTransform;
+
         private Transform floorParent;
         private Transform wallParent;
+        private Renderer gridOverlayRenderer;
 
         private BuildGridFloor floorGrid;
         private BuildGridWall wallGrid;
@@ -73,12 +84,16 @@ namespace SimpleSurvival.Building
 
             RebuildGrids();
 
+            if (openBuildModeButton != null) openBuildModeButton.onClick.AddListener(EnterBuildMode);
+            if (closeBuildModeButton != null) closeBuildModeButton.onClick.AddListener(ExitBuildMode);
+
             foreach (BuildActionButtonUi actionButton in actionButtons)
             {
                 BuildAction action = actionButton.Action;
                 actionButton.Button.onClick.AddListener(() => HandleActionButtonClicked(action));
             }
 
+            buildModeRoot.SetActive(false);
             HideActionButtons();
         }
 
@@ -118,6 +133,17 @@ namespace SimpleSurvival.Building
             mainHudCanvasGroup.interactable = false;
             mainHudCanvasGroup.blocksRaycasts = false;
 
+            if (cameraRig != null)
+            {
+                cameraRig.SetBuildMode(true);
+                if (playerTransform != null)
+                {
+                    cameraRig.SetTarget(playerTransform, true);
+                    cameraRig.ClearTarget();
+                }
+            }
+            if (gridOverlayRenderer != null) gridOverlayRenderer.enabled = true;
+
             buildMenuController.Populate(buildingDatabase.Buildings, StartPlacement);
         }
 
@@ -134,6 +160,13 @@ namespace SimpleSurvival.Building
             mainHudCanvasGroup.alpha = 1f;
             mainHudCanvasGroup.interactable = true;
             mainHudCanvasGroup.blocksRaycasts = true;
+
+            if (cameraRig != null)
+            {
+                cameraRig.SetBuildMode(false);
+                if (playerTransform != null) cameraRig.SetTarget(playerTransform, false);
+            }
+            if (gridOverlayRenderer != null) gridOverlayRenderer.enabled = false;
         }
 
         public void StartPlacement(BuildingData data)
@@ -157,16 +190,30 @@ namespace SimpleSurvival.Building
             currentDraft.Init(data, startCoords, 0);
             MoveDraftTo(currentDraftGrid.GetGridCellPosition(startCoords));
 
+            if (cameraRig != null) cameraRig.SetTarget(currentDraft.transform, false);
+
             ShowActionButtons(BuildAction.Confirm, BuildAction.Cancel);
         }
 
         public void ConfirmPlacement()
         {
-            if (currentDraft == null) return;
+            if (currentDraft == null)
+            {
+                Debug.LogWarning("[Build] ConfirmPlacement gọi nhưng không có draft nào đang active.");
+                return;
+            }
 
             BuildCellCoords coords = currentDraft.Coords;
-            if (!currentDraftGrid.CheckAvailable(coords, currentBuildingData)) return;
-            if (!HasEnoughCost(currentBuildingData)) return;
+            if (!currentDraftGrid.CheckAvailable(coords, currentBuildingData))
+            {
+                Debug.LogWarning($"[Build] Vị trí ({coords.X},{coords.Z}) không hợp lệ để đặt {currentBuildingData.DisplayName}.");
+                return;
+            }
+            if (!HasEnoughCost(currentBuildingData))
+            {
+                Debug.LogWarning($"[Build] Không đủ nguyên liệu để đặt {currentBuildingData.DisplayName}.");
+                return;
+            }
 
             ConsumeCost(currentBuildingData);
 
@@ -180,6 +227,7 @@ namespace SimpleSurvival.Building
             currentDraftGrid = null;
             HideActionButtons();
 
+            Debug.Log($"[Build] Đã đặt {placedData.DisplayName} tại ({coords.X},{coords.Z}).");
             StartPlacement(placedData);
         }
 
@@ -192,6 +240,8 @@ namespace SimpleSurvival.Building
             currentBuildingData = null;
             currentDraftGrid = null;
             HideActionButtons();
+
+            if (cameraRig != null) cameraRig.ClearTarget();
         }
 
         public void DestroySelected()
@@ -318,6 +368,7 @@ namespace SimpleSurvival.Building
 
             floorParent = anchor.FloorParent;
             wallParent = anchor.WallParent;
+            gridOverlayRenderer = anchor.GridOverlayRenderer;
         }
 
         private BaseMapSaveData CaptureLiveGrid()
@@ -440,6 +491,8 @@ namespace SimpleSurvival.Building
             selectedGrid = GetGrid(structure.BuildingData.StructureType);
             selectedStructure.SetSelected(true);
 
+            if (cameraRig != null) cameraRig.SetTarget(selectedStructure.transform, false);
+
             RefreshSelectionButtons();
             FollowWorldPosition(selectedStructure.transform.position);
         }
@@ -453,6 +506,8 @@ namespace SimpleSurvival.Building
             selectedGrid = null;
             upgradeCostUi.Hide();
             HideActionButtons();
+
+            if (cameraRig != null) cameraRig.ClearTarget();
         }
 
         private void RefreshSelectionButtons()

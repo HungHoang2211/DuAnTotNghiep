@@ -6,8 +6,10 @@ namespace SimpleSurvival.Building
     {
         [SerializeField] private Transform floorParent;
         [SerializeField] private Transform wallParent;
+        [SerializeField] private Renderer gridOverlayRenderer;
 
         public Transform FloorParent => floorParent;
         public Transform WallParent => wallParent;
+        public Renderer GridOverlayRenderer => gridOverlayRenderer;
     }
 }

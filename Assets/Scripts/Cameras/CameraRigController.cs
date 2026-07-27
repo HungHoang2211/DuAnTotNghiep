@@ -12,6 +12,14 @@ namespace SimpleSurvival.Cameras
         [SerializeField] private float rigHeight = 0.75f;
         [SerializeField] private float snapDistance = 5f;
 
+        [Header("Pitch & Distance")]
+        [SerializeField] private Transform cameraTransform;
+        [SerializeField] private float normalPitchAngle = 55f;
+        [SerializeField] private float normalCameraDistance = 25f;
+        [SerializeField] private float buildPitchAngle = 65f;
+        [SerializeField] private float buildCameraDistance = 35f;
+        [SerializeField] private float pitchDistanceLerpSpeed = 5f;
+
         [Header("Debug Info")]
         [SerializeField] private float yawAngle = 45f;
 
@@ -19,11 +27,21 @@ namespace SimpleSurvival.Cameras
         public bool HasTarget => target != null;
 
         private Vector3 _followVelocity = Vector3.zero;
+        private float _targetPitchAngle;
+        private float _targetCameraDistance;
+
+        private void Awake()
+        {
+            _targetPitchAngle = normalPitchAngle;
+            _targetCameraDistance = normalCameraDistance;
+        }
 
         private void LateUpdate()
         {
-            if (target == null) return;
-            FollowTarget();
+            if (target != null)
+                FollowTarget();
+
+            UpdatePitchAndDistance();
         }
 
         private void FollowTarget()
@@ -49,6 +67,25 @@ namespace SimpleSurvival.Cameras
             }
         }
 
+        private void UpdatePitchAndDistance()
+        {
+            float currentPitch = transform.eulerAngles.x;
+            float newPitch = Mathf.LerpAngle(currentPitch, _targetPitchAngle, pitchDistanceLerpSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Euler(newPitch, yawAngle, 0f);
+
+            if (cameraTransform == null) return;
+
+            Vector3 localPos = cameraTransform.localPosition;
+            localPos.z = Mathf.Lerp(localPos.z, -_targetCameraDistance, pitchDistanceLerpSpeed * Time.deltaTime);
+            cameraTransform.localPosition = localPos;
+        }
+
+        public void SetBuildMode(bool isBuildMode)
+        {
+            _targetPitchAngle = isBuildMode ? buildPitchAngle : normalPitchAngle;
+            _targetCameraDistance = isBuildMode ? buildCameraDistance : normalCameraDistance;
+        }
+
         public void Snap()
         {
             if (target == null) return;
@@ -61,6 +98,22 @@ namespace SimpleSurvival.Cameras
         {
             target = newTarget;
             if (snapImmediately) Snap();
+        }
+
+        public void ClearTarget()
+        {
+            target = null;
+        }
+
+        public void SetFreePosition(Vector3 worldPosition)
+        {
+            if (target != null) return;
+            transform.position = worldPosition;
+        }
+
+        public void AdjustFreeDistance(float delta, float min, float max)
+        {
+            _targetCameraDistance = Mathf.Clamp(_targetCameraDistance + delta, min, max);
         }
 
         private void OnValidate()
