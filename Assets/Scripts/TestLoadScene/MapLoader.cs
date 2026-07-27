@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using SimpleSurvival.Building;
 using SimpleSurvival.SaveLoad;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -46,6 +47,7 @@ namespace SimpleSurvival.World
             currentMapScene = mapScene;
 
             CorpseSaveRegistry.Instance?.RestoreForMap(mapScene);
+            BuildModeController.Instance?.RestoreForMap(mapScene);
 
             RepositionPlayerToSpawn();
             SaveService.Instance?.Save();

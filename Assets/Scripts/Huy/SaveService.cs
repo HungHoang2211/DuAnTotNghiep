@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SimpleSurvival.Building;
 using SimpleSurvival.Quests;
 using UnityEngine;
 
@@ -60,7 +61,10 @@ namespace SimpleSurvival.SaveLoad
                     : new List<ContainerData>(),
                 world = QuestManager.Instance != null
                     ? QuestManager.Instance.Capture()
-                    : new WorldData()
+                    : new WorldData(),
+                baseMap = BuildModeController.Instance != null 
+                    ? BuildModeController.Instance.Capture() 
+                    : new BaseMapSaveData()
             };
 
             lastLoaded = save;
@@ -123,6 +127,11 @@ namespace SimpleSurvival.SaveLoad
                 return null;
 
             return lastLoaded.containers.Find(c => c.containerId == containerId);
+        }
+
+        public BaseMapSaveData GetBaseMapData()
+        {
+            return lastLoaded?.baseMap;
         }
 
         public void DeleteSave()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using SimpleSurvival.Items;
+using SimpleSurvival.SaveLoad;
 using SimpleSurvival.World;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,14 +9,12 @@ namespace SimpleSurvival.Building
 {
     public sealed class BuildModeController : MonoBehaviour
     {
+        public static BuildModeController Instance { get; private set; }
+
         [Header("Grid Settings")]
         [SerializeField] private int cellSize = 2;
         [SerializeField] private int gridSizeX = 16;
         [SerializeField] private int gridSizeZ = 16;
-
-        [Header("Parents")]
-        [SerializeField] private Transform floorParent;
-        [SerializeField] private Transform wallParent;
 
         [Header("Raycast")]
         [SerializeField] private Camera raycastCamera;
@@ -42,6 +41,9 @@ namespace SimpleSurvival.Building
         [SerializeField] private List<BuildActionButtonUi> actionButtons;
         [SerializeField] private BuildUpgradeCostUi upgradeCostUi;
 
+        private Transform floorParent;
+        private Transform wallParent;
+
         private BuildGridFloor floorGrid;
         private BuildGridWall wallGrid;
         private BuildGridFurniture furnitureGrid;
@@ -55,13 +57,21 @@ namespace SimpleSurvival.Building
         private PlacedStructureView selectedStructure;
         private BuildGrid selectedGrid;
 
+        private BaseMapSaveData lastSnapshot;
+        private bool hasSeededFromSave;
+
         public BuildingDatabase BuildingDatabase => buildingDatabase;
 
         private void Awake()
         {
-            floorGrid = new BuildGridFloor(cellSize, gridSizeX, gridSizeZ);
-            wallGrid = new BuildGridWall(floorGrid);
-            furnitureGrid = new BuildGridFurniture(cellSize, gridSizeX, gridSizeZ, floorGrid);
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+
+            RebuildGrids();
 
             foreach (BuildActionButtonUi actionButton in actionButtons)
             {
@@ -70,6 +80,20 @@ namespace SimpleSurvival.Building
             }
 
             HideActionButtons();
+        }
+
+        private void Start()
+        {
+            if (MapTransitionController.Instance != null)
+                MapTransitionController.Instance.TransitionStarted += HandleTransitionStarted;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+
+            if (MapTransitionController.Instance != null)
+                MapTransitionController.Instance.TransitionStarted -= HandleTransitionStarted;
         }
 
         private void Update()
@@ -86,6 +110,7 @@ namespace SimpleSurvival.Building
             if (isBuildModeActive) return;
             if (MapLoader.Instance == null || MapTransitionController.Instance == null) return;
             if (MapLoader.Instance.CurrentMapScene != MapTransitionController.Instance.StartMapScene) return;
+            if (floorParent == null || wallParent == null) return;
 
             isBuildModeActive = true;
             buildModeRoot.SetActive(true);
@@ -244,6 +269,128 @@ namespace SimpleSurvival.Building
             selectedStructure.SetSelected(true);
 
             RefreshSelectionButtons();
+        }
+
+        public BaseMapSaveData Capture()
+        {
+            if (IsOnBaseMap())
+                lastSnapshot = CaptureLiveGrid();
+
+            return lastSnapshot ?? new BaseMapSaveData();
+        }
+
+        public void RestoreForMap(string mapId)
+        {
+            if (MapTransitionController.Instance == null) return;
+            if (mapId != MapTransitionController.Instance.StartMapScene) return;
+
+            RefreshContainerAnchor();
+
+            if (!hasSeededFromSave)
+            {
+                hasSeededFromSave = true;
+                lastSnapshot = SaveService.Instance != null ? SaveService.Instance.GetBaseMapData() : null;
+            }
+
+            RestoreLiveGrid(lastSnapshot);
+        }
+
+        private void HandleTransitionStarted()
+        {
+            if (IsOnBaseMap())
+                lastSnapshot = CaptureLiveGrid();
+        }
+
+        private bool IsOnBaseMap()
+        {
+            return MapLoader.Instance != null && MapTransitionController.Instance != null
+                && MapLoader.Instance.CurrentMapScene == MapTransitionController.Instance.StartMapScene;
+        }
+
+        private void RefreshContainerAnchor()
+        {
+            BuildContainerAnchor anchor = FindFirstObjectByType<BuildContainerAnchor>();
+            if (anchor == null)
+            {
+                Debug.LogWarning("Không tìm thấy BuildContainerAnchor trong BaseMap.");
+                return;
+            }
+
+            floorParent = anchor.FloorParent;
+            wallParent = anchor.WallParent;
+        }
+
+        private BaseMapSaveData CaptureLiveGrid()
+        {
+            BaseMapSaveData data = new BaseMapSaveData();
+
+            foreach (PlacedStructureView view in floorGrid.AllElements)
+                data.floors.Add(ToSaveData(view));
+
+            foreach (PlacedStructureView view in wallGrid.AllElements)
+                data.walls.Add(ToSaveData(view));
+
+            return data;
+        }
+
+        private void RestoreLiveGrid(BaseMapSaveData data)
+        {
+            ClearLiveGrid();
+
+            if (data == null) return;
+
+            foreach (PlacedStructureData structureData in data.floors)
+                SpawnFromSave(structureData, floorGrid);
+
+            foreach (PlacedStructureData structureData in data.walls)
+                SpawnFromSave(structureData, wallGrid);
+        }
+
+        private void ClearLiveGrid()
+        {
+            foreach (PlacedStructureView view in floorGrid.AllElements)
+                if (view != null) Destroy(view.gameObject);
+
+            foreach (PlacedStructureView view in wallGrid.AllElements)
+                if (view != null) Destroy(view.gameObject);
+
+            RebuildGrids();
+        }
+
+        private void RebuildGrids()
+        {
+            floorGrid = new BuildGridFloor(cellSize, gridSizeX, gridSizeZ);
+            wallGrid = new BuildGridWall(floorGrid);
+            furnitureGrid = new BuildGridFurniture(cellSize, gridSizeX, gridSizeZ, floorGrid);
+        }
+
+        private void SpawnFromSave(PlacedStructureData structureData, BuildGrid grid)
+        {
+            if (!buildingDatabase.TryGet(structureData.buildingId, out BuildingData data))
+            {
+                Debug.LogWarning($"Không tìm thấy BuildingData cho id '{structureData.buildingId}', bỏ qua.");
+                return;
+            }
+
+            BuildCellCoords coords = new BuildCellCoords(structureData.x, structureData.z);
+
+            GameObject instance = Instantiate(data.Prefab, GetParent(data.StructureType));
+            PlacedStructureView view = instance.GetComponent<PlacedStructureView>();
+            view.Init(data, coords, structureData.rotationIndex);
+            view.SetWorldTransform(grid.GetGridCellPosition(coords), grid.GetGridCellRotation(coords));
+
+            grid.AddElement(coords, view);
+        }
+
+        private static PlacedStructureData ToSaveData(PlacedStructureView view)
+        {
+            return new PlacedStructureData
+            {
+                buildingId = view.BuildingData.BuildingId,
+                x = view.Coords.X,
+                z = view.Coords.Z,
+                rotationIndex = view.RotationIndex
+            };
         }
 
         private void HandleTap(Vector2 screenPosition)

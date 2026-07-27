@@ -19,6 +19,7 @@ namespace SimpleSurvival.Building
         public abstract BuildCellCoords GetGridCellCoords(Vector3 worldPosition);
         public abstract bool CheckAvailable(BuildCellCoords coords, BuildingData buildingData, BuildCellCoords? ignoreCoords = null);
 
+        public IEnumerable<PlacedStructureView> AllElements => grid.Values;
         public int Key(BuildCellCoords coords)
         {
             return coords.X * GridSizeX + coords.Z;
