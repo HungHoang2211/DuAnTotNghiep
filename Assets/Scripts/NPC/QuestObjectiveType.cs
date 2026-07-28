@@ -5,6 +5,8 @@ namespace SimpleSurvival.Quests
         CollectItem,
         KillEnemy,
         FindNPC,
-        EscortNPC
+        EscortNPC,
+        HarvestNode,
+        CraftItem
     }
 }

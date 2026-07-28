@@ -13,25 +13,15 @@ namespace SimpleSurvival.AI
         [Header("Skills (compose qua Inspector)")]
         [SerializeField] protected List<BaseEnemySkill> _skills = new List<BaseEnemySkill>();
 
-        [Header("Retreat & Hide (dùng khi enemy cần lui về spawn point và biến mất, vd Witch triệu hồi)")]
-        [Tooltip("Khoảng cách tới spawn point được coi là đã 'tới nơi' để bắt đầu ẩn")]
+        [Header("Retreat & Hide")]
         [SerializeField] protected float retreatArrivalThreshold = 0.3f;
 
         protected float _lostTargetTimer;
 
-        /// <summary>
-        /// True khi enemy được EscortEnemyDirector gán để chỉ bám/tấn công 1 target cố định
-        /// (vd Emily) trong lúc hộ tống. Khi bật, enemy bỏ qua hoàn toàn detection/damage từ Player.
-        /// Enemy spawn sẵn trên map bình thường KHÔNG bao giờ bật cờ này nên hành vi không đổi.
-        /// </summary>
         protected bool _escortMode;
 
+        protected bool _questLocked;
         protected EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
-
-        /// <summary>
-        /// True khi enemy đã phát hiện player (mọi state trừ Idle/Dead). Dùng để chặn
-        /// bonus sneak-attack damage một khi enemy không còn bị bất ngờ nữa.
-        /// </summary>
         public bool HasDetectedPlayer => _state != EnemyState.Idle && _state != EnemyState.Dead;
 
         public float LastDamageDealtTime { get; private set; } = -999f;
@@ -60,6 +50,11 @@ namespace SimpleSurvival.AI
             StartCoroutine(DetectionRoutine());
         }
 
+        public void SetQuestLocked(bool locked)
+        {
+            _questLocked = locked;
+        }
+
         protected override void OnInitialized()
         {
             if (Config == null)
@@ -73,6 +68,7 @@ namespace SimpleSurvival.AI
             _agent.speed = Config.MoveSpeed;
             LastDamageDealtTime = -999f;
             _escortMode = false;
+            _questLocked = false;
 
             OnEnemyInitialized();
 
@@ -92,8 +88,9 @@ namespace SimpleSurvival.AI
                 if (_state == EnemyState.Dead) yield break;
                 if (_playerDead) continue;
                 if (_state != EnemyState.Idle) continue;
+                if (_questLocked) continue;
 
-                //Debug.Log($"[{name}] DetectionRoutine tick — checking vision/hearing");
+                Debug.Log($"[{name}] DetectionRoutine tick — checking vision/hearing");
                 if (DetectByVision() || DetectByHearing())
                     OnPlayerDetected();
             }
@@ -337,8 +334,9 @@ namespace SimpleSurvival.AI
         {
             if (source == null || _isDead || _playerDead) return;
             if (_escortMode) return;
-            if (!source.CompareTag("Player")) return; 
+            if (!source.CompareTag("Player")) return;
 
+            _questLocked = false;
             _player = source.transform;
 
             if (_state == EnemyState.Idle)

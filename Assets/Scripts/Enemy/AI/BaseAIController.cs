@@ -106,10 +106,6 @@ namespace SimpleSurvival.AI
         protected abstract void HandleDeath(GameObject source);
         protected abstract void HandleDamagedBy(GameObject source);
 
-        /// <summary>
-        /// Gọi khi player chết (ragdoll kích hoạt). Enemy con phải override để
-        /// dừng hẳn chase/attack, không cần biết chi tiết implement của player.
-        /// </summary>
         protected virtual void HandlePlayerDeath(GameObject source)
         {
             _playerDead = true;

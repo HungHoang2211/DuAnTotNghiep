@@ -11,6 +11,9 @@ namespace SimpleSurvival.Quests
         [SerializeField] private GameObject icon;
         [SerializeField] private GameObject arrowPanel;
 
+        [Header("Quest Flow")]
+        [SerializeField] private TutorialQuestSequencer sequencer;
+
         [Header("Position")]
         [SerializeField] private Vector2 openAnchoredPosition;
 
@@ -32,12 +35,18 @@ namespace SimpleSurvival.Quests
             _button = GetComponent<Button>();
             if (_button != null)
                 _button.onClick.AddListener(HandleClick);
+
+            if (sequencer != null)
+                sequencer.OnCurrentQuestCompleted += ForceClose;
         }
 
         private void OnDestroy()
         {
             if (_button != null)
                 _button.onClick.RemoveListener(HandleClick);
+
+            if (sequencer != null)
+                sequencer.OnCurrentQuestCompleted -= ForceClose;
         }
 
         private void Start()
@@ -59,6 +68,16 @@ namespace SimpleSurvival.Quests
         private void HandleClick()
         {
             _isOpen = !_isOpen;
+            ApplyState();
+
+            if (_isOpen)
+                sequencer?.RevealCurrentQuestHighlight();
+        }
+
+        public void ForceClose()
+        {
+            if (!_isOpen) return;
+            _isOpen = false;
             ApplyState();
         }
 

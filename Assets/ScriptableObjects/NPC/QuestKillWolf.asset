@@ -10,24 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 544c56a4b5192d34b9709f157e479fa2, type: 3}
-  m_Name: DogQuest
+  m_Name: QuestKillWolf
   m_EditorClassIdentifier: 
-  questId: 2
-  questName: Kill Roaming Zombie
-  offerDialogue: Eliminate the Roaming Zombies outside. Do this, and this loyal dog
-    is yours to keep.
-  turnInDialogue: You did it! As promised, here is your new pet dog. He needs a brave
-    companion.
+  questId: 
+  questName: Kill Grey Wolf
+  offerDialogue: 
+  turnInDialogue: 
   objectives:
   - type: 1
-    description: Defeat the Roaming Zombies outside.
+    description: Defeat 1 Grey Wolves lurking around the forest.
     targetItem: {fileID: 0}
-    targetEnemyConfig: {fileID: 11400000, guid: fbcf3d160b23f744ba08ec82f0d85023, type: 2}
+    targetEnemyConfig: {fileID: 11400000, guid: 6676cb9ecd3936642a42ecda211f50fa, type: 2}
     targetNpcId: 
-    escortWaypointIds: []
+    escortWaypointIds:
+    - 
     requiredAmount: 1
   rewards:
-  - itemData: {fileID: 11400000, guid: 2a826b90698e7f94c8a70a6fd6d98beb, type: 2}
+  - itemData: {fileID: 11400000, guid: 9f91028fc115b96448b9b3d2d7c00f4a, type: 2}
+    quantity: 2
+  - itemData: {fileID: 11400000, guid: e2aceb0c3ba103d42bc0c8ef06503836, type: 2}
     quantity: 1
   marksStoryComplete: 0
   mapsToLockOnComplete: []

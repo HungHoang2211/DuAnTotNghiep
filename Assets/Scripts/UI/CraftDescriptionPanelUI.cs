@@ -94,7 +94,15 @@ namespace SimpleSurvival.UI
             }
             progressBarFill.fillAmount = 1f;
 
-            craftDialog.PerformCraft(currentRecipe);
+            try
+            {
+                craftDialog.PerformCraft(currentRecipe);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[CraftDescriptionPanelUI] PerformCraft threw: {e}");
+            }
+
             notifyUI.Show(string.Format(CraftedMessageFormat, currentRecipe.ResultItem.ItemName));
 
             progressBarRoot.SetActive(false);

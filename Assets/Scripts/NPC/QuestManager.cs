@@ -100,10 +100,6 @@ namespace SimpleSurvival.Quests
             OnQuestCompleted?.Invoke(quest);
         }
 
-        /// <summary>
-        /// Hủy quest đang active mà không đánh dấu hoàn thành (vd: NPC hộ tống bị giết).
-        /// Quest không bị thêm vào _completedQuests nên có thể StartQuest() lại nếu muốn cho thử lại.
-        /// </summary>
         public void FailQuest(QuestData quest)
         {
             if (quest == null) return;
@@ -130,7 +126,8 @@ namespace SimpleSurvival.Quests
 
         private void HandleItemAdded(ItemData itemData, int amount)
         {
-            foreach (var kvp in _activeQuests)
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
             {
                 QuestData quest = kvp.Key;
                 QuestProgress progress = kvp.Value;
@@ -152,12 +149,12 @@ namespace SimpleSurvival.Quests
                     OnQuestReadyToTurnIn?.Invoke(quest);
             }
         }
-
         public void NotifyEnemyKilled(EnemyStatsConfig enemyConfig)
         {
             if (enemyConfig == null) return;
 
-            foreach (var kvp in _activeQuests)
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
             {
                 QuestData quest = kvp.Key;
                 QuestProgress progress = kvp.Value;
@@ -179,15 +176,67 @@ namespace SimpleSurvival.Quests
                     OnQuestReadyToTurnIn?.Invoke(quest);
             }
         }
+        public void NotifyHarvestCompleted(ItemData itemData)
+        {
+            if (itemData == null) return;
 
-        /// <summary>
-        /// Gọi khi player tương tác/tìm thấy 1 NPC có npcId trùng targetNpcId của objective FindNPC.
-        /// </summary>
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
+            {
+                QuestData quest = kvp.Key;
+                QuestProgress progress = kvp.Value;
+                bool changed = false;
+
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                {
+                    QuestObjectiveData objective = quest.Objectives[i];
+                    if (objective.type != QuestObjectiveType.HarvestNode) continue;
+                    if (objective.targetItem != itemData) continue;
+                    if (progress.IsObjectiveComplete(i)) continue;
+
+                    progress.AddProgress(i, 1);
+                    OnObjectiveProgress?.Invoke(quest, i);
+                    changed = true;
+                }
+
+                if (changed && progress.IsAllComplete())
+                    OnQuestReadyToTurnIn?.Invoke(quest);
+            }
+        }
+
+        public void NotifyItemCrafted(ItemData itemData)
+        {
+            if (itemData == null) return;
+
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
+            {
+                QuestData quest = kvp.Key;
+                QuestProgress progress = kvp.Value;
+                bool changed = false;
+
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                {
+                    QuestObjectiveData objective = quest.Objectives[i];
+                    if (objective.type != QuestObjectiveType.CraftItem) continue;
+                    if (objective.targetItem != itemData) continue;
+                    if (progress.IsObjectiveComplete(i)) continue;
+
+                    progress.AddProgress(i, 1);
+                    OnObjectiveProgress?.Invoke(quest, i);
+                    changed = true;
+                }
+
+                if (changed && progress.IsAllComplete())
+                    OnQuestReadyToTurnIn?.Invoke(quest);
+            }
+        }
         public void NotifyNPCFound(string npcId)
         {
             if (string.IsNullOrEmpty(npcId)) return;
 
-            foreach (var kvp in _activeQuests)
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
             {
                 QuestData quest = kvp.Key;
                 QuestProgress progress = kvp.Value;
@@ -210,10 +259,6 @@ namespace SimpleSurvival.Quests
             }
         }
 
-        /// <summary>
-        /// Gọi khi NPC hộ tống đã tới EscortPoint đích. Tự hoàn thành objective EscortNPC
-        /// và complete luôn quest (không cần bước turn-in riêng vì NPC đang đi cùng player).
-        /// </summary>
         public void NotifyEscortArrived(QuestData quest)
         {
             if (quest == null) return;

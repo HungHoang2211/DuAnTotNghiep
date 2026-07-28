@@ -12,16 +12,16 @@ namespace SimpleSurvival.Quests
         public QuestObjectiveType type;
         public string description;
 
-        [Header("Dùng cho CollectItem")]
+        [Header("CollectItem / HarvestNode / CraftItem")]
         public ItemData targetItem;
 
-        [Header("Dùng cho KillEnemy")]
+        [Header("KillEnemy")]
         public EnemyStatsConfig targetEnemyConfig;
 
-        [Header("Dùng cho FindNPC / EscortNPC - phải khớp npcId trên NPC")]
+        [Header("FindNPC")]
         public string targetNpcId;
 
-        [Header("Dùng cho EscortNPC - danh sách pointId theo đúng thứ tự đi qua, điểm cuối là đích")]
+        [Header("EscortNPC")]
         public List<string> escortWaypointIds = new List<string>();
 
         public int requiredAmount = 1;

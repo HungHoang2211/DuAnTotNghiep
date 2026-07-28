@@ -1,4 +1,5 @@
 using SimpleSurvival.Items;
+using SimpleSurvival.Quests;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -91,6 +92,8 @@ namespace SimpleSurvival.UI
                 inventoryQueries.RemoveItemAmount(ingredient.Item, ingredient.Amount);
 
             inventoryQueries.AddItem(recipe.ResultItem, 1);
+
+            QuestManager.Instance?.NotifyItemCrafted(recipe.ResultItem);
         }
 
         private void OnRecipeSelected(CraftingRecipeData recipe)
