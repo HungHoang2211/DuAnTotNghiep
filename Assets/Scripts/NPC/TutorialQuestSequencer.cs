@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleSurvival.World;
 
 namespace SimpleSurvival.Quests
 {
@@ -25,12 +26,20 @@ namespace SimpleSurvival.Quests
             manager.OnQuestReadyToTurnIn += HandleReadyToTurnIn;
             manager.OnQuestCompleted += HandleQuestCompleted;
 
-            StartCoroutine(KickoffNextFrame());
+            StartCoroutine(KickoffWhenReady());
         }
 
-        private IEnumerator KickoffNextFrame()
+        private IEnumerator KickoffWhenReady()
         {
             yield return null;
+
+            MapTransitionController transition = MapTransitionController.Instance;
+            if (transition != null)
+            {
+                while (transition.IsTransitioning)
+                    yield return null;
+            }
+
             StartNextQuest();
         }
 
