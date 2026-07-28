@@ -54948,6 +54948,7 @@ GameObject:
   - component: {fileID: 978927274}
   - component: {fileID: 978927276}
   - component: {fileID: 978927275}
+  - component: {fileID: 978927277}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -55012,6 +55013,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 978927273}
   m_CullTransparentMesh: 1
+--- !u!114 &978927277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 978927273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4641f24f7ceb93942b4dfca24fef3852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  icon: {fileID: 978927275}
+  sequencer: {fileID: 1352745461}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  activeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  blinkInterval: 0.4
 --- !u!1 &979387370
 GameObject:
   m_ObjectHideFlags: 0
@@ -73062,6 +73080,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1352745459}
   - component: {fileID: 1352745460}
+  - component: {fileID: 1352745462}
+  - component: {fileID: 1352745461}
   m_Layer: 0
   m_Name: QuestManager
   m_TagString: Untagged
@@ -73098,6 +73118,40 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryQueries: {fileID: 719937943}
   questDatabase: {fileID: 11400000, guid: 88e170b49eeac5b4d86992984f13a54d, type: 2}
+--- !u!114 &1352745461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352745458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d6784b75ed19fc4ca1feea449f3afb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questChain:
+  - {fileID: 11400000, guid: a053075a9d291424c8cb7eef8a306fd6, type: 2}
+  - {fileID: 11400000, guid: 84c4676dbc1a20f40ac186c20bc5fee3, type: 2}
+  - {fileID: 11400000, guid: ae3c25fa3d80bb9458039ccdf9e9745f, type: 2}
+  - {fileID: 11400000, guid: 001ddd7f035b8c34a831d9c7f07dcd34, type: 2}
+  - {fileID: 11400000, guid: c88c847d28134ba4198cf57e2410034c, type: 2}
+  - {fileID: 11400000, guid: af126e3561a879643ab7d2c776857190, type: 2}
+  - {fileID: 11400000, guid: d267cf546298e254eb52b6d68bd3b3df, type: 2}
+  - {fileID: 11400000, guid: eda4e1d7cc83f1c478b039b4e0e2c5d3, type: 2}
+  delayBeforeNextQuest: 2
+--- !u!114 &1352745462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352745458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c373d3999babb4409ad06f55c28ba23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1353080150
 GameObject:
   m_ObjectHideFlags: 0
@@ -82377,7 +82431,32 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1500087588}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 978927277}
+        m_TargetAssemblyTypeName: SimpleSurvival.Quests.QuestNotificationIndicator,
+          Assembly-CSharp
+        m_MethodName: MarkSeen
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1352745461}
+        m_TargetAssemblyTypeName: SimpleSurvival.Quests.TutorialQuestSequencer, Assembly-CSharp
+        m_MethodName: RevealCurrentQuestHighlight
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!111 &1500087586
 Animation:
   m_ObjectHideFlags: 0
@@ -82469,6 +82548,7 @@ MonoBehaviour:
   panelContent: {fileID: 1645859760}
   icon: {fileID: 1603590918}
   arrowPanel: {fileID: 551298793}
+  sequencer: {fileID: 1352745461}
   openAnchoredPosition: {x: 400, y: 6}
   pressAnimation: {fileID: 1500087586}
   downClipName: ShopCateory_OnDown
@@ -109387,7 +109467,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2025567105
 Transform:
   m_ObjectHideFlags: 0
