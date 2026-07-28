@@ -37,12 +37,12 @@ namespace SimpleSurvival.Building
 
         [Header("Build Mode Root")]
         [SerializeField] private GameObject buildModeRoot;
+        [SerializeField] private GameObject panZoomSurfaceRoot;
         [SerializeField] private CanvasGroup mainHudCanvasGroup;
         [SerializeField] private BuildMenuController buildMenuController;
 
         [Header("Action Buttons")]
         [SerializeField] private RectTransform actionButtonsRoot;
-        [SerializeField] private RectTransform canvasRect;
         [SerializeField] private Camera uiCamera;
         [SerializeField] private List<BuildActionButtonUi> actionButtons;
         [SerializeField] private BuildUpgradeCostUi upgradeCostUi;
@@ -71,6 +71,9 @@ namespace SimpleSurvival.Building
         private BaseMapSaveData lastSnapshot;
         private bool hasSeededFromSave;
 
+        private RectTransform actionButtonsParentRect;
+        private BuildCellCoords? lastKnownCoords;
+
         public BuildingDatabase BuildingDatabase => buildingDatabase;
 
         private void Awake()
@@ -81,6 +84,8 @@ namespace SimpleSurvival.Building
                 return;
             }
             Instance = this;
+
+            actionButtonsParentRect = actionButtonsRoot.parent as RectTransform;
 
             RebuildGrids();
 
@@ -94,6 +99,7 @@ namespace SimpleSurvival.Building
             }
 
             buildModeRoot.SetActive(false);
+            if (panZoomSurfaceRoot != null) panZoomSurfaceRoot.SetActive(false);
             HideActionButtons();
         }
 
@@ -101,6 +107,16 @@ namespace SimpleSurvival.Building
         {
             if (MapTransitionController.Instance != null)
                 MapTransitionController.Instance.TransitionStarted += HandleTransitionStarted;
+        }
+
+        private void LateUpdate()
+        {
+            if (!isBuildModeActive) return;
+
+            if (currentDraft != null)
+                FollowWorldPosition(currentDraft.transform.position);
+            else if (selectedStructure != null)
+                FollowWorldPosition(selectedStructure.transform.position);
         }
 
         private void OnDestroy()
@@ -111,24 +127,32 @@ namespace SimpleSurvival.Building
                 MapTransitionController.Instance.TransitionStarted -= HandleTransitionStarted;
         }
 
-        private void Update()
-        {
-            if (!isBuildModeActive) return;
-            if (!UnityEngine.Input.GetMouseButtonDown(0)) return;
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-
-            HandleTap(UnityEngine.Input.mousePosition);
-        }
-
         public void EnterBuildMode()
         {
-            if (isBuildModeActive) return;
-            if (MapLoader.Instance == null || MapTransitionController.Instance == null) return;
-            if (MapLoader.Instance.CurrentMapScene != MapTransitionController.Instance.StartMapScene) return;
-            if (floorParent == null || wallParent == null) return;
+            if (isBuildModeActive)
+            {
+                Debug.LogWarning("[Build] EnterBuildMode bị chặn: đang ở build mode rồi.");
+                return;
+            }
+            if (MapLoader.Instance == null || MapTransitionController.Instance == null)
+            {
+                Debug.LogWarning("[Build] EnterBuildMode bị chặn: MapLoader hoặc MapTransitionController chưa sẵn sàng.");
+                return;
+            }
+            if (MapLoader.Instance.CurrentMapScene != MapTransitionController.Instance.StartMapScene)
+            {
+                Debug.LogWarning($"[Build] EnterBuildMode bị chặn: đang ở map '{MapLoader.Instance.CurrentMapScene}', không phải Base ('{MapTransitionController.Instance.StartMapScene}').");
+                return;
+            }
+            if (floorParent == null || wallParent == null)
+            {
+                Debug.LogWarning("[Build] EnterBuildMode bị chặn: floorParent/wallParent chưa có (BuildContainerAnchor chưa được tìm thấy — kiểm tra RestoreForMap đã chạy chưa).");
+                return;
+            }
 
             isBuildModeActive = true;
             buildModeRoot.SetActive(true);
+            if (panZoomSurfaceRoot != null) panZoomSurfaceRoot.SetActive(true);
             mainHudCanvasGroup.alpha = 0f;
             mainHudCanvasGroup.interactable = false;
             mainHudCanvasGroup.blocksRaycasts = false;
@@ -144,6 +168,7 @@ namespace SimpleSurvival.Building
             }
             if (gridOverlayRenderer != null) gridOverlayRenderer.enabled = true;
 
+            Debug.Log("[Build] Đã vào build mode.");
             buildMenuController.Populate(buildingDatabase.Buildings, StartPlacement);
         }
 
@@ -157,6 +182,7 @@ namespace SimpleSurvival.Building
 
             isBuildModeActive = false;
             buildModeRoot.SetActive(false);
+            if (panZoomSurfaceRoot != null) panZoomSurfaceRoot.SetActive(false);
             mainHudCanvasGroup.alpha = 1f;
             mainHudCanvasGroup.interactable = true;
             mainHudCanvasGroup.blocksRaycasts = true;
@@ -167,9 +193,16 @@ namespace SimpleSurvival.Building
                 if (playerTransform != null) cameraRig.SetTarget(playerTransform, false);
             }
             if (gridOverlayRenderer != null) gridOverlayRenderer.enabled = false;
+
+            lastKnownCoords = null;
         }
 
         public void StartPlacement(BuildingData data)
+        {
+            BeginPlacement(data, lastKnownCoords);
+        }
+
+        private void BeginPlacement(BuildingData data, BuildCellCoords? preferredOrigin)
         {
             if (data.StructureType == StructureType.Furniture)
             {
@@ -185,12 +218,27 @@ namespace SimpleSurvival.Building
 
             GameObject instance = Instantiate(data.Prefab, GetParent(data.StructureType));
             currentDraft = instance.GetComponent<PlacedStructureView>();
+            currentDraft.Init(data, new BuildCellCoords(0, 0), 0);
 
-            BuildCellCoords startCoords = new BuildCellCoords(currentDraftGrid.GridSizeX / 2, currentDraftGrid.GridSizeZ / 2);
-            currentDraft.Init(data, startCoords, 0);
+            BuildCellCoords rawOrigin = preferredOrigin ?? (playerTransform != null
+                ? currentDraftGrid.GetGridCellCoords(playerTransform.position)
+                : new BuildCellCoords(currentDraftGrid.GridSizeX / 2, currentDraftGrid.GridSizeZ / 2));
+            BuildCellCoords searchOrigin = currentDraftGrid.ClampToBounds(rawOrigin);
+
+            BuildCellCoords? freeCoords = currentDraftGrid.FindFreeCellSpiral(
+                searchOrigin, coords => currentDraftGrid.CheckAvailable(coords, data));
+            BuildCellCoords startCoords = freeCoords ?? searchOrigin;
+
+            lastKnownCoords = startCoords;
+
+            currentDraft.SetCoords(startCoords);
+            currentDraft.SetWorldTransform(
+                currentDraftGrid.GetGridCellPosition(startCoords),
+                currentDraftGrid.GetGridCellRotation(startCoords));
+
+            if (cameraRig != null) cameraRig.SetTarget(currentDraft.transform, true);
+
             MoveDraftTo(currentDraftGrid.GetGridCellPosition(startCoords));
-
-            if (cameraRig != null) cameraRig.SetTarget(currentDraft.transform, false);
 
             ShowActionButtons(BuildAction.Confirm, BuildAction.Cancel);
         }
@@ -204,7 +252,7 @@ namespace SimpleSurvival.Building
             }
 
             BuildCellCoords coords = currentDraft.Coords;
-            if (!currentDraftGrid.CheckAvailable(coords, currentBuildingData))
+            if (!currentDraftGrid.InBounds(coords) || !currentDraftGrid.CheckAvailable(coords, currentBuildingData))
             {
                 Debug.LogWarning($"[Build] Vị trí ({coords.X},{coords.Z}) không hợp lệ để đặt {currentBuildingData.DisplayName}.");
                 return;
@@ -221,14 +269,15 @@ namespace SimpleSurvival.Building
             currentDraftGrid.AddElement(coords, currentDraft);
 
             BuildingData placedData = currentBuildingData;
+            BuildCellCoords placedCoords = coords;
 
             currentDraft = null;
             currentBuildingData = null;
             currentDraftGrid = null;
             HideActionButtons();
 
-            Debug.Log($"[Build] Đã đặt {placedData.DisplayName} tại ({coords.X},{coords.Z}).");
-            StartPlacement(placedData);
+            Debug.Log($"[Build] Đã đặt {placedData.DisplayName} tại ({placedCoords.X},{placedCoords.Z}).");
+            BeginPlacement(placedData, placedCoords);
         }
 
         public void CancelPlacement()
@@ -345,6 +394,31 @@ namespace SimpleSurvival.Building
             RestoreLiveGrid(lastSnapshot);
         }
 
+        public void HandleWorldTap(Vector2 screenPosition)
+        {
+            if (!isBuildModeActive) return;
+
+            Ray ray = raycastCamera.ScreenPointToRay(screenPosition);
+
+            if (Physics.Raycast(ray, out RaycastHit structureHit, 200f, structureSelectLayerMask))
+            {
+                BuildStructureRaycastTarget target = structureHit.collider.GetComponent<BuildStructureRaycastTarget>();
+                if (target != null)
+                {
+                    SelectStructure(target.Owner);
+                    return;
+                }
+            }
+
+            if (Physics.Raycast(ray, out RaycastHit groundHit, 200f, groundLayerMask))
+            {
+                if (currentDraft != null)
+                    MoveDraftTo(groundHit.point);
+                else
+                    DeselectStructure();
+            }
+        }
+
         private void HandleTransitionStarted()
         {
             if (IsOnBaseMap())
@@ -444,41 +518,22 @@ namespace SimpleSurvival.Building
             };
         }
 
-        private void HandleTap(Vector2 screenPosition)
-        {
-            Ray ray = raycastCamera.ScreenPointToRay(screenPosition);
-
-            if (Physics.Raycast(ray, out RaycastHit structureHit, 200f, structureSelectLayerMask))
-            {
-                BuildStructureRaycastTarget target = structureHit.collider.GetComponent<BuildStructureRaycastTarget>();
-                if (target != null)
-                {
-                    SelectStructure(target.Owner);
-                    return;
-                }
-            }
-
-            if (Physics.Raycast(ray, out RaycastHit groundHit, 200f, groundLayerMask))
-            {
-                if (currentDraft != null)
-                    MoveDraftTo(groundHit.point);
-                else
-                    DeselectStructure();
-            }
-        }
-
         private void MoveDraftTo(Vector3 worldPoint)
         {
             BuildCellCoords coords = currentDraftGrid.GetGridCellCoords(worldPoint);
-            bool valid = currentDraftGrid.CheckAvailable(coords, currentBuildingData);
+            if (!currentDraftGrid.InBounds(coords)) return;
+
+            lastKnownCoords = coords;
+
+            bool positionValid = currentDraftGrid.CheckAvailable(coords, currentBuildingData);
+            bool costValid = HasEnoughCost(currentBuildingData);
+            bool valid = positionValid && costValid;
 
             currentDraft.SetCoords(coords);
             currentDraft.SetWorldTransform(
                 currentDraftGrid.GetGridCellPosition(coords),
                 currentDraftGrid.GetGridCellRotation(coords));
             currentDraft.SetPreviewMaterial(valid ? previewValidMaterial : previewInvalidMaterial);
-
-            FollowWorldPosition(currentDraft.transform.position);
         }
 
         private void SelectStructure(PlacedStructureView structure)
@@ -490,11 +545,11 @@ namespace SimpleSurvival.Building
             selectedStructure = structure;
             selectedGrid = GetGrid(structure.BuildingData.StructureType);
             selectedStructure.SetSelected(true);
+            lastKnownCoords = structure.Coords;
 
             if (cameraRig != null) cameraRig.SetTarget(selectedStructure.transform, false);
 
             RefreshSelectionButtons();
-            FollowWorldPosition(selectedStructure.transform.position);
         }
 
         private void DeselectStructure()
@@ -580,8 +635,10 @@ namespace SimpleSurvival.Building
 
         private void FollowWorldPosition(Vector3 worldPosition)
         {
-            Vector2 screenPoint = raycastCamera.WorldToScreenPoint(worldPosition);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, uiCamera, out Vector2 localPoint);
+            if (actionButtonsParentRect == null) return;
+
+            Vector3 screenPoint = raycastCamera.WorldToScreenPoint(worldPosition);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(actionButtonsParentRect, screenPoint, uiCamera, out Vector2 localPoint);
             actionButtonsRoot.anchoredPosition = localPoint;
         }
     }

@@ -7,6 +7,7 @@ namespace SimpleSurvival.Building
     public abstract class BuildGrid
     {
         protected readonly Dictionary<int, PlacedStructureView> grid = new Dictionary<int, PlacedStructureView>();
+        protected readonly HashSet<int> blockedKeys = new HashSet<int>();
 
         public int CellSize { get; protected set; }
         public int GridSizeX { get; protected set; }
@@ -19,7 +20,6 @@ namespace SimpleSurvival.Building
         public abstract BuildCellCoords GetGridCellCoords(Vector3 worldPosition);
         public abstract bool CheckAvailable(BuildCellCoords coords, BuildingData buildingData, BuildCellCoords? ignoreCoords = null);
 
-        public IEnumerable<PlacedStructureView> AllElements => grid.Values;
         public int Key(BuildCellCoords coords)
         {
             return coords.X * GridSizeX + coords.Z;
@@ -33,6 +33,13 @@ namespace SimpleSurvival.Building
         public bool InBounds(BuildCellCoords coords)
         {
             return coords.X >= 0 && coords.X < GridSizeX && coords.Z >= 0 && coords.Z < GridSizeZ;
+        }
+
+        public BuildCellCoords ClampToBounds(BuildCellCoords coords)
+        {
+            int x = Mathf.Clamp(coords.X, 0, GridSizeX - 1);
+            int z = Mathf.Clamp(coords.Z, 0, GridSizeZ - 1);
+            return new BuildCellCoords(x, z);
         }
 
         public bool ContainsElement(BuildCellCoords coords)
@@ -63,6 +70,23 @@ namespace SimpleSurvival.Building
             return grid.Keys;
         }
 
+        public IEnumerable<PlacedStructureView> AllElements => grid.Values;
+
+        public void ClearBlocked()
+        {
+            blockedKeys.Clear();
+        }
+
+        public void AddBlocked(BuildCellCoords coords)
+        {
+            blockedKeys.Add(Key(coords));
+        }
+
+        public bool IsBlocked(BuildCellCoords coords)
+        {
+            return blockedKeys.Contains(Key(coords));
+        }
+
         protected void RaiseChange()
         {
             OnChange?.Invoke();
@@ -74,7 +98,7 @@ namespace SimpleSurvival.Building
             int z = 0;
             int dx = 0;
             int dz = -1;
-            int steps = Mathf.Max(GridSizeX, GridSizeZ);
+            int steps = Mathf.Max(GridSizeX, GridSizeZ) * 2;
             int maxIterations = steps * steps;
 
             for (int i = 0; i < maxIterations; i++)

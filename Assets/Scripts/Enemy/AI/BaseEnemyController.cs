@@ -293,9 +293,9 @@ namespace SimpleSurvival.AI
                 ? Physics.OverlapSphere(transform.position, Config.VisionRange)
                 : Physics.OverlapSphere(transform.position, Config.VisionRange, playerLayer);
 
-            Debug.Log($"[{name}] DetectByVision — found {hits.Length} colliders trong range {Config.VisionRange}");
+            //Debug.Log($"[{name}] DetectByVision — found {hits.Length} colliders trong range {Config.VisionRange}");
             foreach (var h in hits)
-                Debug.Log($"[{name}]   hit: {h.name}, tag={h.tag}, enabled={h.enabled}");
+                //Debug.Log($"[{name}]   hit: {h.name}, tag={h.tag}, enabled={h.enabled}");
 
             foreach (var hit in hits)
             {

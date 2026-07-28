@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using SimpleSurvival.Building;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace SimpleSurvival.Cameras
 {
     public sealed class BuildCameraPanZoomSurface : MonoBehaviour,
-        IPointerDownHandler, IDragHandler, IPointerUpHandler
+        IPointerDownHandler, IDragHandler, IPointerUpHandler, IScrollHandler, IPointerClickHandler
     {
         [SerializeField] private CameraRigController cameraRig;
 
@@ -16,13 +17,18 @@ namespace SimpleSurvival.Cameras
         [SerializeField] private Vector2 panBoundsMin = new Vector2(-16f, -16f);
         [SerializeField] private Vector2 panBoundsMax = new Vector2(16f, 16f);
 
-        [Header("Zoom")]
-        [SerializeField] private float zoomSpeed = 0.02f;
-        [SerializeField] private float minZoomDistance = 25f;
-        [SerializeField] private float maxZoomDistance = 45f;
+        [Header("Zoom (Height)")]
+        [SerializeField] private float zoomSpeed = 0.01f;
 
         private readonly Dictionary<int, Vector2> activePointers = new Dictionary<int, Vector2>();
+        private Vector2 currentFreePosition;
         private float lastPinchDistance;
+
+        private void OnEnable()
+        {
+            if (cameraRig != null)
+                currentFreePosition = new Vector2(cameraRig.transform.position.x, cameraRig.transform.position.z);
+        }
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -49,6 +55,18 @@ namespace SimpleSurvival.Cameras
             activePointers.Remove(eventData.pointerId);
         }
 
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            BuildModeController.Instance?.HandleWorldTap(eventData.position);
+        }
+
+        public void OnScroll(PointerEventData eventData)
+        {
+            if (cameraRig == null || cameraRig.HasTarget) return;
+
+            cameraRig.AdjustFreeHeight(-eventData.scrollDelta.y * zoomSpeed * 5f);
+        }
+
         private void HandlePan(Vector2 delta)
         {
             Quaternion yawRotation = Quaternion.Euler(0f, cameraRig.YawAngle, 0f);
@@ -56,13 +74,14 @@ namespace SimpleSurvival.Cameras
             Vector3 forward = yawRotation * Vector3.forward;
             Vector3 move = (-delta.x * right + -delta.y * forward) * panSpeed;
 
-            Vector3 newPos = cameraRig.transform.position + move;
+            currentFreePosition += new Vector2(move.x, move.z);
+
             Vector2 min = GetBoundsMin();
             Vector2 max = GetBoundsMax();
-            newPos.x = Mathf.Clamp(newPos.x, min.x, max.x);
-            newPos.z = Mathf.Clamp(newPos.z, min.y, max.y);
+            currentFreePosition.x = Mathf.Clamp(currentFreePosition.x, min.x, max.x);
+            currentFreePosition.y = Mathf.Clamp(currentFreePosition.y, min.y, max.y);
 
-            cameraRig.SetFreePosition(newPos);
+            cameraRig.SetFreePosition(currentFreePosition);
         }
 
         private void HandlePinch()
@@ -71,7 +90,7 @@ namespace SimpleSurvival.Cameras
             float delta = currentDistance - lastPinchDistance;
             lastPinchDistance = currentDistance;
 
-            cameraRig.AdjustFreeDistance(-delta * zoomSpeed, minZoomDistance, maxZoomDistance);
+            cameraRig.AdjustFreeHeight(-delta * zoomSpeed);
         }
 
         private float GetCurrentPinchDistance()
