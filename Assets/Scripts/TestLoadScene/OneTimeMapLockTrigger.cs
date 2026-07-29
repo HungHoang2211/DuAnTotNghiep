@@ -1,5 +1,6 @@
 using UnityEngine;
 using SimpleSurvival.Quests;
+using SimpleSurvival.SaveLoad;
 
 namespace SimpleSurvival.World
 {
@@ -16,7 +17,10 @@ namespace SimpleSurvival.World
         private void OnDestroy()
         {
             if (!string.IsNullOrEmpty(mapId))
+            {
                 QuestManager.Instance?.LockMapPermanently(mapId);
+                SaveService.Instance?.Save();
+            }
         }
     }
 }

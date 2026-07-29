@@ -95,6 +95,8 @@ namespace SimpleSurvival.Quests
                 StoryCompleted = true;
                 foreach (string mapId in quest.MapsToLockOnComplete)
                     _permanentlyLockedMaps.Add(mapId);
+
+                SaveService.Instance?.Save();
             }
 
             OnQuestCompleted?.Invoke(quest);

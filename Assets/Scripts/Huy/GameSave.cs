@@ -29,5 +29,6 @@ namespace SimpleSurvival.SaveLoad
         public List<ContainerData> containers = new List<ContainerData>();
         public WorldData world = new WorldData();
         public BaseMapSaveData baseMap = new BaseMapSaveData();
+        public LevelData level = new LevelData();
     }
 }

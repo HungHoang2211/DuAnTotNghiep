@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using SimpleSurvival.Quests;
 using SimpleSurvival.Stats;
+using SimpleSurvival.SaveLoad;
 
 namespace SimpleSurvival.Progression
 {
@@ -69,13 +70,49 @@ namespace SimpleSurvival.Progression
         private void ApplyLevelUpHPBonus(int newLevel)
         {
             if (playerStats == null) return;
-            float bonus = newLevel <= 10 ? 1f : 2f;
-            playerStats.AddMaxHPBonus(bonus);
+            playerStats.AddMaxHPBonus(GetHPBonusForLevel(newLevel));
         }
 
         private void HandleQuestCompleted(QuestData quest)
         {
             AddExperience(quest.ExpReward);
         }
+        public LevelData Capture()
+        {
+            return new LevelData
+            {
+                level = _level,
+                currentExp = _currentExp
+            };
+        }
+        private static float GetHPBonusForLevel(int level)
+        {
+            return level <= 10 ? 1f : 2f;
+        }
+        private static float GetTotalHPBonus(int level)
+        {
+            float total = 0f;
+            for (int lv = 2; lv <= level; lv++)
+                total += GetHPBonusForLevel(lv);
+            return total;
+        }
+
+        public void Restore(LevelData data)
+        {
+            _level = 1;
+            _currentExp = 0;
+
+            if (data != null && config != null)
+            {
+                _level = Mathf.Clamp(data.level, 1, config.MaxLevel);
+                _currentExp = Mathf.Max(0, data.currentExp);
+            }
+
+            if (playerStats != null)
+                playerStats.SetMaxHPBonus(GetTotalHPBonus(_level));
+
+            OnExpChanged?.Invoke(_currentExp, ExpToNextLevel, _level);
+        }
+
     }
 }

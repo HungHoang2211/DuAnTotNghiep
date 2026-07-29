@@ -1,6 +1,7 @@
-using System.Collections.Generic;
 using SimpleSurvival.Building;
+using SimpleSurvival.Progression;
 using SimpleSurvival.Quests;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.SaveLoad
@@ -62,6 +63,9 @@ namespace SimpleSurvival.SaveLoad
                 world = QuestManager.Instance != null
                     ? QuestManager.Instance.Capture()
                     : new WorldData(),
+                level = PlayerLevelSystem.Instance != null
+                     ? PlayerLevelSystem.Instance.Capture()
+                    : new LevelData(),
                 baseMap = BuildModeController.Instance != null 
                     ? BuildModeController.Instance.Capture() 
                     : new BaseMapSaveData()
@@ -102,6 +106,7 @@ namespace SimpleSurvival.SaveLoad
             }
 
             ApplyMeta(lastLoaded.meta);
+            PlayerLevelSystem.Instance?.Restore(lastLoaded.level);
             playerAgent.RestoreCrossScene(lastLoaded.player);
             QuestManager.Instance?.Restore(lastLoaded.world);
             IsActive = true;

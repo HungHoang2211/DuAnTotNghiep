@@ -158,7 +158,12 @@ namespace SimpleSurvival.Stats
             if (HP <= 0f && IsAlive)
                 Die(source);
         }
-
+        public void SetMaxHPBonus(float amount)
+        {
+            _maxHPBonus = Mathf.Max(0f, amount);
+            HP = Mathf.Clamp(HP, 0f, MaxHP);
+            OnHPChanged?.Invoke(HP, MaxHP);
+        }
         private void Die(GameObject source)
         {
             IsAlive = false;
