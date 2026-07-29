@@ -2,6 +2,7 @@
 using UnityEngine;
 using static UnityEngine.Input;
 using SimpleSurvival.SaveLoad;
+using SimpleSurvival.Quests;
 
 namespace SimpleSurvival.Items
 {
@@ -22,6 +23,10 @@ namespace SimpleSurvival.Items
         [Header("Random Durability")]
         [SerializeField, Range(0f, 1f)] private float minDurabilityRatio = 0.3f;
         [SerializeField, Range(0f, 1f)] private float maxDurabilityRatio = 0.9f;
+
+        [Header("Quest Debug")]
+        [SerializeField] private List<QuestData> debugQuests = new List<QuestData>();
+        private int selectedQuestIndex;
 
         private int currentBackpackSlots;
         private int selectedStackableIndex;
@@ -61,11 +66,51 @@ namespace SimpleSurvival.Items
             GUILayout.Space(8);
             DrawDurabilityButton();
             GUILayout.Space(8);
+            DrawQuestDebugButtons();
+            GUILayout.Space(8);
             DrawSaveDebugButtons();
 
             GUILayout.EndArea();
         }
+        private void DrawQuestDebugButtons()
+        {
+            GUILayout.Label("Quest Debug");
 
+            if (debugQuests.Count == 0)
+            {
+                GUILayout.Label("  (no debug quests assigned)");
+                return;
+            }
+
+            DrawQuestSelector(ref selectedQuestIndex, debugQuests);
+
+            QuestData selected = debugQuests[selectedQuestIndex];
+
+            if (GUILayout.Button($"Force Complete '{selected.QuestName}'"))
+                QuestManager.Instance?.DebugForceCompleteQuest(selected);
+        }
+
+        private void DrawQuestSelector(ref int index, List<QuestData> quests)
+        {
+            GUILayout.BeginHorizontal();
+
+            using (new GUIEnabledScope(index > 0))
+            {
+                if (GUILayout.Button("◀", GUILayout.Width(30)))
+                    index--;
+            }
+
+            GUILayout.Label(quests[index].QuestName, GUI.skin.box,
+                GUILayout.ExpandWidth(true));
+
+            using (new GUIEnabledScope(index < quests.Count - 1))
+            {
+                if (GUILayout.Button("▶", GUILayout.Width(30)))
+                    index++;
+            }
+
+            GUILayout.EndHorizontal();
+        }
         private void DrawSaveDebugButtons()
         {
             GUILayout.Label("Save Debug");

@@ -93,10 +93,6 @@ namespace SimpleSurvival.Quests
             if (quest.MarksStoryComplete)
             {
                 StoryCompleted = true;
-                foreach (string mapId in quest.MapsToLockOnComplete)
-                    _permanentlyLockedMaps.Add(mapId);
-
-                SaveService.Instance?.Save();
             }
 
             OnQuestCompleted?.Invoke(quest);
@@ -337,7 +333,21 @@ namespace SimpleSurvival.Quests
 
             return data;
         }
+        public void DebugForceCompleteQuest(QuestData quest)
+        {
+            if (quest == null) return;
 
+            if (!_activeQuests.ContainsKey(quest))
+                StartQuest(quest);
+
+            if (_activeQuests.TryGetValue(quest, out QuestProgress progress))
+            {
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                    progress.SetAmount(i, quest.Objectives[i].requiredAmount);
+            }
+
+            CompleteQuest(quest);
+        }
         public void Restore(WorldData data)
         {
             _activeQuests.Clear();
