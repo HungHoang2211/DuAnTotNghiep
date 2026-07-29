@@ -19,7 +19,9 @@ namespace SimpleSurvival.Stats
         private int _lastDamageFrame = -1;
 
         public float HP { get; private set; }
-        public float MaxHP => baseConfig != null ? baseConfig.MaxHP : 0f;
+
+        private float _maxHPBonus;
+        public float MaxHP => (baseConfig != null ? baseConfig.MaxHP : 0f) + _maxHPBonus;
         public float BaseDamage => baseConfig != null ? baseConfig.BaseDamage : 0f;
         public float BaseAttackSpeed => baseConfig != null ? baseConfig.BaseAttackSpeed : 0f;
         public virtual float Armor => _armor;
@@ -109,6 +111,14 @@ namespace SimpleSurvival.Stats
             if (actual <= 0f) return;
 
             SpawnHpHud(actual, HpHudType.Heal);
+        }
+
+        public void AddMaxHPBonus(float amount)
+        {
+            if (amount <= 0f) return;
+            _maxHPBonus += amount;
+            HP = Mathf.Clamp(HP + amount, 0f, MaxHP);
+            OnHPChanged?.Invoke(HP, MaxHP);
         }
 
         public void SetArmor(float value)
