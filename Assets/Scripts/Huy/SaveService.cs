@@ -120,7 +120,10 @@ namespace SimpleSurvival.SaveLoad
 
             return lastLoaded.corpses.FindAll(c => c.mapId == mapId);
         }
-
+        public List<ContainerData> GetAllContainerData()
+        {
+            return lastLoaded?.containers ?? new List<ContainerData>();
+        }
         public ContainerData GetContainerData(string containerId)
         {
             if (lastLoaded?.containers == null)

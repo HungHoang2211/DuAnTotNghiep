@@ -70,6 +70,8 @@ namespace SimpleSurvival.World
 
             yield return fadeScreen.FadeOut(fadeDuration);
 
+            SaveService.Instance?.Save();
+
             float startTime = Time.unscaledTime;
             yield return mapLoader.SwapRoutine(mapScene);
 

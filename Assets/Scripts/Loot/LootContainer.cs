@@ -116,11 +116,20 @@ namespace SimpleSurvival.Loot
 
         private void Awake()
         {
-            _isLocked = startLocked;
-
             if (persistAcrossSessions)
             {
-                ContainerSaveRegistry.Instance?.InitializePersistentContainer(this);
+                if (!persistWhenEmpty)
+                    Debug.LogWarning($"[LootContainer:{name}] Persist Across Sessions bật nhưng Persist When Empty tắt — container có thể tự despawn và mất trạng thái đã lưu.");
+
+                if (ContainerSaveRegistry.Instance != null)
+                {
+                    ContainerSaveRegistry.Instance.InitializePersistentContainer(this);
+                }
+                else
+                {
+                    Debug.LogWarning($"[LootContainer:{name}] Persist Across Sessions bật nhưng ContainerSaveRegistry chưa sẵn sàng — roll mặc định.");
+                    InitializeDefault();
+                }
                 return;
             }
             if (deferInitialization) return;

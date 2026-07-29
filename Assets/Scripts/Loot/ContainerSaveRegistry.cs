@@ -28,14 +28,18 @@ namespace SimpleSurvival.SaveLoad
 
         public void InitializePersistentContainer(LootContainer container)
         {
-            active.Add(container);
-
             if (string.IsNullOrWhiteSpace(container.ContainerId))
             {
                 Debug.LogWarning($"[ContainerSaveRegistry] '{container.name}' bật Persist Across Sessions nhưng chưa điền Container Id — roll mặc định.");
+                active.Add(container);
                 container.InitializeDefault();
                 return;
             }
+
+            if (active.Exists(c => c != null && c.ContainerId == container.ContainerId))
+                Debug.LogWarning($"[ContainerSaveRegistry] Container Id '{container.ContainerId}' bị trùng — '{container.name}' đang dùng chung Id với 1 container khác đã active.");
+
+            active.Add(container);
 
             ContainerData saved = SaveService.Instance != null
                 ? SaveService.Instance.GetContainerData(container.ContainerId)
@@ -56,19 +60,30 @@ namespace SimpleSurvival.SaveLoad
         {
             active.RemoveAll(c => c == null);
 
-            List<ContainerData> result = new List<ContainerData>();
+            Dictionary<string, ContainerData> merged = new Dictionary<string, ContainerData>();
+
+            if (SaveService.Instance != null)
+            {
+                foreach (ContainerData data in SaveService.Instance.GetAllContainerData())
+                {
+                    if (!string.IsNullOrWhiteSpace(data.containerId))
+                        merged[data.containerId] = data;
+                }
+            }
+
             foreach (LootContainer c in active)
             {
                 if (string.IsNullOrWhiteSpace(c.ContainerId))
                     continue;
 
-                result.Add(new ContainerData
+                merged[c.ContainerId] = new ContainerData
                 {
                     containerId = c.ContainerId,
                     inventory = inventorySerializer.Capture(c.Inventory)
-                });
+                };
             }
-            return result;
+
+            return new List<ContainerData>(merged.Values);
         }
     }
 }
