@@ -20,12 +20,16 @@ namespace SimpleSurvival.Quests
         [Header("Rewards")]
         [SerializeField] private List<QuestRewardEntry> rewards = new List<QuestRewardEntry>();
 
+        [Header("Progression")]
+        [SerializeField] private int expReward;
+        [SerializeField] private int requiredLevel = 1;
+
         [Header("Story Completion")]
-        [Tooltip("Tick nếu quest này là quest cuối cùng, hoàn thành xong là coi như xong cốt truyện.")]
         [SerializeField] private bool marksStoryComplete = false;
-        [Tooltip("Tên scene các map sẽ bị khoá vĩnh viễn ngay khi quest này hoàn thành.")]
         [SerializeField] private List<string> mapsToLockOnComplete = new List<string>();
 
+        public int ExpReward => expReward;
+        public int RequiredLevel => requiredLevel;
         public string QuestId => questId;
         public string QuestName => questName;
         public string OfferDialogue => offerDialogue;

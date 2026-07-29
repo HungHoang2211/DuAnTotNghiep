@@ -2,6 +2,7 @@
 using UnityEngine;
 using SimpleSurvival.UI.Hud;
 using SimpleSurvival.Quests;
+using SimpleSurvival.Progression;
 
 namespace SimpleSurvival.AI
 {
@@ -16,8 +17,12 @@ namespace SimpleSurvival.AI
         [Header("No Quest Left")]
         [SerializeField] private string noQuestsAvailableDialogue = "Tôi không còn việc gì để nhờ bạn nữa.";
 
+        [Header("Locked By Level")]
+        [SerializeField] private string lockedByLevelDialogue = "Bạn cần lên cấp cao hơn để nhận nhiệm vụ này.";
+
         [Header("Refs")]
         [SerializeField] private NPCQuestIndicator indicator;
+        [SerializeField] private GameObject groundHighlight;
 
         protected override void Start()
         {
@@ -30,6 +35,9 @@ namespace SimpleSurvival.AI
                 manager.OnQuestCompleted += HandleQuestCompleted;
             }
 
+            if (PlayerLevelSystem.Instance != null)
+                PlayerLevelSystem.Instance.OnLevelUp += HandleLevelUp;
+
             RefreshIndicator();
         }
 
@@ -41,6 +49,9 @@ namespace SimpleSurvival.AI
                 manager.OnObjectiveProgress -= HandleProgressChanged;
                 manager.OnQuestCompleted -= HandleQuestCompleted;
             }
+
+            if (PlayerLevelSystem.Instance != null)
+                PlayerLevelSystem.Instance.OnLevelUp -= HandleLevelUp;
         }
 
         public override void OnPlayerInteract(GameObject player)
@@ -71,6 +82,12 @@ namespace SimpleSurvival.AI
                 return;
             }
 
+            if (!IsLevelMet(currentQuest))
+            {
+                ShowDialogue(lockedByLevelDialogue);
+                return;
+            }
+
             ShowDialogue(currentQuest.OfferDialogue);
             manager.StartQuest(currentQuest);
             RefreshIndicator();
@@ -86,6 +103,11 @@ namespace SimpleSurvival.AI
             return null;
         }
 
+        private bool IsLevelMet(QuestData quest)
+        {
+            return PlayerLevelSystem.Instance == null || PlayerLevelSystem.Instance.HasReachedLevel(quest.RequiredLevel);
+        }
+
         private void ShowDialogue(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
@@ -96,12 +118,11 @@ namespace SimpleSurvival.AI
 
         private void RefreshIndicator()
         {
-            if (indicator == null) return;
-
             var manager = QuestManager.Instance;
             if (manager == null)
             {
-                indicator.Hide();
+                indicator?.Hide();
+                SetGroundHighlight(false);
                 return;
             }
 
@@ -109,16 +130,28 @@ namespace SimpleSurvival.AI
 
             if (currentQuest == null)
             {
-                indicator.Hide();
+                indicator?.Hide();
+                SetGroundHighlight(false);
                 return;
             }
 
             if (manager.IsQuestActive(currentQuest))
-                indicator.SetState(manager.IsReadyToTurnIn(currentQuest)
+            {
+                indicator?.SetState(manager.IsReadyToTurnIn(currentQuest)
                     ? NPCQuestState.ReadyToTurnIn
                     : NPCQuestState.InProgress);
-            else
-                indicator.SetState(NPCQuestState.Available);
+                SetGroundHighlight(false);
+                return;
+            }
+
+            bool levelMet = IsLevelMet(currentQuest);
+            indicator?.SetState(levelMet ? NPCQuestState.Available : NPCQuestState.NoQuest);
+            SetGroundHighlight(levelMet);
+        }
+
+        private void SetGroundHighlight(bool value)
+        {
+            if (groundHighlight != null) groundHighlight.SetActive(value);
         }
 
         private void HandleProgressChanged(QuestData quest, int objectiveIndex)
@@ -130,6 +163,11 @@ namespace SimpleSurvival.AI
         private void HandleQuestCompleted(QuestData quest)
         {
             if (!questChain.Contains(quest)) return;
+            RefreshIndicator();
+        }
+
+        private void HandleLevelUp(int newLevel)
+        {
             RefreshIndicator();
         }
     }

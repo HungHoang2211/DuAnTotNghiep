@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: ZombieFatQuest
   m_EditorClassIdentifier: 
   questId: 2
-  questName: Kill ZombieFat
-  offerDialogue: Hi, can you help me kill the giant ZombieFat? It's too dangerous
+  questName: Kill Roaming Zombie
+  offerDialogue: Hi, can you help me kill the giant Roaming Zombie? It's too dangerous
     for me to handle alone.
   turnInDialogue: Thank goodness you defeated it! Thank you so much for keeping me
     safe.
   objectives:
   - type: 1
-    description: Defeat the ZombieFat to help MrBeat.
+    description: Defeat the Roaming Zombie to help MrBeat.
     targetItem: {fileID: 0}
-    targetEnemyConfig: {fileID: 11400000, guid: 6b931b4c69e76d042bc302fb6f20bf1a, type: 2}
+    targetEnemyConfig: {fileID: 11400000, guid: fbcf3d160b23f744ba08ec82f0d85023, type: 2}
     targetNpcId: 
     escortWaypointIds: []
     requiredAmount: 1
@@ -33,5 +33,7 @@ MonoBehaviour:
     quantity: 1
   - itemData: {fileID: 11400000, guid: 59777914d765db849b2dcd57a5aea121, type: 2}
     quantity: 1
+  expReward: 3
+  requiredLevel: 100
   marksStoryComplete: 0
   mapsToLockOnComplete: []

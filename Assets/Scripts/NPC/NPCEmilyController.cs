@@ -5,18 +5,19 @@ using SimpleSurvival.Stats;
 using SimpleSurvival.UI.Hud;
 using SimpleSurvival.Quests;
 using SimpleSurvival.Loot;
+using SimpleSurvival.Progression;
 
 namespace SimpleSurvival.AI
 {
     public sealed class NPCEmilyController : BaseNPCController
     {
-        [Header("Định danh (khớp targetNpcId trong QuestObjectiveData của MrBeat)")]
+        [Header("Định danh")]
         [SerializeField] private string npcId = "emily";
 
-        [Header("Quest MrBeat giao - tìm Emily (objective type FindNPC)")]
+        [Header("Quest MrBeat")]
         [SerializeField] private QuestData findQuest;
 
-        [Header("Quest Emily giao - hộ tống (objective type EscortNPC)")]
+        [Header("Quest Emily")]
         [SerializeField] private QuestData escortQuest;
 
         [Header("Dialogue")]
@@ -24,6 +25,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private string escortInProgressDialogue = "Đi thôi, tôi sẽ theo sau bạn.";
         [SerializeField] private string escortDoneDialogue = "Cảm ơn bạn rất nhiều!";
         [SerializeField] private string allDoneDialogue = "Tôi ổn rồi, cảm ơn bạn.";
+        [SerializeField] private string lockedByLevelDialogue = "Bạn cần lên cấp cao hơn để nhận nhiệm vụ này.";
 
         [Header("Phản đòn")]
         [Tooltip("Khoảng cách giữa mỗi lần chơi animation attack trong lúc đang đứng đánh nhau")]
@@ -36,6 +38,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private NPCEmilyStats stats;
         [SerializeField] private NPCEmilyAnimator animatorController;
         [SerializeField] private EscortEnemyDirector enemyDirector;
+        [SerializeField] private GameObject groundHighlight;
 
         public bool IsEscorting { get; private set; }
 
@@ -53,7 +56,15 @@ namespace SimpleSurvival.AI
 
             var manager = QuestManager.Instance;
             if (manager != null)
+            {
                 manager.OnQuestFailed += HandleQuestFailed;
+                manager.OnQuestStarted += HandleQuestStateChanged;
+                manager.OnObjectiveProgress += HandleObjectiveProgress;
+                manager.OnQuestCompleted += HandleQuestStateChanged;
+            }
+
+            if (PlayerLevelSystem.Instance != null)
+                PlayerLevelSystem.Instance.OnLevelUp += HandleLevelUp;
 
             if (stats != null)
             {
@@ -63,13 +74,23 @@ namespace SimpleSurvival.AI
 
             if (animatorController != null)
                 animatorController.OnAttackHit += HandleAttackHit;
+
+            RefreshGroundHighlight();
         }
 
         private void OnDestroy()
         {
             var manager = QuestManager.Instance;
             if (manager != null)
+            {
                 manager.OnQuestFailed -= HandleQuestFailed;
+                manager.OnQuestStarted -= HandleQuestStateChanged;
+                manager.OnObjectiveProgress -= HandleObjectiveProgress;
+                manager.OnQuestCompleted -= HandleQuestStateChanged;
+            }
+
+            if (PlayerLevelSystem.Instance != null)
+                PlayerLevelSystem.Instance.OnLevelUp -= HandleLevelUp;
 
             if (stats != null)
             {
@@ -89,7 +110,6 @@ namespace SimpleSurvival.AI
             var manager = QuestManager.Instance;
             if (manager == null) return;
 
-            // 1) Quest "tìm Emily" đang active -> báo tìm thấy + nhận thưởng ngay
             if (findQuest != null && manager.IsQuestActive(findQuest))
             {
                 manager.NotifyNPCFound(npcId);
@@ -101,9 +121,6 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            // 2) Quest hộ tống ĐÃ được giao nhưng CHƯA khởi hành -> lần tương tác này mới thật sự đi.
-            //    (Emily đứng yên, giữ lời mời trên đầu, kể từ lúc quest được giao ở bước 3 bên dưới
-            //    cho tới khi player bấm tương tác thêm 1 lần nữa thì mới BeginEscort()).
             if (escortQuest != null && manager.IsQuestActive(escortQuest) && !IsEscorting)
             {
                 ShowDialogue(escortInProgressDialogue);
@@ -111,30 +128,74 @@ namespace SimpleSurvival.AI
                 return;
             }
 
-            // 3) Đã tìm xong, hộ tống chưa từng được giao -> giao quest, hiện lời mời, ĐỨNG YÊN
-            //    (không gọi BeginEscort() ở đây, chờ tương tác lần nữa ở bước 2 phía trên)
             bool escortNotOfferedYet = escortQuest != null
                 && !manager.IsQuestActive(escortQuest)
                 && !manager.IsQuestCompleted(escortQuest);
 
             if (escortNotOfferedYet)
             {
+                if (!IsLevelMet(escortQuest))
+                {
+                    ShowDialogue(lockedByLevelDialogue);
+                    return;
+                }
+
                 ShowDialogue(escortOfferDialogue);
                 manager.StartQuest(escortQuest);
                 UnlockRouteContainers();
                 return;
             }
 
-            // 4) Đang hộ tống (đã khởi hành)
             if (IsEscorting)
             {
                 ShowDialogue(escortInProgressDialogue);
                 return;
             }
 
-            // 5) Đã hoàn thành hết
             if (escortQuest != null && manager.IsQuestCompleted(escortQuest))
                 ShowDialogue(allDoneDialogue);
+        }
+
+        private bool IsLevelMet(QuestData quest)
+        {
+            return PlayerLevelSystem.Instance == null || PlayerLevelSystem.Instance.HasReachedLevel(quest.RequiredLevel);
+        }
+
+        private void RefreshGroundHighlight()
+        {
+            var manager = QuestManager.Instance;
+            if (manager == null) { SetGroundHighlight(false); return; }
+
+            bool isFindTarget = findQuest != null && manager.IsQuestActive(findQuest);
+
+            bool escortOfferable = escortQuest != null
+                && !manager.IsQuestActive(escortQuest)
+                && !manager.IsQuestCompleted(escortQuest)
+                && IsLevelMet(escortQuest);
+
+            SetGroundHighlight(isFindTarget || escortOfferable);
+        }
+
+        private void SetGroundHighlight(bool value)
+        {
+            if (groundHighlight != null) groundHighlight.SetActive(value);
+        }
+
+        private void HandleQuestStateChanged(QuestData quest)
+        {
+            if (quest != findQuest && quest != escortQuest) return;
+            RefreshGroundHighlight();
+        }
+
+        private void HandleObjectiveProgress(QuestData quest, int objectiveIndex)
+        {
+            if (quest != findQuest && quest != escortQuest) return;
+            RefreshGroundHighlight();
+        }
+
+        private void HandleLevelUp(int newLevel)
+        {
+            RefreshGroundHighlight();
         }
 
         private void BeginEscort()
@@ -248,7 +309,6 @@ namespace SimpleSurvival.AI
         {
             if (!IsEscorting || attacker == null) return;
 
-            // Đã đang đánh nhau với đúng kẻ này rồi -> chỉ cập nhật hướng, không khởi động lại
             if (_currentThreat == attacker)
             {
                 FaceAttacker(attacker.transform);
@@ -260,7 +320,6 @@ namespace SimpleSurvival.AI
 
         private void EnterCombat(GameObject attacker)
         {
-            // Nếu đang đánh nhau với 1 kẻ khác thì gỡ đăng ký cũ trước khi đổi mục tiêu
             if (_currentThreatStats != null)
                 _currentThreatStats.OnDeath -= HandleThreatDefeated;
 
@@ -287,11 +346,6 @@ namespace SimpleSurvival.AI
             }
         }
 
-        /// <summary>
-        /// Gọi từ animation event (qua NPCEmilyAnimator.OnAttackHit) đúng lúc tay Emily
-        /// chạm mục tiêu trong animation attack - đây là nơi thực sự áp damage,
-        /// giống PlayerAnimationRelay.OnAttackHit() gọi attack.HandleHit().
-        /// </summary>
         private void HandleAttackHit()
         {
             if (_currentThreat == null || _currentThreatStats == null) return;
@@ -303,9 +357,6 @@ namespace SimpleSurvival.AI
             ExitCombat();
         }
 
-        /// <summary>
-        /// Kết thúc trạng thái đứng đánh nhau: gỡ đăng ký, dừng animation loop, cho di chuyển tiếp.
-        /// </summary>
         private void ExitCombat()
         {
             if (_currentThreatStats != null)
