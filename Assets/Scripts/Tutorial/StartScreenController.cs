@@ -1,3 +1,4 @@
+using SimpleSurvival.SaveLoad;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,9 +15,25 @@ namespace SimpleSurvival.UI.MainMenu
         [SerializeField] private float maxAlpha = 1f;
         [SerializeField] private float blinkSpeed = 1.5f;
 
+        [Header("New Game")]
+        [SerializeField] private Button newGameButton;
+        [SerializeField] private GameObject confirmNewGamePanel;
+        [SerializeField] private Button confirmYesButton;
+        [SerializeField] private Button confirmNoButton;
+
+        private SaveStorage storage;
+
         private void Awake()
         {
+            storage = new SaveStorage();
+
             startButton.onClick.AddListener(HandleTap);
+            newGameButton.onClick.AddListener(HandleNewGamePressed);
+            confirmYesButton.onClick.AddListener(HandleConfirmYes);
+            confirmNoButton.onClick.AddListener(HandleConfirmNo);
+
+            newGameButton.gameObject.SetActive(storage.Exists());
+            confirmNewGamePanel.SetActive(false);
         }
 
         private void Update()
@@ -32,6 +49,23 @@ namespace SimpleSurvival.UI.MainMenu
         {
             startButton.interactable = false;
             SceneManager.LoadScene(coreSceneName, LoadSceneMode.Single);
+        }
+
+        private void HandleNewGamePressed()
+        {
+            confirmNewGamePanel.SetActive(true);
+        }
+
+        private void HandleConfirmYes()
+        {
+            storage.Delete();
+            startButton.interactable = false;
+            SceneManager.LoadScene(coreSceneName, LoadSceneMode.Single);
+        }
+
+        private void HandleConfirmNo()
+        {
+            confirmNewGamePanel.SetActive(false);
         }
     }
 }
