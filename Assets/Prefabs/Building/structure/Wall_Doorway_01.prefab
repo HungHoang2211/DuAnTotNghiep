@@ -971,6 +971,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4694121525821480}
   - component: {fileID: 208017697238300914}
+  - component: {fileID: 7684930348614633802}
   m_Layer: 6
   m_Name: ColliderDoor
   m_TagString: Untagged
@@ -1009,6 +1010,28 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 1.15, z: 0}
   m_TimeToStationary: 0.5
+--- !u!64 &7684930348614633802
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884547391421755}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: f5ff240e96f5a694189ae51071e75062, type: 2}
 --- !u!1 &1977153420339851
 GameObject:
   m_ObjectHideFlags: 0
@@ -1020,7 +1043,7 @@ GameObject:
   - component: {fileID: 4397768327470545}
   - component: {fileID: 65571718729274231}
   - component: {fileID: 2687077458737777200}
-  m_Layer: 25
+  m_Layer: 23
   m_Name: SelectorCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1160,7 +1183,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6923090749960825801
 MonoBehaviour:
