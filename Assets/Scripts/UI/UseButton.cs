@@ -25,6 +25,7 @@ namespace SimpleSurvival.UI
         [SerializeField] private Sprite axeIcon;
         [SerializeField] private Sprite pickaxeIcon;
         [SerializeField] private Sprite lootIcon;
+        [SerializeField] private Sprite repairIcon;
 
         private static readonly int ShowTrigger = Animator.StringToHash("Show");
         private static readonly int HideTrigger = Animator.StringToHash("Hide");
@@ -81,6 +82,8 @@ namespace SimpleSurvival.UI
                 actionController.RequestPickup(pickup);
             else if (_currentTarget is LootContainer container)
                 actionController.RequestLoot(container);
+            else if (_currentTarget is RepairableTower tower)
+                actionController.RequestRepairTower(tower);
             else if (_currentTarget is SimpleSurvival.Targets.NPCTargetable npc)
                 actionController.RequestNPCInteract(npc);
             else if (_currentTarget is SimpleSurvival.Targets.DogHouseTargetable dogHouse)
@@ -129,6 +132,9 @@ namespace SimpleSurvival.UI
                     break;
                 case LootContainer _:
                     iconImage.sprite = lootIcon;
+                    break;
+                case RepairableTower _:
+                    iconImage.sprite = repairIcon;
                     break;
                 default:
                     iconImage.sprite = defaultIcon;

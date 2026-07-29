@@ -10,6 +10,7 @@ namespace SimpleSurvival.Targets
         Trader,
         Character,
         WitchEvent,
-        DogHouse
+        DogHouse,
+        Repairable
     }
 }

@@ -16,6 +16,8 @@ namespace SimpleSurvival.Pets
     {
         private enum DogState { Waiting, StandingUp, Follow, Combat, MovingToHouse, SentHome }
 
+        public static DogController Instance { get; private set; }
+
         [Header("References")]
         [SerializeField] private PlayerActionController playerActionController;
         [SerializeField] private PlayerInputReader playerInputReader;
@@ -74,6 +76,12 @@ namespace SimpleSurvival.Pets
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             _agent = GetComponent<NavMeshAgent>();
             _characterController = GetComponent<CharacterController>();
 
@@ -89,6 +97,17 @@ namespace SimpleSurvival.Pets
             _scratchPath = new NavMeshPath();
 
             InitializeQuestState();
+
+            if (_state != DogState.Waiting) PersistAcrossScenes();
+        }
+
+        private void PersistAcrossScenes()
+        {
+            if (Instance != null && Instance != this) return;
+
+            Instance = this;
+            transform.SetParent(null, true);
+            DontDestroyOnLoad(gameObject);
         }
 
         private void ResolvePlayerReferences()
@@ -132,6 +151,8 @@ namespace SimpleSurvival.Pets
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
+
             var manager = QuestManager.Instance;
             if (manager != null) manager.OnQuestCompleted -= HandleQuestCompleted;
         }
@@ -166,6 +187,7 @@ namespace SimpleSurvival.Pets
             if (_state != DogState.Waiting) return;
 
             _state = DogState.StandingUp;
+            PersistAcrossScenes();
             if (dogAnimator != null) dogAnimator.TriggerStandUp();
         }
 

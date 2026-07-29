@@ -86,7 +86,6 @@ namespace SimpleSurvival.Stats
             float finalDamage = rawDamage * (1f - reduction);
             SetHP(HP - finalDamage, source);
 
-            Debug.Log($"[{name}] Take damage: {rawDamage} (reduced to {finalDamage:F1}) from {(source != null ? source.name : "unknown")}, HP after: {HP}");
 
             SpawnHpHud(finalDamage, HudDamageType);
 

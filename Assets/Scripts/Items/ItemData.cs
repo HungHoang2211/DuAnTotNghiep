@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.Items
@@ -24,6 +24,10 @@ namespace SimpleSurvival.Items
         [Tooltip("Tick every role this item fills. Equipment slots accept only items carrying the matching tag.")]
         [SerializeField] private ItemTag tags;
 
+        [Header("Restrictions")]
+        [Tooltip("True = item không thể bị Delete (quest/key item).")]
+        [SerializeField] private bool isQuestItem;
+
         [Header("Abilities")]
         [Tooltip("Drag ability assets here. An item with no abilities is a plain resource.")]
         [SerializeField] private List<ItemAbility> abilities = new List<ItemAbility>();
@@ -36,6 +40,8 @@ namespace SimpleSurvival.Items
         public int MaxStack => isStackable ? maxStack : 1;
         public int MaxDurability => maxDurability;
         public bool IsDurable => maxDurability > 0;
+        public bool IsQuestItem => isQuestItem;
+
         public TAbility GetAbility<TAbility>() where TAbility : ItemAbility
         {
             foreach (ItemAbility ability in abilities)
