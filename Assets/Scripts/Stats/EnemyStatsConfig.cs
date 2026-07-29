@@ -41,8 +41,10 @@ namespace SimpleSurvival.Stats
         [SerializeField] private float wanderIntervalMax = 5f;
 
         [Header("Corpse Loot")]
-        [Tooltip("Loot table khi enemy chết. Để null = không drop gì = xác không tương tác được.")]
         [SerializeField] private LootTable corpseLootTable;
+
+        [Header("Progression")]
+        [SerializeField] private int expReward;
 
         public EnemyKind Kind => kind;
         public string DisplayName => displayName;
@@ -65,5 +67,7 @@ namespace SimpleSurvival.Stats
         public float WanderIntervalMin => wanderIntervalMin;
         public float WanderIntervalMax => wanderIntervalMax;
         public LootTable CorpseLootTable => corpseLootTable;
+
+        public int ExpReward => expReward;
     }
 }

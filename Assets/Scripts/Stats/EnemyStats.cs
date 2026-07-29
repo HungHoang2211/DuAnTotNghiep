@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using SimpleSurvival.UI.Hud;
+using SimpleSurvival.Progression;
 
 namespace SimpleSurvival.Stats
 {
@@ -16,6 +17,19 @@ namespace SimpleSurvival.Stats
             {
                 Debug.LogError($"[{name}] EnemyStats requires EnemyStatsConfig, got {baseConfig.GetType().Name}", this);
             }
+
+            OnDeath += HandleExpReward;
+        }
+
+        private void OnDestroy()
+        {
+            OnDeath -= HandleExpReward;
+        }
+
+        private void HandleExpReward(GameObject source)
+        {
+            if (EnemyConfig != null)
+                PlayerLevelSystem.Instance?.AddExperience(EnemyConfig.ExpReward);
         }
 
         private void OnSpawnFromPool()

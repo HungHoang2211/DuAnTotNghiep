@@ -137,10 +137,9 @@ namespace SimpleSurvival.AI
 
             if (manager.IsQuestActive(currentQuest))
             {
-                indicator?.SetState(manager.IsReadyToTurnIn(currentQuest)
-                    ? NPCQuestState.ReadyToTurnIn
-                    : NPCQuestState.InProgress);
-                SetGroundHighlight(false);
+                bool readyToTurnIn = manager.IsReadyToTurnIn(currentQuest);
+                indicator?.SetState(readyToTurnIn ? NPCQuestState.ReadyToTurnIn : NPCQuestState.InProgress);
+                SetGroundHighlight(readyToTurnIn);
                 return;
             }
 

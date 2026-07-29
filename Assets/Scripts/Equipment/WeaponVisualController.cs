@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using SimpleSurvival.Actions;
 using SimpleSurvival.Items;
 
@@ -12,6 +12,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private Transform rightHandAnchor;
         [SerializeField] private AudioSource weaponAudioSource;
         [SerializeField] private PlayerLeftHandIK leftHandIK;
+        [SerializeField] private string weaponVisualLayerName = "PlayerWeapon";
 
         private GameObject _currentVisual;
         private WeaponVisualAnchors _currentAnchors;
@@ -93,7 +94,7 @@ namespace SimpleSurvival.Player
             if (targetPrefab == null) return;
 
             _currentVisual = Instantiate(targetPrefab, rightHandAnchor, false);
-            ApplyLayerRecursively(_currentVisual, rightHandAnchor.gameObject.layer);
+            ApplyLayerRecursively(_currentVisual, ResolveWeaponVisualLayer());
 
             _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
             _currentSourcePrefab = targetPrefab;
@@ -106,6 +107,19 @@ namespace SimpleSurvival.Player
             target.layer = layer;
             foreach (Transform child in target.transform)
                 ApplyLayerRecursively(child.gameObject, layer);
+        }
+
+        /// <summary>
+        /// Trả về layer riêng cho visual vũ khí (mặc định "PlayerWeapon"). Cần tắt va chạm
+        /// giữa layer này với layer "Enemy" trong Project Settings > Physics > Layer Collision
+        /// Matrix để vũ khí không đẩy CharacterController của enemy khi vung, mà không ảnh
+        /// hưởng các va chạm khác của vũ khí (môi trường, v.v.). Nếu layer chưa được tạo,
+        /// fallback về layer của rightHandAnchor để không lỗi khi build.
+        /// </summary>
+        private int ResolveWeaponVisualLayer()
+        {
+            int layer = LayerMask.NameToLayer(weaponVisualLayerName);
+            return layer >= 0 ? layer : rightHandAnchor.gameObject.layer;
         }
 
         private GameObject ResolveTargetPrefab()
