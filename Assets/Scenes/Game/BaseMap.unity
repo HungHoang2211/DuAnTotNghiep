@@ -1039,6 +1039,89 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1080555678}
   m_LocalEulerAnglesHint: {x: 24.776703, y: -5.1185813, z: -12.064827}
+--- !u!1001 &258724265
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1649187033}
+    m_Modifications:
+    - target: {fileID: 7986504087968017091, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_Name
+      value: Healing circle
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986504087968017091, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.19125
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.19125
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.19125
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+--- !u!1 &258724266 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7986504087968017091, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+  m_PrefabInstance: {fileID: 258724265}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &258724267 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8037160467862551414, guid: 178c76e366213ed4a8a87c2876f86fbb, type: 3}
+  m_PrefabInstance: {fileID: 258724265}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &262531851
 GameObject:
   m_ObjectHideFlags: 0
@@ -8526,7 +8609,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a7e16313e1aa2df40bd387e6b3260274, type: 2}
   questInProgressDialogue: The quest isn't finished yet. Stay strong!
   noQuestsAvailableDialogue: I have no more tasks for you at the moment.
+  lockedByLevelDialogue: "B\u1EA1n c\u1EA7n l\xEAn c\u1EA5p cao h\u01A1n \u0111\u1EC3
+    nh\u1EADn nhi\u1EC7m v\u1EE5 n\xE0y."
   indicator: {fileID: 1649187026}
+  groundHighlight: {fileID: 258724266}
 --- !u!135 &1649187029
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -8629,6 +8715,7 @@ Transform:
   - {fileID: 1632827016}
   - {fileID: 1044003647}
   - {fileID: 674008468}
+  - {fileID: 258724267}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -141.075, z: 0}
 --- !u!1 &1651920327
