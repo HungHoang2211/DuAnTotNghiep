@@ -10,18 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c308f16c6d4d4234e8639b00026770d2, type: 3}
-  m_Name: WoodenWall
+  m_Name: Plank Wall
   m_EditorClassIdentifier: 
   buildingId: 
-  displayName: Basic Wall
+  displayName: Plank Wall
   description: 
-  icon: {fileID: 21300000, guid: 6bca5ab54cc4a9645803f137fdc79319, type: 3}
-  prefab: {fileID: 1709254077376921, guid: 5862005ad035b76429856fee9a63fb83, type: 3}
+  icon: {fileID: 21300000, guid: a70f8a0b4fa34eb4a9cc2595ce799d66, type: 3}
+  prefab: {fileID: 1709254077376921, guid: 2ec7409d128ac584eb8b92c4888b538a, type: 3}
   structureType: 1
   footprintSizeX: 1
   footprintSizeZ: 1
   floorRequirement: 0
   directCost:
   - item: {fileID: 11400000, guid: 676e56abf2fdaa541ba452d3deb112ca, type: 2}
-    amount: 1
-  nextTier: {fileID: 11400000, guid: 6d4a85b1e8b4e6e469d8894df2cf18e5, type: 2}
+    amount: 2
+  - item: {fileID: 11400000, guid: 70ac1dbbcbe2c1146a81bee435e31caf, type: 2}
+    amount: 2
+  tierIndex: 1
+  nextTier: {fileID: 0}
