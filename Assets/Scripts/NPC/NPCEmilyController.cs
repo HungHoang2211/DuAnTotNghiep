@@ -20,17 +20,24 @@ namespace SimpleSurvival.AI
         [Header("Quest Emily")]
         [SerializeField] private QuestData escortQuest;
 
+        [Header("Quest Emily - Defeat ZombieWitch")]
+        [SerializeField] private QuestData killWitchQuest;
+        [SerializeField] private string killWitchInProgressDialogue = "That witch is still out there somewhere, be careful.";
+
+        [Header("Quest Emily - Watch Tower")]
+        [SerializeField] private QuestData repairTowerQuest;
+        [SerializeField] private string repairTowerInProgressDialogue = "The broadcast tower still needs fixing.";
+
         [Header("Dialogue")]
-        [SerializeField] private string escortOfferDialogue = "Bạn có thể hộ tống tôi đến nơi đó không?";
-        [SerializeField] private string escortInProgressDialogue = "Đi thôi, tôi sẽ theo sau bạn.";
-        [SerializeField] private string escortDoneDialogue = "Cảm ơn bạn rất nhiều!";
-        [SerializeField] private string allDoneDialogue = "Tôi ổn rồi, cảm ơn bạn.";
-        [SerializeField] private string lockedByLevelDialogue = "Bạn cần lên cấp cao hơn để nhận nhiệm vụ này.";
+        [SerializeField] private string escortOfferDialogue = "Could you escort me there?";
+        [SerializeField] private string escortInProgressDialogue = "Let's go, I'll follow you.";
+        [SerializeField] private string escortDoneDialogue = "Thank you so much!";
+        [SerializeField] private string allDoneDialogue = "I'm fine now, thank you.";
+        [SerializeField] private string lockedByLevelDialogue = "You need to reach a higher level to accept this quest.";
 
         [Header("Phản đòn")]
-        [Tooltip("Khoảng cách giữa mỗi lần chơi animation attack trong lúc đang đứng đánh nhau")]
         [SerializeField] private float attackInterval = 1.2f;
-        [Tooltip("Damage Emily gây ra mỗi đòn phản đòn trúng")]
+
         [SerializeField] private float attackDamage = 10f;
 
         [Header("Refs")]
@@ -152,6 +159,67 @@ namespace SimpleSurvival.AI
                 return;
             }
 
+            if (killWitchQuest != null && manager.IsQuestActive(killWitchQuest))
+            {
+                if (manager.IsReadyToTurnIn(killWitchQuest))
+                {
+                    ShowDialogue(killWitchQuest.TurnInDialogue);
+                    manager.CompleteQuest(killWitchQuest);
+                    RefreshGroundHighlight();
+                }
+                else
+                {
+                    ShowDialogue(killWitchInProgressDialogue);
+                }
+                return;
+            }
+
+            bool killWitchNotOfferedYet = killWitchQuest != null
+                && escortQuest != null
+                && manager.IsQuestCompleted(escortQuest)
+                && !manager.IsQuestActive(killWitchQuest)
+                && !manager.IsQuestCompleted(killWitchQuest);
+
+            if (killWitchNotOfferedYet)
+            {
+                if (!IsLevelMet(killWitchQuest))
+                {
+                    ShowDialogue(lockedByLevelDialogue);
+                    return;
+                }
+
+                ShowDialogue(killWitchQuest.OfferDialogue);
+                manager.StartQuest(killWitchQuest);
+                RefreshGroundHighlight();
+                return;
+            }
+
+            if (repairTowerQuest != null && manager.IsQuestActive(repairTowerQuest))
+            {
+                ShowDialogue(repairTowerInProgressDialogue);
+                return;
+            }
+
+            bool repairTowerNotOfferedYet = repairTowerQuest != null
+                && killWitchQuest != null
+                && manager.IsQuestCompleted(killWitchQuest)
+                && !manager.IsQuestActive(repairTowerQuest)
+                && !manager.IsQuestCompleted(repairTowerQuest);
+
+            if (repairTowerNotOfferedYet)
+            {
+                if (!IsLevelMet(repairTowerQuest))
+                {
+                    ShowDialogue(lockedByLevelDialogue);
+                    return;
+                }
+
+                ShowDialogue(repairTowerQuest.OfferDialogue);
+                manager.StartQuest(repairTowerQuest);
+                RefreshGroundHighlight();
+                return;
+            }
+
             if (escortQuest != null && manager.IsQuestCompleted(escortQuest))
                 ShowDialogue(allDoneDialogue);
         }
@@ -173,7 +241,25 @@ namespace SimpleSurvival.AI
                 && !manager.IsQuestCompleted(escortQuest)
                 && IsLevelMet(escortQuest);
 
-            SetGroundHighlight(isFindTarget || escortOfferable);
+            bool killWitchOfferable = killWitchQuest != null
+                && escortQuest != null
+                && manager.IsQuestCompleted(escortQuest)
+                && !manager.IsQuestActive(killWitchQuest)
+                && !manager.IsQuestCompleted(killWitchQuest)
+                && IsLevelMet(killWitchQuest);
+
+            bool killWitchReadyToTurnIn = killWitchQuest != null
+                && manager.IsQuestActive(killWitchQuest)
+                && manager.IsReadyToTurnIn(killWitchQuest);
+
+            bool repairTowerOfferable = repairTowerQuest != null
+                && killWitchQuest != null
+                && manager.IsQuestCompleted(killWitchQuest)
+                && !manager.IsQuestActive(repairTowerQuest)
+                && !manager.IsQuestCompleted(repairTowerQuest)
+                && IsLevelMet(repairTowerQuest);
+
+            SetGroundHighlight(isFindTarget || escortOfferable || killWitchOfferable || killWitchReadyToTurnIn || repairTowerOfferable);
         }
 
         private void SetGroundHighlight(bool value)
@@ -183,13 +269,13 @@ namespace SimpleSurvival.AI
 
         private void HandleQuestStateChanged(QuestData quest)
         {
-            if (quest != findQuest && quest != escortQuest) return;
+            if (quest != findQuest && quest != escortQuest && quest != killWitchQuest && quest != repairTowerQuest) return;
             RefreshGroundHighlight();
         }
 
         private void HandleObjectiveProgress(QuestData quest, int objectiveIndex)
         {
-            if (quest != findQuest && quest != escortQuest) return;
+            if (quest != findQuest && quest != escortQuest && quest != killWitchQuest && quest != repairTowerQuest) return;
             RefreshGroundHighlight();
         }
 

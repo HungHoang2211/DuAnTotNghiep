@@ -11,6 +11,9 @@ namespace SimpleSurvival.Targets
         [SerializeField] private float unlockDuration = 3f;
         [SerializeField] private BaseStats bigOneStats;
 
+        [Header("Quest")]
+        [SerializeField] private string towerId;
+
         private bool _isUnlocked;
         private bool _repaired;
 
@@ -18,6 +21,7 @@ namespace SimpleSurvival.Targets
         public IReadOnlyList<RepairRequirement> RequiredItems => requiredItems;
         public float UnlockDuration => unlockDuration;
         public bool IsRepaired => _repaired;
+        public string TowerId => towerId;
 
         public event Action<RepairableTower> OnRepaired;
 

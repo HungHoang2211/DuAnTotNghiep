@@ -7,6 +7,7 @@ namespace SimpleSurvival.Quests
         FindNPC,
         EscortNPC,
         HarvestNode,
-        CraftItem
+        CraftItem,
+        RepairTower
     }
 }

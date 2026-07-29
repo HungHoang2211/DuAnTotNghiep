@@ -12,13 +12,13 @@ namespace SimpleSurvival.AI
         [SerializeField] private List<QuestData> questChain = new List<QuestData>();
 
         [Header("Quest In Progress")]
-        [SerializeField] private string questInProgressDialogue = "Nhiệm vụ vẫn chưa xong đâu, cố lên nhé!";
+        [SerializeField] private string questInProgressDialogue = "This quest isn't finished yet, keep going!";
 
         [Header("No Quest Left")]
-        [SerializeField] private string noQuestsAvailableDialogue = "Tôi không còn việc gì để nhờ bạn nữa.";
+        [SerializeField] private string noQuestsAvailableDialogue = "I don't have anything else for you right now.";
 
         [Header("Locked By Level")]
-        [SerializeField] private string lockedByLevelDialogue = "Bạn cần lên cấp cao hơn để nhận nhiệm vụ này.";
+        [SerializeField] private string lockedByLevelDialogue = "You need to reach a higher level to accept this quest.";
 
         [Header("Refs")]
         [SerializeField] private NPCQuestIndicator indicator;

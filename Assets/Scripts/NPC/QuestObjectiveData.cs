@@ -24,6 +24,9 @@ namespace SimpleSurvival.Quests
         [Header("EscortNPC")]
         public List<string> escortWaypointIds = new List<string>();
 
+        [Header("RepairTower")]
+        public string targetTowerId;
+
         public int requiredAmount = 1;
     }
 }

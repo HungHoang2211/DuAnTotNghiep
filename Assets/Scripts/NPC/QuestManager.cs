@@ -278,6 +278,34 @@ namespace SimpleSurvival.Quests
                 CompleteQuest(quest);
         }
 
+        public void NotifyTowerRepaired(string towerId)
+        {
+            if (string.IsNullOrEmpty(towerId)) return;
+
+            var snapshot = new List<KeyValuePair<QuestData, QuestProgress>>(_activeQuests);
+            foreach (var kvp in snapshot)
+            {
+                QuestData quest = kvp.Key;
+                QuestProgress progress = kvp.Value;
+                bool changed = false;
+
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                {
+                    QuestObjectiveData objective = quest.Objectives[i];
+                    if (objective.type != QuestObjectiveType.RepairTower) continue;
+                    if (objective.targetTowerId != towerId) continue;
+                    if (progress.IsObjectiveComplete(i)) continue;
+
+                    progress.AddProgress(i, objective.requiredAmount);
+                    OnObjectiveProgress?.Invoke(quest, i);
+                    changed = true;
+                }
+
+                if (changed && progress.IsAllComplete())
+                    CompleteQuest(quest);
+            }
+        }
+
         public WorldData Capture()
         {
             WorldData data = new WorldData
