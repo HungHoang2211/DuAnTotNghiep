@@ -68954,6 +68954,7 @@ MonoBehaviour:
   axeIcon: {fileID: 21300000, guid: 8ca35c081efa8cb4db745d0d10ba0f3c, type: 3}
   pickaxeIcon: {fileID: 21300000, guid: 6dd08558f74e5034fae4ff5c298ec3b5, type: 3}
   lootIcon: {fileID: 21300000, guid: fca99d0da170d2f46b779a5cae59535c, type: 3}
+  repairIcon: {fileID: 0}
 --- !u!114 &1278303241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95734,7 +95735,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1762195267
 Transform:
   m_ObjectHideFlags: 0
@@ -95833,6 +95834,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1e75e95f08e0c2140a80669577202643, type: 2}
   - {fileID: 11400000, guid: d35e1cce1014f654596a58c3f512b3d0, type: 2}
   - {fileID: 11400000, guid: e540d171a00cf2d4283d5651b0007821, type: 2}
+  - {fileID: 11400000, guid: eff4adf9d24eaeb409be2c96c6ecdc96, type: 2}
+  - {fileID: 11400000, guid: e86d43541d0c7e74daffea1a059252c3, type: 2}
+  - {fileID: 11400000, guid: c55c79f459f99484b841dd8a26e6651d, type: 2}
+  - {fileID: 11400000, guid: 604f6d3d73d02fc4792f3242500c9632, type: 2}
+  - {fileID: 11400000, guid: 0fa64e7cb7d58534d8eee0200a930496, type: 2}
+  - {fileID: 11400000, guid: f546eeaf3f5294d4e82e5e1d7a660400, type: 2}
   addAmount: 5
   backpackStep: 5
   minDurabilityRatio: 0.3
@@ -116300,6 +116307,7 @@ MonoBehaviour:
   rightHandAnchor: {fileID: 263479750965447789}
   weaponAudioSource: {fileID: 8905305806091854582}
   leftHandIK: {fileID: 3436242623003737772}
+  weaponVisualLayerName: PlayerWeapon
 --- !u!222 &704114232802425989
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -122456,6 +122464,7 @@ MonoBehaviour:
   npcInteractRange: 1.5
   witchEventRange: 1.5
   dogHouseInteractRange: 1.5
+  repairRange: 1.5
 --- !u!114 &8905305806091854576
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122564,6 +122573,7 @@ MonoBehaviour:
   rightHandAnchor: {fileID: 2265117200837893411}
   weaponAudioSource: {fileID: 8905305806091854582}
   leftHandIK: {fileID: 8905305806091854583}
+  weaponVisualLayerName: PlayerWeapon
 --- !u!114 &8905305806091854581
 MonoBehaviour:
   m_ObjectHideFlags: 0
