@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using SimpleSurvival.Player;
-using SimpleSurvival.Loot;
+using SimpleSurvival.Targets;
 using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Actions
@@ -17,7 +17,7 @@ namespace SimpleSurvival.Actions
 
         private readonly PlayerActionController _controller;
         private readonly Animator _animator;
-        private readonly LootContainer _target;
+        private readonly IUnlockable _target;
         private readonly Action _onComplete;
         private readonly float _duration;
         private bool _progressStarted;
@@ -26,7 +26,7 @@ namespace SimpleSurvival.Actions
         public UnlockAction(
             PlayerActionController controller,
             Animator animator,
-            LootContainer target,
+            IUnlockable target,
             Action onComplete)
         {
             _controller = controller;

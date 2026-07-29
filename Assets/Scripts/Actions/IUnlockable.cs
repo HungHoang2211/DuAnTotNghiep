@@ -1,16 +1,9 @@
-using UnityEngine;
-
-public class IUnlockable : MonoBehaviour
+namespace SimpleSurvival.Targets
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public interface IUnlockable : ITargetable
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        float UnlockDuration { get; }
+        void MarkUnlocked();
+        void Open();
     }
 }

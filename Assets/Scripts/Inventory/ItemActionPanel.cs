@@ -254,7 +254,7 @@ namespace SimpleSurvival.Items
                 && stack.Quantity > 1
                 && hasFreeSlot;
 
-            buttonDelete.interactable = true;
+            buttonDelete.interactable = !stack.ItemData.IsQuestItem;
         }
 
         private void RefreshSortButton()
@@ -413,6 +413,7 @@ namespace SimpleSurvival.Items
 
             ItemStack stack = grid.BoundInventory.GetSlot(index);
             if (stack == null) return;
+            if (stack.ItemData.IsQuestItem) return;
 
             InventorySystem inventory = grid.BoundInventory;
             InventorySelection sel = GetActiveSelection();

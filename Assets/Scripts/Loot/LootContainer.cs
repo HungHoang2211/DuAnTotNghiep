@@ -7,7 +7,7 @@ using SimpleSurvival.Targets;
 
 namespace SimpleSurvival.Loot
 {
-    public sealed class LootContainer : TargetableBase
+    public sealed class LootContainer : TargetableBase, IUnlockable
     {
         [Header("Display")]
         [Tooltip("Optional. Overrides the LootTable's name. Leave empty to use table name.")]

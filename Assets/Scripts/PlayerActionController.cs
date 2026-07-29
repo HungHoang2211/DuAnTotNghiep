@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Actions;
 using SimpleSurvival.Targets;
@@ -48,6 +49,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float npcInteractRange = 1.5f;
         [SerializeField] private float witchEventRange = 1.5f;
         [SerializeField] private float dogHouseInteractRange = 1.5f;
+        [SerializeField] private float repairRange = 1.5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -375,6 +377,53 @@ namespace SimpleSurvival.Player
             return TryRequestAction(unlock);
         }
 
+        public bool RequestRepairTower(RepairableTower target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null || inventoryQueries == null) return false;
+            if (target.RequiredItems == null || target.RequiredItems.Count == 0) return false;
+
+            float dist = ComputeDistanceToTarget(target);
+            if (dist > repairRange)
+            {
+                Debug.Log($"[Repair] Too far: {dist:F1}m > {repairRange:F1}m");
+                return false;
+            }
+
+            RepairRequirement missing = FindMissingRequirement(target.RequiredItems);
+            if (missing != null)
+            {
+                Debug.Log($"[Repair] Missing item: {missing.ItemData.ItemName}");
+                if (FollowNotifyManager.Instance != null)
+                    FollowNotifyManager.Instance.Notify($"Need {missing.Quantity} {missing.ItemData.ItemName}", SpeechHudType.Bad);
+                return false;
+            }
+
+            UnlockAction repair = new UnlockAction(this, animator, target,
+                onComplete: () => ConsumeRepairItems(target.RequiredItems));
+            return TryRequestAction(repair);
+        }
+
+        private RepairRequirement FindMissingRequirement(IReadOnlyList<RepairRequirement> requirements)
+        {
+            foreach (RepairRequirement requirement in requirements)
+            {
+                if (requirement == null || requirement.ItemData == null) continue;
+                if (inventoryQueries.CountItem(requirement.ItemData) < requirement.Quantity)
+                    return requirement;
+            }
+            return null;
+        }
+
+        private void ConsumeRepairItems(IReadOnlyList<RepairRequirement> requirements)
+        {
+            foreach (RepairRequirement requirement in requirements)
+            {
+                if (requirement == null || requirement.ItemData == null) continue;
+                inventoryQueries.RemoveItemAmount(requirement.ItemData, requirement.Quantity);
+            }
+        }
+
         public bool RequestNPCInteract(SimpleSurvival.Targets.NPCTargetable target)
         {
             if (target == null || !target.CanBeTargeted()) return false;
@@ -545,7 +594,7 @@ namespace SimpleSurvival.Player
             if (targetMb == null) return true;
 
             BaseEnemyController enemy = targetMb.GetComponentInParent<BaseEnemyController>();
-            if (enemy == null) return true; // Không phải enemy AI có detection (vd loot bag, resource...)
+            if (enemy == null) return true;
 
             return !enemy.HasDetectedPlayer;
         }
@@ -553,7 +602,7 @@ namespace SimpleSurvival.Player
         private bool IsMeleeWeapon(ItemStack weaponStack)
         {
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
-            if (weapon == null) return true; // Tay không (không có weapon nào equip) cũng tính là cận chiến
+            if (weapon == null) return true;
 
             switch (weapon.Category)
             {
@@ -562,7 +611,7 @@ namespace SimpleSurvival.Player
                 case WeaponCategory.Melee2H:
                     return true;
                 default:
-                    return false; // Pistol, Rifle... không được hưởng bonus sneak attack
+                    return false;
             }
         }
 
