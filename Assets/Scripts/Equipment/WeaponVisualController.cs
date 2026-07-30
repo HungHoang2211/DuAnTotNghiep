@@ -13,6 +13,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private AudioSource weaponAudioSource;
         [SerializeField] private PlayerLeftHandIK leftHandIK;
         [SerializeField] private string weaponVisualLayerName = "PlayerWeapon";
+        [SerializeField] private bool useFixedWeaponLayer = true;
 
         private GameObject _currentVisual;
         private WeaponVisualAnchors _currentAnchors;
@@ -108,16 +109,11 @@ namespace SimpleSurvival.Player
             foreach (Transform child in target.transform)
                 ApplyLayerRecursively(child.gameObject, layer);
         }
-
-        /// <summary>
-        /// Trả về layer riêng cho visual vũ khí (mặc định "PlayerWeapon"). Cần tắt va chạm
-        /// giữa layer này với layer "Enemy" trong Project Settings > Physics > Layer Collision
-        /// Matrix để vũ khí không đẩy CharacterController của enemy khi vung, mà không ảnh
-        /// hưởng các va chạm khác của vũ khí (môi trường, v.v.). Nếu layer chưa được tạo,
-        /// fallback về layer của rightHandAnchor để không lỗi khi build.
-        /// </summary>
         private int ResolveWeaponVisualLayer()
         {
+            if (!useFixedWeaponLayer)
+                return rightHandAnchor.gameObject.layer;
+
             int layer = LayerMask.NameToLayer(weaponVisualLayerName);
             return layer >= 0 ? layer : rightHandAnchor.gameObject.layer;
         }
