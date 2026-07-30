@@ -28,8 +28,12 @@ namespace SimpleSurvival.Stats
 
         private void HandleExpReward(GameObject source)
         {
-            if (EnemyConfig != null)
-                PlayerLevelSystem.Instance?.AddExperience(EnemyConfig.ExpReward);
+            if (EnemyConfig == null || EnemyConfig.ExpReward <= 0) return;
+
+            PlayerLevelSystem.Instance?.AddExperience(EnemyConfig.ExpReward);
+
+            if (FollowNotifyManager.Instance != null)
+                FollowNotifyManager.Instance.Notify($"+{EnemyConfig.ExpReward} XP", SpeechHudType.Good);
         }
 
         private void OnSpawnFromPool()

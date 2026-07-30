@@ -1,4 +1,5 @@
 using UnityEngine;
+using SimpleSurvival.Items;
 using SimpleSurvival.Targets;
 
 namespace SimpleSurvival.Quests
@@ -9,7 +10,10 @@ namespace SimpleSurvival.Quests
 
         private PickupTarget _pickupTarget;
         private HarvestTarget _harvestTarget;
-        private bool _subscribed;
+        private bool _registered;
+        private bool _isActive;
+
+        public Transform HighlightTransform => transform;
 
         private void Awake()
         {
@@ -19,57 +23,52 @@ namespace SimpleSurvival.Quests
 
         private void OnEnable()
         {
-            TrySubscribe();
-            Refresh();
+            TryRegister();
         }
 
         private void Start()
         {
-            TrySubscribe();
-            Refresh();
+            TryRegister();
         }
 
         private void OnDisable()
         {
             if (QuestHighlightManager.Instance != null)
-                QuestHighlightManager.Instance.OnHighlightChanged -= Refresh;
-            _subscribed = false;
+                QuestHighlightManager.Instance.UnregisterItemCandidate(this);
+            _registered = false;
+            SetHighlighted(false);
         }
 
-        private void TrySubscribe()
+        private void TryRegister()
         {
-            if (_subscribed) return;
+            if (_registered) return;
             if (QuestHighlightManager.Instance == null) return;
-            QuestHighlightManager.Instance.OnHighlightChanged += Refresh;
-            _subscribed = true;
+            QuestHighlightManager.Instance.RegisterItemCandidate(this);
+            _registered = true;
         }
 
-        private void Refresh()
+        public bool MatchesPickup(ItemData item)
         {
-            if (highlightVisual == null) return;
-
-            QuestHighlightManager manager = QuestHighlightManager.Instance;
-            bool shouldShow = false;
-
-            if (manager != null)
+            if (_pickupTarget == null || item == null) return false;
+            foreach (var entry in _pickupTarget.Items)
             {
-                if (_harvestTarget != null && manager.IsItemHarvestHighlighted(_harvestTarget.ItemData))
-                    shouldShow = true;
-
-                if (!shouldShow && _pickupTarget != null)
-                {
-                    foreach (var entry in _pickupTarget.Items)
-                    {
-                        if (manager.IsItemPickupHighlighted(entry.itemData))
-                        {
-                            shouldShow = true;
-                            break;
-                        }
-                    }
-                }
+                if (entry.itemData == item) return true;
             }
+            return false;
+        }
 
-            highlightVisual.SetActive(shouldShow);
+        public bool MatchesHarvest(ItemData item)
+        {
+            return _harvestTarget != null && item != null && _harvestTarget.ItemData == item;
+        }
+
+        public void SetHighlighted(bool value)
+        {
+            if (_isActive == value) return;
+            _isActive = value;
+
+            if (highlightVisual != null)
+                highlightVisual.SetActive(value);
         }
     }
 }

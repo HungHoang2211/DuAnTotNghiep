@@ -135,7 +135,10 @@ namespace SimpleSurvival.AI
                 return;
             }
 
+            bool findRequirementMet = findQuest == null || manager.IsQuestCompleted(findQuest);
+
             bool escortNotOfferedYet = escortQuest != null
+                && findRequirementMet
                 && !manager.IsQuestActive(escortQuest)
                 && !manager.IsQuestCompleted(escortQuest);
 
@@ -236,7 +239,10 @@ namespace SimpleSurvival.AI
 
             bool isFindTarget = findQuest != null && manager.IsQuestActive(findQuest);
 
+            bool findRequirementMet = findQuest == null || manager.IsQuestCompleted(findQuest);
+
             bool escortOfferable = escortQuest != null
+                && findRequirementMet
                 && !manager.IsQuestActive(escortQuest)
                 && !manager.IsQuestCompleted(escortQuest)
                 && IsLevelMet(escortQuest);

@@ -12,7 +12,12 @@ namespace SimpleSurvival.Quests
         private EnemyStats _stats;
         private BaseEnemyController _controller;
         private bool _isActive;
-        private bool _subscribed;
+        private bool _registered;
+        private bool _isDead;
+
+        public Transform HighlightTransform => transform;
+        public EnemyStatsConfig EnemyConfig => _stats != null ? _stats.EnemyConfig : null;
+        public bool IsAlive => !_isDead;
 
         private void Awake()
         {
@@ -22,41 +27,41 @@ namespace SimpleSurvival.Quests
 
         private void OnEnable()
         {
-            TrySubscribe();
-            Refresh();
+            _isDead = false;
+            if (_stats != null) _stats.OnDeath += HandleDeath;
+            TryRegister();
         }
 
         private void Start()
         {
-            TrySubscribe();
-            Refresh();
+            TryRegister();
         }
 
         private void OnDisable()
         {
+            if (_stats != null) _stats.OnDeath -= HandleDeath;
+
             if (QuestHighlightManager.Instance != null)
-                QuestHighlightManager.Instance.OnHighlightChanged -= Refresh;
-            _subscribed = false;
-
-            SetActive(false);
+                QuestHighlightManager.Instance.UnregisterEnemyCandidate(this);
+            _registered = false;
+            SetHighlighted(false);
         }
 
-        private void TrySubscribe()
+        private void TryRegister()
         {
-            if (_subscribed) return;
+            if (_registered) return;
             if (QuestHighlightManager.Instance == null) return;
-            QuestHighlightManager.Instance.OnHighlightChanged += Refresh;
-            _subscribed = true;
+            QuestHighlightManager.Instance.RegisterEnemyCandidate(this);
+            _registered = true;
         }
 
-        private void Refresh()
+        private void HandleDeath(GameObject source)
         {
-            QuestHighlightManager manager = QuestHighlightManager.Instance;
-            bool shouldShow = manager != null && _stats != null && manager.IsEnemyHighlighted(_stats.EnemyConfig);
-            SetActive(shouldShow);
+            _isDead = true;
+            SetHighlighted(false);
         }
 
-        private void SetActive(bool value)
+        public void SetHighlighted(bool value)
         {
             if (_isActive == value) return;
             _isActive = value;
