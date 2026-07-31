@@ -608,6 +608,7 @@ GameObject:
   - component: {fileID: 6193877162881169956}
   - component: {fileID: 999823412643765484}
   - component: {fileID: 8399215840542227034}
+  - component: {fileID: 3795896433420621204}
   m_Layer: 8
   m_Name: ZombieBear
   m_TagString: Enemy
@@ -824,6 +825,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 2
   priority: 1
+  hitCue: {fileID: 0}
   damage: 20
   damageRangeBonus: 0.5
   animator: {fileID: 3566210274771536032}
@@ -844,6 +846,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 2
   priority: 1
+  hitCue: {fileID: 0}
   damage: 35
   damageRangeBonus: 0.5
   animator: {fileID: 3566210274771536032}
@@ -902,6 +905,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3795896433420621204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844829250781014408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d29bd9a24e1a4044a077ff592bd4ea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hurtCue: {fileID: 0}
+  deathCue: {fileID: 11400000, guid: b57a53ef3b40ada47be7ab31e3f1319f, type: 2}
+  footstepCue: {fileID: 0}
+  moveSpeedThreshold: 0.1
+  stats: {fileID: 5717147819697974500}
+  agent: {fileID: 4876176398043684360}
 --- !u!1 &2036345435895471316
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,6 +1709,7 @@ MonoBehaviour:
   openRotationTarget: {fileID: 0}
   openRotation: {x: 0, y: 0, z: 0}
   deferInitialization: 1
+  startLocked: 0
 --- !u!1 &3495280101185468415
 GameObject:
   m_ObjectHideFlags: 0

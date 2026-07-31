@@ -474,6 +474,7 @@ GameObject:
   - component: {fileID: 8731169572987673170}
   - component: {fileID: 8154031087010756229}
   - component: {fileID: -3957693380049580562}
+  - component: {fileID: 2435821263552929451}
   m_Layer: 8
   m_Name: Bear
   m_TagString: Enemy
@@ -713,6 +714,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 2
   priority: 1
+  hitCue: {fileID: 0}
   damage: 20
   damageRangeBonus: 0.5
   animator: {fileID: 5172500344030081942}
@@ -733,6 +735,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 2
   priority: 1
+  hitCue: {fileID: 0}
   damage: 30
   damageRangeBonus: 0.5
   animator: {fileID: 5172500344030081942}
@@ -767,6 +770,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2435821263552929451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837835535960132627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d29bd9a24e1a4044a077ff592bd4ea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hurtCue: {fileID: 0}
+  deathCue: {fileID: 11400000, guid: b57a53ef3b40ada47be7ab31e3f1319f, type: 2}
+  footstepCue: {fileID: 0}
+  moveSpeedThreshold: 0.1
+  stats: {fileID: 6926075252273754152}
+  agent: {fileID: 1618554757922049043}
 --- !u!1 &1878662058745316843
 GameObject:
   m_ObjectHideFlags: 0
@@ -1855,10 +1876,13 @@ MonoBehaviour:
   unlockDuration: 0
   persistWhenEmpty: 0
   despawnDelayWhenEmpty: 2
+  persistAcrossSessions: 0
+  containerId: 
   decayTimer: 0
   openRotationTarget: {fileID: 0}
   openRotation: {x: 0, y: 0, z: 0}
   deferInitialization: 1
+  startLocked: 0
 --- !u!1 &4230844389708590853
 GameObject:
   m_ObjectHideFlags: 0

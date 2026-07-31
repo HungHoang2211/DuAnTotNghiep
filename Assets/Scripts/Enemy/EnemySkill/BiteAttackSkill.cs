@@ -32,6 +32,7 @@ namespace SimpleSurvival.AI
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(damage, gameObject);
+            PlayHitSound();
         }
 
         public void OnAttackEnd()

@@ -110,10 +110,13 @@ MonoBehaviour:
   unlockDuration: 0
   persistWhenEmpty: 0
   despawnDelayWhenEmpty: 2
+  persistAcrossSessions: 0
+  containerId: 
   decayTimer: 0
   openRotationTarget: {fileID: 0}
   openRotation: {x: 0, y: 0, z: 0}
   deferInitialization: 1
+  startLocked: 0
 --- !u!1 &628533503046912630
 GameObject:
   m_ObjectHideFlags: 0
@@ -1511,6 +1514,7 @@ GameObject:
   - component: {fileID: 748534181847559121}
   - component: {fileID: 3286927869528925852}
   - component: {fileID: -6245918946080088259}
+  - component: {fileID: -812056520580334222}
   m_Layer: 8
   m_Name: Wolf_Zombie
   m_TagString: Enemy
@@ -1722,6 +1726,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 1.5
   priority: 1
+  hitCue: {fileID: 0}
   damage: 12
   damageRangeBonus: 0.5
   animator: {fileID: 377105561966920818}
@@ -1756,6 +1761,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-812056520580334222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8145959336298746911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d29bd9a24e1a4044a077ff592bd4ea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hurtCue: {fileID: 11400000, guid: 37c09d592728e864d8ddb50bb55f3f99, type: 2}
+  deathCue: {fileID: 11400000, guid: 1658f1ec5533bf848a9304312b7f3e59, type: 2}
+  footstepCue: {fileID: 11400000, guid: 838acd0b6ae689048a22296e34bccb52, type: 2}
+  moveSpeedThreshold: 0.1
+  stats: {fileID: 1820674617538806043}
+  agent: {fileID: 4997439262625820627}
 --- !u!1 &8353899384796261344
 GameObject:
   m_ObjectHideFlags: 0

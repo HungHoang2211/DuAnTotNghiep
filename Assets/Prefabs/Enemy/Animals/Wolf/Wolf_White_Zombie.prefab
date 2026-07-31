@@ -1273,6 +1273,7 @@ GameObject:
   - component: {fileID: 82505726926929132}
   - component: {fileID: 2668999056024123738}
   - component: {fileID: -3698405087948571423}
+  - component: {fileID: -1170583507614127966}
   m_Layer: 8
   m_Name: Wolf_White_Zombie
   m_TagString: Enemy
@@ -1484,6 +1485,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 1.5
   priority: 1
+  hitCue: {fileID: 0}
   damage: 12
   damageRangeBonus: 0.5
   animator: {fileID: 1343639437315686718}
@@ -1518,6 +1520,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cc672909d751bd42b97d4eda60c1034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-1170583507614127966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6577115057925194132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d29bd9a24e1a4044a077ff592bd4ea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hurtCue: {fileID: 11400000, guid: 37c09d592728e864d8ddb50bb55f3f99, type: 2}
+  deathCue: {fileID: 11400000, guid: 1658f1ec5533bf848a9304312b7f3e59, type: 2}
+  footstepCue: {fileID: 11400000, guid: 838acd0b6ae689048a22296e34bccb52, type: 2}
+  moveSpeedThreshold: 0.1
+  stats: {fileID: 8927788114985286960}
+  agent: {fileID: 3797694021587826350}
 --- !u!1 &6853330899255293590
 GameObject:
   m_ObjectHideFlags: 0
@@ -1820,10 +1840,13 @@ MonoBehaviour:
   unlockDuration: 0
   persistWhenEmpty: 0
   despawnDelayWhenEmpty: 2
+  persistAcrossSessions: 0
+  containerId: 
   decayTimer: 0
   openRotationTarget: {fileID: 0}
   openRotation: {x: 0, y: 0, z: 0}
   deferInitialization: 1
+  startLocked: 0
 --- !u!1 &8997862289593789234
 GameObject:
   m_ObjectHideFlags: 0

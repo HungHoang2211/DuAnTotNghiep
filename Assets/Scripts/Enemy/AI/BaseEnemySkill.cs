@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SimpleSurvival.Audio;
 
 namespace SimpleSurvival.AI
 {
@@ -9,6 +10,9 @@ namespace SimpleSurvival.AI
         [SerializeField] protected float minRange = 0f;
         [SerializeField] protected float maxRange = 2f;
         [SerializeField] protected float priority = 1f;
+
+        [Header("Audio")]
+        [SerializeField] protected AudioCue hitCue;
 
         protected float _lastExecuteTime = -999f;
         protected bool _isExecuting;
@@ -50,6 +54,12 @@ namespace SimpleSurvival.AI
         protected void MarkComplete()
         {
             _isExecuting = false;
+        }
+
+        protected void PlayHitSound()
+        {
+            if (hitCue == null || AudioManager.Instance == null) return;
+            AudioManager.Instance.PlaySfxAt(hitCue, transform.position);
         }
 
         /// <summary>

@@ -21,7 +21,6 @@ namespace SimpleSurvival.AI
             if (animator != null) animator.TriggerAttack(0);
         }
 
-        // Gọi từ Animation Event đặt trên clip Attack
         public void OnAttackHit()
         {
             if (!_isExecuting || _target == null) return;
@@ -33,9 +32,9 @@ namespace SimpleSurvival.AI
             if (damageable == null || damageable.IsDead) return;
 
             damageable.TakeDamage(damage, gameObject);
+            PlayHitSound();
         }
 
-        // Gọi từ Animation Event cuối clip Attack
         public void OnAttackEnd()
         {
             MarkComplete();
@@ -50,7 +49,6 @@ namespace SimpleSurvival.AI
 
         private IDamageable ResolveDamageable(Transform target)
         {
-            // Tìm IDamageable theo thứ tự: tại target → child → parent
             var direct = target.GetComponent<IDamageable>();
             if (direct != null) return direct;
 

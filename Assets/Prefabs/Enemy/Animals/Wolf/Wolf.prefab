@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 4542792842420249708}
   - component: {fileID: -156048416995467922}
   - component: {fileID: 4738717188354382614}
+  - component: {fileID: -7867713017756405915}
   m_Layer: 8
   m_Name: Wolf
   m_TagString: Enemy
@@ -234,6 +235,7 @@ MonoBehaviour:
   minRange: 0
   maxRange: 1.5
   priority: 1
+  hitCue: {fileID: 0}
   damage: 12
   damageRangeBonus: 0.5
   animator: {fileID: 3817186447025799035}
@@ -281,6 +283,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlightVisual: {fileID: 8077459111027635950}
+--- !u!114 &-7867713017756405915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26420039585923096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d29bd9a24e1a4044a077ff592bd4ea6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hurtCue: {fileID: 11400000, guid: 37c09d592728e864d8ddb50bb55f3f99, type: 2}
+  deathCue: {fileID: 11400000, guid: 1658f1ec5533bf848a9304312b7f3e59, type: 2}
+  footstepCue: {fileID: 11400000, guid: 838acd0b6ae689048a22296e34bccb52, type: 2}
+  moveSpeedThreshold: 0.1
+  stats: {fileID: 3250867705687680651}
+  agent: {fileID: 929990205936610628}
 --- !u!1 &213402551378400243
 GameObject:
   m_ObjectHideFlags: 0
