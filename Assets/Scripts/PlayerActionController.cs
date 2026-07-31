@@ -326,8 +326,15 @@ namespace SimpleSurvival.Player
 
         public bool RequestPickup(PickupTarget target)
         {
-            if (target == null || !target.CanBeTargeted()) return false;
-            if (animator == null || inventoryQueries == null) return false;
+            // Đang pickup thì không cho request tiếp
+            if (CurrentAction is PickupAction)
+                return false;
+
+            if (target == null || !target.CanBeTargeted())
+                return false;
+
+            if (animator == null || inventoryQueries == null)
+                return false;
 
             float dist = ComputeDistanceToTarget(target);
             if (dist > pickupRange)
@@ -339,8 +346,10 @@ namespace SimpleSurvival.Player
             if (!CanPickupAtLeastOneItem(target))
             {
                 Debug.Log("[ActionController] Inventory full, cannot pickup");
+
                 if (FollowNotifyManager.Instance != null)
                     FollowNotifyManager.Instance.Notify("Inventory full!", SpeechHudType.Bad);
+
                 return false;
             }
 
