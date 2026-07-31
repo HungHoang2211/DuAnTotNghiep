@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using SimpleSurvival.Actions;
 using SimpleSurvival.Items;
 
@@ -14,10 +15,12 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerLeftHandIK leftHandIK;
         [SerializeField] private string weaponVisualLayerName = "PlayerWeapon";
         [SerializeField] private bool useFixedWeaponLayer = true;
+        [SerializeField] private Material dollPreviewMaterialOverride;
 
         private GameObject _currentVisual;
         private WeaponVisualAnchors _currentAnchors;
         private GameObject _currentSourcePrefab;
+        private readonly List<Material> _overrideMaterialInstances = new List<Material>();
 
         private Transform _moveTarget0;
         private Transform _moveTarget1;
@@ -56,6 +59,8 @@ namespace SimpleSurvival.Player
 
             if (actionController != null)
                 actionController.OnActionChanged -= HandleActionChanged;
+
+            DestroyOverrideMaterialInstances();
         }
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
@@ -96,6 +101,7 @@ namespace SimpleSurvival.Player
 
             _currentVisual = Instantiate(targetPrefab, rightHandAnchor, false);
             ApplyLayerRecursively(_currentVisual, ResolveWeaponVisualLayer());
+            ApplyMaterialOverrideIfSet(_currentVisual);
 
             _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
             _currentSourcePrefab = targetPrefab;
@@ -109,6 +115,36 @@ namespace SimpleSurvival.Player
             foreach (Transform child in target.transform)
                 ApplyLayerRecursively(child.gameObject, layer);
         }
+
+        private void ApplyMaterialOverrideIfSet(GameObject target)
+        {
+            if (dollPreviewMaterialOverride == null)
+                return;
+
+            foreach (Renderer renderer in target.GetComponentsInChildren<Renderer>())
+            {
+                Material original = renderer.sharedMaterial;
+                Material instance = new Material(dollPreviewMaterialOverride);
+
+                if (original != null && original.HasProperty("_MainTex"))
+                    instance.mainTexture = original.mainTexture;
+
+                if (original != null && original.HasProperty("_Color"))
+                    instance.color = original.color;
+
+                renderer.sharedMaterial = instance;
+                _overrideMaterialInstances.Add(instance);
+            }
+        }
+
+        private void DestroyOverrideMaterialInstances()
+        {
+            foreach (Material material in _overrideMaterialInstances)
+                Destroy(material);
+
+            _overrideMaterialInstances.Clear();
+        }
+
         private int ResolveWeaponVisualLayer()
         {
             if (!useFixedWeaponLayer)
@@ -135,6 +171,7 @@ namespace SimpleSurvival.Player
             _currentAnchors = null;
             _currentSourcePrefab = null;
 
+            DestroyOverrideMaterialInstances();
             UpdateLeftHandIK();
         }
 
