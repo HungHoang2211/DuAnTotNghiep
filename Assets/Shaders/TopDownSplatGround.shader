@@ -41,6 +41,8 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fog
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _SHADOWS_SOFT
             #pragma target 3.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -77,6 +79,7 @@
                 float3 normalWS    : TEXCOORD0;
                 float2 groundXZ    : TEXCOORD1;
                 float  fogCoord    : TEXCOORD2;
+                float4 shadowCoord : TEXCOORD3;
             };
 
             Varyings vert(Attributes IN)
@@ -87,6 +90,7 @@
                 OUT.normalWS    = TransformObjectToWorldNormal(IN.normalOS);
                 OUT.fogCoord    = ComputeFogFactor(p.positionCS.z);
                 OUT.groundXZ    = IN.uv;
+                OUT.shadowCoord = GetShadowCoord(p);
                 return OUT;
             }
 
@@ -111,10 +115,10 @@
                 half3 albedo = (c0 * ctrl1.r + c1 * ctrl1.g + c2 * ctrl1.b + c3 * ctrl1.a +
                                 c4 * ctrl2.r + c5 * ctrl2.g + c6 * ctrl2.b + c7 * ctrl2.a) / total;
 
-                Light ml = GetMainLight();
+                Light ml = GetMainLight(IN.shadowCoord);
                 half3 n = normalize(IN.normalWS);
                 half ndotl = saturate(dot(n, ml.direction));
-                half3 lighting = ml.color * ndotl + SampleSH(n);
+                half3 lighting = ml.color * ndotl * ml.shadowAttenuation + SampleSH(n);
 
                 half3 col = albedo * lighting;
                 col = MixFog(col, IN.fogCoord);
