@@ -16,6 +16,7 @@ namespace SimpleSurvival.AI
 
         [Header("Quest MrBeat")]
         [SerializeField] private QuestData findQuest;
+        [SerializeField] private string findQuestInventoryFullDialogue = "Your bag is full, please make some space before I can reward you.";
 
         [Header("Quest Emily")]
         [SerializeField] private QuestData escortQuest;
@@ -23,6 +24,7 @@ namespace SimpleSurvival.AI
         [Header("Quest Emily - Defeat ZombieWitch")]
         [SerializeField] private QuestData killWitchQuest;
         [SerializeField] private string killWitchInProgressDialogue = "That witch is still out there somewhere, be careful.";
+        [SerializeField] private string killWitchInventoryFullDialogue = "Your bag is full, please make some space before I can reward you.";
 
         [Header("Quest Emily - Watch Tower")]
         [SerializeField] private QuestData repairTowerQuest;
@@ -32,6 +34,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private string escortOfferDialogue = "Could you escort me there?";
         [SerializeField] private string escortInProgressDialogue = "Let's go, I'll follow you.";
         [SerializeField] private string escortDoneDialogue = "Thank you so much!";
+        [SerializeField] private string escortInventoryFullDialogue = "Thank you for getting me here, but your bag is full. Please make some space so I can reward you.";
         [SerializeField] private string allDoneDialogue = "I'm fine now, thank you.";
         [SerializeField] private string lockedByLevelDialogue = "You need to reach a higher level to accept this quest.";
 
@@ -48,6 +51,8 @@ namespace SimpleSurvival.AI
         [SerializeField] private GameObject groundHighlight;
 
         public bool IsEscorting { get; private set; }
+
+        private static readonly Dictionary<string, Vector3> _completedEscortPositions = new Dictionary<string, Vector3>();
 
         private readonly List<EscortPoint> _route = new List<EscortPoint>();
         private int _routeIndex;
@@ -68,6 +73,12 @@ namespace SimpleSurvival.AI
                 manager.OnQuestStarted += HandleQuestStateChanged;
                 manager.OnObjectiveProgress += HandleObjectiveProgress;
                 manager.OnQuestCompleted += HandleQuestStateChanged;
+
+                if (escortQuest != null && manager.IsQuestCompleted(escortQuest)
+                    && _completedEscortPositions.TryGetValue(npcId, out Vector3 savedPosition))
+                {
+                    movement?.WarpTo(savedPosition);
+                }
             }
 
             if (PlayerLevelSystem.Instance != null)
@@ -122,8 +133,29 @@ namespace SimpleSurvival.AI
                 manager.NotifyNPCFound(npcId);
                 if (manager.IsReadyToTurnIn(findQuest))
                 {
-                    manager.CompleteQuest(findQuest);
-                    ShowDialogue(findQuest.TurnInDialogue);
+                    if (manager.HasSpaceForRewards(findQuest))
+                    {
+                        manager.CompleteQuest(findQuest);
+                        ShowDialogue(findQuest.TurnInDialogue);
+                    }
+                    else
+                    {
+                        ShowDialogue(findQuestInventoryFullDialogue);
+                    }
+                }
+                return;
+            }
+
+            if (escortQuest != null && manager.IsQuestActive(escortQuest) && !IsEscorting && manager.IsReadyToTurnIn(escortQuest))
+            {
+                if (manager.HasSpaceForRewards(escortQuest))
+                {
+                    manager.CompleteQuest(escortQuest);
+                    ShowDialogue(escortDoneDialogue);
+                }
+                else
+                {
+                    ShowDialogue(escortInventoryFullDialogue);
                 }
                 return;
             }
@@ -166,9 +198,16 @@ namespace SimpleSurvival.AI
             {
                 if (manager.IsReadyToTurnIn(killWitchQuest))
                 {
-                    ShowDialogue(killWitchQuest.TurnInDialogue);
-                    manager.CompleteQuest(killWitchQuest);
-                    RefreshGroundHighlight();
+                    if (manager.HasSpaceForRewards(killWitchQuest))
+                    {
+                        ShowDialogue(killWitchQuest.TurnInDialogue);
+                        manager.CompleteQuest(killWitchQuest);
+                        RefreshGroundHighlight();
+                    }
+                    else
+                    {
+                        ShowDialogue(killWitchInventoryFullDialogue);
+                    }
                 }
                 else
                 {
@@ -377,9 +416,17 @@ namespace SimpleSurvival.AI
             if (_routeIndex >= _route.Count)
             {
                 IsEscorting = false;
+                _completedEscortPositions[npcId] = transform.position;
                 enemyDirector?.StopEncounter();
-                QuestManager.Instance?.NotifyEscortArrived(escortQuest);
-                ShowDialogue(escortDoneDialogue);
+
+                QuestManager manager = QuestManager.Instance;
+                manager?.NotifyEscortArrived(escortQuest);
+
+                if (manager != null && manager.IsQuestCompleted(escortQuest))
+                    ShowDialogue(escortDoneDialogue);
+                else
+                    ShowDialogue(escortInventoryFullDialogue);
+
                 return;
             }
 

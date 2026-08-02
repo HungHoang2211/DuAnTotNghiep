@@ -8,8 +8,6 @@ namespace SimpleSurvival.Core
     {
         public static ObjectPool Instance { get; private set; }
 
-        [Tooltip("Số object tối đa mỗi prefab được giữ trong pool. " +
-                 "Vượt quá sẽ Destroy thay vì cất vào pool.")]
         [SerializeField] private int _maxPoolSizePerPrefab = 20;
 
         private readonly Dictionary<GameObject, Stack<GameObject>> _pools
@@ -47,6 +45,7 @@ namespace SimpleSurvival.Core
             else
             {
                 obj = Instantiate(prefab, position, rotation);
+                obj.SetActive(true);
                 _instanceToPrefab[obj] = prefab;
             }
 

@@ -48,6 +48,23 @@ namespace SimpleSurvival.AI
             _agent.SetDestination(_destination);
         }
 
+        public void WarpTo(Vector3 position)
+        {
+            Stop();
+
+            if (_characterController != null) _characterController.enabled = false;
+
+            transform.position = position;
+
+            if (_agent != null)
+            {
+                if (_agent.isOnNavMesh) _agent.Warp(position);
+                _agent.nextPosition = position;
+            }
+
+            if (_characterController != null) _characterController.enabled = true;
+        }
+
         public void Stop()
         {
             _isMoving = false;

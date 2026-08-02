@@ -31,6 +31,7 @@ namespace SimpleSurvival.UI.Hud
 
             if (_active.TryGetValue(target, out SpeechHudPopup existing) && existing != null)
             {
+                existing.gameObject.SetActive(true);
                 existing.Show(target, customOffset, text, type, _hud.CanvasRect, _hud.GameCamera, _hud.UICamera);
                 return;
             }

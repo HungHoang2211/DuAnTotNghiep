@@ -63,6 +63,19 @@ namespace SimpleSurvival.Quests
 
         public bool IsMapPermanentlyLocked(string mapId) => !string.IsNullOrEmpty(mapId) && _permanentlyLockedMaps.Contains(mapId);
 
+        public bool HasSpaceForRewards(QuestData quest)
+        {
+            if (quest == null || inventoryQueries == null) return true;
+
+            foreach (var reward in quest.Rewards)
+            {
+                if (reward.itemData == null || reward.quantity <= 0) continue;
+                if (!inventoryQueries.CanAddItem(reward.itemData, reward.quantity)) return false;
+            }
+
+            return true;
+        }
+
         public void LockMapPermanently(string mapId)
         {
             if (string.IsNullOrEmpty(mapId)) return;
@@ -272,7 +285,7 @@ namespace SimpleSurvival.Quests
                 OnObjectiveProgress?.Invoke(quest, i);
             }
 
-            if (progress.IsAllComplete())
+            if (progress.IsAllComplete() && HasSpaceForRewards(quest))
                 CompleteQuest(quest);
         }
 

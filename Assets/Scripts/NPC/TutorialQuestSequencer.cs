@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,9 +82,15 @@ namespace SimpleSurvival.Quests
             OnNewQuestAvailable?.Invoke(_currentQuest);
         }
 
-        public void RevealCurrentQuestHighlight()
+        /// <summary>
+        /// Bật highlight visual cho vật được chỉ định của quest hiện tại (tutorial).
+        /// Chỉ bật khi "quest" truyền vào đúng là quest tutorial đang active - tránh trường hợp
+        /// người chơi click vào 1 entry quest khác (không thuộc tutorial chain) trong QuestLogUI
+        /// mà vẫn vô tình bật highlight của quest tutorial.
+        /// </summary>
+        public void RevealQuestHighlight(QuestData quest)
         {
-            if (_currentQuest == null || _highlightRevealed) return;
+            if (quest == null || quest != _currentQuest || _highlightRevealed) return;
             _highlightRevealed = true;
             QuestHighlightManager.Instance?.SetActiveQuest(_currentQuest);
         }
