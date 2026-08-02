@@ -43,12 +43,22 @@ namespace SimpleSurvival.AI
 
         [SerializeField] private float attackDamage = 10f;
 
+        [Header("Hồi sinh sau khi chết lúc Escort")]
+        [SerializeField] private float respawnDelay = 5f;
+
         [Header("Refs")]
         [SerializeField] private NPCEmilyMovement movement;
         [SerializeField] private NPCEmilyStats stats;
         [SerializeField] private NPCEmilyAnimator animatorController;
+        [SerializeField] private NPCEmilyRagdollController ragdollController;
         [SerializeField] private EscortEnemyDirector enemyDirector;
         [SerializeField] private GameObject groundHighlight;
+
+        [Header("Debug / Testing")]
+        [Tooltip("CHỈ DÙNG ĐỂ TEST - nhớ tắt trước khi build thật. Khi bật: lúc Start sẽ tự ép " +
+                 "hoàn thành Find Quest, Escort Quest và Kill Witch Quest (nếu đã gán và chưa hoàn thành) " +
+                 "để có thể nhận thẳng Repair Tower Quest mà không cần chơi tuần tự qua các bước trước đó.")]
+        [SerializeField] private bool debugSkipToRepairTower = false;
 
         public bool IsEscorting { get; private set; }
 
@@ -61,6 +71,17 @@ namespace SimpleSurvival.AI
         private GameObject _currentThreat;
         private BaseStats _currentThreatStats;
         private Coroutine _combatRoutine;
+        private Coroutine _respawnRoutine;
+
+        private Vector3 _spawnPosition;
+        private Quaternion _spawnRotation;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            _spawnPosition = transform.position;
+            _spawnRotation = transform.rotation;
+        }
 
         protected override void Start()
         {
@@ -73,6 +94,21 @@ namespace SimpleSurvival.AI
                 manager.OnQuestStarted += HandleQuestStateChanged;
                 manager.OnObjectiveProgress += HandleObjectiveProgress;
                 manager.OnQuestCompleted += HandleQuestStateChanged;
+
+                // Debug: ép hoàn thành 3 quest đầu để test thẳng Repair Tower Quest.
+                // Lưu ý: bỏ qua hẳn phần logic escort thật (di chuyển, combat, unlock loot...)
+                // nên chỉ dùng để test riêng Repair Tower, không phản ánh đúng trải nghiệm escort thật.
+                if (debugSkipToRepairTower)
+                {
+                    if (findQuest != null && !manager.IsQuestCompleted(findQuest))
+                        manager.DebugForceCompleteQuest(findQuest);
+
+                    if (escortQuest != null && !manager.IsQuestCompleted(escortQuest))
+                        manager.DebugForceCompleteQuest(escortQuest);
+
+                    if (killWitchQuest != null && !manager.IsQuestCompleted(killWitchQuest))
+                        manager.DebugForceCompleteQuest(killWitchQuest);
+                }
 
                 if (escortQuest != null && manager.IsQuestCompleted(escortQuest)
                     && _completedEscortPositions.TryGetValue(npcId, out Vector3 savedPosition))
@@ -121,6 +157,12 @@ namespace SimpleSurvival.AI
 
             ExitCombat();
             ResetRouteState();
+
+            if (_respawnRoutine != null)
+            {
+                StopCoroutine(_respawnRoutine);
+                _respawnRoutine = null;
+            }
         }
 
         public override void OnPlayerInteract(GameObject player)
@@ -534,6 +576,22 @@ namespace SimpleSurvival.AI
             ResetRouteState();
             enemyDirector?.StopEncounter();
             QuestManager.Instance?.FailQuest(escortQuest);
+
+            if (_respawnRoutine != null) StopCoroutine(_respawnRoutine);
+            _respawnRoutine = StartCoroutine(RespawnAfterDelay());
+        }
+
+        private IEnumerator RespawnAfterDelay()
+        {
+            yield return new WaitForSeconds(respawnDelay);
+
+            ragdollController?.ResetRagdoll();
+            movement?.WarpTo(_spawnPosition);
+            transform.rotation = _spawnRotation;
+            stats?.RestoreHP(stats.MaxHP);
+
+            RefreshGroundHighlight();
+            _respawnRoutine = null;
         }
 
         private void HandleQuestFailed(QuestData quest)

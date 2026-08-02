@@ -8623,23 +8623,32 @@ MonoBehaviour:
   interactRange: 1.5
   npcId: Emily
   findQuest: {fileID: 11400000, guid: a7e16313e1aa2df40bd387e6b3260274, type: 2}
+  findQuestInventoryFullDialogue: Your bag is full, please make some space before
+    I can reward you.
   escortQuest: {fileID: 11400000, guid: 413e0698cef075547b398684021c86ce, type: 2}
   killWitchQuest: {fileID: 11400000, guid: ef720b6467d4b5543ba33ef728f10bc8, type: 2}
   killWitchInProgressDialogue: That witch is still out there somewhere, be careful.
+  killWitchInventoryFullDialogue: Your bag is full, please make some space before
+    I can reward you.
   repairTowerQuest: {fileID: 11400000, guid: 007a9af077c534e4ea3c915171a10fdd, type: 2}
   repairTowerInProgressDialogue: The broadcast tower still needs fixing.
   escortOfferDialogue: Can you escort me there?
   escortInProgressDialogue: Let's go, I'll follow you.
   escortDoneDialogue: Thank you so much!
+  escortInventoryFullDialogue: Thank you for getting me here, but your bag is full.
+    Please make some space so I can reward you.
   allDoneDialogue: I'm fine now, thank you
   lockedByLevelDialogue: You need to reach a higher level to unlock this quest.
   attackInterval: 1.2
   attackDamage: 10
+  respawnDelay: 10
   movement: {fileID: 682408888845051081}
   stats: {fileID: 682408888845051089}
   animatorController: {fileID: 682408888845051082}
+  ragdollController: {fileID: 682408888845051080}
   enemyDirector: {fileID: 184540023}
   groundHighlight: {fileID: 1598271269}
+  debugSkipToRepairTower: 0
 --- !u!114 &682408888845051080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8694,7 +8703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10ddbc265fdc73041b898d41e48942f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
+  moveSpeed: 1
   rotationSpeed: 360
   arrivalThreshold: 0.5
 --- !u!114 &682408888845051082
