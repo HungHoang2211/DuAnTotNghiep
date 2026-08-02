@@ -31,6 +31,11 @@ namespace SimpleSurvival.Targets
          "(vì nó chỉ spawn SAU khi trap trigger, không phải điều kiện để mở trap).")]
         [SerializeField] private EnemySpawnPoint witchSpawnPoint;
 
+        [Header("Highlight")]
+        [Tooltip("Visual (vòng sáng, outline...) hiện lên khi trap có thể tương tác được, " +
+                 "tức là encounter đã Cleared và trap chưa bị Trigger.")]
+        [SerializeField] private GameObject highlightVisual;
+
         public float TriggerDuration => triggerDuration;
 
         public override TargetType Type => TargetType.WitchEvent;
@@ -39,6 +44,36 @@ namespace SimpleSurvival.Targets
         public bool IsEncounterCleared => encounter == null || encounter.IsCleared;
 
         public event Action<WitchEventTrap> OnTriggered;
+
+        private void OnEnable()
+        {
+            if (encounter != null) encounter.OnCleared += HandleEncounterCleared;
+
+            // Cần refresh ngay lúc bật lên, phòng trường hợp encounter đã Cleared từ trước
+            // (vd trap bị disable/enable lại giữa chừng) mà không đợi được sự kiện OnCleared bắn ra.
+            RefreshHighlight();
+        }
+
+        private void OnDisable()
+        {
+            if (encounter != null) encounter.OnCleared -= HandleEncounterCleared;
+            SetHighlighted(false);
+        }
+
+        private void HandleEncounterCleared()
+        {
+            RefreshHighlight();
+        }
+
+        private void RefreshHighlight()
+        {
+            SetHighlighted(CanBeTargeted());
+        }
+
+        private void SetHighlighted(bool value)
+        {
+            if (highlightVisual != null) highlightVisual.SetActive(value);
+        }
 
         public override bool CanBeTargeted()
         {
@@ -52,6 +87,7 @@ namespace SimpleSurvival.Targets
         {
             if (HasTriggered || !IsEncounterCleared) return;
             HasTriggered = true;
+            RefreshHighlight();
 
             SpawnEffect();
             SpawnWitch();
