@@ -10,6 +10,7 @@ namespace SimpleSurvival.Player
 {
     public sealed class PlayerDeathHandler : MonoBehaviour
     {
+        public static PlayerDeathHandler Instance { get; private set; }
         [Header("Refs")]
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private PlayerInventory playerInventory;
@@ -21,8 +22,12 @@ namespace SimpleSurvival.Player
         [SerializeField] private Transform spawnPoint;
         private readonly List<Transform> _activeCorpses = new List<Transform>();
         private const float CorpseMinSeparation = 2f;
+
+
         private void Awake()
         {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
             if (playerStats == null)
                 playerStats = GetComponentInChildren<PlayerStats>();
             if (playerInventory == null)
@@ -41,6 +46,8 @@ namespace SimpleSurvival.Player
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
+
             if (playerStats != null)
                 playerStats.OnDeath -= HandleDeath;
         }
@@ -171,5 +178,13 @@ namespace SimpleSurvival.Player
 
             return enemyStats.EnemyConfig.DisplayName;
         }
+        public void ResumeDeathStateIfNeeded()
+        {
+            if (playerStats == null || playerStats.IsAlive) return;
+
+            if (deathDialog != null)
+                deathDialog.Show(null);
+        }
+
     }
 }

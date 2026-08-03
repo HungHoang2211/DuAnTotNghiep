@@ -1,4 +1,5 @@
 using SimpleSurvival.Building;
+using SimpleSurvival.Player;
 using SimpleSurvival.Progression;
 using SimpleSurvival.Quests;
 using System.Collections.Generic;
@@ -108,6 +109,7 @@ namespace SimpleSurvival.SaveLoad
             ApplyMeta(lastLoaded.meta);
             PlayerLevelSystem.Instance?.Restore(lastLoaded.level);
             playerAgent.RestoreCrossScene(lastLoaded.player);
+            PlayerDeathHandler.Instance?.ResumeDeathStateIfNeeded();
             QuestManager.Instance?.Restore(lastLoaded.world);
             IsActive = true;
         }
