@@ -8,7 +8,7 @@ namespace SimpleSurvival.Audio
 
         [Header("UI Cues")]
         [SerializeField] private AudioCue clickCue;
-        [SerializeField] private AudioCue confirmCue;
+        [SerializeField] private AudioCue okcue;
         [SerializeField] private AudioCue cancelCue;
         [SerializeField] private AudioCue errorCue;
         [SerializeField] private AudioCue itemMoveCue;
@@ -16,6 +16,7 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue deleteCue;
         [SerializeField] private AudioCue craft ;
         [SerializeField] private AudioCue mainClickCue ;
+        [SerializeField] private AudioCue updatecue ;
         public void PlayMainClick()
         {
             AudioManager.Instance.PlaySfx(mainClickCue);
@@ -35,9 +36,13 @@ namespace SimpleSurvival.Audio
             AudioManager.Instance.PlaySfx(craft);
         }
 
-        public void PlayConfirm()
+        public void Playoke()
         {
-            AudioManager.Instance.PlaySfx(confirmCue);
+            AudioManager.Instance.PlaySfx(okcue);
+        }
+        public void Playupdate()
+        {
+            AudioManager.Instance.PlaySfx(updatecue);
         }
 
         public void PlayCancel()

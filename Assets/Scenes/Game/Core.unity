@@ -12197,6 +12197,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -13049,6 +13050,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -13613,7 +13615,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 203026024}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayDelete
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &203026024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14127,7 +14141,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 215402023}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayCancel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &215402023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14472,6 +14498,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -27218,6 +27245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -43923,6 +43951,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -58747,7 +58776,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickCue: {fileID: 11400000, guid: b17d87799e874d94481eb05989a2580a, type: 2}
-  confirmCue: {fileID: 0}
+  okcue: {fileID: 11400000, guid: 894a25f81e518a244b823a12c3f25c1f, type: 2}
   cancelCue: {fileID: 11400000, guid: 08f7be1810dff0a49b2d8b9d89e53500, type: 2}
   errorCue: {fileID: 0}
   itemMoveCue: {fileID: 11400000, guid: 03f20e5814b5a684db22bf3171a01ae4, type: 2}
@@ -58755,6 +58784,7 @@ MonoBehaviour:
   deleteCue: {fileID: 11400000, guid: d948453d66071d24db0ec5fdd5fc08ae, type: 2}
   craft: {fileID: 11400000, guid: e5afbcbfad72d4847b963206228f8326, type: 2}
   mainClickCue: {fileID: 11400000, guid: 1b12b2c4689b1b94782461c4030444c6, type: 2}
+  updatecue: {fileID: 11400000, guid: 6b2953ccee9049f4196720a906c805c2, type: 2}
 --- !u!1 &1072386800
 GameObject:
   m_ObjectHideFlags: 0
@@ -79742,6 +79772,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -81844,7 +81875,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1482923013}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayMainClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1487904739
 GameObject:
   m_ObjectHideFlags: 0
@@ -82762,6 +82805,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!111 &1500087586
 Animation:
   m_ObjectHideFlags: 0
@@ -83438,7 +83493,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -42.5, y: 0}
+  m_AnchoredPosition: {x: -42.49994, y: 0}
   m_SizeDelta: {x: 0, y: 915}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1509040236
@@ -91809,7 +91864,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2028943410}
   m_HandleRect: {fileID: 2028943409}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -92165,7 +92220,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1680990259}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayCancel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1680990259
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106781,6 +106848,7 @@ Transform:
   - {fileID: 764421583}
   - {fileID: 172865824}
   - {fileID: 1441216091}
+  - {fileID: 8519242389510742120}
   - {fileID: 3610616496864412710}
   - {fileID: 1500088792}
   - {fileID: 317230785966186275}
@@ -112025,7 +112093,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2052623077}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayMainClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2055830134
 GameObject:
   m_ObjectHideFlags: 0
@@ -118298,7 +118378,6 @@ Transform:
   - {fileID: 1329733872}
   - {fileID: 368043239}
   - {fileID: 2025567105}
-  - {fileID: 8519242389510742120}
   m_Father: {fileID: 1967195713}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!4 &3665299730413355045
@@ -119533,6 +119612,7 @@ GameObject:
   - component: {fileID: 8519242389510742120}
   - component: {fileID: 2689979639070894836}
   - component: {fileID: 5520254626891816977}
+  - component: {fileID: 8519242389510742121}
   m_Layer: 0
   m_Name: minimap
   m_TagString: Untagged
@@ -120649,8 +120729,22 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3610616496864412710}
+  m_Father: {fileID: 1967195713}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &8519242389510742121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6290476402056112141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56d29258ea57d264ba027e25e7695e7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 3610616496864412710}
+  height: 20
 --- !u!23 &8552290597945236112
 MeshRenderer:
   m_ObjectHideFlags: 0
