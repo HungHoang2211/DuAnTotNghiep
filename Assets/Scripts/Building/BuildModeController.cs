@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using SimpleSurvival.Audio;
 using SimpleSurvival.Cameras;
 using SimpleSurvival.Items;
 using SimpleSurvival.SaveLoad;
 using SimpleSurvival.World;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -267,6 +268,8 @@ namespace SimpleSurvival.Building
 
             currentDraft.ClearPreviewMaterial();
             currentDraftGrid.AddElement(coords, currentDraft);
+            // âm thanh đặt thành công có thể được phát ở đây
+            UIAudioController.Instance.Playoke();
 
             BuildingData placedData = currentBuildingData;
             BuildCellCoords placedCoords = coords;
@@ -363,6 +366,9 @@ namespace SimpleSurvival.Building
             upgraded.SetWorldTransform(grid.GetGridCellPosition(coords), grid.GetGridCellRotation(coords));
 
             grid.AddElement(coords, upgraded);
+          
+            UIAudioController.Instance.Playupdate();
+
 
             selectedStructure = upgraded;
             selectedStructure.SetSelected(true);

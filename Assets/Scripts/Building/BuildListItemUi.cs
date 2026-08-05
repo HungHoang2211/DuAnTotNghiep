@@ -1,3 +1,4 @@
+using SimpleSurvival.Audio;
 using System;
 using TMPro;
 using UnityEngine;
@@ -41,6 +42,7 @@ namespace SimpleSurvival.Building
         public void SetSelected(bool selected)
         {
             highlightCanvasGroup.alpha = selected ? 1f : 0f;
+            UIAudioController.Instance.PlayMainClick();
         }
     }
 }
