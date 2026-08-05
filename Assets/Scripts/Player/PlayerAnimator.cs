@@ -59,15 +59,14 @@ namespace SimpleSurvival.Player
             if (animator == null) return;
 
             float moveSpeed = 0f;
-            if (_actionController.CurrentAction is MoveAction move)
-                moveSpeed = move.NormalizedSpeed;
+            if (_actionController.CurrentAction is IMovingAction moving)
+                moveSpeed = moving.NormalizedSpeed;
 
             bool isSneaking = inputReader != null && inputReader.IsSneakHeld;
 
             animator.SetFloat(ParamMoveSpeed, moveSpeed, speedDampTime, Time.deltaTime);
             animator.SetInteger(ParamMoveMode, isSneaking ? moveModeSneak : moveModeNormal);
         }
-
         private void HandleSlotChanged(EquipSlot slot, int index, ItemStack stack)
         {
             if (slot != EquipSlot.Weapon) return;

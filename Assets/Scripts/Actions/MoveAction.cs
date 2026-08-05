@@ -5,7 +5,7 @@ using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.Actions
 {
-    public class MoveAction : IAction
+    public class MoveAction : IAction, IMovingAction
     {
         public ActionType Type => ActionType.Move;
         public bool IsCompleted => _inputMagnitude < 0.1f;

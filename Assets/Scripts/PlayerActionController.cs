@@ -50,6 +50,7 @@ namespace SimpleSurvival.Player
         [SerializeField] private float witchEventRange = 1.5f;
         [SerializeField] private float dogHouseInteractRange = 1.5f;
         [SerializeField] private float repairRange = 1.5f;
+        [SerializeField] private float followTimeoutSeconds = 5f;
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
@@ -296,9 +297,18 @@ namespace SimpleSurvival.Player
             float dist = ComputeDistanceToTarget(target);
             if (dist > gatherRange)
             {
-                Debug.Log($"[Gather] Too far: {dist:F1}m > {gatherRange:F1}m");
-                return false;
+                FollowAction follow = new FollowAction(
+                    this, moveConfig, playerStats, target, gatherRange, followTimeoutSeconds,
+                    onArrived: () => BeginGatherAction(target));
+                return TryRequestAction(follow);
             }
+
+            return BeginGatherAction(target);
+        }
+
+        private bool BeginGatherAction(HarvestTarget target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
 
             ToolType required = target.RequiredTool;
             GatherToolResolution resolution = ResolveGatherTool(required);
@@ -326,37 +336,37 @@ namespace SimpleSurvival.Player
 
         public bool RequestPickup(PickupTarget target)
         {
-            // Đang pickup thì không cho request tiếp
-            if (CurrentAction is PickupAction)
-                return false;
-
-            if (target == null || !target.CanBeTargeted())
-                return false;
-
-            if (animator == null || inventoryQueries == null)
-                return false;
+            if (CurrentAction is PickupAction) return false;
+            if (target == null || !target.CanBeTargeted()) return false;
+            if (animator == null || inventoryQueries == null) return false;
 
             float dist = ComputeDistanceToTarget(target);
             if (dist > pickupRange)
             {
-                Debug.Log($"[Pickup] Too far: {dist:F1}m > {pickupRange:F1}m");
-                return false;
+                FollowAction follow = new FollowAction(
+                    this, moveConfig, playerStats, target, pickupRange, followTimeoutSeconds,
+                    onArrived: () => BeginPickupAction(target));
+                return TryRequestAction(follow);
             }
+
+            return BeginPickupAction(target);
+        }
+
+        private bool BeginPickupAction(PickupTarget target)
+        {
+            if (target == null || !target.CanBeTargeted()) return false;
 
             if (!CanPickupAtLeastOneItem(target))
             {
                 Debug.Log("[ActionController] Inventory full, cannot pickup");
-
                 if (FollowNotifyManager.Instance != null)
                     FollowNotifyManager.Instance.Notify("Inventory full!", SpeechHudType.Bad);
-
                 return false;
             }
 
             PickupAction pickup = new PickupAction(this, animator, inventoryQueries, target);
             return TryRequestAction(pickup);
         }
-
         public bool RequestLoot(LootContainer target)
         {
             if (target == null || !target.CanBeTargeted()) return false;
@@ -514,7 +524,7 @@ namespace SimpleSurvival.Player
             return false;
         }
 
-        private float ComputeDistanceToTarget(ITargetable target)
+        public float ComputeDistanceToTarget(ITargetable target)
         {
             if (target?.Transform == null) return float.MaxValue;
 
