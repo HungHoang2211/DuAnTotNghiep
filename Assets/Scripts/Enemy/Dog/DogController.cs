@@ -66,6 +66,7 @@ namespace SimpleSurvival.Pets
         private float _stuckCheckTimer;
         private float _stuckTimer;
         private int _rerouteAttempts;
+        private bool _isDestinationReachable = true;
         private NavMeshPath _scratchPath;
 
         private const float PathUpdateInterval = 0.2f;
@@ -90,6 +91,7 @@ namespace SimpleSurvival.Pets
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
+            _agent.autoBraking = false;
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.GoodQualityObstacleAvoidance;
             _agent.avoidancePriority = 30;
             _agent.nextPosition = transform.position;
@@ -408,7 +410,14 @@ namespace SimpleSurvival.Pets
             }
 
             _agent.isStopped = false;
-            UpdateAgentDestination(_combatTarget.position);
+            bool isMoving = UpdateAgentDestination(_combatTarget.position);
+
+            if (!isMoving)
+            {
+                if (dogAnimator != null) dogAnimator.SetIdle();
+                return;
+            }
+
             MoveAlongAgentPath(runSpeed, rotationSpeed);
             if (dogAnimator != null) dogAnimator.SetSpeed(1f);
         }
@@ -451,7 +460,14 @@ namespace SimpleSurvival.Pets
             if (sneaking) targetSpeed *= sneakSpeedMultiplier;
 
             _agent.isStopped = false;
-            UpdateAgentDestination(followTarget.position);
+            bool isMoving = UpdateAgentDestination(followTarget.position);
+
+            if (!isMoving)
+            {
+                if (dogAnimator != null) dogAnimator.SetIdle();
+                return;
+            }
+
             MoveAlongAgentPath(targetSpeed, rotationSpeed);
 
             if (dogAnimator != null)
@@ -477,14 +493,21 @@ namespace SimpleSurvival.Pets
             }
 
             _agent.isStopped = false;
-            UpdateAgentDestination(_houseAnchor.position);
+            bool isMoving = UpdateAgentDestination(_houseAnchor.position);
+
+            if (!isMoving)
+            {
+                if (dogAnimator != null) dogAnimator.SetIdle();
+                return;
+            }
+
             MoveAlongAgentPath(runSpeed, rotationSpeed);
             if (dogAnimator != null) dogAnimator.SetSpeed(1f);
         }
 
-        private void UpdateAgentDestination(Vector3 destination)
+        private bool UpdateAgentDestination(Vector3 destination)
         {
-            if (!_agent.isOnNavMesh) return;
+            if (!_agent.isOnNavMesh) return false;
 
             UpdateStuckTimer();
 
@@ -495,12 +518,26 @@ namespace SimpleSurvival.Pets
                 _nextPathUpdateTime = Time.time + PathUpdateInterval;
                 _stuckTimer = 0f;
                 _rerouteAttempts++;
-                return;
+                _isDestinationReachable = true;
+                return true;
             }
 
-            if (Time.time < _nextPathUpdateTime) return;
-            _agent.SetDestination(destination);
+            if (Time.time < _nextPathUpdateTime) return _isDestinationReachable;
+
+            bool reachable = _agent.CalculatePath(destination, _scratchPath) &&
+                              _scratchPath.status == NavMeshPathStatus.PathComplete;
+
             _nextPathUpdateTime = Time.time + PathUpdateInterval;
+            _isDestinationReachable = reachable;
+
+            if (!reachable)
+            {
+                StopMoving();
+                return false;
+            }
+
+            _agent.SetDestination(destination);
+            return true;
         }
 
         private float CurrentStuckThreshold()
