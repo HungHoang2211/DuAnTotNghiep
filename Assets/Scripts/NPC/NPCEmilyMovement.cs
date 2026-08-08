@@ -3,12 +3,8 @@ using UnityEngine.AI;
 
 namespace SimpleSurvival.AI
 {
-    /// <summary>
-    /// Di chuyển Emily tới 1 điểm đích, dùng chung pattern NavMeshAgent (tính đường)
-    /// + CharacterController (thực thi di chuyển) như BaseAIController.MoveAlongAgentPath.
-    /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(Rigidbody))]
     public sealed class NPCEmilyMovement : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 3.5f;
@@ -16,7 +12,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private float arrivalThreshold = 0.5f;
 
         private NavMeshAgent _agent;
-        private CharacterController _characterController;
+        private Rigidbody _rigidbody;
         private NPCEmilyAnimator _animatorController;
 
         private Vector3 _destination;
@@ -28,8 +24,11 @@ namespace SimpleSurvival.AI
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
-            _characterController = GetComponent<CharacterController>();
+            _rigidbody = GetComponent<Rigidbody>();
             _animatorController = GetComponent<NPCEmilyAnimator>();
+
+            _rigidbody.isKinematic = true;
+            _rigidbody.useGravity = false;
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
@@ -52,17 +51,11 @@ namespace SimpleSurvival.AI
         {
             Stop();
 
-            if (_characterController != null) _characterController.enabled = false;
-
             transform.position = position;
+            _rigidbody.position = position;
 
-            if (_agent != null)
-            {
-                if (_agent.isOnNavMesh) _agent.Warp(position);
-                _agent.nextPosition = position;
-            }
-
-            if (_characterController != null) _characterController.enabled = true;
+            if (_agent.isOnNavMesh) _agent.Warp(position);
+            _agent.nextPosition = position;
         }
 
         public void Stop()
@@ -76,20 +69,17 @@ namespace SimpleSurvival.AI
             _animatorController?.SetMoving(false);
         }
 
-        /// <summary>
-        /// Tạm dừng di chuyển (vd lúc bị enemy đánh trúng và đang chơi animation phản đòn).
-        /// </summary>
         public void SetPaused(bool paused)
         {
             _isPaused = paused;
             if (paused) _animatorController?.SetMoving(false);
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (!_isMoving || _isPaused || !_agent.isOnNavMesh) return;
 
-            float dist = Vector3.Distance(transform.position, _destination);
+            float dist = Vector3.Distance(_rigidbody.position, _destination);
             if (dist <= arrivalThreshold)
             {
                 HasArrived = true;
@@ -99,15 +89,15 @@ namespace SimpleSurvival.AI
 
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * moveSpeed;
-            move.y += Physics.gravity.y * Time.deltaTime;
-            _characterController.Move(move * Time.deltaTime);
-            _agent.nextPosition = transform.position;
+            _rigidbody.MovePosition(_rigidbody.position + move * Time.fixedDeltaTime);
+            _agent.nextPosition = _rigidbody.position;
 
             Vector3 lookDir = new Vector3(desiredVel.x, 0f, desiredVel.z);
             if (lookDir.sqrMagnitude > 0.01f)
             {
                 Quaternion targetRot = Quaternion.LookRotation(lookDir);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+                Quaternion newRot = Quaternion.RotateTowards(_rigidbody.rotation, targetRot, rotationSpeed * Time.fixedDeltaTime);
+                _rigidbody.MoveRotation(newRot);
             }
 
             _animatorController?.SetMoving(true);

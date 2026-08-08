@@ -8,7 +8,7 @@ namespace SimpleSurvival.AI
         [Header("Refs")]
         [SerializeField] private NPCEmilyStats stats;
         [SerializeField] private Animator animator;
-        [SerializeField] private CharacterController characterController;
+        [SerializeField] private Collider bodyCollider;
         [SerializeField] private Collider mainCollider;
         [SerializeField] private NPCEmilyMovement movement;
         [SerializeField] private NavMeshAgent navMeshAgent;
@@ -21,7 +21,7 @@ namespace SimpleSurvival.AI
         {
             if (stats == null) stats = GetComponent<NPCEmilyStats>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
-            if (characterController == null) characterController = GetComponent<CharacterController>();
+            if (bodyCollider == null) bodyCollider = GetComponent<CapsuleCollider>();
             if (movement == null) movement = GetComponent<NPCEmilyMovement>();
             if (navMeshAgent == null) navMeshAgent = GetComponent<NavMeshAgent>();
 
@@ -39,8 +39,6 @@ namespace SimpleSurvival.AI
 
         private void HandleDeath(GameObject source)
         {
-            // Tắt hẳn component di chuyển - đảm bảo xác không còn bị kéo đi nữa dù bất kỳ
-            // logic nào khác (script khác, thứ tự gọi event...) có cố di chuyển Emily đi nữa.
             if (movement != null)
             {
                 movement.Stop();
@@ -48,7 +46,7 @@ namespace SimpleSurvival.AI
             }
             if (navMeshAgent != null) navMeshAgent.enabled = false;
 
-            if (characterController != null) characterController.enabled = false;
+            if (bodyCollider != null) bodyCollider.enabled = false;
             if (mainCollider != null) mainCollider.enabled = false;
             if (animator != null) animator.enabled = false;
 
@@ -61,7 +59,7 @@ namespace SimpleSurvival.AI
 
             if (animator != null) animator.enabled = true;
             if (mainCollider != null) mainCollider.enabled = true;
-            if (characterController != null) characterController.enabled = true;
+            if (bodyCollider != null) bodyCollider.enabled = true;
             if (navMeshAgent != null) navMeshAgent.enabled = true;
             if (movement != null) movement.enabled = true;
         }
