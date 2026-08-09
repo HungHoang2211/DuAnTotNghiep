@@ -23,17 +23,14 @@ namespace SimpleSurvival.UI.HealthBar
                 playerStats = FindAnyObjectByType<PlayerStats>();
         }
 
-        private void Start()
-        {
-            InitializeBars();
-        }
-
         private void OnEnable()
         {
             if (playerStats != null)
                 playerStats.OnHPChanged += HandleHPChanged;
             if (playerNameLabel != null)
                 playerNameLabel.text = playerName;
+
+            InitializeBars();
         }
 
         private void OnDisable()
@@ -56,7 +53,6 @@ namespace SimpleSurvival.UI.HealthBar
             if (hpBar != null) hpBar.AnimateValue(percent);
             UpdateLabel();
         }
-
 
         private void UpdateLabel()
         {

@@ -9,8 +9,8 @@ namespace SimpleSurvival.UI
 {
     public sealed class CraftDescriptionPanelUI : MonoBehaviour
     {
-        private const string NotEnoughIngredientsMessage = "Thiếu nguyên liệu";
-        private const string InventoryFullMessage = "Túi đồ đầy";
+        private const string NotEnoughIngredientsMessage = "Not enough ingredients";
+        private const string InventoryFullMessage = "Inventory full";
         private const string CraftedMessageFormat = "{0} +1";
 
         [Header("Info")]
