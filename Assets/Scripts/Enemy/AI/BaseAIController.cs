@@ -82,8 +82,6 @@ namespace SimpleSurvival.AI
             _isDead = false;
             _player = null;
 
-            // Awake() có thể chạy trước khi Player được spawn (enemy pool khởi tạo trước),
-            // nên thử tìm + đăng ký lại mỗi lần enemy được Initialize() từ pool.
             if (_playerStats == null)
             {
                 _playerStats = FindAnyObjectByType<PlayerStats>();
@@ -96,7 +94,7 @@ namespace SimpleSurvival.AI
             _playerDead = _playerStats != null && _playerStats.IsDead;
 
             _agent.isStopped = false;
-            _agent.nextPosition = transform.position;
+            _agent.Warp(transform.position);
 
             var col = GetComponent<Collider>();
             if (col != null) col.enabled = true;
@@ -111,7 +109,7 @@ namespace SimpleSurvival.AI
             _playerDead = true;
         }
 
-        protected void MoveAlongAgentPath(float moveSpeed, float rotationSpeed)
+        protected void MoveAlongAgentPath(float moveSpeed, float rotationSpeed, bool ignoreMapEdge = false)
         {
             if (!_agent.isOnNavMesh) return;
 
@@ -120,24 +118,26 @@ namespace SimpleSurvival.AI
             move.y += Physics.gravity.y * Time.deltaTime;
 
             Vector3 finalMove = move;
-            Vector3 nextPosition = transform.position + move * Time.deltaTime;
 
-            if (MapEdgeTrigger.IsInsideAnyZone(nextPosition))
+            if (!ignoreMapEdge)
             {
-                // Bị chặn theo hướng full move -> thử trượt theo từng trục riêng
-                // để lách qua rìa vùng thay vì đứng khựng lại hoàn toàn.
-                Vector3 moveXOnly = new Vector3(move.x, move.y, 0f);
-                Vector3 moveZOnly = new Vector3(0f, move.y, move.z);
+                Vector3 nextPosition = transform.position + move * Time.deltaTime;
 
-                bool xBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveXOnly * Time.deltaTime);
-                bool zBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveZOnly * Time.deltaTime);
-
-                if (!xBlocked) finalMove = moveXOnly;
-                else if (!zBlocked) finalMove = moveZOnly;
-                else
+                if (MapEdgeTrigger.IsInsideAnyZone(nextPosition))
                 {
-                    _agent.nextPosition = transform.position;
-                    return;
+                    Vector3 moveXOnly = new Vector3(move.x, move.y, 0f);
+                    Vector3 moveZOnly = new Vector3(0f, move.y, move.z);
+
+                    bool xBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveXOnly * Time.deltaTime);
+                    bool zBlocked = MapEdgeTrigger.IsInsideAnyZone(transform.position + moveZOnly * Time.deltaTime);
+
+                    if (!xBlocked) finalMove = moveXOnly;
+                    else if (!zBlocked) finalMove = moveZOnly;
+                    else
+                    {
+                        _agent.nextPosition = transform.position;
+                        return;
+                    }
                 }
             }
 

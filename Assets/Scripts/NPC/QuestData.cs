@@ -9,6 +9,7 @@ namespace SimpleSurvival.Quests
         [Header("Identity")]
         [SerializeField] private string questId;
         [SerializeField] private string questName;
+        [SerializeField] private string questGiverName;
 
         [Header("Dialogue")]
         [TextArea][SerializeField] private string offerDialogue;
@@ -32,6 +33,7 @@ namespace SimpleSurvival.Quests
         public int RequiredLevel => requiredLevel;
         public string QuestId => questId;
         public string QuestName => questName;
+        public string QuestGiverName => questGiverName;
         public string OfferDialogue => offerDialogue;
         public string TurnInDialogue => turnInDialogue;
         public IReadOnlyList<QuestObjectiveData> Objectives => objectives;

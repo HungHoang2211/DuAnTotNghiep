@@ -105,7 +105,7 @@ namespace SimpleSurvival.AI
 
             float dist = Vector3.Distance(transform.position, _player.position);
 
-            if (dist > Config.ChaseRadius)
+            if (!_escortMode && dist > Config.ChaseRadius)
             {
                 BeginIdle();
                 return;
@@ -130,7 +130,7 @@ namespace SimpleSurvival.AI
 
             _agent.isStopped = false;
             _agent.SetDestination(GetChaseDestination());
-            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed);
+            MoveAlongAgentPath(Config.MoveSpeed, Config.RotationSpeed, _escortMode);
 
             if (_fatAnimator != null)
             {
@@ -138,13 +138,16 @@ namespace SimpleSurvival.AI
                 _fatAnimator.SetMoveSpeed(speed);
             }
 
-            if (!CanStillDetect())
+            if (!_escortMode)
             {
-                _lostTargetTimer += Time.deltaTime;
-                if (_lostTargetTimer >= Config.LoseTargetTime)
-                    BeginIdle();
+                if (!CanStillDetect())
+                {
+                    _lostTargetTimer += Time.deltaTime;
+                    if (_lostTargetTimer >= Config.LoseTargetTime)
+                        BeginIdle();
+                }
+                else _lostTargetTimer = 0f;
             }
-            else _lostTargetTimer = 0f;
 
             CheckStuck();
         }

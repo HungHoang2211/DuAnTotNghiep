@@ -1,5 +1,4 @@
 using UnityEngine;
-using SimpleSurvival.AI;
 using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.Quests
@@ -10,7 +9,6 @@ namespace SimpleSurvival.Quests
         [SerializeField] private GameObject highlightVisual;
 
         private EnemyStats _stats;
-        private BaseEnemyController _controller;
         private bool _isActive;
         private bool _registered;
         private bool _isDead;
@@ -22,7 +20,6 @@ namespace SimpleSurvival.Quests
         private void Awake()
         {
             _stats = GetComponent<EnemyStats>();
-            _controller = GetComponent<BaseEnemyController>();
         }
 
         private void OnEnable()
@@ -68,9 +65,6 @@ namespace SimpleSurvival.Quests
 
             if (highlightVisual != null)
                 highlightVisual.SetActive(value);
-
-            if (_controller != null)
-                _controller.SetQuestLocked(value);
         }
     }
 }

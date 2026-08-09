@@ -9,7 +9,6 @@ namespace SimpleSurvival.Quests
         [SerializeField] private List<QuestLogEntryUI> slots = new List<QuestLogEntryUI>();
 
         [Header("Quest Flow")]
-        // Dùng để bật highlight visual của quest tutorial khi người chơi click vào slot tương ứng.
         [SerializeField] private TutorialQuestSequencer sequencer;
 
         private readonly Dictionary<QuestData, QuestLogEntryUI> _assignedSlots = new Dictionary<QuestData, QuestLogEntryUI>();
@@ -21,7 +20,6 @@ namespace SimpleSurvival.Quests
             {
                 if (slot == null) continue;
                 slot.gameObject.SetActive(false);
-                // Đăng ký 1 lần cho toàn bộ vòng đời slot (slot cố định, chỉ đổi quest được gán bên trong).
                 slot.OnEntryClicked += HandleEntryClicked;
             }
 
@@ -30,6 +28,7 @@ namespace SimpleSurvival.Quests
             {
                 manager.OnQuestStarted += HandleQuestStarted;
                 manager.OnObjectiveProgress += HandleProgress;
+                manager.OnQuestReadyToTurnIn += HandleReadyToTurnIn;
                 manager.OnQuestCompleted += HandleQuestCompleted;
             }
         }
@@ -46,12 +45,11 @@ namespace SimpleSurvival.Quests
             {
                 manager.OnQuestStarted -= HandleQuestStarted;
                 manager.OnObjectiveProgress -= HandleProgress;
+                manager.OnQuestReadyToTurnIn -= HandleReadyToTurnIn;
                 manager.OnQuestCompleted -= HandleQuestCompleted;
             }
         }
 
-        // Click vào thông tin nhiệm vụ trong Quest Log -> bật highlight visual cho vật chỉ định của quest đó
-        // (thay vì bật khi ấn dấu "!" như trước).
         private void HandleEntryClicked(QuestData quest)
         {
             if (quest != null) sequencer?.RevealQuestHighlight(quest);
@@ -75,6 +73,12 @@ namespace SimpleSurvival.Quests
         {
             if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
             slot.SetObjectiveText(BuildObjectiveText(quest, objectiveIndex));
+        }
+
+        private void HandleReadyToTurnIn(QuestData quest)
+        {
+            if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
+            slot.SetObjectiveText(BuildTurnInText(quest));
         }
 
         private void HandleQuestCompleted(QuestData quest)
@@ -119,6 +123,25 @@ namespace SimpleSurvival.Quests
             var objective = quest.Objectives[objectiveIndex];
             int current = manager.GetObjectiveProgress(quest, objectiveIndex);
             return $"{objective.description} ({current}/{objective.requiredAmount})";
+        }
+
+        private string BuildTurnInText(QuestData quest)
+        {
+            string giver = string.IsNullOrEmpty(quest.QuestGiverName) ? "the quest giver" : quest.QuestGiverName;
+
+            bool isEscort = false;
+            foreach (var objective in quest.Objectives)
+            {
+                if (objective.type == QuestObjectiveType.EscortNPC)
+                {
+                    isEscort = true;
+                    break;
+                }
+            }
+
+            return isEscort
+                ? $"Talk to {giver} to receive your reward."
+                : $"Go back to find {giver} to receive your reward.";
         }
     }
 }

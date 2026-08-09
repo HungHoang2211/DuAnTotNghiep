@@ -285,8 +285,12 @@ namespace SimpleSurvival.Quests
                 OnObjectiveProgress?.Invoke(quest, i);
             }
 
-            if (progress.IsAllComplete() && HasSpaceForRewards(quest))
+            if (!progress.IsAllComplete()) return;
+
+            if (HasSpaceForRewards(quest))
                 CompleteQuest(quest);
+            else
+                OnQuestReadyToTurnIn?.Invoke(quest);
         }
 
         public void NotifyTowerRepaired(string towerId)

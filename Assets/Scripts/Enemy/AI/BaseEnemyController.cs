@@ -20,7 +20,6 @@ namespace SimpleSurvival.AI
 
         protected bool _escortMode;
 
-        protected bool _questLocked;
         protected EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
         public bool HasDetectedPlayer => _state != EnemyState.Idle && _state != EnemyState.Dead;
 
@@ -50,11 +49,6 @@ namespace SimpleSurvival.AI
             StartCoroutine(DetectionRoutine());
         }
 
-        public void SetQuestLocked(bool locked)
-        {
-            _questLocked = locked;
-        }
-
         protected override void OnInitialized()
         {
             if (Config == null)
@@ -68,7 +62,6 @@ namespace SimpleSurvival.AI
             _agent.speed = Config.MoveSpeed;
             LastDamageDealtTime = -999f;
             _escortMode = false;
-            _questLocked = false;
 
             OnEnemyInitialized();
 
@@ -88,7 +81,6 @@ namespace SimpleSurvival.AI
                 if (_state == EnemyState.Dead) yield break;
                 if (_playerDead) continue;
                 if (_state != EnemyState.Idle) continue;
-                if (_questLocked) continue;
                 if (DetectByVision() || DetectByHearing())
                     OnPlayerDetected();
             }
@@ -288,10 +280,6 @@ namespace SimpleSurvival.AI
                 ? Physics.OverlapSphere(transform.position, Config.VisionRange)
                 : Physics.OverlapSphere(transform.position, Config.VisionRange, playerLayer);
 
-            //Debug.Log($"[{name}] DetectByVision — found {hits.Length} colliders trong range {Config.VisionRange}");
-            foreach (var h in hits)
-                //Debug.Log($"[{name}]   hit: {h.name}, tag={h.tag}, enabled={h.enabled}");
-
             foreach (var hit in hits)
             {
                 if (!hit.CompareTag("Player")) continue;
@@ -334,7 +322,6 @@ namespace SimpleSurvival.AI
             if (_escortMode) return;
             if (!source.CompareTag("Player")) return;
 
-            _questLocked = false;
             _player = source.transform;
 
             if (_state == EnemyState.Idle)
