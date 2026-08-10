@@ -18,33 +18,56 @@ namespace SimpleSurvival.AI
         protected override void OnExecute(Transform target)
         {
             _target = target;
-            if (animator != null) animator.TriggerAttackClaw();
+
+            if (animator != null)
+                animator.TriggerAttackClaw();
         }
 
         // Animation Event ở frame trái trúng
-        public void OnHitLeft() => TryDealDamage();
+        public void OnHitLeft()
+        {
+            PlayHitSound();
+            TryDealDamage();
+        }
 
         // Animation Event ở frame phải trúng
-        public void OnHitRight() => TryDealDamage();
+        public void OnHitRight()
+        {
+            PlayHitSound();
+            TryDealDamage();
+        }
 
         // Animation Event cuối combo
         public void OnAttackEnd()
         {
             MarkComplete();
-            if (controller != null) controller.NotifySkillComplete();
+
+            if (controller != null)
+                controller.NotifySkillComplete();
         }
 
         private void TryDealDamage()
         {
-            if (!_isExecuting || _target == null) return;
+            if (!_isExecuting || _target == null)
+                return;
 
-            float dist = Vector3.Distance(transform.position, _target.position);
-            if (dist > maxRange + damageRangeBonus) return;
+            float dist = Vector3.Distance(
+                transform.position,
+                _target.position
+            );
+
+            if (dist > maxRange + damageRangeBonus)
+                return;
 
             var damageable = ResolveDamageable(_target);
-            if (damageable == null || damageable.IsDead) return;
 
-            damageable.TakeDamage(damagePerHit, gameObject);
+            if (damageable == null || damageable.IsDead)
+                return;
+
+            damageable.TakeDamage(
+                damagePerHit,
+                gameObject
+            );
         }
 
         protected override void OnCancel()
@@ -55,9 +78,16 @@ namespace SimpleSurvival.AI
         private IDamageable ResolveDamageable(Transform target)
         {
             var direct = target.GetComponent<IDamageable>();
-            if (direct != null) return direct;
-            var inChildren = target.GetComponentInChildren<IDamageable>();
-            if (inChildren != null) return inChildren;
+
+            if (direct != null)
+                return direct;
+
+            var inChildren =
+                target.GetComponentInChildren<IDamageable>();
+
+            if (inChildren != null)
+                return inChildren;
+
             return target.GetComponentInParent<IDamageable>();
         }
     }

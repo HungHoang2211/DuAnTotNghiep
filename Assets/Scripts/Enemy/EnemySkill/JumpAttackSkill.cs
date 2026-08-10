@@ -34,6 +34,7 @@ namespace SimpleSurvival.AI
 
             if (impactEffectPrefab != null)
                 Instantiate(impactEffectPrefab, transform.position, Quaternion.identity);
+            PlayHitSound();
 
             Collider[] hits = playerLayer == 0
                 ? Physics.OverlapSphere(transform.position, aoeRadius)

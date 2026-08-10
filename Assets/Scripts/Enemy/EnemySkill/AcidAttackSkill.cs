@@ -33,13 +33,21 @@ namespace SimpleSurvival.AI
 
         public override bool IsAvailable(Transform target, float distanceToTarget)
         {
-            bool inRange = target != null && distanceToTarget >= minRange && distanceToTarget <= maxRange;
+            bool inRange =
+                target != null &&
+                distanceToTarget >= minRange &&
+                distanceToTarget <= maxRange;
 
-            if (inRange) _timeInRange += Time.deltaTime;
-            else _timeInRange = 0f;
+            if (inRange)
+                _timeInRange += Time.deltaTime;
+            else
+                _timeInRange = 0f;
 
-            if (!base.IsAvailable(target, distanceToTarget)) return false;
-            if (_timeInRange < requiredTimeInRange) return false;
+            if (!base.IsAvailable(target, distanceToTarget))
+                return false;
+
+            if (_timeInRange < requiredTimeInRange)
+                return false;
 
             return true;
         }
@@ -48,35 +56,61 @@ namespace SimpleSurvival.AI
         {
             _target = target;
             _timeInRange = 0f;
-            if (animator != null) animator.TriggerAcidAttack();
 
-            if (_failsafeRoutine != null) StopCoroutine(_failsafeRoutine);
+            if (animator != null)
+                animator.TriggerAcidAttack();
+
+            if (_failsafeRoutine != null)
+                StopCoroutine(_failsafeRoutine);
+
             _failsafeRoutine = StartCoroutine(FailsafeEndRoutine());
         }
 
         public void OnAcidSpit()
         {
-            if (!_isExecuting) return;
+            if (!_isExecuting)
+                return;
 
             if (acidEffectPrefab != null && _target != null)
             {
-                Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : transform.position + transform.forward;
+                Vector3 spawnPos =
+                    spawnPoint != null
+                        ? spawnPoint.position
+                        : transform.position + transform.forward;
 
-                Vector3 dir = (_target.position - spawnPos).normalized;
-                Quaternion spawnRot = dir != Vector3.zero ? Quaternion.LookRotation(dir) : transform.rotation;
+                Vector3 dir =
+                    (_target.position - spawnPos).normalized;
 
-                // ĐÃ SỬA: dùng ObjectPool.Instance.Get thay vì Instantiate để tránh
-                // GC spike/leak trên Android khi zombie phun acid liên tục.
-                var go = ObjectPool.Instance.Get(acidEffectPrefab, spawnPos, spawnRot);
+                Quaternion spawnRot =
+                    dir != Vector3.zero
+                        ? Quaternion.LookRotation(dir)
+                        : transform.rotation;
+
+                // Phát âm thanh khi acid được phun
+                PlayHitSound();
+
+                // Spawn acid projectile
+                var go = ObjectPool.Instance.Get(
+                    acidEffectPrefab,
+                    spawnPos,
+                    spawnRot
+                );
+
                 var projectile = go.GetComponent<AcidProjectile>();
+
                 if (projectile != null)
-                    projectile.Init(damage, gameObject, controller);
+                    projectile.Init(
+                        damage,
+                        gameObject,
+                        controller
+                    );
             }
         }
 
         public void OnAcidEnd()
         {
-            if (!_isExecuting) return;
+            if (!_isExecuting)
+                return;
 
             if (_failsafeRoutine != null)
             {
@@ -85,13 +119,17 @@ namespace SimpleSurvival.AI
             }
 
             MarkComplete();
-            if (controller != null) controller.NotifySkillComplete();
+
+            if (controller != null)
+                controller.NotifySkillComplete();
+
             _target = null;
         }
 
         private IEnumerator FailsafeEndRoutine()
         {
             yield return new WaitForSeconds(failsafeDuration);
+
             OnAcidEnd();
         }
 
@@ -102,8 +140,12 @@ namespace SimpleSurvival.AI
                 StopCoroutine(_failsafeRoutine);
                 _failsafeRoutine = null;
             }
+
             _timeInRange = 0f;
-            if (animator != null) animator.CancelAttack();
+
+            if (animator != null)
+                animator.CancelAttack();
+
             _target = null;
         }
     }

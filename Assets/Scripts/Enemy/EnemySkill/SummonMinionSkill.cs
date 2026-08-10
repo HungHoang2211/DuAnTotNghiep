@@ -68,6 +68,7 @@ namespace SimpleSurvival.AI
                 var sampler = new NavMeshAreaSampler();
                 foreach (var group in _minionsToSummon)
                     SpawnMinion(group, sampler);
+                PlayHitSound();
             }
 
             if (animator != null)

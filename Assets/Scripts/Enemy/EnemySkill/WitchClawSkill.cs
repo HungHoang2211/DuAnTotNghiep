@@ -45,10 +45,11 @@ namespace SimpleSurvival.AI
 
             return controller.DroppedArmIndex == 0 ? AttackMode.Right : AttackMode.Left;
         }
-        public void OnHitLeft() => TryDealDamage(1);
-
-        public void OnHitRight() => TryDealDamage(1);
-        public void OnHitBoth() => TryDealDamage(2);
+        public void OnHitLeft() { PlayHitSound(); TryDealDamage(1); } 
+        
+        public void OnHitRight() { PlayHitSound(); TryDealDamage(1); }
+       
+        public void OnHitBoth() { PlayHitSound(); TryDealDamage(2); }
 
         public void OnAttackEnd()
         {
