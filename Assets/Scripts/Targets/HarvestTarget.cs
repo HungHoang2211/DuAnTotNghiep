@@ -65,7 +65,6 @@ namespace SimpleSurvival.Targets
 
         private void HandleDepleted()
         {
-            Debug.Log("[Harvest] Depleted called");
             FireOnDestroyed();
             DisableTargetability();
             PlayDepletedEffect();

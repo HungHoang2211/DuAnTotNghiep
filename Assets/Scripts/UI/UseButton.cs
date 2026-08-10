@@ -170,7 +170,21 @@ namespace SimpleSurvival.UI
             var equipment = actionController.GetComponentInChildren<PlayerEquipment>();
             if (equipment == null || equipment.System == null) return false;
 
-            var stack = equipment.System.GetSlot(EquipSlot.Weapon, 0);
+            if (CheckSlotForTool(equipment.System, EquipSlot.Weapon, 0, required))
+                return true;
+
+            if (CheckSlotForTool(equipment.System, EquipSlot.QuickSlot, 0, required))
+                return true;
+
+            if (CheckSlotForTool(equipment.System, EquipSlot.QuickSlot, 1, required))
+                return true;
+
+            return false;
+        }
+
+        private bool CheckSlotForTool(EquipmentSystem system, EquipSlot slot, int index, ToolType required)
+        {
+            var stack = system.GetSlot(slot, index);
             if (stack == null) return false;
 
             var tool = stack.ItemData.GetAbility<ToolAbility>();

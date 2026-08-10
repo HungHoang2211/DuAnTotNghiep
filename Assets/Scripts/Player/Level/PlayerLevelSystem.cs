@@ -23,6 +23,7 @@ namespace SimpleSurvival.Progression
 
         public event Action<int, int, int> OnExpChanged;
         public event Action<int> OnLevelUp;
+        public event Action<int> OnExpGained;
 
         private void Awake()
         {
@@ -51,6 +52,8 @@ namespace SimpleSurvival.Progression
         public void AddExperience(int amount)
         {
             if (amount <= 0 || config == null || IsMaxLevel) return;
+
+            OnExpGained?.Invoke(amount);
 
             _currentExp += amount;
 

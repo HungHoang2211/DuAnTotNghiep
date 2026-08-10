@@ -64,7 +64,6 @@ namespace SimpleSurvival.UI.HealthBar
                 return;
             }
             BindEnemy(stats);
-            Debug.Log($"[EnemyHealthUI] Enemy changed: {(target as MonoBehaviour)?.name ?? "null"}");
         }
 
         private void BindEnemy(EnemyStats stats)

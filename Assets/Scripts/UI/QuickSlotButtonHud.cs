@@ -50,8 +50,6 @@ namespace SimpleSurvival.UI
 
         private void HandleSlotChanged(EquipSlot slot, int index, ItemStack stack)
         {
-            Debug.Log($"[QuickSlotButtonHud:{slotIndex}] HandleSlotChanged fired: slot={slot}, index={index}, stack={stack?.ItemData.ItemName ?? "null"}");
-
             if (slot != EquipSlot.QuickSlot || index != slotIndex) return;
             Refresh();
         }
@@ -59,7 +57,6 @@ namespace SimpleSurvival.UI
         private void Refresh()
         {
             ItemStack stack = _system != null ? _system.GetSlot(EquipSlot.QuickSlot, slotIndex) : null;
-            Debug.Log($"[QuickSlotButtonHud:{slotIndex}] Refresh, stack={stack?.ItemData.ItemName ?? "null"}, root={root != null}");
 
             if (stack != _currentStack)
             {

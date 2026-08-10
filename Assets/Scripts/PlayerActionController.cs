@@ -145,7 +145,6 @@ namespace SimpleSurvival.Player
 
             if (CurrentAction.IsCompleted)
             {
-                Debug.Log($"[Update] Action complete: {CurrentAction.GetType().Name}");
                 HandleActionCompletion(CurrentAction);
                 SwitchToIdle();
             }
@@ -648,11 +647,13 @@ namespace SimpleSurvival.Player
 
             if (playerEquipment != null)
             {
-                ItemStack equipped = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
-                if (equipped != null)
+                var system = playerEquipment.System;
+
+                ItemStack equipped = system.GetSlot(EquipSlot.Weapon, 0);
+                if (equipped != null && !equipped.IsBroken)
                 {
                     ToolAbility equippedTool = equipped.ItemData.GetAbility<ToolAbility>();
-                    if (equippedTool != null && equippedTool.ToolType == required && !equipped.IsBroken)
+                    if (equippedTool != null && equippedTool.ToolType == required)
                     {
                         result.HasTool = true;
                         result.ToolStack = equipped;
@@ -660,6 +661,21 @@ namespace SimpleSurvival.Player
                         result.IsEphemeral = false;
                         return result;
                     }
+                }
+
+                for (int i = 0; i < system.SlotCount(EquipSlot.QuickSlot); i++)
+                {
+                    ItemStack quickStack = system.GetSlot(EquipSlot.QuickSlot, i);
+                    if (quickStack == null || quickStack.IsBroken) continue;
+
+                    ToolAbility quickTool = quickStack.ItemData.GetAbility<ToolAbility>();
+                    if (quickTool == null || quickTool.ToolType != required) continue;
+
+                    result.HasTool = true;
+                    result.ToolStack = quickStack;
+                    result.Damage = quickTool.Damage;
+                    result.IsEphemeral = true;
+                    return result;
                 }
             }
 
