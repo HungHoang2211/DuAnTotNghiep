@@ -17,6 +17,19 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue craft ;
         [SerializeField] private AudioCue mainClickCue ;
         [SerializeField] private AudioCue updatecue ;
+        [SerializeField] private AudioCue pickupCue;
+        [SerializeField] private AudioCue lootCue;
+
+      
+        public void PlayPickup()
+        {
+            AudioManager.Instance.PlaySfx(pickupCue);
+        }
+
+        public void PlayLoot()
+        {
+            AudioManager.Instance.PlaySfx(lootCue);
+        }
         public void PlayMainClick()
         {
             AudioManager.Instance.PlaySfx(mainClickCue);
