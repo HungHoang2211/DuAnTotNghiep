@@ -1,6 +1,8 @@
+﻿using SimpleSurvival.Stats;
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.Audio
 {
@@ -12,71 +14,139 @@ namespace SimpleSurvival.Audio
 
         [Header("Footstep Cue")]
         [SerializeField] private AudioCue footstepCue;
+
+        // Thời gian chờ SAU KHI cue trước phát xong
+        [SerializeField] private float footstepDelay = 1.5f;
+
         [SerializeField] private float moveSpeedThreshold = 0.1f;
 
         [Header("References")]
         [SerializeField] private EnemyStats stats;
         [SerializeField] private NavMeshAgent agent;
 
-        private bool _wasMoving;
+        private Coroutine _footstepCoroutine;
 
         private void Awake()
         {
-            if (stats == null) stats = GetComponentInParent<EnemyStats>();
-            if (agent == null) agent = GetComponentInParent<NavMeshAgent>();
+            if (stats == null)
+                stats = GetComponentInParent<EnemyStats>();
+
+            if (agent == null)
+                agent = GetComponentInParent<NavMeshAgent>();
         }
 
         private void OnEnable()
         {
-            if (stats == null) return;
-            stats.OnDamagedBy += HandleDamaged;
-            stats.OnDeath += HandleDeath;
+            if (stats != null)
+            {
+                stats.OnDamagedBy += HandleDamaged;
+                stats.OnDeath += HandleDeath;
+            }
         }
 
         private void OnDisable()
         {
-            if (stats == null) return;
-            stats.OnDamagedBy -= HandleDamaged;
-            stats.OnDeath -= HandleDeath;
+            if (stats != null)
+            {
+                stats.OnDamagedBy -= HandleDamaged;
+                stats.OnDeath -= HandleDeath;
+            }
 
-            StopFootstepIfNeeded();
+            StopFootsteps();
         }
 
         private void Update()
         {
-            TickFootstep();
-        }
+            if (agent == null)
+                return;
 
-        private void TickFootstep()
-        {
-            if (agent == null || footstepCue == null || AudioManager.Instance == null) return;
             if (stats != null && stats.IsDead)
             {
-                StopFootstepIfNeeded();
+                StopFootsteps();
                 return;
             }
+
             if (!agent.enabled)
             {
-                StopFootstepIfNeeded();
+                StopFootsteps();
                 return;
             }
 
             bool isMoving = agent.velocity.magnitude >= moveSpeedThreshold;
 
-            if (isMoving && !_wasMoving)
-                AudioManager.Instance.StartLoop(footstepCue);
-            else if (!isMoving && _wasMoving)
-                AudioManager.Instance.StopLoop(footstepCue);
-
-            _wasMoving = isMoving;
+            if (isMoving)
+            {
+                StartFootsteps();
+            }
+            else
+            {
+                StopFootsteps();
+            }
         }
 
-        private void StopFootstepIfNeeded()
+        private void StartFootsteps()
         {
-            if (!_wasMoving) return;
-            if (AudioManager.Instance != null && footstepCue != null)
-                AudioManager.Instance.StopLoop(footstepCue);
-            _wasMoving = false;
+            if (_footstepCoroutine != null)
+                return;
+
+            if (footstepCue == null || AudioManager.Instance == null)
+                return;
+
+            _footstepCoroutine = StartCoroutine(FootstepRoutine());
+        }
+
+        private void StopFootsteps()
+        {
+            if (_footstepCoroutine != null)
+            {
+                StopCoroutine(_footstepCoroutine);
+                _footstepCoroutine = null;
+            }
+        }
+
+        private IEnumerator FootstepRoutine()
+        {
+            while (true)
+            {
+                // Phát 1 lần
+                AudioSource source = AudioManager.Instance.PlaySfxAt(
+                    footstepCue,
+                    transform.position
+                );
+
+                // Nếu không phát được thì dừng
+                if (source == null)
+                    break;
+
+                // CHỜ CUE PHÁT HẾT
+                while (source != null && source.isPlaying)
+                {
+                    yield return null;
+                }
+
+                // CUE ĐÃ PHÁT HẾT
+                // Bây giờ mới bắt đầu footstepDelay
+                float timer = 0f;
+
+                while (timer < footstepDelay)
+                {
+                    // Nếu Enemy dừng thì dừng luôn
+                    if (agent == null ||
+                        !agent.enabled ||
+                        agent.velocity.magnitude < moveSpeedThreshold)
+                    {
+                        _footstepCoroutine = null;
+                        yield break;
+                    }
+
+                    timer += Time.deltaTime;
+                    yield return null;
+                }
+
+                // Hết delay -> vòng lặp phát cue tiếp
+            }
+
+            _footstepCoroutine = null;
         }
 
         private void HandleDamaged(GameObject attacker)
@@ -86,14 +156,19 @@ namespace SimpleSurvival.Audio
 
         private void HandleDeath(GameObject source)
         {
+            StopFootsteps();
             PlaySfx(deathCue);
-            StopFootstepIfNeeded();
         }
 
         private void PlaySfx(AudioCue cue)
         {
-            if (cue == null || AudioManager.Instance == null) return;
-            AudioManager.Instance.PlaySfxAt(cue, transform.position);
+            if (cue == null || AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfxAt(
+                cue,
+                transform.position
+            );
         }
     }
 }
