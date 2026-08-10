@@ -402,6 +402,13 @@ namespace SimpleSurvival.Quests
                         progress.SetAmount(i, activeData.objectiveProgress[i]);
 
                     _activeQuests[quest] = progress;
+
+                    OnQuestStarted?.Invoke(quest);
+                    for (int i = 0; i < quest.Objectives.Count; i++)
+                        OnObjectiveProgress?.Invoke(quest, i);
+
+                    if (progress.IsAllComplete())
+                        OnQuestReadyToTurnIn?.Invoke(quest);
                 }
             }
         }

@@ -120,6 +120,12 @@ namespace SimpleSurvival.SaveLoad
             return save;
         }
 
+        public void RestoreQuestState()
+        {
+            if (lastLoaded == null) return;
+            QuestManager.Instance?.Restore(lastLoaded.world);
+        }
+
         public void ApplyColdBoot()
         {
             if (lastLoaded == null)
@@ -132,13 +138,13 @@ namespace SimpleSurvival.SaveLoad
             PlayerLevelSystem.Instance?.Restore(lastLoaded.level);
             playerAgent.RestoreCrossScene(lastLoaded.player);
             PlayerDeathHandler.Instance?.ResumeDeathStateIfNeeded();
-            QuestManager.Instance?.Restore(lastLoaded.world);
             IsActive = true;
         }
 
         public void LoadColdBoot()
         {
             Read();
+            RestoreQuestState();
             ApplyColdBoot();
         }
 

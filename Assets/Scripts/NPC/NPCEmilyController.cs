@@ -63,8 +63,6 @@ namespace SimpleSurvival.AI
 
         public bool IsEscorting { get; private set; }
 
-        private static readonly Dictionary<string, Vector3> _completedEscortPositions = new Dictionary<string, Vector3>();
-
         private readonly List<EscortPoint> _route = new List<EscortPoint>();
         private int _routeIndex;
         private LootContainer _waitingLootContainer;
@@ -98,9 +96,6 @@ namespace SimpleSurvival.AI
                 manager.OnObjectiveProgress += HandleObjectiveProgress;
                 manager.OnQuestCompleted += HandleQuestStateChanged;
 
-                // Debug: ép hoàn thành 3 quest đầu để test thẳng Repair Tower Quest.
-                // Lưu ý: bỏ qua hẳn phần logic escort thật (di chuyển, combat, unlock loot...)
-                // nên chỉ dùng để test riêng Repair Tower, không phản ánh đúng trải nghiệm escort thật.
                 if (debugSkipToRepairTower)
                 {
                     if (findQuest != null && !manager.IsQuestCompleted(findQuest))
@@ -113,10 +108,11 @@ namespace SimpleSurvival.AI
                         manager.DebugForceCompleteQuest(killWitchQuest);
                 }
 
-                if (escortQuest != null && manager.IsQuestCompleted(escortQuest)
-                    && _completedEscortPositions.TryGetValue(npcId, out Vector3 savedPosition))
+                if (escortQuest != null && manager.IsQuestCompleted(escortQuest))
                 {
-                    movement?.WarpTo(savedPosition);
+                    EscortPoint finalPoint = GetFinalEscortPoint();
+                    if (finalPoint != null)
+                        movement?.WarpTo(finalPoint.Position);
                 }
             }
 
@@ -412,7 +408,18 @@ namespace SimpleSurvival.AI
             movement?.BeginMoveTo(_route[_routeIndex].Position);
             enemyDirector?.BeginEncounter(transform);
         }
+        private EscortPoint GetFinalEscortPoint()
+        {
+            foreach (var objective in escortQuest.Objectives)
+            {
+                if (objective.type != QuestObjectiveType.EscortNPC) continue;
+                if (objective.escortWaypointIds == null || objective.escortWaypointIds.Count == 0) return null;
 
+                string lastPointId = objective.escortWaypointIds[objective.escortWaypointIds.Count - 1];
+                return EscortPoint.Find(lastPointId);
+            }
+            return null;
+        }
         private void UnlockRouteContainers()
         {
             if (escortQuest == null) return;
@@ -477,7 +484,6 @@ namespace SimpleSurvival.AI
             if (_routeIndex >= _route.Count)
             {
                 IsEscorting = false;
-                _completedEscortPositions[npcId] = transform.position;
                 enemyDirector?.StopEncounter();
 
                 QuestManager manager = QuestManager.Instance;

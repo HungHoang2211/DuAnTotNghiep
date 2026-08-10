@@ -52,7 +52,10 @@ namespace SimpleSurvival.World
             isTransitioning = true;
             TransitionStarted?.Invoke();
 
+            yield return null;
+
             SaveService.Instance?.Read();
+            SaveService.Instance?.RestoreQuestState();
 
             fadeScreen.SetBlack();
             yield return mapLoader.SwapRoutine(startMapScene);
