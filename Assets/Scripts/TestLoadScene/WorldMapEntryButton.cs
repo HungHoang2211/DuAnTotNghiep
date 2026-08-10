@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SimpleSurvival.World
 {
-    public class WorldMapEntryButton : MonoBehaviour
+    public class WorldMapEntryButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Button button;
         [SerializeField] private Image iconImage;
@@ -13,6 +15,10 @@ namespace SimpleSurvival.World
         [SerializeField] private Color currentMapColor = new Color(0.4f, 0.4f, 0.4f, 1f);
         [SerializeField] private Color tapFlashColor = new Color(0.6f, 1f, 0.6f, 1f);
         [SerializeField] private float tapFlashDuration = 0.15f;
+
+        [Header("Hover Tooltip")]
+        [SerializeField] private GameObject nameLabelRoot;
+        [SerializeField] private TextMeshProUGUI nameLabel;
 
         private MapDestination destination;
         private Action<MapDestination> onClicked;
@@ -28,9 +34,44 @@ namespace SimpleSurvival.World
             if (iconImage != null)
                 iconImage.color = isCurrent ? currentMapColor : normalColor;
 
+            if (nameLabel != null)
+                nameLabel.text = target.DisplayName;
+
+            HideTooltip();
+
             button.interactable = !isCurrent;
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(HandleClick);
+        }
+
+        private void OnDisable()
+        {
+            HideTooltip();
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            ShowTooltip();
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            HideTooltip();
+        }
+
+        private void ShowTooltip()
+        {
+            if (destination == null)
+                return;
+
+            if (nameLabelRoot != null)
+                nameLabelRoot.SetActive(true);
+        }
+
+        private void HideTooltip()
+        {
+            if (nameLabelRoot != null)
+                nameLabelRoot.SetActive(false);
         }
 
         private void HandleClick()

@@ -50,7 +50,7 @@ namespace SimpleSurvival.World
             creditsPanel.SetActive(false);
             confirmNewGamePanel.SetActive(false);
             rootPanel.SetActive(true);
-            comicReveal.RevealNext();   
+            comicReveal.RevealNext();
 
             Time.timeScale = 0f;
             isPaused = true;
@@ -66,6 +66,7 @@ namespace SimpleSurvival.World
                 }
                 else
                 {
+                    comicReveal.StopNarration();
                     comicPanel.SetActive(false);
                     creditsPanel.SetActive(true);
                 }
@@ -91,6 +92,7 @@ namespace SimpleSurvival.World
 
         public void OnConfirmNewGameYes()
         {
+            comicReveal.StopNarration();
             SaveService.Instance?.DeleteSave();
             Time.timeScale = 1f;
             SceneManager.LoadScene(mainMenuScene);
@@ -103,6 +105,7 @@ namespace SimpleSurvival.World
 
         private void ClosePanel()
         {
+            comicReveal.StopNarration();
             rootPanel.SetActive(false);
             if (isPaused)
             {
