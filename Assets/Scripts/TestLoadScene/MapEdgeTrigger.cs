@@ -21,9 +21,13 @@ namespace SimpleSurvival.World
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly List<MapEdgeTrigger> _activeZones = new List<MapEdgeTrigger>();
 
+        private static int _playerInsideCount;
+        public static bool IsPlayerInsideAnyZone => _playerInsideCount > 0;
+
         private MeshRenderer zoneRenderer;
         private MaterialPropertyBlock propertyBlock;
         private Collider _collider;
+        private bool _playerInside;
 
         private void Reset()
         {
@@ -44,6 +48,12 @@ namespace SimpleSurvival.World
         private void OnDisable()
         {
             _activeZones.Remove(this);
+
+            if (_playerInside)
+            {
+                _playerInside = false;
+                _playerInsideCount = Mathf.Max(0, _playerInsideCount - 1);
+            }
         }
 
         /// <summary>
@@ -79,10 +89,24 @@ namespace SimpleSurvival.World
 
         private void OnTriggerEnter(Collider other)
         {
+            if (_playerInside) return;
             if (!other.CompareTag(playerTag)) return;
+
+            _playerInside = true;
+            _playerInsideCount++;
+
             if (WorldMapUI.Instance == null) return;
 
             WorldMapUI.Instance.Open();
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (!_playerInside) return;
+            if (!other.CompareTag(playerTag)) return;
+
+            _playerInside = false;
+            _playerInsideCount = Mathf.Max(0, _playerInsideCount - 1);
         }
 
         private void BuildZoneVisual()

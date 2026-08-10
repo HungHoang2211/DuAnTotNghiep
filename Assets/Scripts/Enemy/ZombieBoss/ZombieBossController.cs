@@ -187,6 +187,10 @@ namespace SimpleSurvival.AI
             if (_spawnPoint != null)
                 _spawnPoint.NotifyDespawned(despawnDelay);
         }
+        protected override void OnMapEdgeFreeze()
+        {
+            if (_bossAnimator != null) _bossAnimator.SetIdle();
+        }
 
         protected override void StopAllActions()
         {

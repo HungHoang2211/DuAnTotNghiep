@@ -50,6 +50,8 @@ namespace SimpleSurvival.Quests
         public bool MatchesPickup(ItemData item)
         {
             if (_pickupTarget == null || item == null) return false;
+            if (!_pickupTarget.CanBeTargeted()) return false;
+
             foreach (var entry in _pickupTarget.Items)
             {
                 if (entry.itemData == item) return true;
@@ -59,7 +61,10 @@ namespace SimpleSurvival.Quests
 
         public bool MatchesHarvest(ItemData item)
         {
-            return _harvestTarget != null && item != null && _harvestTarget.ItemData == item;
+            if (_harvestTarget == null || item == null) return false;
+            if (!_harvestTarget.CanBeTargeted()) return false;
+
+            return _harvestTarget.ItemData == item;
         }
 
         public void SetHighlighted(bool value)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Stats;
+using SimpleSurvival.World;
 
 namespace SimpleSurvival.AI
 {
@@ -19,6 +20,8 @@ namespace SimpleSurvival.AI
         protected float _lostTargetTimer;
 
         protected bool _escortMode;
+
+        protected bool _frozenByMapEdge;
 
         protected EnemyStatsConfig Config => _stats != null ? _stats.EnemyConfig : null;
         public bool HasDetectedPlayer => _state != EnemyState.Idle && _state != EnemyState.Dead;
@@ -113,12 +116,26 @@ namespace SimpleSurvival.AI
         {
             if (_isDead || _playerDead) return;
 
+            if (!_escortMode && MapEdgeTrigger.IsPlayerInsideAnyZone)
+            {
+                if (!_frozenByMapEdge)
+                {
+                    _frozenByMapEdge = true;
+                    OnMapEdgeFreeze();
+                }
+                return;
+            }
+
+            _frozenByMapEdge = false;
+
             if (_escortMode) UpdateEscortWatchdog();
 
             if (_state == EnemyState.Chasing) UpdateChase();
             else if (_state == EnemyState.Attacking) UpdateAttacking();
             else if (_state == EnemyState.Retreating) UpdateRetreat();
         }
+
+        protected virtual void OnMapEdgeFreeze() { }
 
         private void UpdateEscortWatchdog()
         {

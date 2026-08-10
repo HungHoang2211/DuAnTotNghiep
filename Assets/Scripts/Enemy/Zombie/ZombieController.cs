@@ -261,6 +261,15 @@ namespace SimpleSurvival.AI
                 _spawnPoint.NotifyDespawned(despawnDelay);
         }
 
+        protected override void OnMapEdgeFreeze()
+        {
+            if (_zombieAnimator != null)
+            {
+                _zombieAnimator.SetHowling(false);
+                _zombieAnimator.SetIdle();
+            }
+        }
+
         protected override void StopAllActions()
         {
             if (_zombieAnimator != null)

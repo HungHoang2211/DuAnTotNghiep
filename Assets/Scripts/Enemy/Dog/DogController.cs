@@ -11,7 +11,7 @@ using SimpleSurvival.Quests;
 namespace SimpleSurvival.Pets
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(Rigidbody))]
     public sealed class DogController : MonoBehaviour
     {
         private enum DogState { Waiting, StandingUp, Follow, Combat, MovingToHouse, SentHome }
@@ -32,7 +32,6 @@ namespace SimpleSurvival.Pets
         [SerializeField] private QuestData unlockQuest;
 
         [Header("Follow Settings")]
-        [SerializeField] private float followDistance = 4f;
         [SerializeField] private float stopDistance = 2f;
         [SerializeField] private float runSpeed = 5f;
         [SerializeField] private float sneakSpeedMultiplier = 0.6f;
@@ -50,13 +49,12 @@ namespace SimpleSurvival.Pets
         [SerializeField] private SimpleSurvival.World.MapLoader mapLoader;
 
         private NavMeshAgent _agent;
-        private CharacterController _characterController;
+        private Rigidbody _rigidbody;
         private DogState _state = DogState.Follow;
         private Transform _combatTarget;
         private Transform _enemyAttacker;
         private Transform _houseAnchor;
         private float _lastPlayerDamagedTime = -999f;
-        private bool _isFollowing;
         private float _nextPathUpdateTime;
 
         private Transform _pendingCombatTarget;
@@ -84,7 +82,10 @@ namespace SimpleSurvival.Pets
             }
 
             _agent = GetComponent<NavMeshAgent>();
-            _characterController = GetComponent<CharacterController>();
+            _rigidbody = GetComponent<Rigidbody>();
+            _rigidbody.isKinematic = true;
+            _rigidbody.useGravity = false;
+            _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
             if (mapLoader == null) mapLoader = SimpleSurvival.World.MapLoader.Instance;
             ResolvePlayerReferences();
@@ -243,7 +244,6 @@ namespace SimpleSurvival.Pets
             _combatTarget = null;
             _enemyAttacker = null;
             attackSkill?.Cancel();
-            _isFollowing = false;
 
             _houseAnchor = houseAnchor;
             _state = DogState.MovingToHouse;
@@ -323,7 +323,6 @@ namespace SimpleSurvival.Pets
 
             _combatTarget = desiredTarget;
             _pendingCombatTarget = null;
-            _isFollowing = false;
             _state = DogState.Combat;
         }
 
@@ -433,25 +432,11 @@ namespace SimpleSurvival.Pets
             Transform followTarget = GetFollowTarget();
             float dist = Vector3.Distance(transform.position, followTarget.position);
 
-            if (_isFollowing)
+            if (dist <= stopDistance)
             {
-                if (dist <= stopDistance)
-                {
-                    _isFollowing = false;
-                    StopMoving();
-                    if (dogAnimator != null) dogAnimator.SetIdle();
-                    return;
-                }
-            }
-            else
-            {
-                if (dist < followDistance)
-                {
-                    StopMoving();
-                    if (dogAnimator != null) dogAnimator.SetIdle();
-                    return;
-                }
-                _isFollowing = true;
+                StopMoving();
+                if (dogAnimator != null) dogAnimator.SetIdle();
+                return;
             }
 
             bool sneaking = playerInputReader != null && playerInputReader.IsSneakHeld;
@@ -624,15 +609,14 @@ namespace SimpleSurvival.Pets
         {
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * moveSpeed;
-            move.y += Physics.gravity.y * Time.deltaTime;
-            _characterController.Move(move * Time.deltaTime);
+            _rigidbody.MovePosition(_rigidbody.position + move * Time.deltaTime);
             _agent.nextPosition = transform.position;
 
             Vector3 lookDir = new Vector3(desiredVel.x, 0f, desiredVel.z);
             if (lookDir.sqrMagnitude > 0.01f)
             {
                 Quaternion targetRot = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(lookDir), rotSpeed * Time.deltaTime);
-                transform.rotation = targetRot;
+                _rigidbody.MoveRotation(targetRot);
             }
         }
 
@@ -641,7 +625,8 @@ namespace SimpleSurvival.Pets
             Vector3 dir = target.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.01f) return;
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
+            Quaternion targetRot = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
+            _rigidbody.MoveRotation(targetRot);
         }
     }
 }
