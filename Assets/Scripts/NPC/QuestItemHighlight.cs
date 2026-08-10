@@ -62,8 +62,7 @@ namespace SimpleSurvival.Quests
         public bool MatchesHarvest(ItemData item)
         {
             if (_harvestTarget == null || item == null) return false;
-            if (!_harvestTarget.CanBeTargeted()) return false;
-
+            if (_harvestTarget.Stats != null && _harvestTarget.Stats.IsDepleted) return false;
             return _harvestTarget.ItemData == item;
         }
 

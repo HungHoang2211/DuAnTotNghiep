@@ -4,6 +4,7 @@ using SimpleSurvival.Progression;
 using SimpleSurvival.Quests;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.SaveLoad
 {
@@ -69,13 +70,34 @@ namespace SimpleSurvival.SaveLoad
                     : new LevelData(),
                 baseMap = BuildModeController.Instance != null 
                     ? BuildModeController.Instance.Capture() 
-                    : new BaseMapSaveData()
+                    : new BaseMapSaveData(),
+                    harvestNodes = HarvestSaveRegistry.Instance != null
+                    ? HarvestSaveRegistry.Instance.Capture()
+                    : new List<HarvestNodeData>(),
+                pickedUpIds = HarvestSaveRegistry.Instance != null
+                ? HarvestSaveRegistry.Instance.CapturePickedUpIds()
+                : new List<string>(),
             };
 
             lastLoaded = save;
             return storage.Write(save);
         }
+        public List<string> GetAllPickedUpIds()
+        {
+            return lastLoaded?.pickedUpIds ?? new List<string>();
+        }
+        public List<HarvestNodeData> GetAllHarvestNodeData()
+        {
+            return lastLoaded?.harvestNodes ?? new List<HarvestNodeData>();
+        }
 
+        public HarvestNodeData GetHarvestNodeData(string nodeId)
+        {
+            if (lastLoaded?.harvestNodes == null)
+                return null;
+
+            return lastLoaded.harvestNodes.Find(n => n.nodeId == nodeId);
+        }
         public GameSave Read()
         {
             lastLoaded = storage.Read();

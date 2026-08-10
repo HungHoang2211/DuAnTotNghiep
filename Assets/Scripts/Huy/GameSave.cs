@@ -30,5 +30,7 @@ namespace SimpleSurvival.SaveLoad
         public WorldData world = new WorldData();
         public BaseMapSaveData baseMap = new BaseMapSaveData();
         public LevelData level = new LevelData();
+        public List<HarvestNodeData> harvestNodes = new List<HarvestNodeData>();
+        public List<string> pickedUpIds = new List<string>();
     }
 }

@@ -50,6 +50,32 @@ namespace SimpleSurvival.Targets
             if (_stats != null)
                 _stats.OnDepleted += HandleDepleted;
         }
+        private void Start()
+        {
+            if (_stats != null && _stats.IsDepleted)
+                ApplyDepletedVisualImmediate();
+        }
+
+        private void ApplyDepletedVisualImmediate()
+        {
+            DisableTargetability();
+
+            if (fallTransform != null)
+            {
+                float randomY = Random.Range(0f, 360f);
+                Vector3 fallDirection = Quaternion.Euler(0f, randomY, 0f) * Vector3.forward;
+                Vector3 fallAxis = Vector3.Cross(Vector3.up, fallDirection).normalized;
+                fallTransform.rotation = Quaternion.AngleAxis(fallEndAngle, fallAxis) * fallTransform.rotation;
+            }
+
+            if (fractureObject != null)
+            {
+                fractureObject.SetActive(true);
+                if (mainRenderer != null) mainRenderer.enabled = false;
+            }
+
+            HideVisual();
+        }
 
         protected override void OnDestroy()
         {
