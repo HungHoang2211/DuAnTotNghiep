@@ -17,6 +17,9 @@ namespace SimpleSurvival.AI
         [Header("Retreat & Hide")]
         [SerializeField] protected float retreatArrivalThreshold = 0.3f;
 
+        [Header("Escort Encounter")]
+        [SerializeField] protected float escortCorpseDespawnDelay = 10f;
+
         protected float _lostTargetTimer;
 
         protected bool _escortMode;
@@ -31,6 +34,16 @@ namespace SimpleSurvival.AI
         public void NotifyDamageDealt()
         {
             LastDamageDealtTime = Time.time;
+        }
+
+        protected void ScheduleDespawn()
+        {
+            float despawnDelay = _escortMode
+                ? escortCorpseDespawnDelay
+                : (Config != null ? Config.DespawnDelay : 120f);
+
+            Destroy(gameObject, despawnDelay);
+            _spawnPoint?.NotifyDespawned(despawnDelay);
         }
 
         public void SetEscortTarget(Transform target)

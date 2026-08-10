@@ -224,10 +224,7 @@ namespace SimpleSurvival.AI
             if (_corpseHandler != null)
                 _corpseHandler.SpawnCorpseLoot(Config?.CorpseLootTable);
 
-            float despawnDelay = Config != null ? Config.DespawnDelay : 120f;
-            Destroy(gameObject, despawnDelay);
-            if (_spawnPoint != null)
-                _spawnPoint.NotifyDespawned(despawnDelay);
+            ScheduleDespawn();
         }
         protected override void OnMapEdgeFreeze()
         {
