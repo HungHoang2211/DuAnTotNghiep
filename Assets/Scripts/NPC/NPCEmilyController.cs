@@ -5,6 +5,7 @@ using SimpleSurvival.Stats;
 using SimpleSurvival.UI.Hud;
 using SimpleSurvival.Quests;
 using SimpleSurvival.Loot;
+using SimpleSurvival.Player;
 using SimpleSurvival.Progression;
 
 namespace SimpleSurvival.AI
@@ -72,6 +73,8 @@ namespace SimpleSurvival.AI
         private BaseStats _currentThreatStats;
         private Coroutine _combatRoutine;
         private Coroutine _respawnRoutine;
+        private bool _blockInteractUntilReturn;
+        private bool _respawnPositionReady;
 
         private Vector3 _spawnPosition;
         private Quaternion _spawnRotation;
@@ -169,6 +172,8 @@ namespace SimpleSurvival.AI
         {
             var manager = QuestManager.Instance;
             if (manager == null) return;
+
+            if (_blockInteractUntilReturn) return;
 
             if (findQuest != null && manager.IsQuestActive(findQuest))
             {
@@ -426,6 +431,9 @@ namespace SimpleSurvival.AI
 
         private void Update()
         {
+            if (_blockInteractUntilReturn && _respawnPositionReady)
+                TryClearRecoveryBlock();
+
             if (!IsEscorting || _waitingLootContainer != null) return;
             if (movement == null || !movement.HasArrived) return;
 
@@ -439,6 +447,17 @@ namespace SimpleSurvival.AI
             }
 
             AdvanceRoute();
+        }
+
+        private void TryClearRecoveryBlock()
+        {
+            Transform player = PlayerActionController.Instance != null ? PlayerActionController.Instance.PlayerTransform : null;
+            if (player == null) return;
+
+            if (Vector3.Distance(player.position, _spawnPosition) > InteractRange) return;
+
+            _blockInteractUntilReturn = false;
+            _respawnPositionReady = false;
         }
 
         private void HandleLootContainerLooted(LootContainer container)
@@ -577,6 +596,9 @@ namespace SimpleSurvival.AI
             enemyDirector?.StopEncounter();
             QuestManager.Instance?.FailQuest(escortQuest);
 
+            _blockInteractUntilReturn = true;
+            _respawnPositionReady = false;
+
             if (_respawnRoutine != null) StopCoroutine(_respawnRoutine);
             _respawnRoutine = StartCoroutine(RespawnAfterDelay());
         }
@@ -591,6 +613,7 @@ namespace SimpleSurvival.AI
             stats?.RestoreHP(stats.MaxHP);
 
             RefreshGroundHighlight();
+            _respawnPositionReady = true;
             _respawnRoutine = null;
         }
 

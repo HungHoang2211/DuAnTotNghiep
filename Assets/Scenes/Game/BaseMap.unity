@@ -37484,12 +37484,11 @@ GameObject:
   - component: {fileID: 2831943566808677094}
   - component: {fileID: 6628404054578276193}
   - component: {fileID: 494038236274446075}
+  - component: {fileID: 9070483104243042343}
   - component: {fileID: 9070483104243042342}
   - component: {fileID: 565336723487490649}
   - component: {fileID: 7736235057421806042}
   - component: {fileID: 132754259844818118}
-  - component: {fileID: 9070483104243042344}
-  - component: {fileID: 9070483104243042343}
   m_Layer: 3
   m_Name: Dog
   m_TagString: Untagged
@@ -40550,8 +40549,8 @@ MonoBehaviour:
   moveModeNormal: 0
   moveModeSneak: 1
   speedDampTime: 0.1
---- !u!136 &9070483104243042343
-CapsuleCollider:
+--- !u!143 &9070483104243042343
+CharacterController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -40565,41 +40564,16 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
+  serializedVersion: 3
   m_Height: 2.56
-  m_Direction: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.28, z: 0}
---- !u!54 &9070483104243042344
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7115116764758556611}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!4 &9083173534834709787
 Transform:
   m_ObjectHideFlags: 0

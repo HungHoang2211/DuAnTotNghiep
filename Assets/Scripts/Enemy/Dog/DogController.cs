@@ -11,7 +11,7 @@ using SimpleSurvival.Quests;
 namespace SimpleSurvival.Pets
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(CharacterController))]
     public sealed class DogController : MonoBehaviour
     {
         private enum DogState { Waiting, StandingUp, Follow, Combat, MovingToHouse, SentHome }
@@ -49,7 +49,7 @@ namespace SimpleSurvival.Pets
         [SerializeField] private SimpleSurvival.World.MapLoader mapLoader;
 
         private NavMeshAgent _agent;
-        private Rigidbody _rigidbody;
+        private CharacterController _characterController;
         private DogState _state = DogState.Follow;
         private Transform _combatTarget;
         private Transform _enemyAttacker;
@@ -82,10 +82,7 @@ namespace SimpleSurvival.Pets
             }
 
             _agent = GetComponent<NavMeshAgent>();
-            _rigidbody = GetComponent<Rigidbody>();
-            _rigidbody.isKinematic = true;
-            _rigidbody.useGravity = false;
-            _rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+            _characterController = GetComponent<CharacterController>();
 
             if (mapLoader == null) mapLoader = SimpleSurvival.World.MapLoader.Instance;
             ResolvePlayerReferences();
@@ -609,14 +606,15 @@ namespace SimpleSurvival.Pets
         {
             Vector3 desiredVel = _agent.desiredVelocity;
             Vector3 move = desiredVel.normalized * moveSpeed;
-            _rigidbody.MovePosition(_rigidbody.position + move * Time.deltaTime);
+            move.y += Physics.gravity.y * Time.deltaTime;
+            _characterController.Move(move * Time.deltaTime);
             _agent.nextPosition = transform.position;
 
             Vector3 lookDir = new Vector3(desiredVel.x, 0f, desiredVel.z);
             if (lookDir.sqrMagnitude > 0.01f)
             {
                 Quaternion targetRot = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(lookDir), rotSpeed * Time.deltaTime);
-                _rigidbody.MoveRotation(targetRot);
+                transform.rotation = targetRot;
             }
         }
 
@@ -625,8 +623,7 @@ namespace SimpleSurvival.Pets
             Vector3 dir = target.position - transform.position;
             dir.y = 0f;
             if (dir.sqrMagnitude < 0.01f) return;
-            Quaternion targetRot = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
-            _rigidbody.MoveRotation(targetRot);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
         }
     }
 }

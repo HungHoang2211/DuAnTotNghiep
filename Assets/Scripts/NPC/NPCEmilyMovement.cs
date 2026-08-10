@@ -10,6 +10,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private float moveSpeed = 3.5f;
         [SerializeField] private float rotationSpeed = 360f;
         [SerializeField] private float arrivalThreshold = 0.5f;
+        [SerializeField] private float navMeshSampleRadius = 3f;
 
         private NavMeshAgent _agent;
         private Rigidbody _rigidbody;
@@ -33,17 +34,24 @@ namespace SimpleSurvival.AI
             _agent.updatePosition = false;
             _agent.updateRotation = false;
             _agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+
+            EnsureOnNavMesh();
         }
 
         public void BeginMoveTo(Vector3 destination)
         {
+            if (!EnsureOnNavMesh())
+            {
+                Debug.LogWarning($"[NPCEmilyMovement] '{name}' không nằm trên NavMesh, bỏ qua lệnh di chuyển.", this);
+                return;
+            }
+
             _destination = destination;
             HasArrived = false;
             _isMoving = true;
             _isPaused = false;
 
             _agent.isStopped = false;
-            _agent.nextPosition = transform.position;
             _agent.SetDestination(_destination);
         }
 
@@ -51,11 +59,16 @@ namespace SimpleSurvival.AI
         {
             Stop();
 
-            transform.position = position;
-            _rigidbody.position = position;
+            if (!_agent.Warp(position))
+            {
+                if (NavMesh.SamplePosition(position, out NavMeshHit hit, navMeshSampleRadius, NavMesh.AllAreas))
+                    _agent.Warp(hit.position);
+                else
+                    transform.position = position;
+            }
 
-            if (_agent.isOnNavMesh) _agent.Warp(position);
-            _agent.nextPosition = position;
+            _rigidbody.position = transform.position;
+            _agent.nextPosition = transform.position;
         }
 
         public void Stop()
@@ -73,6 +86,22 @@ namespace SimpleSurvival.AI
         {
             _isPaused = paused;
             if (paused) _animatorController?.SetMoving(false);
+        }
+
+        private bool EnsureOnNavMesh()
+        {
+            if (_agent.isOnNavMesh)
+            {
+                _agent.nextPosition = transform.position;
+                return true;
+            }
+
+            if (_agent.Warp(transform.position)) return true;
+
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, navMeshSampleRadius, NavMesh.AllAreas))
+                return _agent.Warp(hit.position);
+
+            return false;
         }
 
         private void FixedUpdate()
