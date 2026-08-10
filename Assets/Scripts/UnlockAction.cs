@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using UnityEngine;
 using SimpleSurvival.Player;
 using SimpleSurvival.Targets;
 using SimpleSurvival.UI.Hud;
+using SimpleSurvival.Audio;
 
 namespace SimpleSurvival.Actions
 {
@@ -45,13 +46,18 @@ namespace SimpleSurvival.Actions
         {
             _controller.CancelSneak();
             FacingTarget();
-            _animator.SetTrigger(ParamUnlock);
 
             if (_target == null || !_target.CanBeTargeted())
             {
                 Finish();
                 return;
             }
+
+            // 🔊 Bắt đầu âm thanh sửa
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.StartUnlockSound();
+
+            _animator.SetTrigger(ParamUnlock);
 
             HudManager hud = HudManager.Instance;
             if (hud != null && hud.UnlockProgress != null)
@@ -60,6 +66,7 @@ namespace SimpleSurvival.Actions
                     _target.Transform,
                     _duration,
                     OnProgressComplete);
+
                 _progressStarted = true;
             }
             else
@@ -77,8 +84,14 @@ namespace SimpleSurvival.Actions
                 HudManager hud = HudManager.Instance;
                 if (hud != null && hud.UnlockProgress != null)
                     hud.UnlockProgress.Stop();
+
                 _progressStarted = false;
             }
+
+            // 🔇 Hủy sửa → dừng âm thanh
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.StopUnlockSound();
+
             Finish();
         }
 
@@ -94,12 +107,18 @@ namespace SimpleSurvival.Actions
             }
 
             _progressStarted = false;
+
+            // 🔇 Sửa xong → dừng âm thanh
+            if (UIAudioController.Instance != null)
+                UIAudioController.Instance.StopUnlockSound();
+
             Finish();
         }
 
         private void Finish()
         {
             if (_ended) return;
+
             _ended = true;
 
             if (_animator != null)
@@ -112,10 +131,17 @@ namespace SimpleSurvival.Actions
         private void FacingTarget()
         {
             if (_target == null) return;
-            Vector3 toTarget = _target.Transform.position - _controller.PlayerTransform.position;
+
+            Vector3 toTarget =
+                _target.Transform.position -
+                _controller.PlayerTransform.position;
+
             toTarget.y = 0f;
+
             if (toTarget.sqrMagnitude < 0.001f) return;
-            _controller.PlayerTransform.rotation = Quaternion.LookRotation(toTarget, Vector3.up);
+
+            _controller.PlayerTransform.rotation =
+                Quaternion.LookRotation(toTarget, Vector3.up);
         }
     }
 }

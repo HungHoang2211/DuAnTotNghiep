@@ -12334,6 +12334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -13186,6 +13187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -14633,6 +14635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -21706,7 +21709,6 @@ GameObject:
   - component: {fileID: 356873885}
   - component: {fileID: 356873884}
   - component: {fileID: 356873883}
-  - component: {fileID: 356873887}
   m_Layer: 0
   m_Name: ComicPanel
   m_TagString: Untagged
@@ -21735,15 +21737,8 @@ MonoBehaviour:
   - {fileID: 261801695}
   - {fileID: 127764757}
   fadeDuration: 0.4
-  narrationSource: {fileID: 356873887}
-  panelNarration:
-  - {fileID: 8300000, guid: 1469f712586469642a105715c11a60fa, type: 3}
-  - {fileID: 8300000, guid: 44b05b295d1951948b03bfdd8cbd1b02, type: 3}
-  - {fileID: 8300000, guid: bc2229e9235309745afa8693d9990a07, type: 3}
-  - {fileID: 8300000, guid: f3d97625a7e1c704496487499e76e3ab, type: 3}
-  - {fileID: 8300000, guid: 8fd45c4b347009d43ba32eacffa9a905, type: 3}
-  - {fileID: 8300000, guid: 1f64f41522fc9b54e8b09b1b0a1eba1e, type: 3}
-  - {fileID: 8300000, guid: 437d4439d979929479f351035333c585, type: 3}
+  narrationSource: {fileID: 0}
+  panelNarration: []
 --- !u!114 &356873884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21809,103 +21804,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!82 &356873887
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 356873882}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!1 &358659797
 GameObject:
   m_ObjectHideFlags: 0
@@ -27348,6 +27246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -28130,7 +28029,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 474245144}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayCancel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &474245144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32657,7 +32568,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 569258274}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayLoot
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &569258274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44041,6 +43964,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -58899,7 +58823,7 @@ MonoBehaviour:
   clickCue: {fileID: 11400000, guid: b17d87799e874d94481eb05989a2580a, type: 2}
   okcue: {fileID: 11400000, guid: 894a25f81e518a244b823a12c3f25c1f, type: 2}
   cancelCue: {fileID: 11400000, guid: 08f7be1810dff0a49b2d8b9d89e53500, type: 2}
-  errorCue: {fileID: 0}
+  errorCue: {fileID: 11400000, guid: 8570b0abc40ac4f41a6f37045ae93e17, type: 2}
   itemMoveCue: {fileID: 11400000, guid: 03f20e5814b5a684db22bf3171a01ae4, type: 2}
   useItemCue: {fileID: 11400000, guid: 7bbf73125c9baf04a8a0667dc74c3095, type: 2}
   deleteCue: {fileID: 11400000, guid: d948453d66071d24db0ec5fdd5fc08ae, type: 2}
@@ -58907,7 +58831,10 @@ MonoBehaviour:
   mainClickCue: {fileID: 11400000, guid: 1b12b2c4689b1b94782461c4030444c6, type: 2}
   updatecue: {fileID: 11400000, guid: 6b2953ccee9049f4196720a906c805c2, type: 2}
   pickupCue: {fileID: 0}
-  lootCue: {fileID: 0}
+  lootCue: {fileID: 11400000, guid: 95f7850e1dbcb4240bf5a57a0fa37b64, type: 2}
+  npcInteractCue: {fileID: 0}
+  witchEventCue: {fileID: 11400000, guid: 3ae69ff008160e342a9c67ef801d03e8, type: 2}
+  unlockCue: {fileID: 11400000, guid: 3ae69ff008160e342a9c67ef801d03e8, type: 2}
 --- !u!1 &1072386800
 GameObject:
   m_ObjectHideFlags: 0
@@ -75176,7 +75103,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1376591397}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1071657601}
+        m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
+        m_MethodName: PlayMainClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1376591397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79900,6 +79839,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -83620,7 +83560,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -42.5, y: 0}
+  m_AnchoredPosition: {x: -42.50006, y: 0}
   m_SizeDelta: {x: 0, y: 915}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1509040236
@@ -91991,7 +91931,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2028943410}
   m_HandleRect: {fileID: 2028943409}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 namespace SimpleSurvival.Audio
@@ -14,13 +15,22 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue itemMoveCue;
         [SerializeField] private AudioCue useItemCue;
         [SerializeField] private AudioCue deleteCue;
-        [SerializeField] private AudioCue craft ;
-        [SerializeField] private AudioCue mainClickCue ;
-        [SerializeField] private AudioCue updatecue ;
+        [SerializeField] private AudioCue craft;
+        [SerializeField] private AudioCue mainClickCue;
+        [SerializeField] private AudioCue updatecue;
+
+        [Header("Action Cues")]
         [SerializeField] private AudioCue pickupCue;
         [SerializeField] private AudioCue lootCue;
+        [SerializeField] private AudioCue npcInteractCue;
+        [SerializeField] private AudioCue witchEventCue;
+        [SerializeField] private AudioCue unlockCue;
 
-      
+        private void Awake()
+        {
+            Instance = this;
+        }
+
         public void PlayPickup()
         {
             AudioManager.Instance.PlaySfx(pickupCue);
@@ -30,20 +40,32 @@ namespace SimpleSurvival.Audio
         {
             AudioManager.Instance.PlaySfx(lootCue);
         }
+
+        public void PlayNPCInteract()
+        {
+            AudioManager.Instance.PlaySfx(npcInteractCue);
+        }
+
+        public void PlayWitchEvent()
+        {
+            AudioManager.Instance.PlaySfx(witchEventCue);
+        }
+
+        public void PlayUnlock()
+        {
+            AudioManager.Instance.PlaySfx(unlockCue);
+        }
+
         public void PlayMainClick()
         {
             AudioManager.Instance.PlaySfx(mainClickCue);
-        }
-
-        private void Awake()
-        {
-            Instance = this;
         }
 
         public void PlayClick()
         {
             AudioManager.Instance.PlaySfx(clickCue);
         }
+
         public void Playcraft()
         {
             AudioManager.Instance.PlaySfx(craft);
@@ -53,6 +75,7 @@ namespace SimpleSurvival.Audio
         {
             AudioManager.Instance.PlaySfx(okcue);
         }
+
         public void Playupdate()
         {
             AudioManager.Instance.PlaySfx(updatecue);
@@ -82,5 +105,28 @@ namespace SimpleSurvival.Audio
         {
             AudioManager.Instance.PlaySfx(deleteCue);
         }
+
+        public void StartUnlockSound()
+        {
+            AudioManager.Instance.StartLoop(unlockCue);
+        }
+
+        public void StopUnlockSound()
+        {
+            AudioManager.Instance.StopLoop(unlockCue);
+
+
+        }
+        public void StartWitchEventSound()
+        {
+            AudioManager.Instance.StartLoop(witchEventCue);
+        }
+
+        public void StopWitchEventSound()
+        {
+            AudioManager.Instance.StopLoop(witchEventCue);
+        }
     }
 }
+
+
