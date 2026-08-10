@@ -137,11 +137,6 @@ namespace SimpleSurvival.Player
             _isDead = false;
             SwitchToIdle();
         }
-
-        public void ApplyDeadStateOnLoad()
-        {
-            _isDead = true;
-        }
         private void Update()
         {
             if (_isDead) return;
