@@ -182,6 +182,8 @@ namespace SimpleSurvival.Player
         {
             if (playerStats == null || playerStats.IsAlive) return;
 
+            PlayerActionController.Instance?.ApplyDeadStateOnLoad();
+
             if (deathDialog != null)
                 deathDialog.Show(null);
         }
