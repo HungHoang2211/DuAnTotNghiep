@@ -32,7 +32,7 @@ namespace SimpleSurvival.Items
         private int selectedStackableIndex;
         private int selectedDurableIndex;
         private int selectedMiscIndex;
-        private bool isUIVisible = true;
+        private bool isUIVisible = false;
 
         private void Awake()
         {
