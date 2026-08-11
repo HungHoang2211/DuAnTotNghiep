@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using SimpleSurvival.Quests;
 using SimpleSurvival.SaveLoad;
+using SimpleSurvival.Pets;
 
 namespace SimpleSurvival.World
 {
@@ -93,6 +94,11 @@ namespace SimpleSurvival.World
         public void OnConfirmNewGameYes()
         {
             comicReveal.StopNarration();
+            QuestManager.Instance?.ResetProgress();
+
+            if (DogController.Instance != null)
+                Destroy(DogController.Instance.gameObject);
+
             SaveService.Instance?.DeleteSave();
             Time.timeScale = 1f;
             SceneManager.LoadScene(mainMenuScene);

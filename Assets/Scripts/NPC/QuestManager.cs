@@ -46,7 +46,13 @@ namespace SimpleSurvival.Quests
             if (inventoryQueries != null)
                 inventoryQueries.OnItemAdded -= HandleItemAdded;
         }
-
+        public void ResetProgress()
+        {
+            _activeQuests.Clear();
+            _completedQuests.Clear();
+            _permanentlyLockedMaps.Clear();
+            StoryCompleted = false;
+        }
         public bool IsQuestActive(QuestData quest) => quest != null && _activeQuests.ContainsKey(quest);
 
         public bool IsQuestCompleted(QuestData quest) => quest != null && _completedQuests.Contains(quest);
