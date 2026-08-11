@@ -37,6 +37,7 @@ namespace SimpleSurvival.Items
         private void Awake()
         {
             currentBackpackSlots = 0;
+            isUIVisible = false;
         }
 
         private void Update()
