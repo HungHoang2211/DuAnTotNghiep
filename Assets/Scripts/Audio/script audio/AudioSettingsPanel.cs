@@ -11,6 +11,25 @@ namespace SimpleSurvival.Audio
         [SerializeField] private Slider uiSlider;
         [SerializeField] private Slider ambienceSlider;
 
+        [Header("Pause Game While Panel Open")]
+        [Tooltip("Bật: khi panel này Active (SetActive(true)) thì Time.timeScale = 0 (dừng game). " +
+            "Khi panel Inactive (đóng lại) thì trả về Time.timeScale = 1. " +
+            "Lưu ý: panel phải được ẩn/hiện bằng SetActive (không phải chỉ đổi alpha CanvasGroup) thì OnEnable/OnDisable mới chạy đúng, " +
+            "và GameObject này phải Inactive ngay từ đầu scene để không bị đứng game lúc mới vào.")]
+        [SerializeField] private bool pauseGameWhileOpen = true;
+
+        private void OnEnable()
+        {
+            if (pauseGameWhileOpen)
+                Time.timeScale = 0f;
+        }
+
+        private void OnDisable()
+        {
+            if (pauseGameWhileOpen)
+                Time.timeScale = 1f;
+        }
+
         private void Start()
         {
             if (AudioManager.Instance == null)
@@ -132,6 +151,11 @@ namespace SimpleSurvival.Audio
 
         private void OnDestroy()
         {
+            // Đảm bảo không kẹt game ở trạng thái pause nếu panel bị destroy trong lúc đang mở
+            // (vd đổi scene khi settings panel còn active).
+            if (pauseGameWhileOpen)
+                Time.timeScale = 1f;
+
             if (AudioManager.Instance == null)
                 return;
 
