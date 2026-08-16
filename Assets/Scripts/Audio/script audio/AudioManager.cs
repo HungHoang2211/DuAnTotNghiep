@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,19 +12,31 @@ namespace SimpleSurvival.Audio
         [SerializeField] private int sfxPoolSize = 8;
 
         [Header("Volumes")]
-        [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
-        [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
-        [SerializeField, Range(0f, 1f)] private float uiVolume = 1f;
-        [SerializeField, Range(0f, 1f)] private float musicVolume = 0.8f;
-        [SerializeField, Range(0f, 1f)] private float ambienceVolume = 0.6f;
+        [SerializeField, Range(0f, 1f)]
+        private float masterVolume = 1f;
+
+        [SerializeField, Range(0f, 1f)]
+        private float sfxVolume = 1f;
+
+        [SerializeField, Range(0f, 1f)]
+        private float uiVolume = 1f;
+
+        [SerializeField, Range(0f, 1f)]
+        private float musicVolume = 0.8f;
+
+        [SerializeField, Range(0f, 1f)]
+        private float ambienceVolume = 0.6f;
 
         [Header("Music")]
-        [SerializeField] private float musicFadeDuration = 1.5f;
+        [SerializeField]
+        private float musicFadeDuration = 1.5f;
 
         [Header("Startup")]
-        [SerializeField] private AudioCue defaultMusicCue;
-        [SerializeField] private AudioCue defaultAmbienceCue;
-       
+        [SerializeField]
+        private AudioCue defaultMusicCue;
+
+        [SerializeField]
+        private AudioCue defaultAmbienceCue;
 
         private AudioSourcePool _sfxPool;
         private AudioSource _musicSource;
@@ -34,8 +46,14 @@ namespace SimpleSurvival.Audio
             new Dictionary<AudioCue, AudioSource>();
 
         private Coroutine _musicFade;
+
         private float _musicBaseVolume = 1f;
         private float _ambienceBaseVolume = 1f;
+
+
+        // =========================================================
+        // UNITY
+        // =========================================================
 
         private void Awake()
         {
@@ -46,83 +64,257 @@ namespace SimpleSurvival.Audio
             }
 
             Instance = this;
+
             DontDestroyOnLoad(gameObject);
+
             BuildAudioSources();
+
+            // Load volume đã lưu
+            LoadVolumeSettings();
         }
+
 
         private void Start()
         {
             if (defaultMusicCue != null)
+            {
                 PlayMusic(defaultMusicCue);
+            }
 
             if (defaultAmbienceCue != null)
+            {
                 PlayAmbience(defaultAmbienceCue);
+            }
         }
 
+
+        // =========================================================
+        // LOAD SETTINGS
+        // =========================================================
+
+        private void LoadVolumeSettings()
+        {
+            masterVolume = PlayerPrefs.GetFloat(
+                "Audio_MasterVolume",
+                masterVolume
+            );
+
+            sfxVolume = PlayerPrefs.GetFloat(
+                "Audio_SfxVolume",
+                sfxVolume
+            );
+
+            uiVolume = PlayerPrefs.GetFloat(
+                "Audio_UiVolume",
+                uiVolume
+            );
+
+            ambienceVolume = PlayerPrefs.GetFloat(
+                "Audio_AmbienceVolume",
+                ambienceVolume
+            );
+
+            // Music không có slider UI,
+            // nên giữ giá trị mặc định trong AudioManager.
+        }
+
+
+        // =========================================================
+        // BUILD AUDIO SOURCES
+        // =========================================================
 
         private void BuildAudioSources()
         {
-            _sfxPool = new AudioSourcePool(transform, sfxPoolSize, "SfxSource");
-            _musicSource = CreateStreamSource("MusicSource");
-            _ambienceSource = CreateStreamSource("AmbienceSource");
+            _sfxPool = new AudioSourcePool(
+                transform,
+                sfxPoolSize,
+                "SfxSource"
+            );
+
+            _musicSource =
+                CreateStreamSource("MusicSource");
+
+            _ambienceSource =
+                CreateStreamSource("AmbienceSource");
+
+            AddCategory(
+                _musicSource,
+                AudioCategory.Music,
+                1f
+            );
+
+            AddCategory(
+                _ambienceSource,
+                AudioCategory.Ambience,
+                1f
+            );
         }
 
-        private AudioSource CreateStreamSource(string sourceName)
+
+        private AudioSource CreateStreamSource(
+            string sourceName)
         {
-            GameObject holder = new GameObject(sourceName);
+            GameObject holder =
+                new GameObject(sourceName);
+
             holder.transform.SetParent(transform);
 
-            AudioSource source = holder.AddComponent<AudioSource>();
+            AudioSource source =
+                holder.AddComponent<AudioSource>();
+
             source.playOnAwake = false;
             source.loop = true;
+
             return source;
         }
 
+
+        // =========================================================
+        // CATEGORY
+        // =========================================================
+
+        private AudioSourceCategory AddCategory(
+            AudioSource source,
+            AudioCategory category,
+            float baseVolume)
+        {
+            if (source == null)
+                return null;
+
+            AudioSourceCategory component =
+                source.GetComponent<AudioSourceCategory>();
+
+            if (component == null)
+            {
+                component =
+                    source.gameObject.AddComponent<AudioSourceCategory>();
+            }
+
+            component.SetData(
+                category,
+                baseVolume
+            );
+
+            return component;
+        }
+
+
+        // =========================================================
+        // SFX
+        // =========================================================
+
         public AudioSource PlaySfx(AudioCue cue)
         {
-            return PlayOneShot(cue, Vector3.zero, false);
+            return PlayOneShot(
+                cue,
+                Vector3.zero,
+                false
+            );
         }
 
-        public AudioSource PlaySfxAt(AudioCue cue, Vector3 position)
+
+        public AudioSource PlaySfxAt(
+            AudioCue cue,
+            Vector3 position)
         {
-            return PlayOneShot(cue, position, true);
+            return PlayOneShot(
+                cue,
+                position,
+                true
+            );
         }
 
-        public void PlayImportantSfxAt(AudioCue cue, Vector3 position)
+
+        public void PlayImportantSfxAt(
+            AudioCue cue,
+            Vector3 position)
         {
             if (!IsPlayable(cue))
                 return;
 
-            GameObject holder = new GameObject("ImportantSfx_" + cue.name);
+            GameObject holder =
+                new GameObject(
+                    "ImportantSfx_" + cue.name
+                );
+
             holder.transform.SetParent(transform);
 
-            AudioSource source = holder.AddComponent<AudioSource>();
+            AudioSource source =
+                holder.AddComponent<AudioSource>();
+
             source.playOnAwake = false;
-            ConfigureSource(source, cue, position, true);
+
+            ConfigureSource(
+                source,
+                cue,
+                position,
+                true
+            );
+
             source.loop = false;
             source.Play();
 
-            StartCoroutine(DestroyAfterPlay(holder, source));
+            StartCoroutine(
+                DestroyAfterPlay(
+                    holder,
+                    source
+                )
+            );
         }
 
-        private IEnumerator DestroyAfterPlay(GameObject holder, AudioSource source)
+
+        private IEnumerator DestroyAfterPlay(
+            GameObject holder,
+            AudioSource source)
         {
-            float duration = source.clip != null ? source.clip.length / Mathf.Max(source.pitch, 0.01f) : 0f;
-            yield return new WaitForSeconds(duration);
-            Destroy(holder);
+            float duration =
+                source.clip != null
+                    ? source.clip.length /
+                      Mathf.Max(
+                          source.pitch,
+                          0.01f
+                      )
+                    : 0f;
+
+            yield return new WaitForSeconds(
+                duration
+            );
+
+            if (holder != null)
+            {
+                Destroy(holder);
+            }
         }
 
-        private AudioSource PlayOneShot(AudioCue cue, Vector3 position, bool positional)
+
+        private AudioSource PlayOneShot(
+            AudioCue cue,
+            Vector3 position,
+            bool positional)
         {
             if (!IsPlayable(cue))
                 return null;
 
-            AudioSource source = _sfxPool.GetAvailable();
-            ConfigureSource(source, cue, position, positional);
+            AudioSource source =
+                _sfxPool.GetAvailable();
+
+            ConfigureSource(
+                source,
+                cue,
+                position,
+                positional
+            );
+
             source.loop = false;
             source.Play();
+
             return source;
         }
+
+
+        // =========================================================
+        // LOOP
+        // =========================================================
 
         public void StartLoop(AudioCue cue)
         {
@@ -132,180 +324,515 @@ namespace SimpleSurvival.Audio
             if (_activeLoops.ContainsKey(cue))
                 return;
 
-            AudioSource source = CreateStreamSource("Loop_" + cue.name);
-            ConfigureSource(source, cue, Vector3.zero, false);
+            AudioSource source =
+                CreateStreamSource(
+                    "Loop_" + cue.name
+                );
+
+            ConfigureSource(
+                source,
+                cue,
+                Vector3.zero,
+                false
+            );
+
             source.Play();
-            _activeLoops.Add(cue, source);
+
+            _activeLoops.Add(
+                cue,
+                source
+            );
         }
+
 
         public void StopLoop(AudioCue cue)
         {
-            if (!_activeLoops.TryGetValue(cue, out AudioSource source))
+            if (!_activeLoops.TryGetValue(
+                cue,
+                out AudioSource source))
+            {
                 return;
+            }
 
-            source.Stop();
-            Destroy(source.gameObject);
+            if (source != null)
+            {
+                source.Stop();
+                Destroy(source.gameObject);
+            }
+
             _activeLoops.Remove(cue);
         }
+
+
+        // =========================================================
+        // MUSIC
+        // =========================================================
 
         public void PlayMusic(AudioCue cue)
         {
             if (!IsPlayable(cue))
                 return;
 
-            RestartMusicFade(FadeToTrack(cue));
+            RestartMusicFade(
+                FadeToTrack(cue)
+            );
         }
+
 
         public void StopMusic()
         {
-            RestartMusicFade(FadeOut(_musicSource));
+            RestartMusicFade(
+                FadeOut(_musicSource)
+            );
         }
+
+
+        // =========================================================
+        // AMBIENCE
+        // =========================================================
 
         public void PlayAmbience(AudioCue cue)
         {
             if (!IsPlayable(cue))
                 return;
 
-            _ambienceBaseVolume = cue.Volume;
-            _ambienceSource.clip = cue.PickClip();
-            _ambienceSource.volume = StreamVolume(AudioCategory.Ambience, _ambienceBaseVolume);
+            _ambienceBaseVolume =
+                cue.Volume;
+
+            _ambienceSource.clip =
+                cue.PickClip();
+
+            _ambienceSource.volume =
+                StreamVolume(
+                    AudioCategory.Ambience,
+                    _ambienceBaseVolume
+                );
+
             _ambienceSource.Play();
         }
 
+
         public void StopAmbience()
         {
-            _ambienceSource.Stop();
-        }
-
-        private void ConfigureSource(AudioSource source, AudioCue cue, Vector3 position, bool positional)
-        {
-            source.transform.position = position;
-            source.clip = cue.PickClip();
-            source.volume = OneShotVolume(cue);
-            source.pitch = cue.PickPitch();
-            source.priority = cue.Priority;
-            source.spatialBlend = positional ? cue.SpatialBlend : 0f;
-            source.minDistance = cue.MinDistance;
-            source.maxDistance = cue.MaxDistance;
-        }
-
-        private float OneShotVolume(AudioCue cue)
-        {
-            return masterVolume * CategoryVolume(cue.Category) * cue.Volume;
-        }
-
-        private float StreamVolume(AudioCategory category, float baseVolume)
-        {
-            return masterVolume * CategoryVolume(category) * baseVolume;
-        }
-
-        private float CategoryVolume(AudioCategory category)
-        {
-            switch (category)
+            if (_ambienceSource != null)
             {
-                case AudioCategory.Ui: return uiVolume;
-                case AudioCategory.Music: return musicVolume;
-                case AudioCategory.Ambience: return ambienceVolume;
-                default: return sfxVolume;
+                _ambienceSource.Stop();
             }
         }
 
-        private bool IsPlayable(AudioCue cue)
+
+        // =========================================================
+        // CONFIGURE SOURCE
+        // =========================================================
+
+        private void ConfigureSource(
+            AudioSource source,
+            AudioCue cue,
+            Vector3 position,
+            bool positional)
         {
-            return cue != null && cue.HasClip;
+            if (source == null || cue == null)
+                return;
+
+            source.transform.position =
+                position;
+
+            source.clip =
+                cue.PickClip();
+
+            source.pitch =
+                cue.PickPitch();
+
+            source.priority =
+                cue.Priority;
+
+            source.spatialBlend =
+                positional
+                    ? cue.SpatialBlend
+                    : 0f;
+
+            source.minDistance =
+                cue.MinDistance;
+
+            source.maxDistance =
+                cue.MaxDistance;
+
+            // Category luôn được cập nhật
+            // theo AudioCue hiện tại.
+            AddCategory(
+                source,
+                cue.Category,
+                cue.Volume
+            );
+
+            source.volume =
+                OneShotVolume(cue);
         }
 
-        private void RestartMusicFade(IEnumerator routine)
+
+        // =========================================================
+        // VOLUME
+        // =========================================================
+
+        private float OneShotVolume(
+            AudioCue cue)
+        {
+            if (cue == null)
+                return 0f;
+
+            return
+                masterVolume *
+                CategoryVolume(cue.Category) *
+                cue.Volume;
+        }
+
+
+        private float StreamVolume(
+            AudioCategory category,
+            float baseVolume)
+        {
+            return
+                masterVolume *
+                CategoryVolume(category) *
+                baseVolume;
+        }
+
+
+        private float CategoryVolume(
+            AudioCategory category)
+        {
+            switch (category)
+            {
+                case AudioCategory.Ui:
+                    return uiVolume;
+
+                case AudioCategory.Music:
+                    return musicVolume;
+
+                case AudioCategory.Ambience:
+                    return ambienceVolume;
+
+                case AudioCategory.Sfx:
+                default:
+                    return sfxVolume;
+            }
+        }
+
+
+        // =========================================================
+        // MASTER
+        // =========================================================
+
+        public void SetMasterVolume(
+            float value)
+        {
+            masterVolume =
+                Mathf.Clamp01(value);
+
+            RefreshAllVolumes();
+        }
+
+
+        // =========================================================
+        // SFX
+        // =========================================================
+
+        public void SetSfxVolume(
+            float value)
+        {
+            sfxVolume =
+                Mathf.Clamp01(value);
+
+            RefreshCategoryVolumes(
+                AudioCategory.Sfx
+            );
+        }
+
+
+        // =========================================================
+        // UI
+        // =========================================================
+
+        public void SetUiVolume(
+            float value)
+        {
+            uiVolume =
+                Mathf.Clamp01(value);
+
+            RefreshCategoryVolumes(
+                AudioCategory.Ui
+            );
+        }
+
+
+        // =========================================================
+        // MUSIC
+        // =========================================================
+
+        public void SetMusicVolume(
+            float value)
+        {
+            musicVolume =
+                Mathf.Clamp01(value);
+
+            RefreshCategoryVolumes(
+                AudioCategory.Music
+            );
+
+            RefreshStreamVolumes();
+        }
+
+
+        // =========================================================
+        // AMBIENCE
+        // =========================================================
+
+        public void SetAmbienceVolume(
+            float value)
+        {
+            ambienceVolume =
+                Mathf.Clamp01(value);
+
+            RefreshCategoryVolumes(
+                AudioCategory.Ambience
+            );
+
+            RefreshStreamVolumes();
+        }
+
+
+        // =========================================================
+        // REFRESH CATEGORY
+        // =========================================================
+
+        private void RefreshCategoryVolumes(
+            AudioCategory targetCategory)
+        {
+            AudioSource[] sources =
+                GetComponentsInChildren<AudioSource>(
+                    true
+                );
+
+            foreach (AudioSource source in sources)
+            {
+                if (source == null)
+                    continue;
+
+                AudioSourceCategory data =
+                    source.GetComponent<AudioSourceCategory>();
+
+                if (data == null)
+                    continue;
+
+                // Chỉ thay đổi đúng category
+                if (data.Category != targetCategory)
+                    continue;
+
+                source.volume =
+                    masterVolume *
+                    CategoryVolume(
+                        data.Category
+                    ) *
+                    data.BaseVolume;
+            }
+        }
+
+
+        // =========================================================
+        // REFRESH ALL
+        // =========================================================
+
+        private void RefreshAllVolumes()
+        {
+            AudioSource[] sources =
+                GetComponentsInChildren<AudioSource>(
+                    true
+                );
+
+            foreach (AudioSource source in sources)
+            {
+                if (source == null)
+                    continue;
+
+                AudioSourceCategory data =
+                    source.GetComponent<AudioSourceCategory>();
+
+                if (data == null)
+                    continue;
+
+                source.volume =
+                    masterVolume *
+                    CategoryVolume(
+                        data.Category
+                    ) *
+                    data.BaseVolume;
+            }
+        }
+
+
+        // =========================================================
+        // REFRESH STREAM
+        // =========================================================
+
+        private void RefreshStreamVolumes()
+        {
+            if (_musicSource != null &&
+                _musicSource.isPlaying)
+            {
+                _musicSource.volume =
+                    StreamVolume(
+                        AudioCategory.Music,
+                        _musicBaseVolume
+                    );
+            }
+
+            if (_ambienceSource != null &&
+                _ambienceSource.isPlaying)
+            {
+                _ambienceSource.volume =
+                    StreamVolume(
+                        AudioCategory.Ambience,
+                        _ambienceBaseVolume
+                    );
+            }
+        }
+
+
+        // =========================================================
+        // MUSIC FADE
+        // =========================================================
+
+        private void RestartMusicFade(
+            IEnumerator routine)
         {
             if (_musicFade != null)
+            {
                 StopCoroutine(_musicFade);
+            }
 
-            _musicFade = StartCoroutine(routine);
+            _musicFade =
+                StartCoroutine(routine);
         }
 
-        private IEnumerator FadeToTrack(AudioCue cue)
-        {
-            yield return FadeOut(_musicSource);
 
-            _musicBaseVolume = cue.Volume;
-            _musicSource.clip = cue.PickClip();
+        private IEnumerator FadeToTrack(
+            AudioCue cue)
+        {
+            yield return FadeOut(
+                _musicSource
+            );
+
+            _musicBaseVolume =
+                cue.Volume;
+
+            _musicSource.clip =
+                cue.PickClip();
+
             _musicSource.volume = 0f;
+
             _musicSource.Play();
 
-            yield return FadeIn(_musicSource, StreamVolume(AudioCategory.Music, _musicBaseVolume));
+            yield return FadeIn(
+                _musicSource,
+                StreamVolume(
+                    AudioCategory.Music,
+                    _musicBaseVolume
+                )
+            );
+
             _musicFade = null;
         }
 
-        private IEnumerator FadeOut(AudioSource source)
+
+        private IEnumerator FadeOut(
+            AudioSource source)
         {
-            float start = source.volume;
+            if (source == null)
+                yield break;
+
+            float start =
+                source.volume;
+
             float elapsed = 0f;
 
             while (elapsed < musicFadeDuration)
             {
                 elapsed += Time.deltaTime;
-                source.volume = Mathf.Lerp(start, 0f, elapsed / musicFadeDuration);
+
+                source.volume =
+                    Mathf.Lerp(
+                        start,
+                        0f,
+                        elapsed /
+                        musicFadeDuration
+                    );
+
                 yield return null;
             }
 
             source.Stop();
         }
 
-        private IEnumerator FadeIn(AudioSource source, float target)
+
+        private IEnumerator FadeIn(
+            AudioSource source,
+            float target)
         {
+            if (source == null)
+                yield break;
+
             float elapsed = 0f;
 
             while (elapsed < musicFadeDuration)
             {
                 elapsed += Time.deltaTime;
-                source.volume = Mathf.Lerp(0f, target, elapsed / musicFadeDuration);
+
+                source.volume =
+                    Mathf.Lerp(
+                        0f,
+                        target,
+                        elapsed /
+                        musicFadeDuration
+                    );
+
                 yield return null;
             }
 
-            source.volume = target;
+            source.volume =
+                target;
         }
 
-        public void SetMasterVolume(float value)
+
+        // =========================================================
+        // PLAYABLE
+        // =========================================================
+
+        private bool IsPlayable(
+            AudioCue cue)
         {
-            masterVolume = Mathf.Clamp01(value);
-            RefreshStreamVolumes();
+            return
+                cue != null &&
+                cue.HasClip;
         }
 
-        public void SetSfxVolume(float value)
-        {
-            sfxVolume = Mathf.Clamp01(value);
-        }
 
-        public void SetUiVolume(float value)
-        {
-            uiVolume = Mathf.Clamp01(value);
-        }
+        // =========================================================
+        // PUBLIC VALUES
+        // =========================================================
 
-        public void SetMusicVolume(float value)
-        {
-            musicVolume = Mathf.Clamp01(value);
-            RefreshStreamVolumes();
-        }
+        public float MasterVolume =>
+            masterVolume;
 
-        public void SetAmbienceVolume(float value)
-        {
-            ambienceVolume = Mathf.Clamp01(value);
-            RefreshStreamVolumes();
-        }
+        public float SfxVolume =>
+            sfxVolume;
 
-        private void RefreshStreamVolumes()
-        {
-            if (_musicSource.isPlaying)
-                _musicSource.volume = StreamVolume(AudioCategory.Music, _musicBaseVolume);
+        public float UiVolume =>
+            uiVolume;
 
-            if (_ambienceSource.isPlaying)
-                _ambienceSource.volume = StreamVolume(AudioCategory.Ambience, _ambienceBaseVolume);
-        }
+        public float MusicVolume =>
+            musicVolume;
 
-        public float MasterVolume => masterVolume;
-        public float SfxVolume => sfxVolume;
-        public float MusicVolume => musicVolume;
-        public float AmbienceVolume => ambienceVolume;
-        public float UiVolume => uiVolume;
+        public float AmbienceVolume =>
+            ambienceVolume;
     }
 }

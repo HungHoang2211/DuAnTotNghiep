@@ -17,6 +17,7 @@ namespace SimpleSurvival.Audio
         public AudioSource GetAvailable()
         {
             AudioSource idle = FindIdleSource();
+
             if (idle != null)
                 return idle;
 
@@ -37,9 +38,21 @@ namespace SimpleSurvival.Audio
         private AudioSource StealNextSource()
         {
             AudioSource source = _sources[_nextIndex];
+
             _nextIndex = (_nextIndex + 1) % _sources.Count;
+
             source.Stop();
+
             return source;
+        }
+
+        public void RefreshVolumes(System.Action<AudioSource> action)
+        {
+            foreach (AudioSource source in _sources)
+            {
+                if (source != null && source.isPlaying)
+                    action?.Invoke(source);
+            }
         }
 
         private AudioSource CreateSource(Transform parent, string sourceName)
@@ -48,8 +61,10 @@ namespace SimpleSurvival.Audio
             holder.transform.SetParent(parent);
 
             AudioSource source = holder.AddComponent<AudioSource>();
+
             source.playOnAwake = false;
             source.rolloffMode = AudioRolloffMode.Linear;
+
             return source;
         }
     }
