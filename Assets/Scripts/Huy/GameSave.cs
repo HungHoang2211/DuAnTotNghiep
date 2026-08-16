@@ -28,8 +28,10 @@ namespace SimpleSurvival.SaveLoad
         public List<CorpseData> corpses = new List<CorpseData>();
         public List<ContainerData> containers = new List<ContainerData>();
         public WorldData world = new WorldData();
-        public BaseMapSaveData baseMap = new BaseMapSaveData();
         public LevelData level = new LevelData();
+        public IntroSaveData intro = new IntroSaveData();
+        public EndingSaveData ending = new EndingSaveData();
+        public BaseMapSaveData baseMap = new BaseMapSaveData();
         public List<HarvestNodeData> harvestNodes = new List<HarvestNodeData>();
         public List<string> pickedUpIds = new List<string>();
     }

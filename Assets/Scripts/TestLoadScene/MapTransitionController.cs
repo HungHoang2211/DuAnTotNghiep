@@ -52,20 +52,26 @@ namespace SimpleSurvival.World
             isTransitioning = true;
             TransitionStarted?.Invoke();
 
-            yield return null;
-
             SaveService.Instance?.Read();
-            SaveService.Instance?.RestoreQuestState();
 
             fadeScreen.SetBlack();
             yield return mapLoader.SwapRoutine(startMapScene);
             SaveService.Instance?.ApplyColdBoot();
+
+            if (EndingUI.Instance != null && EndingUI.Instance.WasInterrupted)
+            {
+                EndingUI.Instance.ResumeInterrupted();
+            }
+            else if (IntroComicUI.Instance != null && !IntroComicUI.Instance.IsCompleted)
+            {
+                yield return IntroComicUI.Instance.PlayRoutine();
+            }
+
             yield return fadeScreen.FadeIn(fadeDuration);
 
             TransitionFinished?.Invoke();
             isTransitioning = false;
         }
-
         private IEnumerator TransitionRoutine(string mapScene)
         {
             isTransitioning = true;

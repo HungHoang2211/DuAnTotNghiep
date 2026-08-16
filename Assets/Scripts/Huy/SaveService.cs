@@ -2,9 +2,10 @@ using SimpleSurvival.Building;
 using SimpleSurvival.Player;
 using SimpleSurvival.Progression;
 using SimpleSurvival.Quests;
+using SimpleSurvival.Stats;
+using SimpleSurvival.World;
 using System.Collections.Generic;
 using UnityEngine;
-using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.SaveLoad
 {
@@ -65,6 +66,12 @@ namespace SimpleSurvival.SaveLoad
                 world = QuestManager.Instance != null
                     ? QuestManager.Instance.Capture()
                     : new WorldData(),
+                intro = IntroComicUI.Instance != null
+                    ? IntroComicUI.Instance.Capture()
+                    : new IntroSaveData(),
+                ending = EndingUI.Instance != null
+                    ? EndingUI.Instance.Capture()
+                    : new EndingSaveData(),
                 level = PlayerLevelSystem.Instance != null
                      ? PlayerLevelSystem.Instance.Capture()
                     : new LevelData(),
@@ -138,6 +145,8 @@ namespace SimpleSurvival.SaveLoad
             PlayerLevelSystem.Instance?.Restore(lastLoaded.level);
             playerAgent.RestoreCrossScene(lastLoaded.player);
             PlayerDeathHandler.Instance?.ResumeDeathStateIfNeeded();
+            IntroComicUI.Instance?.Restore(lastLoaded.intro);
+            EndingUI.Instance?.Restore(lastLoaded.ending);
             IsActive = true;
         }
 
