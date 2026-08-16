@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections;
+using SimpleSurvival.Player;
 using SimpleSurvival.SaveLoad;
 using UnityEngine;
 
@@ -76,6 +77,10 @@ namespace SimpleSurvival.World
         {
             isTransitioning = true;
             TransitionStarted?.Invoke();
+
+            // Chi phí Hunger/Thirst khi teleport (đổi map thật sự, không tính lần load đầu game).
+            // ApplyTeleportCost() tự clamp về 0, không bao giờ để Hunger/Thirst âm.
+            PlayerActionController.Instance?.PlayerStats?.ApplyTeleportCost();
 
             yield return fadeScreen.FadeOut(fadeDuration);
 

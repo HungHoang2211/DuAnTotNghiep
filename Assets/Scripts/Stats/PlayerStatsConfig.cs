@@ -76,6 +76,14 @@ namespace SimpleSurvival.Stats
             "Cộng dồn (nhân) với LowHpHungerDecayMultiplier/LowHpThirstDecayMultiplier nếu HP đồng thời dưới cả 2 ngưỡng.")]
         [SerializeField] private float mediumHpDecayMultiplier = 2f;
 
+        [Header("Teleport Cost")]
+        [Tooltip("Hunger bị trừ mỗi lần player teleport (đổi map qua MapTransitionController.GoToMap). " +
+            "Không thể làm Hunger xuống dưới 0.")]
+        [SerializeField] private float teleportHungerCost = 20f;
+
+        [Tooltip("Thirst bị trừ mỗi lần player teleport. Không thể làm Thirst xuống dưới 0.")]
+        [SerializeField] private float teleportThirstCost = 30f;
+
         [Header("HP Regen theo Hunger/Thirst")]
         [Tooltip("Ngưỡng % Hunger (so với MaxHunger) để HP hồi bình thường. Mặc định 0.7 = 70%.")]
         [SerializeField] private float hungerRegenThreshold = 0.7f;
@@ -120,6 +128,9 @@ namespace SimpleSurvival.Stats
 
         public float MediumHpThreshold => mediumHpThreshold;
         public float MediumHpDecayMultiplier => mediumHpDecayMultiplier;
+
+        public float TeleportHungerCost => teleportHungerCost;
+        public float TeleportThirstCost => teleportThirstCost;
 
         public float HungerRegenThreshold => hungerRegenThreshold;
         public float ThirstRegenThreshold => thirstRegenThreshold;
