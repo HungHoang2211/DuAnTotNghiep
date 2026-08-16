@@ -571,15 +571,25 @@ namespace SimpleSurvival.Player
         private float ResolveAttackDamage(ItemStack weaponStack)
         {
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
-            if (weapon != null) return weapon.Damage;
-            return playerStats != null ? playerStats.BaseDamage : 0f;
+            float damage = weapon != null ? weapon.Damage : (playerStats != null ? playerStats.BaseDamage : 0f);
+
+            // HP/Hunger/Thirst thấp: giảm damage (melee/base). Vũ khí tầm xa không bị giảm damage ở đây.
+            if (playerStats != null)
+                damage *= playerStats.GetDamageMultiplier(weapon?.Category);
+
+            return damage;
         }
 
         private float ResolveAttackRange(ItemStack weaponStack)
         {
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
-            if (weapon != null) return weapon.Range;
-            return unarmedAttackRange;
+            float range = weapon != null ? weapon.Range : unarmedAttackRange;
+
+            // HP/Hunger/Thirst thấp: giảm Range của vũ khí tầm xa (Pistol/Rifle) — dùng thay cho hitrate.
+            if (playerStats != null)
+                range *= playerStats.GetRangeMultiplier(weapon?.Category);
+
+            return range;
         }
 
         private int ResolveMaxComboIndex(ItemStack weaponStack)
@@ -599,8 +609,15 @@ namespace SimpleSurvival.Player
         private float ResolveAttackSpeedMultiplier(ItemStack weaponStack)
         {
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
-            if (weapon != null) return weapon.AttackSpeed * weapon.AttackClipLength;
-            return unarmedAttackSpeed * unarmedAttackClipLength;
+            float speed = weapon != null
+                ? weapon.AttackSpeed * weapon.AttackClipLength
+                : unarmedAttackSpeed * unarmedAttackClipLength;
+
+            // HP/Hunger/Thirst thấp: giảm tốc độ bắn của vũ khí tầm xa (Pistol/Rifle).
+            if (playerStats != null)
+                speed *= playerStats.GetAttackSpeedMultiplier(weapon?.Category);
+
+            return speed;
         }
 
         private WeaponAbility GetWeaponAbility(ItemStack stack)
