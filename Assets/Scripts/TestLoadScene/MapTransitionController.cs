@@ -54,10 +54,11 @@ namespace SimpleSurvival.World
             TransitionStarted?.Invoke();
 
             SaveService.Instance?.Read();
+            SaveService.Instance?.RestoreQuestState();
+            SaveService.Instance?.ApplyColdBoot();
 
             fadeScreen.SetBlack();
             yield return mapLoader.SwapRoutine(startMapScene);
-            SaveService.Instance?.ApplyColdBoot();
 
             if (EndingUI.Instance != null && EndingUI.Instance.WasInterrupted)
             {

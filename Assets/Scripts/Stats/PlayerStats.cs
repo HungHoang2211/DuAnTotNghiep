@@ -458,5 +458,12 @@ namespace SimpleSurvival.Stats
             if (!Mathf.Approximately(Thirst, prev))
                 OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
+        public override bool TakeDamage(float rawDamage, GameObject source)
+        {
+            if (source != null && HardModeSettings.IsActive && source.GetComponentInParent<EnemyStats>() != null)
+                rawDamage *= HardModeSettings.DamageMultiplier;
+
+            return base.TakeDamage(rawDamage, source);
+        }
     }
 }

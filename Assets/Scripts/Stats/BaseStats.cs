@@ -21,11 +21,11 @@ namespace SimpleSurvival.Stats
         public float HP { get; private set; }
 
         private float _maxHPBonus;
-        public float MaxHP => (baseConfig != null ? baseConfig.MaxHP : 0f) + _maxHPBonus;
-        public float BaseDamage => baseConfig != null ? baseConfig.BaseDamage : 0f;
+        public virtual float MaxHP => (baseConfig != null ? baseConfig.MaxHP : 0f) + _maxHPBonus;
+        public virtual float BaseDamage => baseConfig != null ? baseConfig.BaseDamage : 0f;
+        public virtual float MoveSpeed => _moveSpeed;
         public float BaseAttackSpeed => baseConfig != null ? baseConfig.BaseAttackSpeed : 0f;
         public virtual float Armor => _armor;
-        public float MoveSpeed => _moveSpeed;
         public bool IsAlive { get; private set; }
         public bool IsDead => !IsAlive;
         public bool IsInvulnerable { get; private set; }
