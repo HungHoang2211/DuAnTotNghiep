@@ -46,6 +46,8 @@ namespace SimpleSurvival.Player
         {
             if (playerEquipment != null && playerEquipment.System != null)
                 playerEquipment.System.OnSlotChanged += HandleSlotChanged;
+
+            SwapOverrideController(ResolveCurrentWeaponController());
         }
 
         private void OnDestroy()
