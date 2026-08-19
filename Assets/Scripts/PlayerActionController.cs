@@ -45,6 +45,7 @@ namespace SimpleSurvival.Player
         [Header("Action Ranges")]
         [SerializeField] private float pickupRange = 1f;
         [SerializeField] private float gatherRange = 1f;
+        [SerializeField] private float gatherRestartCooldown = 0.15f;
         [SerializeField] private float lootRange = 1.5f;
         [SerializeField] private float npcInteractRange = 1.5f;
         [SerializeField] private float witchEventRange = 1.5f;
@@ -75,6 +76,7 @@ namespace SimpleSurvival.Player
         private MoveAction _moveAction;
         private SimpleSurvival.Input.PlayerInputReader _inputReader;
         private bool _isDead;
+        private float _lastGatherEndTime = -999f;
 
         private void Awake()
         {
@@ -175,6 +177,9 @@ namespace SimpleSurvival.Player
                         FollowNotifyManager.Instance.Notify($"{brokenName} broke!", SpeechHudType.Bad);
                 }
             }
+
+            if (action is GatherAction)
+                _lastGatherEndTime = Time.time;
         }
 
         public void DestroyStackAnywhere(ItemStack stack)
@@ -313,6 +318,7 @@ namespace SimpleSurvival.Player
         private bool BeginGatherAction(HarvestTarget target)
         {
             if (target == null || !target.CanBeTargeted()) return false;
+            if (Time.time - _lastGatherEndTime < gatherRestartCooldown) return false;
 
             ToolType required = target.RequiredTool;
             GatherToolResolution resolution = ResolveGatherTool(required);
