@@ -39,16 +39,31 @@ namespace SimpleSurvival.Audio
         private AudioCue defaultAmbienceCue;
 
         private AudioSourcePool _sfxPool;
+
         private AudioSource _musicSource;
+
         private AudioSource _ambienceSource;
 
-        private readonly Dictionary<AudioCue, AudioSource> _activeLoops =
+        private readonly Dictionary<AudioCue, AudioSource>
+            _activeLoops =
             new Dictionary<AudioCue, AudioSource>();
+
+        private readonly HashSet<AudioSource>
+            _gameplayLoopSources =
+            new HashSet<AudioSource>();
+
+        private readonly HashSet<AudioSource>
+            _pausedGameplayLoopSources =
+            new HashSet<AudioSource>();
 
         private Coroutine _musicFade;
 
         private float _musicBaseVolume = 1f;
+
         private float _ambienceBaseVolume = 1f;
+
+        // TRUE khi Settings đang mở
+        private bool _gameplayAudioPaused;
 
 
         // =========================================================
@@ -69,7 +84,6 @@ namespace SimpleSurvival.Audio
 
             BuildAudioSources();
 
-            // Load volume đã lưu
             LoadVolumeSettings();
         }
 
@@ -94,28 +108,29 @@ namespace SimpleSurvival.Audio
 
         private void LoadVolumeSettings()
         {
-            masterVolume = PlayerPrefs.GetFloat(
-                "Audio_MasterVolume",
-                masterVolume
-            );
+            masterVolume =
+                PlayerPrefs.GetFloat(
+                    "Audio_MasterVolume",
+                    masterVolume
+                );
 
-            sfxVolume = PlayerPrefs.GetFloat(
-                "Audio_SfxVolume",
-                sfxVolume
-            );
+            sfxVolume =
+                PlayerPrefs.GetFloat(
+                    "Audio_SfxVolume",
+                    sfxVolume
+                );
 
-            uiVolume = PlayerPrefs.GetFloat(
-                "Audio_UiVolume",
-                uiVolume
-            );
+            uiVolume =
+                PlayerPrefs.GetFloat(
+                    "Audio_UiVolume",
+                    uiVolume
+                );
 
-            ambienceVolume = PlayerPrefs.GetFloat(
-                "Audio_AmbienceVolume",
-                ambienceVolume
-            );
-
-            // Music không có slider UI,
-            // nên giữ giá trị mặc định trong AudioManager.
+            ambienceVolume =
+                PlayerPrefs.GetFloat(
+                    "Audio_AmbienceVolume",
+                    ambienceVolume
+                );
         }
 
 
@@ -125,11 +140,12 @@ namespace SimpleSurvival.Audio
 
         private void BuildAudioSources()
         {
-            _sfxPool = new AudioSourcePool(
-                transform,
-                sfxPoolSize,
-                "SfxSource"
-            );
+            _sfxPool =
+                new AudioSourcePool(
+                    transform,
+                    sfxPoolSize,
+                    "SfxSource"
+                );
 
             _musicSource =
                 CreateStreamSource("MusicSource");
@@ -200,14 +216,16 @@ namespace SimpleSurvival.Audio
 
 
         // =========================================================
-        // SFX
+        // NORMAL SFX
         // =========================================================
 
-        public AudioSource PlaySfx(AudioCue cue)
+        public AudioSource PlaySfx(
+            AudioCue cue)
         {
             return PlayOneShot(
                 cue,
                 Vector3.zero,
+                false,
                 false
             );
         }
@@ -220,10 +238,44 @@ namespace SimpleSurvival.Audio
             return PlayOneShot(
                 cue,
                 position,
+                true,
+                false
+            );
+        }
+
+
+        // =========================================================
+        // GAMEPLAY SFX
+        // =========================================================
+
+        public AudioSource PlayGameplaySfx(
+            AudioCue cue)
+        {
+            return PlayOneShot(
+                cue,
+                Vector3.zero,
+                false,
                 true
             );
         }
 
+
+        public AudioSource PlayGameplaySfxAt(
+            AudioCue cue,
+            Vector3 position)
+        {
+            return PlayOneShot(
+                cue,
+                position,
+                true,
+                true
+            );
+        }
+
+
+        // =========================================================
+        // IMPORTANT SFX
+        // =========================================================
 
         public void PlayImportantSfxAt(
             AudioCue cue,
@@ -232,9 +284,18 @@ namespace SimpleSurvival.Audio
             if (!IsPlayable(cue))
                 return;
 
+            // Nếu đây là gameplay audio
+            // thì không cho phát khi Settings đang mở.
+            if (_gameplayAudioPaused &&
+                cue.Category == AudioCategory.Ui)
+            {
+                return;
+            }
+
             GameObject holder =
                 new GameObject(
-                    "ImportantSfx_" + cue.name
+                    "ImportantSfx_" +
+                    cue.name
                 );
 
             holder.transform.SetParent(transform);
@@ -252,6 +313,7 @@ namespace SimpleSurvival.Audio
             );
 
             source.loop = false;
+
             source.Play();
 
             StartCoroutine(
@@ -287,16 +349,40 @@ namespace SimpleSurvival.Audio
         }
 
 
+        // =========================================================
+        // PLAY ONE SHOT
+        // =========================================================
+
         private AudioSource PlayOneShot(
             AudioCue cue,
             Vector3 position,
-            bool positional)
+            bool positional,
+            bool gameplayAudio)
         {
             if (!IsPlayable(cue))
                 return null;
 
+            // Gameplay audio bị khóa khi Settings mở.
+            if (gameplayAudio &&
+                _gameplayAudioPaused)
+            {
+                return null;
+            }
+
+            if (_sfxPool == null)
+                return null;
+
             AudioSource source =
                 _sfxPool.GetAvailable();
+
+            if (source == null)
+                return null;
+
+            // Đánh dấu source hiện tại.
+            _sfxPool.SetGameplaySource(
+                source,
+                gameplayAudio
+            );
 
             ConfigureSource(
                 source,
@@ -306,6 +392,7 @@ namespace SimpleSurvival.Audio
             );
 
             source.loop = false;
+
             source.Play();
 
             return source;
@@ -316,17 +403,46 @@ namespace SimpleSurvival.Audio
         // LOOP
         // =========================================================
 
-        public void StartLoop(AudioCue cue)
+        public void StartLoop(
+            AudioCue cue)
+        {
+            StartLoopInternal(
+                cue,
+                false
+            );
+        }
+
+
+        public void StartGameplayLoop(
+            AudioCue cue)
+        {
+            StartLoopInternal(
+                cue,
+                true
+            );
+        }
+
+
+        private void StartLoopInternal(
+            AudioCue cue,
+            bool gameplayAudio)
         {
             if (!IsPlayable(cue))
                 return;
+
+            if (gameplayAudio &&
+                _gameplayAudioPaused)
+            {
+                return;
+            }
 
             if (_activeLoops.ContainsKey(cue))
                 return;
 
             AudioSource source =
                 CreateStreamSource(
-                    "Loop_" + cue.name
+                    "Loop_" +
+                    cue.name
                 );
 
             ConfigureSource(
@@ -342,10 +458,16 @@ namespace SimpleSurvival.Audio
                 cue,
                 source
             );
+
+            if (gameplayAudio)
+            {
+                _gameplayLoopSources.Add(source);
+            }
         }
 
 
-        public void StopLoop(AudioCue cue)
+        public void StopLoop(
+            AudioCue cue)
         {
             if (!_activeLoops.TryGetValue(
                 cue,
@@ -357,7 +479,18 @@ namespace SimpleSurvival.Audio
             if (source != null)
             {
                 source.Stop();
-                Destroy(source.gameObject);
+
+                _gameplayLoopSources.Remove(
+                    source
+                );
+
+                _pausedGameplayLoopSources.Remove(
+                    source
+                );
+
+                Destroy(
+                    source.gameObject
+                );
             }
 
             _activeLoops.Remove(cue);
@@ -365,10 +498,74 @@ namespace SimpleSurvival.Audio
 
 
         // =========================================================
+        // PAUSE GAMEPLAY AUDIO
+        // =========================================================
+
+        public void PauseGameplayAudio()
+        {
+            _gameplayAudioPaused = true;
+
+            // Pause SFX gameplay
+            if (_sfxPool != null)
+            {
+                _sfxPool.PauseGameplaySources();
+            }
+
+            // Pause gameplay loops
+            _pausedGameplayLoopSources.Clear();
+
+            foreach (AudioSource source
+                     in _gameplayLoopSources)
+            {
+                if (source == null)
+                    continue;
+
+                if (!source.isPlaying)
+                    continue;
+
+                source.Pause();
+
+                _pausedGameplayLoopSources.Add(
+                    source
+                );
+            }
+        }
+
+
+        // =========================================================
+        // RESUME GAMEPLAY AUDIO
+        // =========================================================
+
+        public void ResumeGameplayAudio()
+        {
+            _gameplayAudioPaused = false;
+
+            // Resume SFX gameplay
+            if (_sfxPool != null)
+            {
+                _sfxPool.ResumeGameplaySources();
+            }
+
+            // Resume gameplay loops
+            foreach (AudioSource source
+                     in _pausedGameplayLoopSources)
+            {
+                if (source == null)
+                    continue;
+
+                source.UnPause();
+            }
+
+            _pausedGameplayLoopSources.Clear();
+        }
+
+
+        // =========================================================
         // MUSIC
         // =========================================================
 
-        public void PlayMusic(AudioCue cue)
+        public void PlayMusic(
+            AudioCue cue)
         {
             if (!IsPlayable(cue))
                 return;
@@ -391,7 +588,8 @@ namespace SimpleSurvival.Audio
         // AMBIENCE
         // =========================================================
 
-        public void PlayAmbience(AudioCue cue)
+        public void PlayAmbience(
+            AudioCue cue)
         {
             if (!IsPlayable(cue))
                 return;
@@ -431,8 +629,11 @@ namespace SimpleSurvival.Audio
             Vector3 position,
             bool positional)
         {
-            if (source == null || cue == null)
+            if (source == null ||
+                cue == null)
+            {
                 return;
+            }
 
             source.transform.position =
                 position;
@@ -457,8 +658,6 @@ namespace SimpleSurvival.Audio
             source.maxDistance =
                 cue.MaxDistance;
 
-            // Category luôn được cập nhật
-            // theo AudioCue hiện tại.
             AddCategory(
                 source,
                 cue.Category,
@@ -482,7 +681,9 @@ namespace SimpleSurvival.Audio
 
             return
                 masterVolume *
-                CategoryVolume(cue.Category) *
+                CategoryVolume(
+                    cue.Category
+                ) *
                 cue.Volume;
         }
 
@@ -613,7 +814,8 @@ namespace SimpleSurvival.Audio
                     true
                 );
 
-            foreach (AudioSource source in sources)
+            foreach (AudioSource source
+                     in sources)
             {
                 if (source == null)
                     continue;
@@ -624,7 +826,6 @@ namespace SimpleSurvival.Audio
                 if (data == null)
                     continue;
 
-                // Chỉ thay đổi đúng category
                 if (data.Category != targetCategory)
                     continue;
 
@@ -649,7 +850,8 @@ namespace SimpleSurvival.Audio
                     true
                 );
 
-            foreach (AudioSource source in sources)
+            foreach (AudioSource source
+                     in sources)
             {
                 if (source == null)
                     continue;

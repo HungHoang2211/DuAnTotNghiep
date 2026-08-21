@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 namespace SimpleSurvival.Audio
@@ -31,102 +30,213 @@ namespace SimpleSurvival.Audio
             Instance = this;
         }
 
+        // =========================================================
+        // GAMEPLAY UI AUDIO
+        // =========================================================
+
         public void PlayPickup()
         {
-            AudioManager.Instance.PlaySfx(pickupCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlayGameplaySfx(
+                pickupCue
+            );
         }
 
         public void PlayLoot()
         {
-            AudioManager.Instance.PlaySfx(lootCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlayGameplaySfx(
+                lootCue
+            );
         }
 
         public void PlayNPCInteract()
         {
-            AudioManager.Instance.PlaySfx(npcInteractCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlayGameplaySfx(
+                npcInteractCue
+            );
         }
 
         public void PlayWitchEvent()
         {
-            AudioManager.Instance.PlaySfx(witchEventCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlayGameplaySfx(
+                witchEventCue
+            );
         }
 
         public void PlayUnlock()
         {
-            AudioManager.Instance.PlaySfx(unlockCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlayGameplaySfx(
+                unlockCue
+            );
         }
+
+
+        // =========================================================
+        // NORMAL UI AUDIO
+        // =========================================================
 
         public void PlayMainClick()
         {
-            AudioManager.Instance.PlaySfx(mainClickCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                mainClickCue
+            );
         }
 
         public void PlayClick()
         {
-            AudioManager.Instance.PlaySfx(clickCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                clickCue
+            );
         }
 
         public void Playcraft()
         {
-            AudioManager.Instance.PlaySfx(craft);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                craft
+            );
         }
 
         public void Playoke()
         {
-            AudioManager.Instance.PlaySfx(okcue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                okcue
+            );
         }
 
         public void Playupdate()
         {
-            AudioManager.Instance.PlaySfx(updatecue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                updatecue
+            );
         }
 
         public void PlayCancel()
         {
-            AudioManager.Instance.PlaySfx(cancelCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                cancelCue
+            );
         }
 
         public void PlayError()
         {
-            AudioManager.Instance.PlaySfx(errorCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                errorCue
+            );
         }
 
         public void PlayItemMove()
         {
-            AudioManager.Instance.PlaySfx(itemMoveCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                itemMoveCue
+            );
         }
 
         public void PlayUseItem()
         {
-            AudioManager.Instance.PlaySfx(useItemCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                useItemCue
+            );
         }
 
         public void PlayDelete()
         {
-            AudioManager.Instance.PlaySfx(deleteCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.PlaySfx(
+                deleteCue
+            );
         }
+
+
+        // =========================================================
+        // UNLOCK LOOP
+        // =========================================================
 
         public void StartUnlockSound()
         {
-            AudioManager.Instance.StartLoop(unlockCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.StartGameplayLoop(
+                unlockCue
+            );
         }
 
         public void StopUnlockSound()
         {
-            AudioManager.Instance.StopLoop(unlockCue);
+            if (AudioManager.Instance == null)
+                return;
 
-
+            AudioManager.Instance.StopLoop(
+                unlockCue
+            );
         }
+
+
+        // =========================================================
+        // WITCH EVENT LOOP
+        // =========================================================
+
         public void StartWitchEventSound()
         {
-            AudioManager.Instance.StartLoop(witchEventCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.StartGameplayLoop(
+                witchEventCue
+            );
         }
 
         public void StopWitchEventSound()
         {
-            AudioManager.Instance.StopLoop(witchEventCue);
+            if (AudioManager.Instance == null)
+                return;
+
+            AudioManager.Instance.StopLoop(
+                witchEventCue
+            );
         }
     }
 }
-
-

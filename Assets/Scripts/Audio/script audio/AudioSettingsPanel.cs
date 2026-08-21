@@ -12,73 +12,116 @@ namespace SimpleSurvival.Audio
         [SerializeField] private Slider ambienceSlider;
 
         [Header("Pause Game While Panel Open")]
-        [Tooltip("Bật: khi panel này Active (SetActive(true)) thì Time.timeScale = 0 (dừng game). " +
-            "Khi panel Inactive (đóng lại) thì trả về Time.timeScale = 1. " +
-            "Lưu ý: panel phải được ẩn/hiện bằng SetActive (không phải chỉ đổi alpha CanvasGroup) thì OnEnable/OnDisable mới chạy đúng, " +
-            "và GameObject này phải Inactive ngay từ đầu scene để không bị đứng game lúc mới vào.")]
+        [Tooltip(
+            "Khi Settings mở: gameplay pause + gameplay audio pause. " +
+            "Music và ambience vẫn hoạt động."
+        )]
         [SerializeField] private bool pauseGameWhileOpen = true;
 
         private void OnEnable()
         {
-            if (pauseGameWhileOpen)
-                Time.timeScale = 0f;
+            if (!pauseGameWhileOpen)
+                return;
+
+            // Pause gameplay
+            Time.timeScale = 0f;
+
+            // Pause gameplay audio
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PauseGameplayAudio();
+            }
         }
 
         private void OnDisable()
         {
-            if (pauseGameWhileOpen)
-                Time.timeScale = 1f;
+            if (!pauseGameWhileOpen)
+                return;
+
+            // Resume gameplay
+            Time.timeScale = 1f;
+
+            // Resume gameplay audio
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ResumeGameplayAudio();
+            }
         }
 
         private void Start()
         {
             if (AudioManager.Instance == null)
             {
-                Debug.LogWarning("AudioManager not found!");
+                Debug.LogWarning(
+                    "[AudioSettingsUI] AudioManager not found!"
+                );
+
                 return;
             }
 
-            // Load giá trị hiện tại từ AudioManager
-            masterSlider.value =
-                AudioManager.Instance.MasterVolume;
+            // =====================================================
+            // LOAD VALUES
+            // =====================================================
 
-            sfxSlider.value =
-                AudioManager.Instance.SfxVolume;
+            if (masterSlider != null)
+            {
+                masterSlider.SetValueWithoutNotify(
+                    AudioManager.Instance.MasterVolume
+                );
 
-            uiSlider.value =
-                AudioManager.Instance.UiVolume;
+                masterSlider.onValueChanged.AddListener(
+                    OnMasterVolumeChanged
+                );
+            }
 
-            ambienceSlider.value =
-                AudioManager.Instance.AmbienceVolume;
+            if (sfxSlider != null)
+            {
+                sfxSlider.SetValueWithoutNotify(
+                    AudioManager.Instance.SfxVolume
+                );
 
-            // Đăng ký sự kiện
-            masterSlider.onValueChanged.AddListener(
-                OnMasterVolumeChanged
-            );
+                sfxSlider.onValueChanged.AddListener(
+                    OnSfxVolumeChanged
+                );
+            }
 
-            sfxSlider.onValueChanged.AddListener(
-                OnSfxVolumeChanged
-            );
+            if (uiSlider != null)
+            {
+                uiSlider.SetValueWithoutNotify(
+                    AudioManager.Instance.UiVolume
+                );
 
-            uiSlider.onValueChanged.AddListener(
-                OnUiVolumeChanged
-            );
+                uiSlider.onValueChanged.AddListener(
+                    OnUiVolumeChanged
+                );
+            }
 
-            ambienceSlider.onValueChanged.AddListener(
-                OnAmbienceVolumeChanged
-            );
+            if (ambienceSlider != null)
+            {
+                ambienceSlider.SetValueWithoutNotify(
+                    AudioManager.Instance.AmbienceVolume
+                );
+
+                ambienceSlider.onValueChanged.AddListener(
+                    OnAmbienceVolumeChanged
+                );
+            }
         }
+
 
         // =========================================================
         // MASTER
         // =========================================================
 
-        private void OnMasterVolumeChanged(float value)
+        private void OnMasterVolumeChanged(
+            float value)
         {
             if (AudioManager.Instance == null)
                 return;
 
-            AudioManager.Instance.SetMasterVolume(value);
+            AudioManager.Instance.SetMasterVolume(
+                value
+            );
 
             PlayerPrefs.SetFloat(
                 "Audio_MasterVolume",
@@ -88,16 +131,20 @@ namespace SimpleSurvival.Audio
             PlayerPrefs.Save();
         }
 
+
         // =========================================================
         // SFX
         // =========================================================
 
-        private void OnSfxVolumeChanged(float value)
+        private void OnSfxVolumeChanged(
+            float value)
         {
             if (AudioManager.Instance == null)
                 return;
 
-            AudioManager.Instance.SetSfxVolume(value);
+            AudioManager.Instance.SetSfxVolume(
+                value
+            );
 
             PlayerPrefs.SetFloat(
                 "Audio_SfxVolume",
@@ -107,16 +154,20 @@ namespace SimpleSurvival.Audio
             PlayerPrefs.Save();
         }
 
+
         // =========================================================
         // UI
         // =========================================================
 
-        private void OnUiVolumeChanged(float value)
+        private void OnUiVolumeChanged(
+            float value)
         {
             if (AudioManager.Instance == null)
                 return;
 
-            AudioManager.Instance.SetUiVolume(value);
+            AudioManager.Instance.SetUiVolume(
+                value
+            );
 
             PlayerPrefs.SetFloat(
                 "Audio_UiVolume",
@@ -126,16 +177,20 @@ namespace SimpleSurvival.Audio
             PlayerPrefs.Save();
         }
 
+
         // =========================================================
         // AMBIENCE
         // =========================================================
 
-        private void OnAmbienceVolumeChanged(float value)
+        private void OnAmbienceVolumeChanged(
+            float value)
         {
             if (AudioManager.Instance == null)
                 return;
 
-            AudioManager.Instance.SetAmbienceVolume(value);
+            AudioManager.Instance.SetAmbienceVolume(
+                value
+            );
 
             PlayerPrefs.SetFloat(
                 "Audio_AmbienceVolume",
@@ -145,19 +200,22 @@ namespace SimpleSurvival.Audio
             PlayerPrefs.Save();
         }
 
+
         // =========================================================
         // CLEANUP
         // =========================================================
 
         private void OnDestroy()
         {
-            // Đảm bảo không kẹt game ở trạng thái pause nếu panel bị destroy trong lúc đang mở
-            // (vd đổi scene khi settings panel còn active).
             if (pauseGameWhileOpen)
+            {
                 Time.timeScale = 1f;
 
-            if (AudioManager.Instance == null)
-                return;
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.ResumeGameplayAudio();
+                }
+            }
 
             if (masterSlider != null)
             {
