@@ -12739,6 +12739,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -13667,6 +13668,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -14234,7 +14236,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1071657601}
         m_TargetAssemblyTypeName: SimpleSurvival.Audio.UIAudioController, Assembly-CSharp
-        m_MethodName: PlayDelete
+        m_MethodName: PlayDestroy
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -15189,6 +15191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -28201,6 +28204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -45649,6 +45653,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -61570,6 +61575,7 @@ MonoBehaviour:
   itemMoveCue: {fileID: 11400000, guid: 03f20e5814b5a684db22bf3171a01ae4, type: 2}
   useItemCue: {fileID: 11400000, guid: 7bbf73125c9baf04a8a0667dc74c3095, type: 2}
   deleteCue: {fileID: 11400000, guid: d948453d66071d24db0ec5fdd5fc08ae, type: 2}
+  destroyCue: {fileID: 11400000, guid: a79bb2a5f180327479bbad8d21804191, type: 2}
   craft: {fileID: 11400000, guid: e5afbcbfad72d4847b963206228f8326, type: 2}
   mainClickCue: {fileID: 11400000, guid: 1b12b2c4689b1b94782461c4030444c6, type: 2}
   updatecue: {fileID: 11400000, guid: 6b2953ccee9049f4196720a906c805c2, type: 2}
@@ -84046,6 +84052,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -88128,7 +88135,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -42.5, y: 0}
+  m_AnchoredPosition: {x: -42.499878, y: 0}
   m_SizeDelta: {x: 0, y: 915}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1509040236
@@ -96499,7 +96506,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2028943410}
   m_HandleRect: {fileID: 2028943409}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -98992,7 +98999,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1711647130}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
@@ -99010,7 +99017,7 @@ RectTransform:
   - {fileID: 622766027}
   - {fileID: 1747808885}
   - {fileID: 1197979241}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1967195713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -99030,6 +99037,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics_Dummy: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -112932,6 +112940,7 @@ Transform:
   - {fileID: 764421583}
   - {fileID: 172865824}
   - {fileID: 1441216091}
+  - {fileID: 1711647131}
   - {fileID: 8519242389510742120}
   - {fileID: 3610616496864412710}
   - {fileID: 1500088792}
@@ -127750,6 +127759,7 @@ MonoBehaviour:
   sneakAttackDamageMultiplier: 2
   pickupRange: 1
   gatherRange: 1
+  gatherRestartCooldown: 0.15
   lootRange: 1.5
   npcInteractRange: 1.5
   witchEventRange: 1.5
@@ -127893,11 +127903,12 @@ MonoBehaviour:
   minMoveSpeedForFootstep: 0.05
   fistsImpactCue: {fileID: 11400000, guid: 29c3bec3b3e3cd24d8d581a8aa06bbb8, type: 2}
   melee1HImpactCue: {fileID: 11400000, guid: 8a7de5f1d31510d45b64c63d582295b9, type: 2}
-  melee2HImpactCue: {fileID: 0}
+  melee2HImpactCue: {fileID: 11400000, guid: 1fd20fb5c50f3794782012dda7b1c358, type: 2}
   pistolImpactCue: {fileID: 11400000, guid: 119818e9901ceee41b4ac82d1cab8234, type: 2}
   rifleImpactCue: {fileID: 11400000, guid: b2a40c5c37db6554ab6611f6748fd7da, type: 2}
   fistsHitCue: {fileID: 11400000, guid: f8a52d27e7b1a364cb6f58a88ef2db63, type: 2}
   melee1HHitCue: {fileID: 11400000, guid: 0af6ea613d1b6e449ae0a2ebdb9d4ac2, type: 2}
+  melee2HHitCue: {fileID: 11400000, guid: 4d76f8b3d41423a4db7cfad1f21887f7, type: 2}
   gatherAxeCue: {fileID: 0}
   gatherPickaxeCue: {fileID: 0}
   playerStats: {fileID: 812480218}
@@ -128133,7 +128144,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1711647131}
   - {fileID: 1967195713}
   - {fileID: 273088330}
   - {fileID: 515767401}

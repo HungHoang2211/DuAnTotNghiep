@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SimpleSurvival.Audio
 {
@@ -14,6 +14,7 @@ namespace SimpleSurvival.Audio
         [SerializeField] private AudioCue itemMoveCue;
         [SerializeField] private AudioCue useItemCue;
         [SerializeField] private AudioCue deleteCue;
+        [SerializeField] private AudioCue destroyCue;   // Thêm mới
         [SerializeField] private AudioCue craft;
         [SerializeField] private AudioCue mainClickCue;
         [SerializeField] private AudioCue updatecue;
@@ -43,7 +44,15 @@ namespace SimpleSurvival.Audio
                 pickupCue
             );
         }
+        public void PlayDestroy()
+        {
+            if (AudioManager.Instance == null)
+                return;
 
+            AudioManager.Instance.PlaySfx(
+                destroyCue
+            );
+        }
         public void PlayLoot()
         {
             if (AudioManager.Instance == null)

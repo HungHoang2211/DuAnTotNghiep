@@ -39,6 +39,7 @@ namespace SimpleSurvival.Audio
         [Header("Combat Hit Cues")]
         [SerializeField] private AudioCue fistsHitCue;
         [SerializeField] private AudioCue melee1HHitCue;
+        [SerializeField] private AudioCue melee2HHitCue;
 
         [Header("Gather Impact Cues")]
         [SerializeField] private AudioCue gatherAxeCue;
@@ -137,9 +138,17 @@ namespace SimpleSurvival.Audio
         {
             switch (category)
             {
-                case WeaponCategory.Fists: return fistsHitCue;
-                case WeaponCategory.Melee1H: return melee1HHitCue;
-                default: return null;
+                case WeaponCategory.Fists:
+                    return fistsHitCue;
+
+                case WeaponCategory.Melee1H:
+                    return melee1HHitCue;
+
+                case WeaponCategory.Melee2H:
+                    return melee2HHitCue;
+
+                default:
+                    return null;
             }
         }
 
