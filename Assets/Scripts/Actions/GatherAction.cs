@@ -22,7 +22,6 @@ namespace SimpleSurvival.Actions
         private readonly Animator _animator;
         private readonly PlayerInventoryQueries _inventoryQueries;
         private readonly PlayerToolSwapper _toolSwapper;
-        private readonly PlayerAnimator _playerAnimator;
         private readonly HarvestTarget _target;
         private readonly float _damage;
         private readonly bool _isEphemeral;
@@ -41,7 +40,6 @@ namespace SimpleSurvival.Actions
             Animator animator,
             PlayerInventoryQueries inventoryQueries,
             PlayerToolSwapper toolSwapper,
-            PlayerAnimator playerAnimator,
             HarvestTarget target,
             ItemStack toolStack,
             float damage,
@@ -51,7 +49,6 @@ namespace SimpleSurvival.Actions
             _animator = animator;
             _inventoryQueries = inventoryQueries;
             _toolSwapper = toolSwapper;
-            _playerAnimator = playerAnimator;
             _target = target;
             _toolStack = toolStack;
             _damage = damage;
@@ -160,17 +157,8 @@ namespace SimpleSurvival.Actions
             if (_target != null && _target.Stats != null)
                 _target.Stats.OnDepleted -= HandleTargetDepleted;
 
-            if (_isEphemeral && _toolSwapper != null && _toolSwapper.IsSwapped)
-            {
-                _toolSwapper.SwapOut();
-
-                if (_playerAnimator != null && _animator != null)
-                {
-                    AnimatorOverrideController weaponController = _playerAnimator.ResolveCurrentWeaponController();
-                    if (weaponController != null && _animator.runtimeAnimatorController != weaponController)
-                        _animator.runtimeAnimatorController = weaponController;
-                }
-            }
+            if (_isEphemeral && _toolSwapper != null)
+                _toolSwapper.RequestRevert();
 
             if (enterGatherIdle)
                 _animator.SetTrigger(ParamGatherIdle);
@@ -210,10 +198,7 @@ namespace SimpleSurvival.Actions
             if (tool == null) return false;
 
             if (_toolSwapper != null)
-            {
-                _toolSwapper.SwapOut();
-                _toolSwapper.SwapIn(tool);
-            }
+                _toolSwapper.RequestSwitchTool(tool);
 
             _toolStack = replacement;
             return true;

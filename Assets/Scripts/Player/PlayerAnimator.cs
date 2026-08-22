@@ -24,6 +24,9 @@ namespace SimpleSurvival.Player
         [SerializeField] private AnimatorOverrideController defaultOverrideController;
 
         private PlayerActionController _actionController;
+        private string _lastLoggedClip;
+        private string _lastLoggedController;
+        private string _lastLoggedAction;
 
         public AnimatorOverrideController ResolveCurrentWeaponController()
         {
@@ -59,6 +62,21 @@ namespace SimpleSurvival.Player
         private void Update()
         {
             if (animator == null) return;
+
+            var clips = animator.GetCurrentAnimatorClipInfo(0);
+            string clipName = clips.Length > 0 ? clips[0].clip.name : "none";
+            string controllerName = animator.runtimeAnimatorController != null ? animator.runtimeAnimatorController.name : "none";
+            string actionType = _actionController != null && _actionController.CurrentAction != null
+                ? _actionController.CurrentAction.Type.ToString()
+                : "none";
+
+            if (clipName != _lastLoggedClip || controllerName != _lastLoggedController || actionType != _lastLoggedAction)
+            {
+                Debug.Log($"[AnimDebug] t={Time.time:F2} clip={clipName} controller={controllerName} action={actionType} swapped={(toolSwapper != null ? toolSwapper.IsSwapped.ToString() : "?")}");
+                _lastLoggedClip = clipName;
+                _lastLoggedController = controllerName;
+                _lastLoggedAction = actionType;
+            }
 
             float moveSpeed = 0f;
             if (_actionController.CurrentAction is IMovingAction moving)

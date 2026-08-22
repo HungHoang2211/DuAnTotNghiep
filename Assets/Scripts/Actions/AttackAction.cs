@@ -26,6 +26,7 @@ namespace SimpleSurvival.Actions
         private readonly PlayerActionController _controller;
         private readonly Animator _animator;
         private readonly PlayerTargetChecker _targetChecker;
+        private readonly PlayerToolSwapper _toolSwapper;
         private ITargetable _target;
         private readonly ItemStack _weaponStack;
         private readonly float _damage;
@@ -52,6 +53,7 @@ namespace SimpleSurvival.Actions
             Animator animator,
             ITargetable target,
             PlayerTargetChecker targetChecker,
+            PlayerToolSwapper toolSwapper,
             ItemStack weaponStack,
             float damage,
             float range,
@@ -64,6 +66,7 @@ namespace SimpleSurvival.Actions
             _animator = animator;
             _target = target;
             _targetChecker = targetChecker;
+            _toolSwapper = toolSwapper;
             _weaponStack = weaponStack;
             _damage = damage;
             _range = range;
@@ -83,6 +86,7 @@ namespace SimpleSurvival.Actions
         {
             _controller.ConsumeAttackQueue();
             _controller.CancelSneak();
+            _toolSwapper?.ForceRevertNow();
             _animator.SetFloat(ParamAttackSpeed, _attackSpeedMultiplier);
             PickComboIndex();
             StartSwing();

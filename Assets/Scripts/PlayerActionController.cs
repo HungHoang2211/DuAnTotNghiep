@@ -25,7 +25,6 @@ namespace SimpleSurvival.Player
         [SerializeField] private PlayerEquipment playerEquipment;
         [SerializeField] private PlayerInventoryQueries inventoryQueries;
         [SerializeField] private PlayerToolSwapper toolSwapper;
-        [SerializeField] private PlayerAnimator playerAnimator;
         [SerializeField] private PlayerTargetChecker targetChecker;
 
         [Header("Pet References")]
@@ -100,7 +99,6 @@ namespace SimpleSurvival.Player
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (inventoryQueries == null) inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
             if (toolSwapper == null) toolSwapper = GetComponentInChildren<PlayerToolSwapper>();
-            if (playerAnimator == null) playerAnimator = GetComponentInChildren<PlayerAnimator>();
             if (targetChecker == null) targetChecker = GetComponentInChildren<PlayerTargetChecker>();
 
             _idleAction = new IdleAction(this);
@@ -266,7 +264,7 @@ namespace SimpleSurvival.Player
             float speedMultiplier = ResolveAttackSpeedMultiplier(weaponStack);
 
             AttackAction attack = new AttackAction(
-                this, animator, target, targetChecker,
+                this, animator, target, targetChecker, toolSwapper,
                 weaponStack,
                 damage, range, maxComboIndex, comboWindowSeconds,
                 safetyTimeout,
@@ -336,7 +334,6 @@ namespace SimpleSurvival.Player
                 animator,
                 inventoryQueries,
                 toolSwapper,
-                playerAnimator,
                 target,
                 resolution.ToolStack,
                 resolution.Damage,
@@ -579,7 +576,6 @@ namespace SimpleSurvival.Player
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
             float damage = weapon != null ? weapon.Damage : (playerStats != null ? playerStats.BaseDamage : 0f);
 
-            // HP/Hunger/Thirst thấp: giảm damage (melee/base). Vũ khí tầm xa không bị giảm damage ở đây.
             if (playerStats != null)
                 damage *= playerStats.GetDamageMultiplier(weapon?.Category);
 
@@ -591,7 +587,6 @@ namespace SimpleSurvival.Player
             WeaponAbility weapon = GetWeaponAbility(weaponStack);
             float range = weapon != null ? weapon.Range : unarmedAttackRange;
 
-            // HP/Hunger/Thirst thấp: giảm Range của vũ khí tầm xa (Pistol/Rifle) — dùng thay cho hitrate.
             if (playerStats != null)
                 range *= playerStats.GetRangeMultiplier(weapon?.Category);
 
@@ -619,7 +614,6 @@ namespace SimpleSurvival.Player
                 ? weapon.AttackSpeed * weapon.AttackClipLength
                 : unarmedAttackSpeed * unarmedAttackClipLength;
 
-            // HP/Hunger/Thirst thấp: giảm tốc độ bắn của vũ khí tầm xa (Pistol/Rifle).
             if (playerStats != null)
                 speed *= playerStats.GetAttackSpeedMultiplier(weapon?.Category);
 
