@@ -74,10 +74,35 @@ namespace SimpleSurvival.Stats
         };
 
         public override float Armor => TotalDefense;
+
+        /// <summary>
+        /// True khi HP hiện tại dưới ngưỡng LowHpThreshold (% MaxHP) trong PlayerStatsConfig.
+        /// </summary>
         public bool IsLowHp => Config != null && MaxHP > 0f && HP < MaxHP * Config.LowHpThreshold;
+
+        /// <summary>
+        /// True khi HP hiện tại dưới ngưỡng MediumHpThreshold (% MaxHP, mặc định 75% — cao hơn LowHpThreshold).
+        /// Chỉ dùng để tăng tốc decay Hunger/Thirst (xem TickHunger/TickThirst), không ảnh hưởng damage/range/movespeed.
+        /// Có thể tắt hoàn toàn qua tick EnableMediumHpDecayPenalty trong Inspector.
+        /// </summary>
         public bool IsMediumLowHp => Config != null && MaxHP > 0f && HP < MaxHP * Config.MediumHpThreshold;
+
+        /// <summary>
+        /// True khi Hunger hiện tại <= ngưỡng LowHungerThreshold (% MaxHunger) trong PlayerStatsConfig.
+        /// </summary>
         public bool IsHungerLow => Config != null && MaxHunger > 0f && Hunger <= Config.LowHungerThreshold * MaxHunger;
+
+        /// <summary>
+        /// True khi Thirst hiện tại <= ngưỡng LowThirstThreshold (% MaxThirst) trong PlayerStatsConfig.
+        /// </summary>
         public bool IsThirstLow => Config != null && MaxThirst > 0f && Thirst <= Config.LowThirstThreshold * MaxThirst;
+
+        /// <summary>
+        /// True khi (EnableWeakenedPenalty đang bật) VÀ HP thấp (dưới LowHpThreshold), HOẶC Hunger thấp
+        /// (<= LowHungerThreshold), HOẶC Thirst thấp (<= LowThirstThreshold). Khi true: giảm damage (melee/base),
+        /// giảm range + attack speed vũ khí tầm xa, giảm move speed, và tăng tốc độ giảm Hunger/Thirst.
+        /// Tắt tick EnableWeakenedPenalty trong Inspector để vô hiệu hoá toàn bộ nhóm debuff này.
+        /// </summary>
         public bool IsWeakened => enableWeakenedPenalty && (IsLowHp || IsHungerLow || IsThirstLow);
 
         public float TotalDamage
@@ -132,6 +157,11 @@ namespace SimpleSurvival.Stats
                 return atkSpeed;
             }
         }
+
+        /// <summary>
+        /// Range hiệu dụng của vũ khí đang trang bị. WeaponAbility chưa có stat "hitrate" riêng cho vũ khí
+        /// tầm xa, nên khi HP/Hunger/Thirst thấp, Range bị giảm thay cho hitrate (vũ khí cận chiến không bị ảnh hưởng).
+        /// </summary>
         public float TotalRange
         {
             get
@@ -149,16 +179,31 @@ namespace SimpleSurvival.Stats
                 return range;
             }
         }
+
+        /// <summary>
+        /// Tầm xa: Pistol, Rifle. Tầm gần: Melee1H, Melee2H, Fist.
+        /// </summary>
         private static bool IsRangedCategory(WeaponCategory category)
         {
             return category == WeaponCategory.Pistol || category == WeaponCategory.Rifle;
         }
+
+        /// <summary>
+        /// Hệ số nhân damage do HP/Hunger/Thirst thấp, dành cho nơi khác (vd PlayerActionController)
+        /// tự resolve damage/range/attackspeed từ WeaponAbility nhưng vẫn muốn áp penalty này.
+        /// category = null nghĩa là unarmed (base damage) — vẫn tính là "cận chiến".
+        /// Vũ khí tầm xa (Pistol/Rifle) KHÔNG bị giảm damage ở đây (xem GetRangeMultiplier/GetAttackSpeedMultiplier).
+        /// </summary>
         public float GetDamageMultiplier(WeaponCategory? category)
         {
             if (Config == null || !IsWeakened) return 1f;
             bool isRanged = category.HasValue && IsRangedCategory(category.Value);
             return isRanged ? 1f : Config.LowHpMeleeDamageMultiplier;
         }
+
+        /// <summary>
+        /// Hệ số nhân Range do HP/Hunger/Thirst thấp. Chỉ áp dụng cho vũ khí tầm xa (Pistol/Rifle).
+        /// </summary>
         public float GetRangeMultiplier(WeaponCategory? category)
         {
             if (Config == null || !IsWeakened) return 1f;
@@ -166,6 +211,9 @@ namespace SimpleSurvival.Stats
             return isRanged ? Config.LowHpRangedRangeMultiplier : 1f;
         }
 
+        /// <summary>
+        /// Hệ số nhân AttackSpeed (tốc độ bắn) do HP/Hunger/Thirst thấp. Chỉ áp dụng cho vũ khí tầm xa (Pistol/Rifle).
+        /// </summary>
         public float GetAttackSpeedMultiplier(WeaponCategory? category)
         {
             if (Config == null || !IsWeakened) return 1f;
@@ -220,6 +268,14 @@ namespace SimpleSurvival.Stats
             Debug.Log("[PlayerStats] Revive() called, invoking OnRevived");
             OnRevived?.Invoke();
         }
+        /// <summary>
+        /// Key PlayerPrefs lưu lựa chọn tick "Penalty & HP Regen" (xem PenaltyRegenToggle.cs). PlayerStats tự đọc
+        /// key này ngay trong Awake() — KHÔNG phụ thuộc panel Settings đã từng mở trong lần chơi/lần map này hay
+        /// chưa — để tránh bug: sau khi thoát vào lại (load save) hoặc teleport (map mới tạo PlayerStats mới),
+        /// component mới bị reset về default Inspector (true/true) vì Awake của panel Settings không tự chạy lại.
+        /// </summary>
+        public const string PenaltyRegenPrefsKey = "Gameplay_PenaltyRegenEnabled";
+
         protected override void Awake()
         {
             base.Awake();
@@ -229,6 +285,12 @@ namespace SimpleSurvival.Stats
             }
             if (playerEquipment == null)
                 playerEquipment = GetComponentInParent<PlayerEquipment>();
+
+            // Áp lại lựa chọn Penalty/Regen đã lưu — chạy mỗi lần PlayerStats khởi tạo (game mới load,
+            // respawn, hay map mới sau teleport), không chỉ khi panel Settings được mở.
+            bool penaltyRegenOn = PlayerPrefs.GetInt(PenaltyRegenPrefsKey, 1) == 1;
+            enableWeakenedPenalty = penaltyRegenOn;
+            allowRegen = penaltyRegenOn;
         }
 
         private void Start()
@@ -303,6 +365,11 @@ namespace SimpleSurvival.Stats
             TickHPRegen(dt);
             TickStarvation(dt);
 
+            // TotalDamage/TotalRange/TotalAttackSpeed/TotalMoveSpeed phụ thuộc IsWeakened (HP/Hunger/Thirst).
+            // Các giá trị này tự đổi theo từng frame do decay, nhưng UI (StatLabel...) chỉ refresh khi
+            // OnCombatStatsChanged bắn ra — trước đây event này chỉ bắn khi đổi trang bị, nên UI bị "đứng hình"
+            // cho tới khi tắt/bật lại panel. Ở đây chỉ bắn event khi trạng thái Weakened THỰC SỰ đổi (chuyển
+            // true<->false), tránh spam event mỗi frame trong lúc Hunger/Thirst đang decay liên tục.
             bool weakenedNow = IsWeakened;
             if (weakenedNow != _wasWeakened)
             {
@@ -332,16 +399,30 @@ namespace SimpleSurvival.Stats
         {
             _thirstPauseUntil = Time.time + decayPauseAfterConsume;
         }
+
+        /// <summary>
+        /// Trừ Hunger đi 1 lượng cố định (vd chi phí teleport). Tự động clamp về 0, không bao giờ âm
+        /// (dùng chung SetHunger bên dưới, vốn đã Mathf.Clamp(0, MaxHunger)).
+        /// </summary>
         public void ReduceHunger(float amount)
         {
             if (amount <= 0f || Config == null) return;
             SetHunger(Hunger - amount);
         }
+
+        /// <summary>
+        /// Trừ Thirst đi 1 lượng cố định (vd chi phí teleport). Tự động clamp về 0, không bao giờ âm.
+        /// </summary>
         public void ReduceThirst(float amount)
         {
             if (amount <= 0f || Config == null) return;
             SetThirst(Thirst - amount);
         }
+
+        /// <summary>
+        /// Trừ Hunger/Thirst theo chi phí teleport cấu hình trong PlayerStatsConfig (TeleportHungerCost/TeleportThirstCost).
+        /// Gọi từ MapTransitionController mỗi khi player thực sự đổi map. Không làm 2 chỉ số này xuống dưới 0.
+        /// </summary>
         public void ApplyTeleportCost()
         {
             if (Config == null) return;
@@ -382,6 +463,13 @@ namespace SimpleSurvival.Stats
                 _hpRegenTimer -= Config.HPRegenInterval;
             }
         }
+
+        /// <summary>
+        /// Hồi máu tự nhiên phụ thuộc Hunger/Thirst:
+        /// - Hunger >= ngưỡng và Thirst >= ngưỡng: hồi bình thường (x1).
+        /// - Chỉ một trong hai dưới ngưỡng: giảm 25% (x0.75).
+        /// - Cả hai đều dưới ngưỡng: giảm 75% (x0.25).
+        /// </summary>
         private float GetHpRegenMultiplier()
         {
             bool hungerOk = MaxHunger > 0f && Hunger >= Config.HungerRegenThreshold * MaxHunger;
@@ -458,6 +546,7 @@ namespace SimpleSurvival.Stats
             if (!Mathf.Approximately(Thirst, prev))
                 OnThirstChanged?.Invoke(Thirst, Config.MaxThirst);
         }
+
         public override bool TakeDamage(float rawDamage, GameObject source)
         {
             if (source != null && HardModeSettings.IsActive && source.GetComponentInParent<EnemyStats>() != null)

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using SimpleSurvival.Player;
+using SimpleSurvival.Stats;
 
 namespace SimpleSurvival.UI
 {
@@ -22,10 +23,7 @@ namespace SimpleSurvival.UI
 
         [Header("Animation")]
         [SerializeField] private float animDuration = 0.15f;
-
-        [Header("Persistence")]
-        [Tooltip("Key lưu lựa chọn vào PlayerPrefs, load lại đúng trạng thái ở lần chơi sau.")]
-        [SerializeField] private string prefsKey = "Gameplay_PenaltyRegenEnabled";
+        private const string PrefsKey = PlayerStats.PenaltyRegenPrefsKey;
 
         private bool _isOn = true;
         private Coroutine _animCoroutine;
@@ -38,14 +36,17 @@ namespace SimpleSurvival.UI
 
         private void Start()
         {
-            _isOn = PlayerPrefs.GetInt(prefsKey, 1) == 1;
-            ApplyStateInstant(_isOn);
-            ApplyToPlayerStats(_isOn);
-
             if (toggleButton != null)
                 toggleButton.onClick.AddListener(OnClicked);
             else
                 Debug.LogWarning("[PenaltyRegenToggle] Thiếu Button reference — nút sẽ không bấm được.");
+        }
+
+        private void OnEnable()
+        {
+            _isOn = PlayerPrefs.GetInt(PrefsKey, 1) == 1;
+            ApplyStateInstant(_isOn);
+            ApplyToPlayerStats(_isOn);
         }
 
         private void OnDestroy()
@@ -58,7 +59,7 @@ namespace SimpleSurvival.UI
         {
             _isOn = !_isOn;
 
-            PlayerPrefs.SetInt(prefsKey, _isOn ? 1 : 0);
+            PlayerPrefs.SetInt(PrefsKey, _isOn ? 1 : 0);
             PlayerPrefs.Save();
 
             ApplyToPlayerStats(_isOn);
