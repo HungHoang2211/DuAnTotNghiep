@@ -17,5 +17,12 @@ namespace SimpleSurvival.Audio
             if (ambienceCue != null)
                 AudioManager.Instance.PlayAmbience(ambienceCue);
         }
+
+        private void OnDestroy()
+        {
+            if (AudioManager.Instance == null) return;
+
+            AudioManager.Instance.StopMusic();
+        }
     }
 }
