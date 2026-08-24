@@ -66,9 +66,7 @@ namespace SimpleSurvival.Audio
         private bool _gameplayAudioPaused;
 
 
-        // =========================================================
-        // UNITY
-        // =========================================================
+       
 
         private void Awake()
         {
@@ -102,10 +100,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // LOAD SETTINGS
-        // =========================================================
-
+        
         private void LoadVolumeSettings()
         {
             masterVolume =
@@ -134,9 +129,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // BUILD AUDIO SOURCES
-        // =========================================================
+      
 
         private void BuildAudioSources()
         {
@@ -185,9 +178,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // CATEGORY
-        // =========================================================
+       
 
         private AudioSourceCategory AddCategory(
             AudioSource source,
@@ -215,9 +206,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // NORMAL SFX
-        // =========================================================
+      
 
         public AudioSource PlaySfx(
             AudioCue cue)
@@ -244,10 +233,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // GAMEPLAY SFX
-        // =========================================================
-
+       
         public AudioSource PlayGameplaySfx(
             AudioCue cue)
         {
@@ -273,9 +259,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // IMPORTANT SFX
-        // =========================================================
+       
 
         public void PlayImportantSfxAt(
             AudioCue cue,
@@ -349,10 +333,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // PLAY ONE SHOT
-        // =========================================================
-
+       
         private AudioSource PlayOneShot(
             AudioCue cue,
             Vector3 position,
@@ -399,9 +380,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // LOOP
-        // =========================================================
+       
 
         public void StartLoop(
             AudioCue cue)
@@ -497,9 +476,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // PAUSE GAMEPLAY AUDIO
-        // =========================================================
+       
 
         public void PauseGameplayAudio()
         {
@@ -532,10 +509,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // RESUME GAMEPLAY AUDIO
-        // =========================================================
-
+        
         public void ResumeGameplayAudio()
         {
             _gameplayAudioPaused = false;
@@ -560,10 +534,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // MUSIC
-        // =========================================================
-
+      
         public void PlayMusic(
             AudioCue cue)
         {
@@ -584,9 +555,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // AMBIENCE
-        // =========================================================
+      
 
         public void PlayAmbience(
             AudioCue cue)
@@ -619,9 +588,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // CONFIGURE SOURCE
-        // =========================================================
+      
 
         private void ConfigureSource(
             AudioSource source,
@@ -669,9 +636,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // VOLUME
-        // =========================================================
+        
 
         private float OneShotVolume(
             AudioCue cue)
@@ -720,9 +685,6 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // MASTER
-        // =========================================================
 
         public void SetMasterVolume(
             float value)
@@ -734,9 +696,6 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // SFX
-        // =========================================================
 
         public void SetSfxVolume(
             float value)
@@ -750,10 +709,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // UI
-        // =========================================================
-
+        
         public void SetUiVolume(
             float value)
         {
@@ -766,9 +722,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // MUSIC
-        // =========================================================
+       
 
         public void SetMusicVolume(
             float value)
@@ -784,9 +738,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // AMBIENCE
-        // =========================================================
+     
 
         public void SetAmbienceVolume(
             float value)
@@ -802,10 +754,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // REFRESH CATEGORY
-        // =========================================================
-
+      
         private void RefreshCategoryVolumes(
             AudioCategory targetCategory)
         {
@@ -839,10 +788,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // REFRESH ALL
-        // =========================================================
-
+        
         private void RefreshAllVolumes()
         {
             AudioSource[] sources =
@@ -872,9 +818,6 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // REFRESH STREAM
-        // =========================================================
 
         private void RefreshStreamVolumes()
         {
@@ -900,10 +843,7 @@ namespace SimpleSurvival.Audio
         }
 
 
-        // =========================================================
-        // MUSIC FADE
-        // =========================================================
-
+       
         private void RestartMusicFade(
             IEnumerator routine)
         {
