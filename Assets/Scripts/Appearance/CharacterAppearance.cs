@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Items;
 
@@ -20,9 +20,11 @@ namespace SimpleSurvival.Characters.Appearance
 
         private Material _instanceMaterial;
         private Texture2D _generatedAtlas;
+        private Coroutine _bakeCoroutine;
 
         private void OnEnable()
         {
+            Debug.Log($"[AppearanceDebug] t={Time.time:F2} OnEnable");
             EnsureMaterialInstance();
             playerEquipment.System.OnSlotChanged += HandleSlotChanged;
             Rebuild();
@@ -30,7 +32,14 @@ namespace SimpleSurvival.Characters.Appearance
 
         private void OnDisable()
         {
+            Debug.Log($"[AppearanceDebug] t={Time.time:F2} OnDisable");
             playerEquipment.System.OnSlotChanged -= HandleSlotChanged;
+
+            if (_bakeCoroutine != null)
+            {
+                StopCoroutine(_bakeCoroutine);
+                _bakeCoroutine = null;
+            }
         }
 
         private void OnDestroy()
@@ -43,6 +52,7 @@ namespace SimpleSurvival.Characters.Appearance
             if (!IsAppearanceSlot(slot))
                 return;
 
+            Debug.Log($"[AppearanceDebug] t={Time.time:F2} HandleSlotChanged slot={slot}");
             Rebuild();
         }
 
@@ -68,6 +78,8 @@ namespace SimpleSurvival.Characters.Appearance
 
         private void Rebuild()
         {
+            Debug.Log($"[AppearanceDebug] t={Time.time:F2} Rebuild bắt đầu");
+
             BodypartSlotEntry headSlot = FindSlotEntry(BodypartSlotKind.Head);
             BodypartSlotEntry torsoSlot = FindSlotEntry(BodypartSlotKind.Torso);
             BodypartSlotEntry legsSlot = FindSlotEntry(BodypartSlotKind.Legs);
@@ -90,6 +102,13 @@ namespace SimpleSurvival.Characters.Appearance
             BodypartResource beardResource = beardSlot?.DefaultResource;
             bool beardVisible = beardResource != null && !hideBeard;
 
+            ApplyRenderer(headRenderer, headResource);
+            ApplyRenderer(torsoRenderer, torsoResource);
+            ApplyRenderer(legsRenderer, legsResource);
+            ApplyRenderer(feetRenderer, feetResource);
+            ApplyRenderer(backpackRenderer, backpackResource);
+            ApplyRenderer(beardRenderer, beardVisible ? beardResource : null);
+
             List<BodypartView> atlasViews = new List<BodypartView>();
             AddView(atlasViews, headSlot, headResource);
             AddView(atlasViews, torsoSlot, torsoResource);
@@ -97,22 +116,31 @@ namespace SimpleSurvival.Characters.Appearance
             AddView(atlasViews, feetSlot, feetResource);
             AddView(atlasViews, backpackSlot, backpackResource);
 
+            if (_bakeCoroutine != null)
+            {
+                Debug.Log($"[AppearanceDebug] t={Time.time:F2} Huỷ bake coroutine cũ đang chạy dở");
+                StopCoroutine(_bakeCoroutine);
+                _bakeCoroutine = null;
+            }
+
             if (atlasViews.Count > 0)
             {
                 Color haircutTint = ResolveHaircutColor();
-                Texture2D newAtlas = CharacterAppearanceBuilder.BakeAtlas(atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint, atlasBlitMaterial);
-
-                DestroyGeneratedAtlas();
-                _generatedAtlas = newAtlas;
-                _instanceMaterial.mainTexture = _generatedAtlas;
+                Debug.Log($"[AppearanceDebug] t={Time.time:F2} Bắt đầu bake atlas");
+                _bakeCoroutine = StartCoroutine(CharacterAppearanceBuilder.BakeAtlasCoroutine(
+                    atlasViews, config.AtlasSize, config.AtlasFormat, haircutTint, atlasBlitMaterial,
+                    OnAtlasBaked));
             }
+        }
 
-            ApplyRenderer(headRenderer, headResource);
-            ApplyRenderer(torsoRenderer, torsoResource);
-            ApplyRenderer(legsRenderer, legsResource);
-            ApplyRenderer(feetRenderer, feetResource);
-            ApplyRenderer(backpackRenderer, backpackResource);
-            ApplyRenderer(beardRenderer, beardVisible ? beardResource : null);
+        private void OnAtlasBaked(Texture2D newAtlas)
+        {
+            Debug.Log($"[AppearanceDebug] t={Time.time:F2} Bake atlas xong");
+            _bakeCoroutine = null;
+
+            DestroyGeneratedAtlas();
+            _generatedAtlas = newAtlas;
+            _instanceMaterial.mainTexture = _generatedAtlas;
         }
 
         private static void AddView(List<BodypartView> views, BodypartSlotEntry slot, BodypartResource resource)

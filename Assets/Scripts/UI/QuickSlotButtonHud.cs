@@ -27,7 +27,6 @@ namespace SimpleSurvival.UI
         private void Start()
         {
             _system = playerEquipment != null ? playerEquipment.System : null;
-            Debug.Log($"[QuickSlotButtonHud:{slotIndex}] Start, playerEquipment={playerEquipment != null}, system={_system != null}");
 
             if (_system != null)
                 _system.OnSlotChanged += HandleSlotChanged;
@@ -129,9 +128,19 @@ namespace SimpleSurvival.UI
         {
             ItemStack weaponStack = _system.GetSlot(EquipSlot.Weapon, 0);
             ItemStack quickStack = _currentStack;
+            int currentSlotIndex = slotIndex;
+            EquipmentSystem system = _system;
 
-            _system.SetSlotDirect(EquipSlot.Weapon, 0, quickStack);
-            _system.SetSlotDirect(EquipSlot.QuickSlot, slotIndex, weaponStack);
+            void ApplySwap()
+            {
+                system.SetSlotDirect(EquipSlot.Weapon, 0, quickStack);
+                system.SetSlotDirect(EquipSlot.QuickSlot, currentSlotIndex, weaponStack);
+            }
+
+            if (PlayerActionController.Instance != null)
+                PlayerActionController.Instance.RequestWeaponSlotAction(ApplySwap);
+            else
+                ApplySwap();
         }
 
         private void UseConsumable()

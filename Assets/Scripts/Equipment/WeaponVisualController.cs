@@ -17,6 +17,10 @@ namespace SimpleSurvival.Player
         [SerializeField] private bool useFixedWeaponLayer = true;
         [SerializeField] private Material dollPreviewMaterialOverride;
 
+        [Header("Chống giật góc xoay bất thường")]
+        [Tooltip("Nếu góc CỤC BỘ (so với rightHandAnchor) của mesh vũ khí lệch quá số này (độ) so với khung hình hợp lệ gần nhất, VÀ không đang Attack/Gather, sẽ bị loại bỏ.")]
+        [SerializeField] private float outlierAngleThreshold = 45f;
+
         private GameObject _currentVisual;
         private WeaponVisualAnchors _currentAnchors;
         private GameObject _currentSourcePrefab;
@@ -26,6 +30,9 @@ namespace SimpleSurvival.Player
         private Transform _moveTarget1;
         private Transform _attackTarget0;
         private Transform _attackTarget1;
+
+        private Quaternion _lastGoodLocalRotation;
+        private bool _hasLastGoodRotation;
 
         private void Awake()
         {
@@ -61,6 +68,31 @@ namespace SimpleSurvival.Player
                 actionController.OnActionChanged -= HandleActionChanged;
 
             DestroyOverrideMaterialInstances();
+        }
+
+        private void LateUpdate()
+        {
+            if (_currentVisual == null) return;
+
+            bool isAttackingOrGathering = actionController != null
+                && actionController.CurrentAction != null
+                && (actionController.CurrentAction.Type == ActionType.Attack
+                    || actionController.CurrentAction.Type == ActionType.Gather);
+
+            Quaternion currentLocal = _currentVisual.transform.localRotation;
+
+            if (!isAttackingOrGathering && _hasLastGoodRotation)
+            {
+                float angle = Quaternion.Angle(_lastGoodLocalRotation, currentLocal);
+                if (angle > outlierAngleThreshold)
+                {
+                    _currentVisual.transform.localRotation = _lastGoodLocalRotation;
+                    return;
+                }
+            }
+
+            _lastGoodLocalRotation = currentLocal;
+            _hasLastGoodRotation = true;
         }
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
@@ -105,6 +137,8 @@ namespace SimpleSurvival.Player
 
             _currentAnchors = _currentVisual.GetComponent<WeaponVisualAnchors>();
             _currentSourcePrefab = targetPrefab;
+
+            _hasLastGoodRotation = false;
 
             UpdateLeftHandIK();
         }

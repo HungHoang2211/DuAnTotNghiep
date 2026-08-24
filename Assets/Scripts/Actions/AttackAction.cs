@@ -113,6 +113,12 @@ namespace SimpleSurvival.Actions
                 return;
             }
 
+            if (_controller.HasPendingWeaponSwap)
+            {
+                CompleteAction();
+                return;
+            }
+
             if (_controller.IsAttackHeld || _controller.AttackInputQueued)
             {
                 _controller.ConsumeAttackQueue();

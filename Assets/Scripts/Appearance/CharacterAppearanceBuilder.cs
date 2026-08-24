@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,10 +27,48 @@ namespace SimpleSurvival.Characters.Appearance
             Color haircutTint,
             Material blitMaterial)
         {
+            RenderTexture rt = BeginBakeAndDraw(views, atlasSize, haircutTint, blitMaterial, out RenderTexture previousActive);
+
+            Texture2D atlas = ReadAtlasFromActiveRT(atlasSize, format);
+
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(rt);
+
+            return atlas;
+        }
+
+        public static IEnumerator BakeAtlasCoroutine(
+            IReadOnlyList<BodypartView> views,
+            int atlasSize,
+            TextureFormat format,
+            Color haircutTint,
+            Material blitMaterial,
+            System.Action<Texture2D> onComplete)
+        {
+            RenderTexture rt = BeginBakeAndDraw(views, atlasSize, haircutTint, blitMaterial, out RenderTexture previousActive);
+
+            yield return new WaitForEndOfFrame();
+
+            RenderTexture.active = rt;
+            Texture2D atlas = ReadAtlasFromActiveRT(atlasSize, format);
+
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(rt);
+
+            onComplete?.Invoke(atlas);
+        }
+
+        private static RenderTexture BeginBakeAndDraw(
+            IReadOnlyList<BodypartView> views,
+            int atlasSize,
+            Color haircutTint,
+            Material blitMaterial,
+            out RenderTexture previousActive)
+        {
             Texture2D defaultMask = GetOrCreateDefaultMask();
 
             RenderTexture rt = RenderTexture.GetTemporary(atlasSize, atlasSize, 0, RenderTextureFormat.ARGB32);
-            RenderTexture previousActive = RenderTexture.active;
+            previousActive = RenderTexture.active;
             RenderTexture.active = rt;
 
             GL.Clear(true, true, new Color(0f, 0f, 0f, 0f));
@@ -41,16 +80,17 @@ namespace SimpleSurvival.Characters.Appearance
 
             GL.PopMatrix();
 
+            return rt;
+        }
+
+        private static Texture2D ReadAtlasFromActiveRT(int atlasSize, TextureFormat format)
+        {
             Texture2D atlas = new Texture2D(atlasSize, atlasSize, format, false)
             {
                 name = "CharacterAppearanceAtlas"
             };
             atlas.ReadPixels(new Rect(0, 0, atlasSize, atlasSize), 0, 0);
             atlas.Apply();
-
-            RenderTexture.active = previousActive;
-            RenderTexture.ReleaseTemporary(rt);
-
             return atlas;
         }
 

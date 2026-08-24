@@ -66,6 +66,8 @@ namespace SimpleSurvival.Player
         public SimpleSurvival.Input.PlayerInputReader InputReader => _inputReader;
         public Transform DogFollowPoint => dogFollowPoint;
 
+        public bool HasPendingWeaponSwap => _pendingWeaponSwapAction != null;
+
         public void ConsumeAttackQueue()
         {
             AttackInputQueued = false;
@@ -76,6 +78,8 @@ namespace SimpleSurvival.Player
         private SimpleSurvival.Input.PlayerInputReader _inputReader;
         private bool _isDead;
         private float _lastGatherEndTime = -999f;
+        private bool _pendingWeaponBrokeReattack;
+        private Action _pendingWeaponSwapAction;
 
         private void Awake()
         {
@@ -165,7 +169,7 @@ namespace SimpleSurvival.Player
         {
             if (action is AttackAction attack)
             {
-                Debug.Log($"[HandleCompletion] AttackAction, WeaponBroke={attack.WeaponBroke}, StackName={attack.WeaponStack?.ItemData.ItemName ?? "null"}");
+                Debug.Log($"[HandleCompletion] t={Time.time:F2} AttackAction, WeaponBroke={attack.WeaponBroke}, StackName={attack.WeaponStack?.ItemData.ItemName ?? "null"}");
                 if (attack.WeaponBroke)
                 {
                     string brokenName = attack.WeaponStack != null ? attack.WeaponStack.ItemData.ItemName : "Weapon";
@@ -173,11 +177,34 @@ namespace SimpleSurvival.Player
 
                     if (FollowNotifyManager.Instance != null)
                         FollowNotifyManager.Instance.Notify($"{brokenName} broke!", SpeechHudType.Bad);
+
+                    _pendingWeaponBrokeReattack = true;
                 }
             }
 
             if (action is GatherAction)
                 _lastGatherEndTime = Time.time;
+
+            if (_pendingWeaponSwapAction != null)
+            {
+                Action pending = _pendingWeaponSwapAction;
+                _pendingWeaponSwapAction = null;
+                pending.Invoke();
+            }
+        }
+
+        public bool RequestWeaponSlotAction(Action applyAction)
+        {
+            if (applyAction == null) return false;
+
+            if (CurrentAction.Type == ActionType.Attack)
+            {
+                _pendingWeaponSwapAction = applyAction;
+                return false;
+            }
+
+            applyAction.Invoke();
+            return true;
         }
 
         public void DestroyStackAnywhere(ItemStack stack)
@@ -249,7 +276,11 @@ namespace SimpleSurvival.Player
             if (animator == null) return false;
             if (CurrentAction.Type == ActionType.Attack) return false;
 
-            ItemStack weaponStack = GetEquippedWeaponStack();
+            bool allowQuickSlotFallback = _pendingWeaponBrokeReattack;
+            _pendingWeaponBrokeReattack = false;
+
+            ItemStack weaponStack = GetEquippedWeaponStack(allowQuickSlotFallback);
+
             float damage = ResolveAttackDamage(weaponStack);
 
             bool isSneakAttack = _inputReader != null && _inputReader.IsSneakHeld
@@ -275,7 +306,14 @@ namespace SimpleSurvival.Player
         public void SetAttackHeld(bool held)
         {
             IsAttackHeld = held;
-            if (held) AttackInputQueued = true;
+            if (held)
+            {
+                AttackInputQueued = true;
+            }
+            else
+            {
+                _pendingWeaponBrokeReattack = false;
+            }
         }
 
         public bool IsGatherHeld { get; private set; }
@@ -376,6 +414,7 @@ namespace SimpleSurvival.Player
         }
         public bool RequestLoot(LootContainer target)
         {
+            if (CurrentAction is UnlockAction) return false;
             if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null) return false;
 
@@ -405,6 +444,7 @@ namespace SimpleSurvival.Player
 
         public bool RequestRepairTower(RepairableTower target)
         {
+            if (CurrentAction is UnlockAction) return false;
             if (target == null || !target.CanBeTargeted()) return false;
             if (animator == null || inventoryQueries == null) return false;
             if (target.RequiredItems == null || target.RequiredItems.Count == 0) return false;
@@ -547,7 +587,7 @@ namespace SimpleSurvival.Player
             return dist < 0f ? 0f : dist;
         }
 
-        private ItemStack GetEquippedWeaponStack()
+        private ItemStack GetEquippedWeaponStack(bool allowQuickSlotFallback)
         {
             if (playerEquipment == null) return null;
             var system = playerEquipment.System;
@@ -556,11 +596,15 @@ namespace SimpleSurvival.Player
             if (mainWeapon != null && !mainWeapon.IsBroken)
                 return mainWeapon;
 
+            if (!allowQuickSlotFallback)
+                return mainWeapon;
+
             for (int i = 0; i < system.SlotCount(EquipSlot.QuickSlot); i++)
             {
                 ItemStack quickStack = system.GetSlot(EquipSlot.QuickSlot, i);
                 if (quickStack == null) continue;
                 if (!quickStack.ItemData.HasAbility<WeaponAbility>()) continue;
+                if (quickStack.ItemData.HasAbility<ToolAbility>()) continue;
                 if (quickStack.IsBroken) continue;
 
                 system.SetSlotDirect(EquipSlot.Weapon, 0, quickStack);

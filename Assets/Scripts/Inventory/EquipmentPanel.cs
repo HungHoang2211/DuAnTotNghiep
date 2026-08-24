@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleSurvival.Player;
 
 namespace SimpleSurvival.Items
 {
@@ -104,6 +105,16 @@ namespace SimpleSurvival.Items
             }
         }
 
+        private void ExecuteOrQueueIfWeapon(EquipSlot slot, Action action)
+        {
+            if (action == null) return;
+
+            if (slot == EquipSlot.Weapon && PlayerActionController.Instance != null)
+                PlayerActionController.Instance.RequestWeaponSlotAction(action);
+            else
+                action.Invoke();
+        }
+
         private void HandleCellClicked(CellUI cell)
         {
             if (_selectedEquipCell == cell)
@@ -126,12 +137,14 @@ namespace SimpleSurvival.Items
             if (IsBackpackOccupied(cell)) return;
 
             int slotIndex = GetSlotIndex(cell);
-            bool unequipped = _equipmentSystem.TryUnequip(
-                cell.EquipSlot, slotIndex, playerInventory.Pockets);
+            EquipSlot slot = cell.EquipSlot;
 
-            if (!unequipped && playerInventory.Backpack != null)
-                _equipmentSystem.TryUnequip(
-                    cell.EquipSlot, slotIndex, playerInventory.Backpack);
+            ExecuteOrQueueIfWeapon(slot, () =>
+            {
+                bool unequipped = _equipmentSystem.TryUnequip(slot, slotIndex, playerInventory.Pockets);
+                if (!unequipped && playerInventory.Backpack != null)
+                    _equipmentSystem.TryUnequip(slot, slotIndex, playerInventory.Backpack);
+            });
 
             ClearEquipSelection();
         }
@@ -181,11 +194,18 @@ namespace SimpleSurvival.Items
             int inventoryIndex = grid.IndexOf(cell);
             if (inventoryIndex < 0) return;
 
-            bool equipped = _equipmentSystem.TryAutoEquip(
-                cell.CurrentStack, grid.BoundInventory, inventoryIndex);
+            EquipSlot? targetSlot = _equipmentSystem.GetAutoEquipSlot(cell.CurrentStack);
+            ItemStack stackToEquip = cell.CurrentStack;
+            InventorySystem boundInventory = grid.BoundInventory;
 
-            if (equipped)
-                selection.Deselect();
+            void ApplyEquip()
+            {
+                bool equipped = _equipmentSystem.TryAutoEquip(stackToEquip, boundInventory, inventoryIndex);
+                if (equipped)
+                    selection.Deselect();
+            }
+
+            ExecuteOrQueueIfWeapon(targetSlot ?? EquipSlot.None, ApplyEquip);
         }
 
         public void UnequipSelected()
@@ -194,12 +214,14 @@ namespace SimpleSurvival.Items
             if (IsBackpackOccupied(_selectedEquipCell)) return;
 
             int slotIndex = GetSlotIndex(_selectedEquipCell);
-            bool unequipped = _equipmentSystem.TryUnequip(
-                _selectedEquipCell.EquipSlot, slotIndex, playerInventory.Pockets);
+            EquipSlot slot = _selectedEquipCell.EquipSlot;
 
-            if (!unequipped && playerInventory.Backpack != null)
-                _equipmentSystem.TryUnequip(
-                    _selectedEquipCell.EquipSlot, slotIndex, playerInventory.Backpack);
+            ExecuteOrQueueIfWeapon(slot, () =>
+            {
+                bool unequipped = _equipmentSystem.TryUnequip(slot, slotIndex, playerInventory.Pockets);
+                if (!unequipped && playerInventory.Backpack != null)
+                    _equipmentSystem.TryUnequip(slot, slotIndex, playerInventory.Backpack);
+            });
 
             ClearEquipSelection();
         }
@@ -211,16 +233,20 @@ namespace SimpleSurvival.Items
             if (IsDroppingBackpackIntoItself(sourceCell, targetInventory)) return;
 
             int slotIndex = GetSlotIndex(sourceCell);
-            ItemStack equipped = _equipmentSystem.GetSlot(sourceCell.EquipSlot, slotIndex);
+            EquipSlot slot = sourceCell.EquipSlot;
+            ItemStack equipped = _equipmentSystem.GetSlot(slot, slotIndex);
             if (equipped == null) return;
 
             ItemStack existing = targetInventory.GetSlot(targetIndex);
 
-            if (existing != null && !_equipmentSystem.CanEquipInSlot(existing, sourceCell.EquipSlot))
+            if (existing != null && !_equipmentSystem.CanEquipInSlot(existing, slot))
                 return;
 
-            _equipmentSystem.SetSlotDirect(sourceCell.EquipSlot, slotIndex, existing);
-            targetInventory.SetSlot(targetIndex, equipped);
+            ExecuteOrQueueIfWeapon(slot, () =>
+            {
+                _equipmentSystem.SetSlotDirect(slot, slotIndex, existing);
+                targetInventory.SetSlot(targetIndex, equipped);
+            });
         }
 
         private bool IsDroppingBackpackIntoItself(CellUI sourceCell, InventorySystem targetInventory)
@@ -239,29 +265,48 @@ namespace SimpleSurvival.Items
                 && playerInventory.IsBackpackOccupied()) return;
 
             int slotIndex = GetSlotIndex(targetCell);
-            _equipmentSystem.TryEquip(
-                sourceCell.CurrentStack,
-                sourceGrid.BoundInventory,
-                sourceIndex,
-                targetCell.EquipSlot,
-                slotIndex);
+            EquipSlot slot = targetCell.EquipSlot;
+            ItemStack stackToEquip = sourceCell.CurrentStack;
+            InventorySystem boundInventory = sourceGrid.BoundInventory;
+
+            ExecuteOrQueueIfWeapon(slot, () =>
+            {
+                _equipmentSystem.TryEquip(
+                    stackToEquip,
+                    boundInventory,
+                    sourceIndex,
+                    slot,
+                    slotIndex);
+            });
         }
 
         public void HandleEquipSwap(CellUI fromCell, CellUI toCell)
         {
             int fromIndex = GetSlotIndex(fromCell);
             int toIndex = GetSlotIndex(toCell);
+            EquipSlot fromSlot = fromCell.EquipSlot;
+            EquipSlot toSlot = toCell.EquipSlot;
 
-            ItemStack fromStack = _equipmentSystem.GetSlot(fromCell.EquipSlot, fromIndex);
-            ItemStack toStack = _equipmentSystem.GetSlot(toCell.EquipSlot, toIndex);
+            ItemStack fromStack = _equipmentSystem.GetSlot(fromSlot, fromIndex);
+            ItemStack toStack = _equipmentSystem.GetSlot(toSlot, toIndex);
 
-            if (fromStack != null && !_equipmentSystem.CanEquipInSlot(fromStack, toCell.EquipSlot))
+            if (fromStack != null && !_equipmentSystem.CanEquipInSlot(fromStack, toSlot))
                 return;
-            if (toStack != null && !_equipmentSystem.CanEquipInSlot(toStack, fromCell.EquipSlot))
+            if (toStack != null && !_equipmentSystem.CanEquipInSlot(toStack, fromSlot))
                 return;
 
-            _equipmentSystem.SetSlotDirect(fromCell.EquipSlot, fromIndex, toStack);
-            _equipmentSystem.SetSlotDirect(toCell.EquipSlot, toIndex, fromStack);
+            bool involvesWeapon = fromSlot == EquipSlot.Weapon || toSlot == EquipSlot.Weapon;
+
+            void ApplySwap()
+            {
+                _equipmentSystem.SetSlotDirect(fromSlot, fromIndex, toStack);
+                _equipmentSystem.SetSlotDirect(toSlot, toIndex, fromStack);
+            }
+
+            if (involvesWeapon && PlayerActionController.Instance != null)
+                PlayerActionController.Instance.RequestWeaponSlotAction(ApplySwap);
+            else
+                ApplySwap();
         }
 
         private void HandleSlotChanged(EquipSlot slot, int slotIndex, ItemStack stack)
