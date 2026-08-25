@@ -11,16 +11,12 @@ namespace SimpleSurvival.Player
         [SerializeField] private Animator animator;
         [SerializeField] private PlayerAnimator playerAnimator;
         [SerializeField] private float lingerDuration = 0.3f;
-        [SerializeField] private float maxTransitionWait = 2f;
-        [Range(0f, 1f)]
-        [SerializeField] private float transitionSwapThreshold = 0.7f;
 
-        private enum PendingActionType { None, RevertToWeapon, SwitchToTool, WaitingForRevertTransition }
+        private enum PendingActionType { None, RevertToWeapon, SwitchToTool }
 
         private PendingActionType _pendingAction = PendingActionType.None;
         private ToolAbility _pendingTool;
         private float _pendingTimer;
-        private bool _skipTransitionCheckThisFrame;
 
         public bool IsSwapped { get; private set; }
         public ToolAbility CurrentTool { get; private set; }
@@ -35,61 +31,26 @@ namespace SimpleSurvival.Player
 
         private void Update()
         {
-            switch (_pendingAction)
-            {
-                case PendingActionType.None:
-                    return;
+            if (_pendingAction == PendingActionType.None) return;
 
-                case PendingActionType.RevertToWeapon:
-                    _pendingTimer -= Time.deltaTime;
-                    if (_pendingTimer > 0f) return;
-                    BeginRevertTransition();
-                    return;
+            _pendingTimer -= Time.deltaTime;
+            if (_pendingTimer > 0f) return;
 
-                case PendingActionType.SwitchToTool:
-                    _pendingTimer -= Time.deltaTime;
-                    if (_pendingTimer > 0f) return;
+            PendingActionType action = _pendingAction;
+            ToolAbility tool = _pendingTool;
 
-                    ToolAbility tool = _pendingTool;
-                    _pendingAction = PendingActionType.None;
-                    _pendingTool = null;
-                    ApplySwapIn(tool);
-                    return;
+            _pendingAction = PendingActionType.None;
+            _pendingTool = null;
 
-                case PendingActionType.WaitingForRevertTransition:
-                    if (_skipTransitionCheckThisFrame)
-                    {
-                        _skipTransitionCheckThisFrame = false;
-                        return;
-                    }
-
-                    _pendingTimer -= Time.deltaTime;
-
-                    bool reachedThreshold = HasReachedSwapThreshold();
-
-                    if (!reachedThreshold && _pendingTimer > 0f) return;
-
-                    if (_pendingTimer <= 0f && !reachedThreshold)
-                        Debug.LogWarning("[PlayerToolSwapper] Timeout chờ transition GatherLingerEnd, ép hoàn tất revert.");
-
-                    FinishRevert();
-                    return;
-            }
-        }
-
-        private bool HasReachedSwapThreshold()
-        {
-            if (animator == null) return true;
-            if (!animator.IsInTransition(0)) return true;
-
-            AnimatorTransitionInfo info = animator.GetAnimatorTransitionInfo(0);
-            return info.normalizedTime >= transitionSwapThreshold;
+            if (action == PendingActionType.RevertToWeapon)
+                ApplyRevertToWeapon(triggerLingerEnd: true);
+            else if (action == PendingActionType.SwitchToTool)
+                ApplySwapIn(tool);
         }
 
         public bool SwapIn(ToolAbility tool)
         {
             if (tool == null || tool.OverrideController == null) return false;
-            if (animator == null) return false;
 
             _pendingAction = PendingActionType.None;
             _pendingTool = null;
@@ -119,55 +80,28 @@ namespace SimpleSurvival.Player
         {
             _pendingAction = PendingActionType.None;
             _pendingTool = null;
-            ApplyRevertToWeaponImmediate();
-        }
-
-        private void BeginRevertTransition()
-        {
-            if (animator != null && playerAnimator != null)
-            {
-                AnimatorOverrideController weaponController = playerAnimator.ResolveCurrentWeaponController();
-                if (weaponController != null)
-                    animator.runtimeAnimatorController = weaponController;
-            }
-
-            if (animator != null)
-                animator.SetTrigger(ParamGatherLingerEnd);
-
-            _pendingAction = PendingActionType.WaitingForRevertTransition;
-            _pendingTimer = maxTransitionWait;
-            _skipTransitionCheckThisFrame = true;
-        }
-
-        private void FinishRevert()
-        {
-            _pendingAction = PendingActionType.None;
-
-            CurrentTool = null;
-            IsSwapped = false;
-            OnToolVisualStateChanged?.Invoke();
+            ApplyRevertToWeapon(triggerLingerEnd: false);
         }
 
         private void ApplySwapIn(ToolAbility tool)
         {
-            if (tool == null || tool.OverrideController == null || animator == null) return;
+            if (tool == null || tool.OverrideController == null) return;
 
-            animator.runtimeAnimatorController = tool.OverrideController;
+            playerAnimator?.ApplyGatherOverrides(tool.OverrideController);
+
             CurrentTool = tool;
             IsSwapped = true;
             OnToolVisualStateChanged?.Invoke();
         }
 
-        private void ApplyRevertToWeaponImmediate()
+        private void ApplyRevertToWeapon(bool triggerLingerEnd)
         {
             if (!IsSwapped) return;
 
-            if (animator != null && playerAnimator != null)
-            {
-                AnimatorOverrideController weaponController = playerAnimator.ResolveCurrentWeaponController();
-                if (weaponController != null)
-                    animator.runtimeAnimatorController = weaponController;
-            }
+            playerAnimator?.RestoreGatherOverridesForCurrentWeapon();
+
+            if (triggerLingerEnd && animator != null)
+                animator.SetTrigger(ParamGatherLingerEnd);
 
             CurrentTool = null;
             IsSwapped = false;

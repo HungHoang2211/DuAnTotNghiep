@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using SimpleSurvival.Actions;
 using SimpleSurvival.Input;
 using SimpleSurvival.Items;
@@ -11,6 +12,8 @@ namespace SimpleSurvival.Player
         private static readonly int ParamMoveSpeed = Animator.StringToHash("MoveSpeed");
         private static readonly int ParamMoveMode = Animator.StringToHash("MoveMode");
 
+        private static readonly string[] GatherClipNames = { "action_gather_hatchet", "action_gather_idle" };
+
         [SerializeField] private Animator animator;
         [SerializeField] private PlayerInputReader inputReader;
         [SerializeField] private PlayerEquipment playerEquipment;
@@ -20,25 +23,19 @@ namespace SimpleSurvival.Player
         [SerializeField] private float speedDampTime = 0.1f;
 
         [Header("Animation")]
+        [Tooltip("AnimatorController gốc (PlayerBase.controller). Nếu để trống, tự lấy từ Default Override Controller.")]
+        [SerializeField] private RuntimeAnimatorController baseController;
         [Tooltip("Override Controller khi không equip weapon (tay không). Drag Fists.overrideController vào đây.")]
         [SerializeField] private AnimatorOverrideController defaultOverrideController;
-
-        [Header("Debug")]
-        [Tooltip("Kéo đúng xương R_arm_3_jnt (rightHandAnchor) vào đây để log góc xoay mỗi frame.")]
-        [SerializeField] private Transform debugRightHandBone;
 
         private PlayerActionController _actionController;
         private bool _weaponSlotDirty;
         private ItemStack _pendingWeaponSlotStack;
         private bool _hasPendingWeaponSlotStack;
 
-        public AnimatorOverrideController ResolveCurrentWeaponController()
-        {
-            ItemStack stack = null;
-            if (playerEquipment != null)
-                stack = playerEquipment.System.GetSlot(EquipSlot.Weapon, 0);
-            return ResolveOverrideController(stack);
-        }
+        private AnimatorOverrideController _runtimeController;
+        private readonly List<KeyValuePair<AnimationClip, AnimationClip>> _overridesBuffer = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        private readonly List<KeyValuePair<AnimationClip, AnimationClip>> _applyBuffer = new List<KeyValuePair<AnimationClip, AnimationClip>>();
 
         private void Awake()
         {
@@ -47,14 +44,24 @@ namespace SimpleSurvival.Player
             if (inputReader == null) inputReader = GetComponent<PlayerInputReader>();
             if (playerEquipment == null) playerEquipment = GetComponentInChildren<PlayerEquipment>();
             if (toolSwapper == null) toolSwapper = GetComponent<PlayerToolSwapper>();
+
+            if (baseController == null && defaultOverrideController != null)
+                baseController = defaultOverrideController.runtimeAnimatorController;
         }
 
         private void Start()
         {
+            if (animator != null && baseController != null)
+            {
+                _runtimeController = new AnimatorOverrideController(baseController);
+                _runtimeController.name = "PlayerRuntimeOverride";
+                animator.runtimeAnimatorController = _runtimeController;
+            }
+
             if (playerEquipment != null && playerEquipment.System != null)
                 playerEquipment.System.OnSlotChanged += HandleSlotChanged;
 
-            SwapOverrideController(ResolveCurrentWeaponController());
+            ApplyWeaponSlot(ResolveCurrentWeaponStack());
         }
 
         private void OnDestroy()
@@ -67,55 +74,14 @@ namespace SimpleSurvival.Player
         {
             if (animator == null) return;
 
-            float rawMoveSpeed = 0f;
-            bool isMovingAction = _actionController.CurrentAction is IMovingAction;
+            float moveSpeed = 0f;
             if (_actionController.CurrentAction is IMovingAction moving)
-                rawMoveSpeed = moving.NormalizedSpeed;
-
-            LogFrameCapture(rawMoveSpeed, isMovingAction);
+                moveSpeed = moving.NormalizedSpeed;
 
             bool isSneaking = inputReader != null && inputReader.IsSneakHeld;
 
-            animator.SetFloat(ParamMoveSpeed, rawMoveSpeed, speedDampTime, Time.deltaTime);
+            animator.SetFloat(ParamMoveSpeed, moveSpeed, speedDampTime, Time.deltaTime);
             animator.SetInteger(ParamMoveMode, isSneaking ? moveModeSneak : moveModeNormal);
-        }
-
-        private void LogFrameCapture(float rawMoveSpeed, bool isMovingAction)
-        {
-            var currentClips = animator.GetCurrentAnimatorClipInfo(0);
-            string currentClipName = currentClips.Length > 0 ? currentClips[0].clip.name : "none";
-            int clipCount = currentClips.Length;
-            bool inTransition = animator.IsInTransition(0);
-
-            float appliedMoveSpeed = animator.GetFloat(ParamMoveSpeed);
-            string actionType = _actionController.CurrentAction != null
-                ? _actionController.CurrentAction.Type.ToString()
-                : "none";
-
-            string line = $"[FrameCap] t={Time.time:F3} f={Time.frameCount} action={actionType} isMovingAction={isMovingAction} rawMoveSpeed={rawMoveSpeed:F3} appliedMoveSpeed={appliedMoveSpeed:F3} currentClip={currentClipName} clipCount={clipCount} inTransition={inTransition}";
-
-            if (clipCount > 1)
-            {
-                for (int i = 1; i < currentClips.Length; i++)
-                    line += $" | extraClip{i}={currentClips[i].clip.name} weight{i}={currentClips[i].weight:F2}";
-            }
-
-            if (inTransition)
-            {
-                var nextClips = animator.GetNextAnimatorClipInfo(0);
-                string nextClipName = nextClips.Length > 0 ? nextClips[0].clip.name : "none";
-                var transInfo = animator.GetAnimatorTransitionInfo(0);
-                line += $" -> nextClip={nextClipName} transNormTime={transInfo.normalizedTime:F2}";
-            }
-
-            if (debugRightHandBone != null)
-            {
-                Vector3 localEuler = debugRightHandBone.localEulerAngles;
-                Vector3 worldEuler = debugRightHandBone.eulerAngles;
-                line += $" | boneLocalRot=({localEuler.x:F1},{localEuler.y:F1},{localEuler.z:F1}) boneWorldRot=({worldEuler.x:F1},{worldEuler.y:F1},{worldEuler.z:F1})";
-            }
-
-            Debug.Log(line);
         }
 
         private void LateUpdate()
@@ -127,10 +93,9 @@ namespace SimpleSurvival.Player
 
             ItemStack stack = _hasPendingWeaponSlotStack
                 ? _pendingWeaponSlotStack
-                : (playerEquipment != null ? playerEquipment.System.GetSlot(EquipSlot.Weapon, 0) : null);
+                : ResolveCurrentWeaponStack();
 
-            AnimatorOverrideController overrideController = ResolveOverrideController(stack);
-            SwapOverrideController(overrideController);
+            ApplyWeaponSlot(stack);
         }
 
         private void HandleSlotChanged(EquipSlot slot, int index, ItemStack stack)
@@ -140,6 +105,70 @@ namespace SimpleSurvival.Player
             _weaponSlotDirty = true;
             _pendingWeaponSlotStack = stack;
             _hasPendingWeaponSlotStack = true;
+        }
+
+        private ItemStack ResolveCurrentWeaponStack()
+        {
+            return playerEquipment != null ? playerEquipment.System.GetSlot(EquipSlot.Weapon, 0) : null;
+        }
+
+        private void ApplyWeaponSlot(ItemStack stack)
+        {
+            AnimatorOverrideController source = ResolveOverrideController(stack);
+            bool isToolInWeaponSlot = HasToolAbility(stack);
+
+            ApplyOverrideGroup(source, includeGatherGroup: isToolInWeaponSlot);
+        }
+
+        public void ApplyGatherOverrides(AnimatorOverrideController toolOverrideController)
+        {
+            ApplyOverrideGroup(toolOverrideController, includeGatherGroup: true, gatherOnly: true);
+        }
+
+        public void RestoreGatherOverridesForCurrentWeapon()
+        {
+            ItemStack stack = ResolveCurrentWeaponStack();
+            if (!HasToolAbility(stack)) return;
+
+            AnimatorOverrideController source = ResolveOverrideController(stack);
+            ApplyOverrideGroup(source, includeGatherGroup: true, gatherOnly: true);
+        }
+
+        private void ApplyOverrideGroup(AnimatorOverrideController source, bool includeGatherGroup, bool gatherOnly = false)
+        {
+            if (source == null || _runtimeController == null) return;
+
+            _overridesBuffer.Clear();
+            source.GetOverrides(_overridesBuffer);
+
+            _applyBuffer.Clear();
+            foreach (var pair in _overridesBuffer)
+            {
+                if (pair.Key == null) continue;
+
+                bool isGatherClip = IsGatherClipName(pair.Key.name);
+
+                if (gatherOnly && !isGatherClip) continue;
+                if (isGatherClip && !includeGatherGroup) continue;
+
+                _applyBuffer.Add(pair);
+            }
+
+            _runtimeController.ApplyOverrides(_applyBuffer);
+        }
+
+        private static bool IsGatherClipName(string clipName)
+        {
+            foreach (string name in GatherClipNames)
+            {
+                if (clipName == name) return true;
+            }
+            return false;
+        }
+
+        private static bool HasToolAbility(ItemStack stack)
+        {
+            return stack != null && stack.ItemData.GetAbility<ToolAbility>() != null;
         }
 
         private AnimatorOverrideController ResolveOverrideController(ItemStack stack)
@@ -155,14 +184,6 @@ namespace SimpleSurvival.Player
                 return tool.OverrideController;
 
             return defaultOverrideController;
-        }
-
-        private void SwapOverrideController(AnimatorOverrideController overrideController)
-        {
-            if (animator == null || overrideController == null) return;
-            if (animator.runtimeAnimatorController == overrideController) return;
-
-            animator.runtimeAnimatorController = overrideController;
         }
     }
 }
