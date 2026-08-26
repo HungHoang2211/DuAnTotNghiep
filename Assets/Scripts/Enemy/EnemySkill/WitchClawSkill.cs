@@ -17,6 +17,7 @@ namespace SimpleSurvival.AI
         [SerializeField] private ZombieWitchAnimator animator;
         [SerializeField] private ZombieWitchController controller;
         [SerializeField] private EnemyStats stats;
+        [SerializeField] private WitchClawTrailController trailController;
 
         private Transform _target;
         private AttackMode _currentMode;
@@ -31,9 +32,18 @@ namespace SimpleSurvival.AI
 
             switch (_currentMode)
             {
-                case AttackMode.Left: animator?.TriggerAttackLeft(); break;
-                case AttackMode.Right: animator?.TriggerAttackRight(); break;
-                case AttackMode.Both: animator?.TriggerAttackBoth(); break;
+                case AttackMode.Left:
+                    animator?.TriggerAttackLeft();
+                    trailController?.ActivateLeft();
+                    break;
+                case AttackMode.Right:
+                    animator?.TriggerAttackRight();
+                    trailController?.ActivateRight();
+                    break;
+                case AttackMode.Both:
+                    animator?.TriggerAttackBoth();
+                    trailController?.ActivateBoth();
+                    break;
             }
         }
 
@@ -45,15 +55,16 @@ namespace SimpleSurvival.AI
 
             return controller.DroppedArmIndex == 0 ? AttackMode.Right : AttackMode.Left;
         }
-        public void OnHitLeft() { PlayHitSound(); TryDealDamage(1); } 
-        
+        public void OnHitLeft() { PlayHitSound(); TryDealDamage(1); }
+
         public void OnHitRight() { PlayHitSound(); TryDealDamage(1); }
-       
+
         public void OnHitBoth() { PlayHitSound(); TryDealDamage(2); }
 
         public void OnAttackEnd()
         {
             MarkComplete();
+            trailController?.DeactivateAll();
             if (controller != null) controller.NotifySkillComplete();
         }
 
@@ -77,6 +88,7 @@ namespace SimpleSurvival.AI
         protected override void OnCancel()
         {
             _target = null;
+            trailController?.DeactivateAll();
         }
 
         private IDamageable ResolveDamageable(Transform target)

@@ -20,6 +20,9 @@ namespace SimpleSurvival.AI
         [Header("Locked By Level")]
         [SerializeField] private string lockedByLevelDialogue = "You need to reach a higher level to accept this quest.";
 
+        [Header("Not Enough Space")]
+        [SerializeField] private string notEnoughSpaceDialogue = "Your inventory is full. Make some space before you can claim your reward.";
+
         [Header("Refs")]
         [SerializeField] private NPCQuestIndicator indicator;
         [SerializeField] private GameObject groundHighlight;
@@ -71,9 +74,16 @@ namespace SimpleSurvival.AI
             {
                 if (manager.IsReadyToTurnIn(currentQuest))
                 {
-                    ShowDialogue(currentQuest.TurnInDialogue);
-                    manager.CompleteQuest(currentQuest);
-                    RefreshIndicator();
+                    bool completed = manager.CompleteQuest(currentQuest);
+                    if (completed)
+                    {
+                        ShowDialogue(currentQuest.TurnInDialogue);
+                        RefreshIndicator();
+                    }
+                    else
+                    {
+                        ShowDialogue(notEnoughSpaceDialogue);
+                    }
                 }
                 else
                 {

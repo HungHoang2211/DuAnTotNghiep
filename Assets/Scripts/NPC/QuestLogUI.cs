@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SimpleSurvival.UI.Hud;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleSurvival.Quests
@@ -75,7 +76,12 @@ namespace SimpleSurvival.Quests
 
             if (_readyForTurnIn.Contains(quest))
             {
-                QuestManager.Instance?.CompleteQuest(quest);
+                if (quest.RequiresNpcTurnIn) return;
+
+                bool completed = QuestManager.Instance != null && QuestManager.Instance.CompleteQuest(quest);
+                if (!completed)
+                    FollowNotifyManager.Instance?.Notify("Inventory is full! Make space to claim your reward.", SpeechHudType.Neutral);
+
                 return;
             }
 

@@ -25,6 +25,9 @@ namespace SimpleSurvival.Quests
         [SerializeField] private int expReward;
         [SerializeField] private int requiredLevel = 1;
 
+        [Header("Turn-In")]
+        [SerializeField] private bool requiresNpcTurnIn = false;
+
         [Header("Story Completion")]
         [SerializeField] private bool marksStoryComplete = false;
         [SerializeField] private List<string> mapsToLockOnComplete = new List<string>();
@@ -38,6 +41,7 @@ namespace SimpleSurvival.Quests
         public string TurnInDialogue => turnInDialogue;
         public IReadOnlyList<QuestObjectiveData> Objectives => objectives;
         public IReadOnlyList<QuestRewardEntry> Rewards => rewards;
+        public bool RequiresNpcTurnIn => requiresNpcTurnIn;
         public bool MarksStoryComplete => marksStoryComplete;
         public IReadOnlyList<string> MapsToLockOnComplete => mapsToLockOnComplete;
     }

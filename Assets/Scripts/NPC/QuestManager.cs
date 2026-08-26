@@ -102,11 +102,12 @@ namespace SimpleSurvival.Quests
             OnQuestStarted?.Invoke(quest);
         }
 
-        public void CompleteQuest(QuestData quest)
+        public bool CompleteQuest(QuestData quest)
         {
-            if (quest == null) return;
-            if (!_activeQuests.TryGetValue(quest, out QuestProgress progress)) return;
-            if (!progress.IsAllComplete()) return;
+            if (quest == null) return false;
+            if (!_activeQuests.TryGetValue(quest, out QuestProgress progress)) return false;
+            if (!progress.IsAllComplete()) return false;
+            if (!HasSpaceForRewards(quest)) return false;
 
             GrantRewards(quest);
 
@@ -119,6 +120,7 @@ namespace SimpleSurvival.Quests
             }
 
             OnQuestCompleted?.Invoke(quest);
+            return true;
         }
 
         public void FailQuest(QuestData quest)
@@ -297,10 +299,7 @@ namespace SimpleSurvival.Quests
 
             if (!progress.IsAllComplete()) return;
 
-            if (HasSpaceForRewards(quest))
-                CompleteQuest(quest);
-            else
-                OnQuestReadyToTurnIn?.Invoke(quest);
+            OnQuestReadyToTurnIn?.Invoke(quest);
         }
 
         public void NotifyTowerRepaired(string towerId)
