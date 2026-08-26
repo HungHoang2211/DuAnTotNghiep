@@ -9,20 +9,18 @@ namespace SimpleSurvival.Quests
     {
         [SerializeField] private TMP_Text questNameText;
         [SerializeField] private TMP_Text objectiveText;
-
-        // Button để bắt click vào slot. Nếu không gán trong Inspector, tự lấy Button trên cùng GameObject.
         [SerializeField] private Button entryButton;
 
-        // Quest đang được gán cho slot này (do QuestLogUI set qua SetAssignedQuest).
         private QuestData _assignedQuest;
+        private QuestSlotReadyEffect _readyEffect;
 
-        // Bắn ra kèm quest đang được gán khi người chơi click vào slot này.
         public event Action<QuestData> OnEntryClicked;
 
         private void Awake()
         {
             if (entryButton == null) entryButton = GetComponent<Button>();
             if (entryButton != null) entryButton.onClick.AddListener(HandleClick);
+            _readyEffect = GetComponent<QuestSlotReadyEffect>();
         }
 
         private void OnDestroy()
@@ -48,6 +46,11 @@ namespace SimpleSurvival.Quests
         public void SetObjectiveText(string value)
         {
             if (objectiveText != null) objectiveText.text = value;
+        }
+
+        public void SetReadyToTurnIn(bool ready)
+        {
+            _readyEffect?.SetActive(ready);
         }
     }
 }

@@ -79,12 +79,14 @@ namespace SimpleSurvival.Quests
         {
             if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
             slot.SetObjectiveText(BuildTurnInText(quest));
+            slot.SetReadyToTurnIn(true);
         }
 
         private void HandleQuestCompleted(QuestData quest)
         {
             if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
 
+            slot.SetReadyToTurnIn(false);
             slot.gameObject.SetActive(false);
             slot.SetAssignedQuest(null);
             _assignedSlots.Remove(quest);
