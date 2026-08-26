@@ -56,6 +56,10 @@ namespace SimpleSurvival.Quests
         public bool IsQuestActive(QuestData quest) => quest != null && _activeQuests.ContainsKey(quest);
 
         public bool IsQuestCompleted(QuestData quest) => quest != null && _completedQuests.Contains(quest);
+        public IReadOnlyList<QuestData> GetActiveQuests()
+        {
+            return new List<QuestData>(_activeQuests.Keys);
+        }
 
         public bool IsReadyToTurnIn(QuestData quest)
         {

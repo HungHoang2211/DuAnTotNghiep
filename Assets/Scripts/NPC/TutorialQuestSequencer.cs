@@ -9,7 +9,6 @@ namespace SimpleSurvival.Quests
     public sealed class TutorialQuestSequencer : MonoBehaviour
     {
         [SerializeField] private List<QuestData> questChain = new List<QuestData>();
-        [SerializeField] private float delayBeforeNextQuest = 2f;
 
         private QuestData _currentQuest;
         private bool _highlightRevealed;
@@ -23,7 +22,6 @@ namespace SimpleSurvival.Quests
             QuestManager manager = QuestManager.Instance;
             if (manager == null) return;
 
-            manager.OnQuestReadyToTurnIn += HandleReadyToTurnIn;
             manager.OnQuestCompleted += HandleQuestCompleted;
 
             StartCoroutine(KickoffWhenReady());
@@ -48,7 +46,6 @@ namespace SimpleSurvival.Quests
             QuestManager manager = QuestManager.Instance;
             if (manager == null) return;
 
-            manager.OnQuestReadyToTurnIn -= HandleReadyToTurnIn;
             manager.OnQuestCompleted -= HandleQuestCompleted;
         }
 
@@ -82,12 +79,6 @@ namespace SimpleSurvival.Quests
             OnNewQuestAvailable?.Invoke(_currentQuest);
         }
 
-        /// <summary>
-        /// Bật highlight visual cho vật được chỉ định của quest hiện tại (tutorial).
-        /// Chỉ bật khi "quest" truyền vào đúng là quest tutorial đang active - tránh trường hợp
-        /// người chơi click vào 1 entry quest khác (không thuộc tutorial chain) trong QuestLogUI
-        /// mà vẫn vô tình bật highlight của quest tutorial.
-        /// </summary>
         public void RevealQuestHighlight(QuestData quest)
         {
             if (quest == null || quest != _currentQuest || _highlightRevealed) return;
@@ -95,26 +86,11 @@ namespace SimpleSurvival.Quests
             QuestHighlightManager.Instance?.SetActiveQuest(_currentQuest);
         }
 
-        private void HandleReadyToTurnIn(QuestData quest)
-        {
-            if (quest != _currentQuest) return;
-
-            QuestManager manager = QuestManager.Instance;
-            if (manager != null)
-                manager.CompleteQuest(quest);
-        }
-
         private void HandleQuestCompleted(QuestData quest)
         {
             if (quest != _currentQuest) return;
 
             OnCurrentQuestCompleted?.Invoke();
-            StartCoroutine(StartNextQuestAfterDelay());
-        }
-
-        private IEnumerator StartNextQuestAfterDelay()
-        {
-            yield return new WaitForSeconds(delayBeforeNextQuest);
             StartNextQuest();
         }
     }

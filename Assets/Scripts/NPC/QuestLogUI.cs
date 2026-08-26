@@ -13,6 +13,7 @@ namespace SimpleSurvival.Quests
 
         private readonly Dictionary<QuestData, QuestLogEntryUI> _assignedSlots = new Dictionary<QuestData, QuestLogEntryUI>();
         private readonly Queue<QuestData> _pendingQuests = new Queue<QuestData>();
+        private readonly HashSet<QuestData> _readyForTurnIn = new HashSet<QuestData>();
 
         private void Start()
         {
@@ -30,6 +31,8 @@ namespace SimpleSurvival.Quests
                 manager.OnObjectiveProgress += HandleProgress;
                 manager.OnQuestReadyToTurnIn += HandleReadyToTurnIn;
                 manager.OnQuestCompleted += HandleQuestCompleted;
+
+                SyncExistingActiveQuests(manager);
             }
         }
 
@@ -50,9 +53,33 @@ namespace SimpleSurvival.Quests
             }
         }
 
+        private void SyncExistingActiveQuests(QuestManager manager)
+        {
+            foreach (QuestData quest in manager.GetActiveQuests())
+            {
+                if (_assignedSlots.ContainsKey(quest)) continue;
+
+                HandleQuestStarted(quest);
+
+                for (int i = 0; i < quest.Objectives.Count; i++)
+                    HandleProgress(quest, i);
+
+                if (manager.IsReadyToTurnIn(quest))
+                    HandleReadyToTurnIn(quest);
+            }
+        }
+
         private void HandleEntryClicked(QuestData quest)
         {
-            if (quest != null) sequencer?.RevealQuestHighlight(quest);
+            if (quest == null) return;
+
+            if (_readyForTurnIn.Contains(quest))
+            {
+                QuestManager.Instance?.CompleteQuest(quest);
+                return;
+            }
+
+            sequencer?.RevealQuestHighlight(quest);
         }
 
         private void HandleQuestStarted(QuestData quest)
@@ -78,6 +105,8 @@ namespace SimpleSurvival.Quests
         private void HandleReadyToTurnIn(QuestData quest)
         {
             if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
+
+            _readyForTurnIn.Add(quest);
             slot.SetObjectiveText(BuildTurnInText(quest));
             slot.SetReadyToTurnIn(true);
         }
@@ -86,6 +115,7 @@ namespace SimpleSurvival.Quests
         {
             if (!_assignedSlots.TryGetValue(quest, out QuestLogEntryUI slot)) return;
 
+            _readyForTurnIn.Remove(quest);
             slot.SetReadyToTurnIn(false);
             slot.gameObject.SetActive(false);
             slot.SetAssignedQuest(null);

@@ -1,50 +1,47 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class QuestCompleteFillTest : MonoBehaviour
 {
     public Image FillOverlay;
-    public float FillInDuration = 0.2f;
-    public float FillOutDuration = 0.15f;
+    public float FillInDuration = 0.6f;
+    public float FillOutDuration = 0.5f;
+    public float PauseBetweenLoops = 0.3f;
 
-    private Coroutine _routine;
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            PlayEffect();
-        }
-    }
+    private bool _playing;
 
     public void PlayEffect()
     {
-        if (_routine != null)
-        {
-            StopCoroutine(_routine);
-        }
-        _routine = StartCoroutine(FillRoutine());
+        _playing = true;
     }
 
-    private IEnumerator FillRoutine()
+    public void StopEffect()
     {
-        yield return Fill(0f, 1f, FillInDuration);
-        yield return Fill(1f, 0f, FillOutDuration);
+        _playing = false;
+        if (FillOverlay != null) FillOverlay.fillAmount = 0f;
     }
 
-    private IEnumerator Fill(float from, float to, float duration)
+    private void Update()
     {
-        float time = 0f;
+        if (!_playing || FillOverlay == null) return;
 
-        while (time < duration)
+        float cycle = FillInDuration + FillOutDuration + PauseBetweenLoops;
+        if (cycle <= 0f) return;
+
+        float t = Time.time % cycle;
+
+        if (t < FillInDuration)
         {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / duration);
-            FillOverlay.fillAmount = Mathf.Lerp(from, to, t);
-            yield return null;
+            FillOverlay.fillAmount = FillInDuration > 0f ? Mathf.Clamp01(t / FillInDuration) : 1f;
         }
-
-        FillOverlay.fillAmount = to;
+        else if (t < FillInDuration + FillOutDuration)
+        {
+            float localT = t - FillInDuration;
+            FillOverlay.fillAmount = FillOutDuration > 0f ? Mathf.Clamp01(1f - localT / FillOutDuration) : 0f;
+        }
+        else
+        {
+            FillOverlay.fillAmount = 0f;
+        }
     }
 }
