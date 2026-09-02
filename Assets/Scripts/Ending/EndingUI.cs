@@ -21,6 +21,11 @@ namespace SimpleSurvival.World
         [Header("Comic")]
         [SerializeField] private EndingComicReveal comicReveal;
 
+        [Header("Credits")]
+        [SerializeField] private CreditsScroller creditsScroller;
+        [SerializeField] private GameObject continueButton;
+        [SerializeField] private GameObject newGameButton;
+
         private List<string> _pendingMapsToLock = new List<string>();
         private bool _endingActive;
         private bool _atCredits;
@@ -48,6 +53,9 @@ namespace SimpleSurvival.World
 
             if (QuestManager.Instance != null)
                 QuestManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
+
+            if (creditsScroller != null)
+                creditsScroller.OnFinished -= HandleCreditsFinished;
         }
 
         public void Restore(EndingSaveData data)
@@ -102,6 +110,7 @@ namespace SimpleSurvival.World
             {
                 comicPanel.SetActive(false);
                 creditsPanel.SetActive(true);
+                ShowCreditsButtons();
             }
             else
             {
@@ -129,6 +138,37 @@ namespace SimpleSurvival.World
             comicPanel.SetActive(false);
             creditsPanel.SetActive(true);
             _atCredits = true;
+
+            HideCreditsButtons();
+
+            if (creditsScroller != null)
+            {
+                creditsScroller.OnFinished -= HandleCreditsFinished;
+                creditsScroller.OnFinished += HandleCreditsFinished;
+            }
+            else
+            {
+                ShowCreditsButtons();
+            }
+        }
+
+        private void HandleCreditsFinished()
+        {
+            ShowCreditsButtons();
+            if (creditsScroller != null)
+                creditsScroller.OnFinished -= HandleCreditsFinished;
+        }
+
+        private void ShowCreditsButtons()
+        {
+            if (continueButton != null) continueButton.SetActive(true);
+            if (newGameButton != null) newGameButton.SetActive(true);
+        }
+
+        private void HideCreditsButtons()
+        {
+            if (continueButton != null) continueButton.SetActive(false);
+            if (newGameButton != null) newGameButton.SetActive(false);
         }
 
         public void OnContinuePressed()

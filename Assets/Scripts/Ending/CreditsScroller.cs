@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,10 +10,17 @@ namespace SimpleSurvival.World
         [SerializeField] private RectTransform viewport;
         [SerializeField] private float scrollSpeed = 40f;
         [SerializeField] private float startDelay = 0.8f;
-        [SerializeField] private bool loop = true;
+        [SerializeField] private bool loop = false;
+
+        [Tooltip("anchoredPosition.y at which scrolling stops when loop is off. " +
+                  "0 = stop as soon as the last line has fully entered the viewport. " +
+                  "Increase to keep scrolling a bit further (last line ends higher up).")]
+        [SerializeField] private float stopAtY = 0f;
 
         private RectTransform _rect;
         private float _timer;
+
+        public event Action OnFinished;
 
         private void Awake()
         {
@@ -43,12 +51,22 @@ namespace SimpleSurvival.World
             pos.y += scrollSpeed * Time.unscaledDeltaTime;
             _rect.anchoredPosition = pos;
 
-            if (pos.y >= viewport.rect.height)
+            float target = loop ? viewport.rect.height : stopAtY;
+
+            if (pos.y >= target)
             {
                 if (loop)
+                {
+                    OnFinished?.Invoke();
                     ResetPosition();
+                }
                 else
+                {
+                    pos.y = target;
+                    _rect.anchoredPosition = pos;
                     enabled = false;
+                    OnFinished?.Invoke();
+                }
             }
         }
     }
