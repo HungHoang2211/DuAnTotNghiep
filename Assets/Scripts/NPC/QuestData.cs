@@ -32,6 +32,12 @@ namespace SimpleSurvival.Quests
         [SerializeField] private bool marksStoryComplete = false;
         [SerializeField] private List<string> mapsToLockOnComplete = new List<string>();
 
+        [Header("Spawn Override")]
+        [Tooltip("Tên scene của map cần đổi điểm spawn (để trống nếu quest này không đổi spawn).")]
+        [SerializeField] private string spawnOverrideMapScene;
+        [Tooltip("ID của MapSpawnPoint (trong scene ở trên) sẽ trở thành điểm spawn mặc định sau khi quest hoàn thành.")]
+        [SerializeField] private string spawnOverrideSpawnPointId;
+
         public int ExpReward => expReward;
         public int RequiredLevel => requiredLevel;
         public string QuestId => questId;
@@ -44,5 +50,9 @@ namespace SimpleSurvival.Quests
         public bool RequiresNpcTurnIn => requiresNpcTurnIn;
         public bool MarksStoryComplete => marksStoryComplete;
         public IReadOnlyList<string> MapsToLockOnComplete => mapsToLockOnComplete;
+        public string SpawnOverrideMapScene => spawnOverrideMapScene;
+        public string SpawnOverrideSpawnPointId => spawnOverrideSpawnPointId;
+        public bool HasSpawnOverride =>
+            !string.IsNullOrEmpty(spawnOverrideMapScene) && !string.IsNullOrEmpty(spawnOverrideSpawnPointId);
     }
 }

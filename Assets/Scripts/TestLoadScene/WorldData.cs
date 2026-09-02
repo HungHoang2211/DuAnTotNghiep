@@ -17,5 +17,6 @@ namespace SimpleSurvival.SaveLoad
         public List<ActiveQuestData> activeQuests = new List<ActiveQuestData>();
         public bool storyCompleted;
         public List<string> permanentlyLockedMapIds = new List<string>();
+        public Dictionary<string, string> mapSpawnOverrides = new Dictionary<string, string>();
     }
 }

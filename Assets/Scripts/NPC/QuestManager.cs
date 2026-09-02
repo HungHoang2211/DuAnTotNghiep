@@ -19,6 +19,7 @@ namespace SimpleSurvival.Quests
         private readonly Dictionary<QuestData, QuestProgress> _activeQuests = new Dictionary<QuestData, QuestProgress>();
         private readonly HashSet<QuestData> _completedQuests = new HashSet<QuestData>();
         private readonly HashSet<string> _permanentlyLockedMaps = new HashSet<string>();
+        private readonly Dictionary<string, string> _mapSpawnOverrides = new Dictionary<string, string>();
 
         public bool StoryCompleted { get; private set; }
 
@@ -51,6 +52,7 @@ namespace SimpleSurvival.Quests
             _activeQuests.Clear();
             _completedQuests.Clear();
             _permanentlyLockedMaps.Clear();
+            _mapSpawnOverrides.Clear();
             StoryCompleted = false;
         }
         public bool IsQuestActive(QuestData quest) => quest != null && _activeQuests.ContainsKey(quest);
@@ -72,6 +74,12 @@ namespace SimpleSurvival.Quests
         }
 
         public bool IsMapPermanentlyLocked(string mapId) => !string.IsNullOrEmpty(mapId) && _permanentlyLockedMaps.Contains(mapId);
+
+        public string GetSpawnOverride(string mapScene)
+        {
+            if (string.IsNullOrEmpty(mapScene)) return null;
+            return _mapSpawnOverrides.TryGetValue(mapScene, out string spawnId) ? spawnId : null;
+        }
 
         public bool HasSpaceForRewards(QuestData quest)
         {
@@ -117,6 +125,11 @@ namespace SimpleSurvival.Quests
             if (quest.MarksStoryComplete)
             {
                 StoryCompleted = true;
+            }
+
+            if (quest.HasSpawnOverride)
+            {
+                _mapSpawnOverrides[quest.SpawnOverrideMapScene] = quest.SpawnOverrideSpawnPointId;
             }
 
             OnQuestCompleted?.Invoke(quest);
@@ -335,7 +348,8 @@ namespace SimpleSurvival.Quests
             WorldData data = new WorldData
             {
                 storyCompleted = StoryCompleted,
-                permanentlyLockedMapIds = new List<string>(_permanentlyLockedMaps)
+                permanentlyLockedMapIds = new List<string>(_permanentlyLockedMaps),
+                mapSpawnOverrides = new Dictionary<string, string>(_mapSpawnOverrides)
             };
 
             foreach (QuestData quest in _completedQuests)
@@ -379,6 +393,7 @@ namespace SimpleSurvival.Quests
             _activeQuests.Clear();
             _completedQuests.Clear();
             _permanentlyLockedMaps.Clear();
+            _mapSpawnOverrides.Clear();
             StoryCompleted = false;
 
             if (data == null || questDatabase == null)
@@ -389,6 +404,10 @@ namespace SimpleSurvival.Quests
             if (data.permanentlyLockedMapIds != null)
                 foreach (string mapId in data.permanentlyLockedMapIds)
                     _permanentlyLockedMaps.Add(mapId);
+
+            if (data.mapSpawnOverrides != null)
+                foreach (var kvp in data.mapSpawnOverrides)
+                    _mapSpawnOverrides[kvp.Key] = kvp.Value;
 
             if (data.completedQuestIds != null)
             {

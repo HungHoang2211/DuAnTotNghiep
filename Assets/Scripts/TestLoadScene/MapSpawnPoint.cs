@@ -4,6 +4,10 @@ namespace SimpleSurvival.World
 {
     public class MapSpawnPoint : MonoBehaviour
     {
+        [SerializeField] private string spawnPointId = "Default";
+
+        public string SpawnPointId => spawnPointId;
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.green;
