@@ -2,17 +2,22 @@ using UnityEngine;
 using SimpleSurvival.Stats;
 using SimpleSurvival.Items;
 using SimpleSurvival.Audio;
+using SimpleSurvival.UI.Hud;
 
 namespace SimpleSurvival.Player
 {
     public sealed class PlayerConsumableHandler : MonoBehaviour
     {
         [SerializeField] private PlayerStats playerStats;
+        [SerializeField] private PlayerInventoryQueries inventoryQueries;
 
         private void Awake()
         {
             if (playerStats == null)
                 playerStats = GetComponentInChildren<PlayerStats>();
+
+            if (inventoryQueries == null)
+                inventoryQueries = GetComponentInChildren<PlayerInventoryQueries>();
         }
 
         public bool TryConsume(ItemStack stack)
@@ -26,6 +31,7 @@ namespace SimpleSurvival.Player
                 return false;
 
             ApplyEffects(ability);
+            GrantLeftover(ability);
 
             if (UIAudioController.Instance != null)
                 UIAudioController.Instance.PlayUseItem();
@@ -49,6 +55,15 @@ namespace SimpleSurvival.Player
                 playerStats.AddThirst(ability.RestoreThirst);
                 playerStats.PauseThirstDecay();
             }
+        }
+
+        private void GrantLeftover(ConsumableAbility ability)
+        {
+            if (ability.LeftoverItem == null || inventoryQueries == null) return;
+
+            int remaining = inventoryQueries.AddItem(ability.LeftoverItem, ability.LeftoverQuantity);
+            if (remaining > 0 && FollowNotifyManager.Instance != null)
+                FollowNotifyManager.Instance.Notify("Inventory full!", SpeechHudType.Bad);
         }
 
         private bool AreAllTargetsFull(ConsumableAbility ability)
