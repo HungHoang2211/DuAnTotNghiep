@@ -170,7 +170,6 @@ namespace SimpleSurvival.AI
                 elapsed += Time.deltaTime;
                 if (elapsed > timeout) break;
 
-                // Bị vật cản chắn đường (velocity gần 0 dù agent đang có path) -> tìm hướng chạy khác
                 if (!_agent.pathPending && _agent.velocity.magnitude < 0.15f)
                 {
                     stuckTimer += Time.deltaTime;

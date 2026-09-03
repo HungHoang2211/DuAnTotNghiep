@@ -30,10 +30,6 @@ namespace SimpleSurvival.AI
         public virtual void TriggerHowl() { }
         public virtual void SetSummoning(bool value) { }
 
-        /// <summary>
-        /// Mặc định fallback về animation attack thường nếu enemy con không có
-        /// animation acid riêng. Override lại nếu muốn 1 clip/trigger riêng (xem ZombieFatAnimator).
-        /// </summary>
         public virtual void TriggerAcidAttack() => TriggerAttack(0);
 
         protected void RaiseHowlSpawn() => OnHowlSpawn?.Invoke();

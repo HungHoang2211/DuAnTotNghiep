@@ -155,7 +155,6 @@ namespace SimpleSurvival.AI
         }
         protected virtual void HandlePlayerRevived()
         {
-            Debug.Log($"[{name}] HandlePlayerRevived called, _playerDead now false");
             _playerDead = false;
         }
         protected Vector3 GetRandomNavMeshPoint(Vector3 origin, float radius)

@@ -165,8 +165,6 @@ namespace SimpleSurvival.Quests
 
         private string BuildTurnInText(QuestData quest)
         {
-            string giver = string.IsNullOrEmpty(quest.QuestGiverName) ? "the quest giver" : quest.QuestGiverName;
-
             bool isEscort = false;
             foreach (var objective in quest.Objectives)
             {
@@ -177,9 +175,19 @@ namespace SimpleSurvival.Quests
                 }
             }
 
-            return isEscort
-                ? $"Talk to {giver} to receive your reward."
-                : $"Go back to find {giver} to receive your reward.";
+            if (isEscort)
+            {
+                string giver = string.IsNullOrEmpty(quest.QuestGiverName) ? "the quest giver" : quest.QuestGiverName;
+                return $"Talk to {giver} to receive your reward.";
+            }
+
+            if (quest.RequiresNpcTurnIn)
+            {
+                string giver = string.IsNullOrEmpty(quest.QuestGiverName) ? "the quest giver" : quest.QuestGiverName;
+                return $"Go back to find {giver} to receive your reward.";
+            }
+
+            return "Tap to complete the quest.";
         }
     }
 }
