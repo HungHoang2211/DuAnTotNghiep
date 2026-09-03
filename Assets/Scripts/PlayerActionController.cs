@@ -54,6 +54,12 @@ namespace SimpleSurvival.Player
 
         public IAction CurrentAction { get; private set; }
         public event Action<IAction, IAction> OnActionChanged;
+        public event Action<GameObject> OnPlayerDealtDamage;
+
+        public void NotifyPlayerDealtDamage(GameObject target)
+        {
+            OnPlayerDealtDamage?.Invoke(target);
+        }
 
         public CharacterController Controller { get; private set; }
         public Transform PlayerTransform { get; private set; }

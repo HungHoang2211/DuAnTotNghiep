@@ -168,6 +168,7 @@ namespace SimpleSurvival.Actions
 
             damageable.TakeDamage(_damage, _controller.gameObject);
             _hitLandedThisSwing = true;
+            _controller.NotifyPlayerDealtDamage(targetMb.gameObject);
 
             ConsumeWeaponDurability();
         }

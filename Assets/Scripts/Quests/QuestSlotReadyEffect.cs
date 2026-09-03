@@ -46,6 +46,8 @@ namespace SimpleSurvival.Quests
         {
             if (fillEffect != null) fillEffect.PlayEffect();
 
+            if (!isActiveAndEnabled) return;
+
             if (_orbitRoutine == null)
             {
                 _currentSegment = -1;

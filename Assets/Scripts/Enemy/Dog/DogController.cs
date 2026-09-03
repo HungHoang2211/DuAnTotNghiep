@@ -39,6 +39,7 @@ namespace SimpleSurvival.Pets
 
         [Header("Combat Settings")]
         [SerializeField] private float playerAttackedGraceTime = 3f;
+        [SerializeField] private float playerDealtDamageGraceTime = 3f;
         [SerializeField] private float nearbyEnemyScanRadius = 6f;
         [SerializeField] private LayerMask enemyLayer;
 
@@ -53,8 +54,10 @@ namespace SimpleSurvival.Pets
         private DogState _state = DogState.Follow;
         private Transform _combatTarget;
         private Transform _enemyAttacker;
+        private Transform _playerDamagedEnemy;
         private Transform _houseAnchor;
         private float _lastPlayerDamagedTime = -999f;
+        private float _lastPlayerDealtDamageTime = -999f;
         private float _nextPathUpdateTime;
 
         private Transform _pendingCombatTarget;
@@ -160,6 +163,7 @@ namespace SimpleSurvival.Pets
         private void OnEnable()
         {
             if (playerStats != null) playerStats.OnDamagedBy += HandlePlayerDamaged;
+            if (playerActionController != null) playerActionController.OnPlayerDealtDamage += HandlePlayerDealtDamage;
             if (dogAnimator != null) dogAnimator.OnStandUpFinished += HandleStandUpFinished;
             if (mapLoader != null) mapLoader.PlayerRepositioned += HandlePlayerRepositioned;
         }
@@ -167,6 +171,7 @@ namespace SimpleSurvival.Pets
         private void OnDisable()
         {
             if (playerStats != null) playerStats.OnDamagedBy -= HandlePlayerDamaged;
+            if (playerActionController != null) playerActionController.OnPlayerDealtDamage -= HandlePlayerDealtDamage;
             if (dogAnimator != null) dogAnimator.OnStandUpFinished -= HandleStandUpFinished;
             if (mapLoader != null) mapLoader.PlayerRepositioned -= HandlePlayerRepositioned;
 
@@ -179,6 +184,13 @@ namespace SimpleSurvival.Pets
             if (attacker == null) return;
             _enemyAttacker = attacker.transform;
             _lastPlayerDamagedTime = Time.time;
+        }
+
+        private void HandlePlayerDealtDamage(GameObject target)
+        {
+            if (target == null) return;
+            _playerDamagedEnemy = target.transform;
+            _lastPlayerDealtDamageTime = Time.time;
         }
 
         private void HandleQuestCompleted(QuestData quest)
@@ -325,17 +337,15 @@ namespace SimpleSurvival.Pets
 
         private Transform ResolveDesiredTarget()
         {
-            bool playerAttacking = playerActionController != null &&
-                                    playerActionController.CurrentAction is AttackAction;
-
-            ITargetable target = targetChecker != null ? targetChecker.CurrentEnemy : null;
-            bool targetValid = target != null && target.Transform != null && target.CanBeTargeted();
+            bool playerDealtDamageRecently = _playerDamagedEnemy != null &&
+                                              (Time.time - _lastPlayerDealtDamageTime) <= playerDealtDamageGraceTime &&
+                                              IsTargetStillValid(_playerDamagedEnemy);
 
             bool enemyStillAttackingPlayer = _enemyAttacker != null &&
                                               (Time.time - _lastPlayerDamagedTime) <= playerAttackedGraceTime &&
                                               IsTargetStillValid(_enemyAttacker);
 
-            if (playerAttacking && targetValid) return target.Transform;
+            if (playerDealtDamageRecently) return _playerDamagedEnemy;
             if (enemyStillAttackingPlayer) return _enemyAttacker;
             return null;
         }
