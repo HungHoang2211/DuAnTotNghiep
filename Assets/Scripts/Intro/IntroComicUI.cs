@@ -88,5 +88,11 @@ namespace SimpleSurvival.World
             else
                 _closeRequested = true;
         }
+        public void OnSkipIntro()
+        {
+            if (!_isPlaying) return;
+
+            _closeRequested = true;
+        }
     }
 }
