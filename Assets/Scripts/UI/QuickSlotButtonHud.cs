@@ -76,7 +76,6 @@ namespace SimpleSurvival.UI
             {
                 icon.sprite = stack.ItemData.Icon;
                 icon.enabled = true;
-                icon.SetNativeSize();
             }
 
             if (quantityText != null)
