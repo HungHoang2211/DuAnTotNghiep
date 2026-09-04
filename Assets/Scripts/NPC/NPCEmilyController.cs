@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleSurvival.Stats;
@@ -61,7 +62,12 @@ namespace SimpleSurvival.AI
                  "để có thể nhận thẳng Repair Tower Quest mà không cần chơi tuần tự qua các bước trước đó.")]
         [SerializeField] private bool debugSkipToRepairTower = false;
 
-        public bool IsEscorting { get; private set; }
+        public static NPCEmilyController Instance { get; private set; }
+
+        public static event Action<bool> OnEscortStateChanged;
+
+        private bool _isEscorting;
+        public bool IsEscorting => _isEscorting;
 
         private readonly List<EscortPoint> _route = new List<EscortPoint>();
         private int _routeIndex;
@@ -80,6 +86,7 @@ namespace SimpleSurvival.AI
         protected override void Awake()
         {
             base.Awake();
+            Instance = this;
             _spawnPosition = transform.position;
             _spawnRotation = transform.rotation;
         }
@@ -133,6 +140,9 @@ namespace SimpleSurvival.AI
 
         private void OnDestroy()
         {
+            if (Instance == this) Instance = null;
+            SetEscorting(false);
+
             var manager = QuestManager.Instance;
             if (manager != null)
             {
@@ -309,6 +319,13 @@ namespace SimpleSurvival.AI
                 ShowDialogue(allDoneDialogue);
         }
 
+        private void SetEscorting(bool value)
+        {
+            if (_isEscorting == value) return;
+            _isEscorting = value;
+            OnEscortStateChanged?.Invoke(value);
+        }
+
         private bool IsLevelMet(QuestData quest)
         {
             return PlayerLevelSystem.Instance == null || PlayerLevelSystem.Instance.HasReachedLevel(quest.RequiredLevel);
@@ -403,7 +420,7 @@ namespace SimpleSurvival.AI
 
             if (_route.Count == 0) return;
 
-            IsEscorting = true;
+            SetEscorting(true);
             _routeIndex = 0;
             movement?.BeginMoveTo(_route[_routeIndex].Position);
             enemyDirector?.BeginEncounter(transform);
@@ -483,7 +500,7 @@ namespace SimpleSurvival.AI
 
             if (_routeIndex >= _route.Count)
             {
-                IsEscorting = false;
+                SetEscorting(false);
                 enemyDirector?.StopEncounter();
 
                 QuestManager manager = QuestManager.Instance;
@@ -597,7 +614,7 @@ namespace SimpleSurvival.AI
 
             if (!IsEscorting) return;
 
-            IsEscorting = false;
+            SetEscorting(false);
             ResetRouteState();
             enemyDirector?.StopEncounter();
             QuestManager.Instance?.FailQuest(escortQuest);
@@ -626,7 +643,7 @@ namespace SimpleSurvival.AI
         private void HandleQuestFailed(QuestData quest)
         {
             if (quest != escortQuest) return;
-            IsEscorting = false;
+            SetEscorting(false);
             ExitCombat();
             ResetRouteState();
             movement?.Stop();
